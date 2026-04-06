@@ -1,0 +1,5575 @@
+################################################################
+##  APP FILES COLLECTION
+##  Generated: 2026-04-07 01:19:51
+##  Source   : src/app/
+################################################################
+
+================================================================
+FILE : app/(admin)/admin/logs/page.tsx
+================================================================
+'use client';
+
+// ==========================================
+// ADMIN AUDIT LOGS PAGE
+// File: src/app/(admin)/admin/logs/page.tsx
+// ==========================================
+
+import { useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAdminLogs } from '@/hooks/admin/use-admin';
+
+// ==========================================
+// ACTION BADGE COLOR
+// ==========================================
+
+function ActionBadge({ action }: { action: string }) {
+  const colorMap: Record<string, 'default' | 'secondary' | 'destructive'> = {
+    SUSPEND_TENANT: 'destructive',
+    UNSUSPEND_TENANT: 'default',
+    EXTEND_SUBSCRIPTION: 'default',
+    CHANGE_PLAN: 'secondary',
+    CREATE_REDEEM_CODES: 'secondary',
+    DELETE_REDEEM_CODE: 'destructive',
+  };
+
+  return (
+    <Badge variant={colorMap[action] ?? 'secondary'} className="text-xs font-mono">
+      {action}
+    </Badge>
+  );
+}
+
+// ==========================================
+// PAGE
+// ==========================================
+
+export default function AdminLogsPage() {
+  const [action, setAction] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [page, setPage] = useState(1);
+
+  const { result, isLoading } = useAdminLogs({
+    page,
+    limit: 20,
+    action: action || undefined,
+    from: from || undefined,
+    to: to || undefined,
+  });
+
+  const totalPages = result ? Math.ceil(result.total / 20) : 1;
+
+  const handleReset = () => {
+    setAction('');
+    setFrom('');
+    setTo('');
+    setPage(1);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold">Audit Logs</h1>
+        <p className="text-sm text-muted-foreground">
+          {result ? `${result.total} log tercatat` : 'Memuat...'}
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <Select
+          value={action || 'ALL'}
+          onValueChange={(v) => { setAction(v === 'ALL' ? '' : v); setPage(1); }}
+        >
+          <SelectTrigger className="w-52">
+            <SelectValue placeholder="Filter aksi" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Semua aksi</SelectItem>
+            <SelectItem value="SUSPEND_TENANT">Suspend Tenant</SelectItem>
+            <SelectItem value="UNSUSPEND_TENANT">Unsuspend Tenant</SelectItem>
+            <SelectItem value="EXTEND_SUBSCRIPTION">Extend Subscription</SelectItem>
+            <SelectItem value="CHANGE_PLAN">Change Plan</SelectItem>
+            <SelectItem value="CREATE_REDEEM_CODES">Create Redeem Codes</SelectItem>
+            <SelectItem value="DELETE_REDEEM_CODE">Delete Redeem Code</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Input
+          type="date"
+          className="w-40"
+          value={from}
+          onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+          placeholder="Dari tanggal"
+        />
+
+        <Input
+          type="date"
+          className="w-40"
+          value={to}
+          onChange={(e) => { setTo(e.target.value); setPage(1); }}
+          placeholder="Sampai tanggal"
+        />
+
+        {(action || from || to) && (
+          <Button variant="ghost" size="sm" onClick={handleReset}>
+            Reset
+          </Button>
+        )}
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Waktu</TableHead>
+              <TableHead>Aksi</TableHead>
+              <TableHead>Target ID</TableHead>
+              <TableHead>Detail</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : result?.data.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="text-center text-muted-foreground py-10"
+                >
+                  Tidak ada log ditemukan
+                </TableCell>
+              </TableRow>
+            ) : (
+              result?.data.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(log.createdAt).toLocaleString('id-ID', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <ActionBadge action={log.action} />
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {log.targetId ?? '—'}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                    {log.details
+                      ? Object.entries(log.details)
+                        .filter(([k]) => k !== 'codes') // skip array panjang
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(' · ')
+                      : '—'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Halaman {page} dari {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(admin)/admin/page.tsx
+================================================================
+'use client';
+
+// ==========================================
+// ADMIN DASHBOARD PAGE
+// File: src/app/(admin)/admin/page.tsx
+// ==========================================
+
+import { Users, CreditCard, TrendingUp, UserCheck, UserX } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAdminStats } from '@/hooks/admin/use-admin';
+
+// ==========================================
+// STAT CARD
+// ==========================================
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ReactNode;
+  isLoading?: boolean;
+}
+
+function StatCard({ title, value, sub, icon, isLoading }: StatCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
+        <div className="text-muted-foreground">{icon}</div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-8 w-24" />
+        ) : (
+          <>
+            <div className="text-2xl font-bold">{value}</div>
+            {sub && (
+              <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ==========================================
+// PAGE
+// ==========================================
+
+export default function AdminDashboardPage() {
+  const { stats, isLoading } = useAdminStats();
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      maximumFractionDigits: 0,
+    }).format(amount);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
+          Overview semua metrik platform
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Tenant"
+          value={stats?.totalTenants ?? 0}
+          sub={`+${stats?.newTenantsThisMonth ?? 0} bulan ini`}
+          icon={<Users className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Tenant Aktif"
+          value={stats?.activeTenants ?? 0}
+          sub={`${stats?.suspendedTenants ?? 0} suspended`}
+          icon={<UserCheck className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Business Plan"
+          value={stats?.businessSubscriptions ?? 0}
+          sub="Subscription aktif"
+          icon={<CreditCard className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Revenue Bulan Ini"
+          value={stats ? formatCurrency(stats.revenueThisMonth) : 'Rp 0'}
+          sub={`Total: ${stats ? formatCurrency(stats.totalRevenue) : 'Rp 0'}`}
+          icon={<TrendingUp className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* Second Row */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <StatCard
+          title="Tenant Suspended"
+          value={stats?.suspendedTenants ?? 0}
+          sub="Perlu perhatian"
+          icon={<UserX className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Tenant Baru Bulan Ini"
+          value={stats?.newTenantsThisMonth ?? 0}
+          sub="Registrasi terbaru"
+          icon={<Users className="h-4 w-4" />}
+          isLoading={isLoading}
+        />
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(admin)/admin/tenants/[id]/page.tsx
+================================================================
+'use client';
+
+// ==========================================
+// ADMIN TENANT DETAIL PAGE
+// File: src/app/(admin)/admin/tenants/[id]/page.tsx
+// ==========================================
+
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  ExternalLink,
+  ShieldOff,
+  ShieldCheck,
+  Loader2,
+  CheckCircle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useAdminTenantDetail, useSuspendTenant } from '@/hooks/admin/use-admin';
+import { adminApi } from '@/lib/api/admin';
+import { toast } from '@/lib/providers/root-provider';
+import { getErrorMessage } from '@/lib/api/client';
+
+// ==========================================
+// INFO ROW
+// ==========================================
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number | null;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium">{value ?? '—'}</span>
+    </div>
+  );
+}
+
+// ==========================================
+// PAGE
+// ==========================================
+
+export default function AdminTenantDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
+
+  const { tenant, isLoading, refetch } = useAdminTenantDetail(id);
+  const { suspend, unsuspend, isLoading: isActing } = useSuspendTenant();
+
+  const [suspendReason, setSuspendReason] = useState('');
+  const [isApproving, setIsApproving] = useState(false);
+
+  const handleSuspend = async () => {
+    if (!suspendReason.trim()) return;
+    await suspend(id, suspendReason);
+    setSuspendReason('');
+    refetch();
+  };
+
+  const handleUnsuspend = async () => {
+    await unsuspend(id);
+    refetch();
+  };
+
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      const result = await adminApi.approveSubscription(id);
+      toast.success(result.message || 'Subscription approved!');
+      refetch();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-48" />
+          <Skeleton className="h-48" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!tenant) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Tenant tidak ditemukan
+      </div>
+    );
+  }
+
+  const isSuspended = tenant.status === 'SUSPENDED';
+  const hasPendingPayment = tenant.subscription?.payments?.some(
+    (p) => p.paymentStatus === 'pending',
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{tenant.name}</h1>
+            <Badge variant={isSuspended ? 'destructive' : 'default'}>
+              {tenant.status}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">{tenant.slug}</p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={`${process.env.NEXT_PUBLIC_APP_URL}/store/${tenant.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Lihat Toko
+            </a>
+          </Button>
+
+          {/* Approve Button — muncul kalau ada pending payment */}
+          {hasPendingPayment && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" disabled={isApproving}>
+                  {isApproving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                  )}
+                  Approve
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Approve Subscription?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tenant <strong>{tenant.name}</strong> akan di-upgrade ke
+                    Business Plan selama 30 hari. Payment pending akan otomatis
+                    jadi Paid.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleApprove}>
+                    Ya, Approve
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {isSuspended ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isActing}>
+                  {isActing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                  )}
+                  Unsuspend
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Unsuspend Tenant?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tenant <strong>{tenant.name}</strong> akan diaktifkan
+                    kembali.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnsuspend}>
+                    Ya, Aktifkan
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={isActing}>
+                  {isActing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldOff className="mr-2 h-4 w-4" />
+                  )}
+                  Suspend
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Suspend Tenant?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tenant <strong>{tenant.name}</strong> tidak bisa login
+                    setelah di-suspend.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="px-6 pb-2">
+                  <Label htmlFor="reason" className="text-sm">
+                    Alasan suspend{' '}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="reason"
+                    placeholder="Tuliskan alasan suspend..."
+                    className="mt-1.5"
+                    value={suspendReason}
+                    onChange={(e) => setSuspendReason(e.target.value)}
+                  />
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setSuspendReason('')}>
+                    Batal
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleSuspend}
+                    disabled={!suspendReason.trim()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Ya, Suspend
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      </div>
+
+      {/* Info Cards */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Tenant Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Informasi Toko</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <InfoRow label="Email" value={tenant.email} />
+            <InfoRow label="Kategori" value={tenant.category} />
+            <InfoRow label="WhatsApp" value={tenant.whatsapp} />
+            <InfoRow label="Telepon" value={tenant.phone} />
+            <InfoRow label="Total Produk" value={tenant._count.products} />
+            <InfoRow
+              label="Bergabung"
+              value={new Date(tenant.createdAt).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            />
+            <InfoRow
+              label="Diupdate"
+              value={new Date(tenant.updatedAt).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Subscription Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Subscription</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tenant.subscription ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoRow label="Plan" value={tenant.subscription.plan} />
+                  <InfoRow label="Status" value={tenant.subscription.status} />
+                  <InfoRow
+                    label="Aktif Sampai"
+                    value={
+                      tenant.subscription.currentPeriodEnd
+                        ? new Date(
+                          tenant.subscription.currentPeriodEnd,
+                        ).toLocaleDateString('id-ID')
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Harga"
+                    value={
+                      tenant.subscription.priceAmount === 0
+                        ? 'Gratis'
+                        : `Rp ${tenant.subscription.priceAmount.toLocaleString('id-ID')}`
+                    }
+                  />
+                </div>
+
+                {/* Payment History */}
+                {tenant.subscription.payments?.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Riwayat Pembayaran
+                      </p>
+                      <div className="space-y-2">
+                        {tenant.subscription.payments.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <span className="text-muted-foreground">
+                              {new Date(p.createdAt).toLocaleDateString(
+                                'id-ID',
+                              )}
+                            </span>
+                            <span>
+                              Rp {p.amount.toLocaleString('id-ID')}
+                            </span>
+                            <Badge
+                              variant={
+                                p.paymentStatus === 'paid'
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              className="text-xs"
+                            >
+                              {p.paymentStatus}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Belum ada subscription
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(admin)/admin/tenants/page.tsx
+================================================================
+'use client';
+
+// ==========================================
+// ADMIN TENANTS PAGE
+// File: src/app/(admin)/admin/tenants/page.tsx
+// ==========================================
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Search, ExternalLink } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAdminTenants } from '@/hooks/admin/use-admin';
+import { useDebounce } from '@/hooks/shared/use-debounce';
+
+// ==========================================
+// STATUS BADGE
+// ==========================================
+
+function StatusBadge({ status }: { status: string }) {
+  const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
+    ACTIVE: 'default',
+    INACTIVE: 'secondary',
+    SUSPENDED: 'destructive',
+  };
+  return (
+    <Badge variant={variants[status] ?? 'secondary'}>
+      {status}
+    </Badge>
+  );
+}
+
+// ==========================================
+// PAGE
+// ==========================================
+
+export default function AdminTenantsPage() {
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const [page, setPage] = useState(1);
+
+  const debouncedSearch = useDebounce(search, 400);
+
+  const { result, isLoading } = useAdminTenants({
+    page,
+    limit: 20,
+    search: debouncedSearch || undefined,
+    status: status || undefined,
+  });
+
+  const totalPages = result ? Math.ceil(result.total / 20) : 1;
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold">Tenants</h1>
+        <p className="text-sm text-muted-foreground">
+          {result ? `${result.total} tenant terdaftar` : 'Memuat...'}
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Cari nama, email, atau slug..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+        <Select
+          value={status || 'ALL'}
+          onValueChange={(v) => { setStatus(v === 'ALL' ? '' : v); setPage(1); }}
+        >
+          <SelectTrigger className="w-full sm:w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Semua status</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="SUSPENDED">Suspended</SelectItem>
+            <SelectItem value="INACTIVE">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Toko</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Produk</TableHead>
+              <TableHead>Daftar</TableHead>
+              <TableHead className="w-16" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : result?.data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  Tidak ada tenant ditemukan
+                </TableCell>
+              </TableRow>
+            ) : (
+              result?.data.map((tenant) => (
+                <TableRow key={tenant.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{tenant.name}</div>
+                      <div className="text-xs text-muted-foreground">{tenant.slug}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">{tenant.email}</TableCell>
+                  <TableCell>
+                    {tenant.subscription ? (
+                      <span className="text-sm font-medium">
+                        {tenant.subscription.plan}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={tenant.status} />
+                  </TableCell>
+                  <TableCell className="text-sm">{tenant._count.products}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {new Date(tenant.createdAt).toLocaleDateString('id-ID')}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link href={`/admin/tenants/${tenant.id}`}>
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Halaman {page} dari {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage(p => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(admin)/layout.tsx
+================================================================
+// ==========================================
+// ADMIN ROUTE GROUP LAYOUT
+// File: src/app/(admin)/layout.tsx
+//
+// Pattern IDENTIK dengan src/app/(dashboard)/layout.tsx
+// ==========================================
+
+import type { Metadata } from 'next';
+import { AdminLayout } from '@/components/layout/admin/admin-layout';
+import { AdminGuard } from '@/components/layout/admin/admin-guard';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Admin - Fibidy',
+    default: 'Admin - Fibidy',
+  },
+  robots: 'noindex, nofollow', // Admin tidak boleh di-index search engine
+};
+
+interface AdminRootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function AdminRootLayout({ children }: AdminRootLayoutProps) {
+  return (
+    <AdminGuard>
+      <AdminLayout>{children}</AdminLayout>
+    </AdminGuard>
+  );
+}
+
+================================================================
+FILE : app/(auth)/forgot-password/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { AuthLayout } from '@/components/layout/auth/auth-layout';
+import { ForgotPasswordForm } from '@/components/auth/forgot-password/forgot-password';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// ==========================================
+// FORGOT PASSWORD PAGE
+// ==========================================
+
+export const metadata: Metadata = {
+  title: 'Forgot Password',
+  description: 'Reset your account password',
+};
+
+// ==========================================
+// LOADING SKELETON
+// ==========================================
+
+function ForgotPasswordFormSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-4 w-28 mx-auto" />
+    </div>
+  );
+}
+
+// ==========================================
+// COMING SOON BADGE
+// ==========================================
+
+function ComingSoonBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber-500">
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+      </span>
+      Coming Soon
+    </span>
+  );
+}
+
+// ==========================================
+// PAGE COMPONENT
+// ==========================================
+
+export default function ForgotPasswordPage() {
+  return (
+    <AuthLayout
+      title="Forgot your password?"
+      badge={<ComingSoonBadge />}
+      image="/auth-picture/auth-forgot-password.jpg"
+      imageAlt="Forgot password illustration"
+    >
+      {/* Suspense diperlukan untuk client-side hooks */}
+      <Suspense fallback={<ForgotPasswordFormSkeleton />}>
+        <ForgotPasswordForm />
+      </Suspense>
+    </AuthLayout>
+  );
+}
+
+================================================================
+FILE : app/(auth)/layout.tsx
+================================================================
+import type { Metadata } from 'next';
+import { GuestGuard } from '@/components/layout/auth/auth-guard';
+
+// ==========================================
+// AUTH LAYOUT
+// Applies GuestGuard to all auth pages
+// ==========================================
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Fibidy',
+    default: 'Fibidy',
+  },
+};
+
+interface AuthLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function AuthLayout({ children }: AuthLayoutProps) {
+  return (
+    <GuestGuard redirectTo="/dashboard/products">
+      {children}
+    </GuestGuard>
+  );
+}
+
+================================================================
+FILE : app/(auth)/login/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { AuthLayout } from '@/components/layout/auth/auth-layout';
+import { LoginForm } from '@/components/auth/login/login';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// ==========================================
+// LOGIN PAGE
+// ==========================================
+
+export const metadata: Metadata = {
+  title: 'Sign In',
+  description: 'Sign in to your Fibidy dashboard',
+};
+
+// ==========================================
+// LOADING SKELETON
+// ==========================================
+
+function LoginFormSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-4 w-32 mx-auto" />
+    </div>
+  );
+}
+
+// ==========================================
+// PAGE COMPONENT
+// ==========================================
+
+export default function LoginPage() {
+  return (
+    <AuthLayout
+      title="Welcome back"
+      description="Sign in to your account to continue"
+      image="/auth-picture/auth-login.jpg"
+      imageAlt="Login illustration"
+    >
+      {/* Suspense diperlukan: LoginForm menggunakan useSearchParams via useLogin hook */}
+      <Suspense fallback={<LoginFormSkeleton />}>
+        <LoginForm />
+      </Suspense>
+    </AuthLayout>
+  );
+}
+
+================================================================
+FILE : app/(auth)/register/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { AuthLayout } from '@/components/layout/auth/auth-layout';
+import { RegisterForm } from '@/components/auth/register/register';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// ==========================================
+// REGISTER PAGE
+// ==========================================
+
+export const metadata: Metadata = {
+  title: 'Create your store',
+  description: 'Get your store up and running in minutes',
+};
+
+// ==========================================
+// LOADING SKELETON
+// ==========================================
+
+function RegisterFormSkeleton() {
+  return (
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      {/* Step indicator */}
+      <div className="flex items-center justify-center gap-3 mb-2">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-px w-10" />
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-px w-10" />
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-px w-10" />
+        <Skeleton className="h-6 w-6 rounded-full" />
+      </div>
+
+      {/* Header */}
+      <div className="pb-6 border-b space-y-2">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-56" />
+      </div>
+
+      {/* Fields */}
+      <div className="space-y-5">
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-28" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      </div>
+
+      {/* Footer nav */}
+      <div className="flex items-center justify-between pt-6 border-t">
+        <Skeleton className="h-9 w-32 rounded-md" />
+        <div className="flex gap-1.5">
+          <Skeleton className="h-1.5 w-1.5 rounded-full" />
+          <Skeleton className="h-1.5 w-5 rounded-full" />
+          <Skeleton className="h-1.5 w-1.5 rounded-full" />
+          <Skeleton className="h-1.5 w-1.5 rounded-full" />
+        </div>
+        <Skeleton className="h-9 w-32 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// PAGE COMPONENT
+// ==========================================
+
+export default function RegisterPage() {
+  return (
+    <AuthLayout>
+      <Suspense fallback={<RegisterFormSkeleton />}>
+        <RegisterForm />
+      </Suspense>
+    </AuthLayout>
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/products/[id]/edit/client.tsx
+================================================================
+'use client';
+
+// ==========================================
+// EDIT PRODUCT CLIENT
+// Terima initialData dari server → tidak ada 401 saat pertama load
+// TanStack Query handle refetch setelah interaksi (create/update/delete)
+// ==========================================
+
+import { notFound } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { productsApi } from '@/lib/api/products';
+import { queryKeys } from '@/lib/shared/query-keys';
+import { ProductForm } from '@/components/dashboard/product/form/product';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { Product } from '@/types/product';
+
+interface EditProductClientProps {
+  id: string;
+  initialProduct: Product | null;
+  initialCategories: string[];
+}
+
+export function EditProductClient({
+  id,
+  initialProduct,
+  initialCategories,
+}: EditProductClientProps) {
+  const {
+    data: product,
+    isLoading: isLoadingProduct,
+    isError,
+  } = useQuery({
+    queryKey: queryKeys.products.detail(id),
+    queryFn: () => productsApi.getById(id),
+    initialData: initialProduct ?? undefined,
+    enabled: !initialProduct,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: queryKeys.products.categories(),
+    queryFn: () => productsApi.getCategories(),
+    // Kalau initialCategories ada isinya → set sebagai initialData yang valid
+    // TanStack Query tidak akan refetch sampai staleTime habis
+    initialData: initialCategories.length > 0 ? initialCategories : undefined,
+    // Hanya fetch kalau memang server tidak kirim data sama sekali
+    enabled: initialCategories.length === 0,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoadingProduct) {
+    return (
+      <div className="space-y-4 p-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (isError || !product) return notFound();
+
+  const mergedCategories: string[] =
+    product.category && !categories.includes(product.category)
+      ? [product.category, ...categories].sort()
+      : categories;
+
+  return <ProductForm product={product} categories={mergedCategories} />;
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/products/[id]/edit/page.tsx
+================================================================
+import { getServerHeaders } from '@/lib/api/server-headers';
+import { productsApi } from '@/lib/api/products';
+import { EditProductClient } from './client';
+
+// ==========================================
+// EDIT PRODUCT PAGE — Server Component
+// Fetch initial data server-side via getServerHeaders()
+// Pass ke client sebagai initialData → tidak ada 401 race condition
+// ==========================================
+
+interface EditProductPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function EditProductPage({ params }: EditProductPageProps) {
+  const { id } = await params;
+
+  const headers = await getServerHeaders();
+
+  const [product, categories] = await Promise.all([
+    productsApi.getById(id, headers).catch(() => null),
+    productsApi.getCategories(headers).catch(() => []),
+  ]);
+
+  return (
+    <EditProductClient
+      id={id}
+      initialProduct={product}
+      initialCategories={categories}
+    />
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/products/client.tsx
+================================================================
+'use client';
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD CLIENT - Products Only
+// ══════════════════════════════════════════════════════════════
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { subscriptionApi } from '@/lib/api/subscription';
+import { queryKeys } from '@/lib/shared/query-keys';
+import { useProducts } from '@/hooks/dashboard/use-products';
+import { getErrorMessage } from '@/lib/api/client';
+import { ProductsGrid, ProductsGridSkeleton } from '@/components/dashboard/product/product-grid';
+import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
+
+export function DashboardClient() {
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState('');
+
+  const { data: planInfo } = useQuery({
+    queryKey: queryKeys.subscription.plan(),
+    queryFn: () => subscriptionApi.getMyPlan(),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const showUpgradeModal = (message: string) => {
+    setUpgradeMessage(message);
+    setUpgradeOpen(true);
+  };
+
+  return (
+    <div>
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        description={upgradeMessage}
+      />
+
+      <ProductsTabContent
+        isAtLimit={planInfo?.isAtLimit?.products}
+        onAtLimit={() =>
+          showUpgradeModal(
+            `You've reached the ${planInfo?.limits.maxProducts} product limit. Upgrade to Business for unlimited products.`
+          )
+        }
+      />
+    </div>
+  );
+}
+
+function ErrorBlock({ message, error }: { message: string; error: string }) {
+  return (
+    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
+      <p className="text-destructive font-medium">{message}</p>
+      <p className="text-sm text-muted-foreground mt-1">{error}</p>
+    </div>
+  );
+}
+
+function ProductsTabContent({
+  isAtLimit,
+  onAtLimit,
+}: {
+  isAtLimit?: boolean;
+  onAtLimit?: () => void;
+}) {
+  const { data, isLoading, isError, error } = useProducts({ limit: 100 });
+
+  if (isLoading) return <ProductsGridSkeleton />;
+
+  if (isError) {
+    return (
+      <ErrorBlock
+        message="Failed to load products"
+        error={getErrorMessage(error)}
+      />
+    );
+  }
+
+  return (
+    <>
+      {isAtLimit && onAtLimit && (
+        <div
+          className="mb-4 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/20 px-4 py-3 flex items-center justify-between gap-4 cursor-pointer"
+          onClick={onAtLimit}
+        >
+          <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+            Batas produk tercapai. Upgrade untuk tambah lebih banyak.
+          </p>
+          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0">
+            Upgrade →
+          </span>
+        </div>
+      )}
+      <ProductsGrid products={data?.data ?? []} />
+    </>
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/products/new/page.tsx
+================================================================
+import { productsApi } from '@/lib/api/products';
+import { getServerHeaders } from '@/lib/api/server-headers';
+import { ProductForm } from '@/components/dashboard/product/form/product';
+
+async function getCategories(): Promise<string[]> {
+  try {
+    const headers = await getServerHeaders();
+    const categories = await productsApi.getCategories(headers);
+    if (Array.isArray(categories) && categories.length > 0) {
+      return categories;
+    }
+  } catch {
+    // Fallback ke array kosong
+  }
+  return [];
+}
+
+export default async function NewProductPage() {
+  const categories = await getCategories();
+  return <ProductForm categories={categories} />;
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/products/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import { DashboardClient } from './client';
+
+// ==========================================
+// METADATA
+// ==========================================
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+};
+
+// ==========================================
+// DASHBOARD PAGE
+// Profile hero + Sticky tabs (Produk, Pelanggan, Pesanan)
+// ==========================================
+
+export default function DashboardPage() {
+  return <DashboardClient />;
+}
+
+
+================================================================
+FILE : app/(dashboard)/dashboard/settings/client.tsx
+================================================================
+'use client';
+
+import { useState } from 'react';
+import {
+  Home,
+  FileText,
+  MapPin,
+  CreditCard,
+  Truck,
+  Share2,
+  ChevronRight,
+  Sun,
+  Moon,
+  Crown,
+  LogOut,
+  HelpCircle,
+  ScrollText,
+  Shield,
+  Phone,
+  Info,
+} from 'lucide-react';
+import { cn } from '@/lib/shared/utils';
+import { useDarkMode } from '@/hooks/shared/use-dark-mode';
+import { useLogout } from '@/hooks/auth/use-auth';
+import { useRouter } from 'next/navigation';
+
+// ── Section components ────────────────────────────────────────────────────
+import { HeroSection } from '@/components/dashboard/settings/hero';
+import { AboutSection } from '@/components/dashboard/settings/about';
+import { ContactSection } from '@/components/dashboard/settings/contact';
+import { PembayaranSection } from '@/components/dashboard/settings/payment';
+import { PengirimanSection } from '@/components/dashboard/settings/shipping';
+import { SocialSection } from '@/components/dashboard/settings/social';
+
+// ── Types ─────────────────────────────────────────────────────────────────
+
+type SettingId =
+  | 'hero'
+  | 'about'
+  | 'contact'
+  | 'pembayaran'
+  | 'pengiriman'
+  | 'social';
+
+interface SettingItem {
+  id: SettingId;
+  label: string;
+  description: string;
+  icon: React.ElementType;
+  group: string;
+}
+
+// ── Config ────────────────────────────────────────────────────────────────
+
+const SETTING_GROUPS = [
+  {
+    group: 'Toko',
+    items: [
+      {
+        id: 'hero' as const,
+        label: 'Bio',
+        description: 'Name, logo, headline & brand color',
+        icon: Home,
+        group: 'Toko',
+      },
+      {
+        id: 'about' as const,
+        label: 'Featured',
+        description: 'Key highlights & store selling points',
+        icon: FileText,
+        group: 'Toko',
+      },
+      {
+        id: 'contact' as const,
+        label: 'Contact',
+        description: 'WhatsApp, address & Google Maps',
+        icon: MapPin,
+        group: 'Toko',
+      },
+    ],
+  },
+  {
+    group: 'Channels',
+    items: [
+      {
+        id: 'pembayaran' as const,
+        label: 'Payment',
+        description: 'Bank accounts, e-wallets & COD',
+        icon: CreditCard,
+        group: 'Channels',
+      },
+      {
+        id: 'pengiriman' as const,
+        label: 'Shipping',
+        description: 'Courier options for your store',
+        icon: Truck,
+        group: 'Channels',
+      },
+      {
+        id: 'social' as const,
+        label: 'Social',
+        description: 'Instagram, TikTok, WhatsApp & more',
+        icon: Share2,
+        group: 'Channels',
+      },
+    ],
+  },
+] satisfies { group: string; items: SettingItem[] }[];
+
+// ── Reusable row button ───────────────────────────────────────────────────
+
+function RowButton({
+  icon: Icon,
+  label,
+  description,
+  onClick,
+  iconClassName,
+  labelClassName,
+}: {
+  icon: React.ElementType;
+  label: string;
+  description: string;
+  onClick: () => void;
+  iconClassName?: string;
+  labelClassName?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-4 px-4 py-3.5',
+        'text-left transition-colors',
+        'hover:bg-muted/50 active:bg-muted',
+      )}
+    >
+      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
+        <Icon className={cn('h-4 w-4 text-muted-foreground', iconClassName)} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={cn('text-sm font-semibold text-foreground leading-tight', labelClassName)}>
+          {label}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+    </button>
+  );
+}
+
+// ── Settings List ─────────────────────────────────────────────────────────
+
+function SettingsList({ onSelect }: { onSelect: (id: SettingId) => void }) {
+  const { isDark, toggleDarkMode } = useDarkMode();
+  const { logout } = useLogout();
+  const router = useRouter();
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+
+      {/* Toko */}
+      <div>
+        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+          Toko
+        </p>
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          {SETTING_GROUPS[0].items.map((item) => (
+            <RowButton
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              description={item.description}
+              onClick={() => onSelect(item.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Channels */}
+      <div>
+        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+          Channels
+        </p>
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          {SETTING_GROUPS[1].items.map((item) => (
+            <RowButton
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              description={item.description}
+              onClick={() => onSelect(item.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Account */}
+      <div>
+        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+          Account
+        </p>
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          <RowButton
+            icon={Crown}
+            label="Subscription"
+            description="Manage your plan and billing"
+            onClick={() => router.push('/dashboard/subscription')}
+          />
+          <RowButton
+            icon={isDark ? Sun : Moon}
+            label={isDark ? 'Light Mode' : 'Dark Mode'}
+            description={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            onClick={toggleDarkMode}
+          />
+        </div>
+      </div>
+
+      {/* Legalitas */}
+      <div>
+        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+          Legalitas
+        </p>
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          <RowButton
+            icon={Info}
+            label="Tentang Fibidy"
+            description="FAQ, kontak, syarat, dan privasi"
+            onClick={() => router.push('/legal')}
+          />
+        </div>
+      </div>
+
+      {/* Sign Out — card sendiri, destructive */}
+      <div>
+        <div className="rounded-xl border border-destructive/20 overflow-hidden bg-card">
+          <button
+            type="button"
+            onClick={logout}
+            className={cn(
+              'w-full flex items-center gap-4 px-4 py-3.5',
+              'text-left transition-colors',
+              'hover:bg-destructive/5 active:bg-destructive/10',
+            )}
+          >
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-destructive/10 shrink-0">
+              <LogOut className="h-4 w-4 text-destructive" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-destructive leading-tight">Sign Out</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Log out from your account</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+// ── Main Client ───────────────────────────────────────────────────────────
+
+export function SettingsClient() {
+  const [activeId, setActiveId] = useState<SettingId | null>(null);
+
+  const handleBack = () => setActiveId(null);
+
+  if (activeId === null) {
+    return <SettingsList onSelect={setActiveId} />;
+  }
+
+  const sectionMap: Record<SettingId, React.ReactNode> = {
+    hero: <HeroSection onBack={handleBack} />,
+    about: <AboutSection onBack={handleBack} />,
+    contact: <ContactSection onBack={handleBack} />,
+    pembayaran: <PembayaranSection onBack={handleBack} />,
+    pengiriman: <PengirimanSection onBack={handleBack} />,
+    social: <SocialSection onBack={handleBack} />,
+  };
+
+  return sectionMap[activeId];
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/settings/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import { SettingsClient } from './client';
+
+export const metadata: Metadata = {
+  title: 'Settings',
+  description: 'Manage your store settings',
+};
+
+export default function SettingsPage() {
+  return <SettingsClient />;
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/studio/page.tsx
+================================================================
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { LivePreview } from '@/components/dashboard/studio/live-preview';
+import { LandingErrorBoundary } from '@/components/dashboard/studio/landing-error-boundary';
+import { BlockDrawer } from '@/components/dashboard/studio/block-drawer';
+import { BuilderLoadingSteps } from '@/components/dashboard/studio/builder-loading-steps';
+import { FullPreviewDrawer } from '@/components/dashboard/studio/full-preview-drawer';
+import { BuilderHeader } from '@/components/dashboard/studio/builder-header';
+import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
+import { useTenant } from '@/hooks/shared/use-tenant';
+import { useLandingConfig } from '@/hooks/dashboard/use-landing-config';
+import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
+import { hasProBlocks } from '@/components/dashboard/studio/block-options';
+import { useBuilderStore } from '@/stores/use-builder-store';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import type { TenantLandingConfig } from '@/types/landing';
+
+export default function LandingBuilderPage() {
+  const { tenant, refresh } = useTenant();
+  const router = useRouter();
+
+  const { blockVariantLimit, isBusiness } = useSubscriptionPlan();
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [loadingComplete, setLoadingComplete] = useState(false);
+  const [fullPreviewOpen, setFullPreviewOpen] = useState(false);
+  const [enableModalOpen, setEnableModalOpen] = useState(false);
+  const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+
+  const { setHasUnsavedChanges, setHeroEnabled, reset: resetBuilderStore } = useBuilderStore();
+
+  const {
+    config: landingConfig,
+    hasUnsavedChanges,
+    isSaving,
+    updateConfig: setLandingConfig,
+    publishChanges: publishToServer,
+  } = useLandingConfig({
+    initialConfig: tenant?.landingConfig,
+    onSaveSuccess: () => refresh(),
+  });
+
+  const configHasProBlocks = !isBusiness && hasProBlocks(landingConfig, blockVariantLimit);
+  const heroEnabled = landingConfig?.hero?.enabled === true;
+
+  // ── Lock body scroll & mark builder active ──
+  useEffect(() => {
+    document.body.classList.add('landing-builder-active');
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.classList.remove('landing-builder-active');
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  // ── Sync ke builder store (untuk sidebar/mobile nav) ──
+  useEffect(() => {
+    setHasUnsavedChanges(hasUnsavedChanges);
+  }, [hasUnsavedChanges, setHasUnsavedChanges]);
+
+  useEffect(() => {
+    setHeroEnabled(heroEnabled);
+  }, [heroEnabled, setHeroEnabled]);
+
+  // ── Reset store saat unmount ──
+  useEffect(() => {
+    return () => resetBuilderStore();
+  }, [resetBuilderStore]);
+
+  // ── Enable Modal — muncul otomatis saat hero belum enabled ──
+  useEffect(() => {
+    if (loadingComplete && !heroEnabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEnableModalOpen(true);
+    }
+  }, [loadingComplete, heroEnabled]);
+
+  // ── Block browser back/forward/close tab ──
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // ── Handle navigate away (dipanggil dari sidebar/mobile nav) ──
+  const handleNavigateAway = useCallback((href: string) => {
+    if (hasUnsavedChanges) {
+      setPendingRoute(href);
+      setUnsavedModalOpen(true);
+      return;
+    }
+    router.push(href);
+  }, [hasUnsavedChanges, router]);
+
+  // Expose ke store supaya nav bisa panggil
+  useEffect(() => {
+    useBuilderStore.setState({ onNavigateAway: handleNavigateAway });
+  }, [handleNavigateAway]);
+
+  const handlePublish = useCallback(async () => {
+    if (configHasProBlocks) {
+      setUpgradeModalOpen(true);
+      return;
+    }
+    await publishToServer();
+  }, [configHasProBlocks, publishToServer]);
+
+  const handleBlockSelect = useCallback((block: string) => {
+    if (!landingConfig) return;
+    const currentHero = landingConfig.hero || {};
+    setLandingConfig({ ...landingConfig, hero: { ...currentHero, block } } as TenantLandingConfig);
+  }, [landingConfig, setLandingConfig]);
+
+  const handleEnableHero = useCallback(() => {
+    if (!landingConfig) return;
+    setLandingConfig({
+      ...landingConfig,
+      hero: { ...landingConfig.hero, enabled: true },
+    } as TenantLandingConfig);
+    setEnableModalOpen(false);
+  }, [landingConfig, setLandingConfig]);
+
+  const handlePublishAndLeave = useCallback(async () => {
+    await handlePublish();
+    setUnsavedModalOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+    setPendingRoute(null);
+  }, [handlePublish, pendingRoute, router]);
+
+  const handleLeaveAnyway = useCallback(() => {
+    setUnsavedModalOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+    setPendingRoute(null);
+  }, [pendingRoute, router]);
+
+  // Loading
+  const tenantLoading = tenant === null;
+  const configReady = landingConfig !== null && landingConfig !== undefined;
+  const isStillLoading = tenantLoading || !configReady;
+
+  if (isStillLoading || !loadingComplete) {
+    return (
+      <BuilderLoadingSteps
+        key="builder-loading"
+        loadingStates={{ tenantLoading, productsLoading: false, configReady }}
+        onComplete={() => setLoadingComplete(true)}
+      />
+    );
+  }
+
+  if (!tenant) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Failed to load store data</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <BuilderHeader
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        configHasProBlocks={configHasProBlocks}
+        onPublish={handlePublish}
+        onFullPreview={() => setFullPreviewOpen(true)}
+      />
+
+      <div className="fixed inset-0 top-14 overflow-hidden">
+        <LandingErrorBoundary>
+          <LivePreview
+            config={landingConfig}
+            tenant={tenant}
+            onEnableHero={handleEnableHero}
+          />
+        </LandingErrorBoundary>
+      </div>
+
+      <BlockDrawer
+        section="hero"
+        currentBlock={landingConfig?.hero?.block}
+        onBlockSelect={handleBlockSelect}
+        blockVariantLimit={blockVariantLimit}
+      />
+
+      <FullPreviewDrawer
+        open={fullPreviewOpen}
+        onOpenChange={setFullPreviewOpen}
+        config={landingConfig}
+        tenant={tenant}
+      />
+
+      <UpgradeModal
+        open={upgradeModalOpen}
+        onOpenChange={setUpgradeModalOpen}
+        title="Upgrade to publish Pro blocks"
+        description="You're using a Pro hero design (block 4+). Upgrade to Business plan to publish."
+      />
+
+      {/* ── ENABLE MODAL ── */}
+      <AlertDialog open={enableModalOpen} onOpenChange={setEnableModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aktifkan Hero Section</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hero section belum aktif. Aktifkan sekarang agar landing page kamu bisa dilihat pelanggan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Nanti saja</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEnableHero}>
+              Aktifkan sekarang
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── UNSAVED MODAL ── */}
+      <AlertDialog open={unsavedModalOpen} onOpenChange={setUnsavedModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Perubahan belum dipublish</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kamu punya perubahan yang belum dipublish. Publish dulu sebelum keluar agar perubahanmu tidak hilang.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>Kembali</AlertDialogCancel>
+            <Button variant="outline" onClick={handleLeaveAnyway}>
+              Keluar tanpa publish
+            </Button>
+            <AlertDialogAction onClick={handlePublishAndLeave} disabled={isSaving}>
+              {isSaving ? 'Publishing...' : 'Publish & keluar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/subscription/client.tsx
+================================================================
+'use client';
+
+// ==========================================
+// SUBSCRIPTION CLIENT
+// Terima initialData dari server → tidak ada 401 saat pertama load
+// TanStack Query handle refetch setelah interaksi
+// ==========================================
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Rocket, Crown, Loader2, Calendar, Receipt, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { subscriptionApi, type SubscriptionInfo, type PaymentHistory } from '@/lib/api/subscription';
+import { queryKeys } from '@/lib/shared/query-keys';
+import { getErrorMessage } from '@/lib/api/client';
+
+// ==========================================
+// CONSTANTS
+// ==========================================
+
+const PAYMENT_STATUS_LABELS: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'outline' }
+> = {
+  paid: { label: 'Paid', variant: 'default' },
+  pending: { label: 'Pending', variant: 'outline' },
+};
+
+// ==========================================
+// HELPERS
+// ==========================================
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
+
+function getDaysRemaining(dateStr: string): number {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+// ==========================================
+// PROPS
+// ==========================================
+
+interface SubscriptionClientProps {
+  initialPlanInfo: SubscriptionInfo | null;
+  initialPayments: PaymentHistory[];
+}
+
+// ==========================================
+// COMPONENT
+// ==========================================
+
+export function SubscriptionClient({
+  initialPlanInfo,
+  initialPayments,
+}: SubscriptionClientProps) {
+  const queryClient = useQueryClient();
+  const [requestingUpgrade, setRequestingUpgrade] = useState(false);
+
+  const { data: planInfo, isLoading: isLoadingPlan } = useQuery({
+    queryKey: queryKeys.subscription.plan(),
+    queryFn: () => subscriptionApi.getMyPlan(),
+    // Hanya fetch dari client kalau server tidak berhasil kirim data
+    initialData: initialPlanInfo ?? undefined,
+    enabled: !initialPlanInfo,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
+    queryKey: queryKeys.subscription.payments(),
+    queryFn: () => subscriptionApi.getPaymentHistory(),
+    // initialPayments selalu array (bisa kosong) — cek length bukan null
+    initialData: initialPayments.length > 0 ? initialPayments : undefined,
+    enabled: initialPayments.length === 0,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  // ==========================================
+  // HANDLERS
+  // ==========================================
+
+  const handleContactWa = async () => {
+    setRequestingUpgrade(true);
+    try {
+      const result = await subscriptionApi.requestUpgrade();
+      window.open(result.waUrl, '_blank');
+      // Setelah upgrade request → invalidate supaya refetch fresh data dari server
+      await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.plan() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.payments() });
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setRequestingUpgrade(false);
+    }
+  };
+
+  // ==========================================
+  // LOADING STATE
+  // Hanya tampil kalau initialData tidak ada (edge case)
+  // ==========================================
+
+  if (isLoadingPlan || isLoadingPayments) {
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto">
+        <div>
+          <h1 className="text-2xl font-bold">Subscription</h1>
+          <p className="text-muted-foreground">Manage your plan and billing</p>
+        </div>
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-11 w-full bg-muted animate-pulse rounded" />
+            <div className="h-11 w-full bg-muted animate-pulse rounded" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // DERIVED STATE
+  // ==========================================
+
+  const plan = planInfo?.subscription.plan;
+  const status = planInfo?.subscription.status;
+  const isStarter = plan === 'STARTER';
+  const isBusiness = plan === 'BUSINESS';
+  const isActive = status === 'ACTIVE';
+  const periodEnd = planInfo?.subscription.currentPeriodEnd;
+  const daysRemaining = periodEnd ? getDaysRemaining(periodEnd) : null;
+
+  const isPaidActiveBusiness = isBusiness && isActive;
+  const hasPendingPayment = payments.some((p) => p.paymentStatus === 'pending');
+  const showUpgrade = !isPaidActiveBusiness;
+  const overLimitProducts = planInfo?.isOverLimit?.products ?? false;
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+
+  return (
+    <div className="space-y-6 max-w-2xl mx-auto">
+      <div>
+        <h1 className="text-2xl font-bold">Subscription</h1>
+        <p className="text-muted-foreground">Manage your plan and billing</p>
+      </div>
+
+      {/* Over-Limit Banner */}
+      {isStarter && overLimitProducts && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-medium text-sm">
+                  You&apos;ve exceeded your Starter plan limits
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  You have {planInfo?.usage.products} products (limit{' '}
+                  {planInfo?.limits.maxProducts}). Your existing data is safe,
+                  but you can&apos;t add new entries.
+                </p>
+                {!hasPendingPayment && (
+                  <Button
+                    size="sm"
+                    className="mt-2"
+                    onClick={handleContactWa}
+                    disabled={requestingUpgrade}
+                  >
+                    {requestingUpgrade ? (
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    ) : (
+                      <Crown className="mr-2 h-3 w-3" />
+                    )}
+                    Contact Sales — Rp 35,000/mo
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Current Plan Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isStarter ? (
+                <Rocket className="h-6 w-6 text-muted-foreground" />
+              ) : (
+                <Crown className="h-6 w-6 text-primary" />
+              )}
+              <div>
+                <CardTitle>{plan} Plan</CardTitle>
+                <CardDescription>
+                  {isStarter ? 'Free forever' : 'Business Plan 35K'}
+                </CardDescription>
+              </div>
+            </div>
+            <Badge variant={isPaidActiveBusiness ? 'default' : 'secondary'}>
+              {isActive ? 'Active' : status}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+
+          {/* Usage Stats */}
+          <div className="rounded-lg border p-3">
+            <p className="text-sm text-muted-foreground">Products</p>
+            <p className="text-lg font-bold">
+              {planInfo?.usage.products}
+              <span className="text-sm font-normal text-muted-foreground">
+                {' / '}
+                {(planInfo?.limits.maxProducts ?? 0) >= 999999
+                  ? 'Unlimited'
+                  : planInfo?.limits.maxProducts}
+              </span>
+            </p>
+          </div>
+
+          {/* Period countdown */}
+          {isBusiness && periodEnd && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>
+                Active until {formatDate(periodEnd)} ({daysRemaining} days left)
+              </span>
+            </div>
+          )}
+
+          {/* Skenario 1: STARTER, belum pending → Contact Sales */}
+          {showUpgrade && !hasPendingPayment && (
+            <Button
+              onClick={handleContactWa}
+              className="w-full"
+              size="lg"
+              disabled={requestingUpgrade}
+            >
+              {requestingUpgrade ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Crown className="mr-2 h-4 w-4" />
+              )}
+              Contact Sales — Rp 35,000/mo
+            </Button>
+          )}
+
+          {/* Skenario 2: STARTER, sudah pending → notice */}
+          {showUpgrade && hasPendingPayment && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-3">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Pembayaran sedang diproses
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Cek riwayat pembayaran di bawah untuk follow up.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment History */}
+      {payments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5" />
+              Payment history
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {payments.map((payment) => {
+                const statusInfo = PAYMENT_STATUS_LABELS[payment.paymentStatus] ?? {
+                  label: payment.paymentStatus,
+                  variant: 'secondary' as const,
+                };
+                const isPending = payment.paymentStatus === 'pending';
+
+                return (
+                  <div
+                    key={payment.id}
+                    className="flex items-center justify-between border-b pb-3 last:border-0"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        Business Plan 35K —{' '}
+                        {new Date(payment.periodStart).toLocaleDateString('en-US', {
+                          month: 'short', year: 'numeric',
+                        })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(payment.createdAt).toLocaleDateString('en-US')}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                      <Badge variant={statusInfo.variant} className="text-xs">
+                        {statusInfo.label}
+                      </Badge>
+
+                      {isPending && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs"
+                          onClick={handleContactWa}
+                          disabled={requestingUpgrade}
+                        >
+                          {requestingUpgrade ? (
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          ) : (
+                            <MessageCircle className="mr-1 h-3 w-3" />
+                          )}
+                          Hubungi Admin
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/dashboard/subscription/page.tsx
+================================================================
+import { getServerHeaders } from '@/lib/api/server-headers';
+import { subscriptionApi } from '@/lib/api/subscription';
+import { SubscriptionClient } from './client';
+
+// ==========================================
+// SUBSCRIPTION PAGE — Server Component
+// Fetch initial data server-side via getServerHeaders()
+// Pass ke client sebagai initialData → tidak ada 401 race condition
+// ==========================================
+
+export default async function SubscriptionPage() {
+  const headers = await getServerHeaders();
+
+  const [planInfo, payments] = await Promise.all([
+    subscriptionApi.getMyPlan(headers).catch(() => null),
+    subscriptionApi.getPaymentHistory(headers).catch(() => []),
+  ]);
+
+  return (
+    <SubscriptionClient
+      initialPlanInfo={planInfo}
+      initialPayments={payments}
+    />
+  );
+}
+
+================================================================
+FILE : app/(dashboard)/layout.tsx
+================================================================
+import type { Metadata } from 'next';
+import { AuthGuard } from '@/components/layout/auth/auth-guard';
+import { DashboardLayout } from '@/components/layout/dashboard/dashboard-layout';
+
+// ==========================================
+// DASHBOARD LAYOUT
+// Protected with AuthGuard
+// ==========================================
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Dashboard - Fibidy',
+    default: 'Dashboard - Fibidy',
+  },
+};
+
+interface DashboardRootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function DashboardRootLayout({
+  children,
+}: DashboardRootLayoutProps) {
+  return (
+    <AuthGuard requireAuth redirectTo="/login">
+      <DashboardLayout>{children}</DashboardLayout>
+    </AuthGuard>
+  );
+}
+
+================================================================
+FILE : app/(legal)/layout.tsx
+================================================================
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Fibidy',
+    default: 'Fibidy',
+  },
+};
+
+interface LegalLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function LegalLayout({ children }: LegalLayoutProps) {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(legal)/legal/contact/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft, Mail, Instagram, Music2, Twitter } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+export const metadata: Metadata = {
+  title: 'Hubungi Kami',
+  description: 'Kontak Fibidy. Email dan media sosial.',
+};
+
+const CONTACTS = [
+  {
+    label: 'Email',
+    value: 'admin@fibidy.com',
+    description: 'Untuk semua pertanyaan. Respons dalam 1x24 jam kerja.',
+    href: 'mailto:admin@fibidy.com',
+    icon: Mail,
+  },
+  {
+    label: 'Instagram',
+    value: '@fibidy_com',
+    description: 'Update fitur dan inspirasi toko.',
+    href: 'https://instagram.com/fibidy_com',
+    icon: Instagram,
+  },
+  {
+    label: 'TikTok',
+    value: '@fibidy.com',
+    description: 'Tips jualan online untuk UMKM.',
+    href: 'https://tiktok.com/@fibidy.com',
+    icon: Music2,
+  },
+  {
+    label: 'X / Twitter',
+    value: '@fibidy42581',
+    description: 'Pengumuman dan update platform.',
+    href: 'https://twitter.com/fibidy42581',
+    icon: Twitter,
+  },
+];
+
+export default function ContactPage() {
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+        {/* Back */}
+        <Link
+          href="/legal"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Info & Legal
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Hubungi Kami</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ada pertanyaan atau butuh bantuan? Hubungi kami di sini.
+          </p>
+        </div>
+
+        {/* Contact list */}
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          {CONTACTS.map((contact) => {
+            const Icon = contact.icon;
+            return (
+              <a
+                key={contact.label}
+                href={contact.href}
+                target={contact.href.startsWith('http') ? '_blank' : undefined}
+                rel={contact.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="flex items-center gap-4 px-4 py-4 hover:bg-muted/50 active:bg-muted transition-colors"
+              >
+                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-0.5">
+                    {contact.label}
+                  </p>
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {contact.value}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                    {contact.description}
+                  </p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+
+        <Separator className="bg-border/60 mt-10 mb-6" />
+        <p className="text-xs text-muted-foreground text-center">
+          Fibidy · PT Perorangan · NIB 1203260002022
+        </p>
+
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(legal)/legal/faq/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+export const metadata: Metadata = {
+  title: 'FAQ',
+  description: 'Pertanyaan yang sering ditanya seputar Fibidy.',
+};
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface FaqGroup {
+  category: string;
+  items: FaqItem[];
+}
+
+const faqs: FaqGroup[] = [
+  {
+    category: 'Tentang Fibidy',
+    items: [
+      {
+        question: 'Apa itu Fibidy?',
+        answer: 'Fibidy adalah platform untuk bikin situs online sendiri. Daftar, isi info usahamu, tambah produk — situsmu langsung aktif dalam hitungan menit. Tanpa coding, tanpa biaya awal.',
+      },
+      {
+        question: 'Apakah Fibidy resmi?',
+        answer: 'Ya. Fibidy beroperasi sebagai PT Perorangan dengan NIB 1203260002022, terdaftar di sistem OSS Kementerian Investasi RI. Bisa dicek langsung di oss.go.id.',
+      },
+      {
+        question: 'Siapa yang bisa pakai Fibidy?',
+        answer: 'Pelaku usaha yang sudah berusia minimal 17 tahun. Warung kelontong, bengkel, salon, laundry, catering, fotografi — semua bisa. Ada banyak kategori tersedia, termasuk "Lainnya".',
+      },
+      {
+        question: 'Apakah Fibidy marketplace?',
+        answer: 'Bukan. Fibidy menyediakan situs untuk usahamu — bukan mempertemukan penjual dan pembeli. Kami tidak ikut campur dalam transaksi, tidak ambil komisi, dan tidak proses pembayaran pelangganmu.',
+      },
+    ],
+  },
+  {
+    category: 'Daftar & Mulai',
+    items: [
+      {
+        question: 'Bagaimana cara daftar?',
+        answer: 'Buka fibidy.com, klik "Buat Situs", isi info dasar usahamu, pilih kategori, dan ikuti langkahnya. Rata-rata selesai dalam beberapa menit.',
+      },
+      {
+        question: 'Perlu kartu kredit untuk daftar?',
+        answer: 'Tidak. Paket Starter gratis dan tidak butuh informasi pembayaran apapun.',
+      },
+      {
+        question: 'Perlu keahlian teknis?',
+        answer: 'Tidak perlu. Semua dilakukan secara visual — isi form, upload foto, selesai.',
+      },
+    ],
+  },
+  {
+    category: 'Fitur',
+    items: [
+      {
+        question: 'Seperti apa alamat situs saya?',
+        answer: 'Di Paket Starter kamu dapat subdomain namakamu.fibidy.com secara gratis. Di Paket Business kamu bisa hubungkan domain milikmu sendiri.',
+      },
+      {
+        question: 'Bagaimana pelanggan memesan?',
+        answer: 'Pelanggan buka situsmu, lihat katalog produk, lalu tap tombol WhatsApp untuk menghubungimu langsung. Semua proses negosiasi dan pembayaran terjadi di antara kamu dan pelanggan — di luar Fibidy.',
+      },
+      {
+        question: 'Apakah ada iklan di situs saya?',
+        answer: 'Tidak ada. Tidak pernah ada, tidak akan ada.',
+      },
+      {
+        question: 'Berapa banyak produk yang bisa ditambahkan?',
+        answer: 'Paket Starter punya batas produk sesuai ketentuan yang berlaku. Paket Business mendukung produk tidak terbatas.',
+      },
+      {
+        question: 'Apakah situs saya bisa muncul di Google?',
+        answer: 'Bisa, tapi tidak dijamin. Setiap situs Fibidy punya pengaturan SEO dasar yang bisa kamu isi. Posisi di Google ditentukan sepenuhnya oleh algoritma Google — bukan oleh Fibidy.',
+      },
+    ],
+  },
+  {
+    category: 'Harga & Pembayaran',
+    items: [
+      {
+        question: 'Apakah Fibidy benar-benar gratis?',
+        answer: 'Ya. Paket Starter gratis selamanya — subdomain, katalog produk, landing page, WhatsApp order, tanpa iklan, tanpa kartu kredit.',
+      },
+      {
+        question: 'Apakah ada komisi dari penjualan saya?',
+        answer: 'Nol. Fibidy tidak mengambil apapun dari transaksimu dengan pelanggan.',
+      },
+      {
+        question: 'Apa bedanya Starter dan Business?',
+        answer: 'Starter gratis dengan subdomain fibidy.com dan fitur inti. Business berbayar dengan domain kustom milikmu, produk tidak terbatas, dan fitur tambahan.',
+      },
+      {
+        question: 'Bagaimana cara bayar Paket Business?',
+        answer: 'Klik "Contact Sales" di halaman Subscription, kami akan kirim detail pembayaran via WhatsApp. Pembayaran dilakukan via transfer bank atau QRIS yang kami share langsung.',
+      },
+      {
+        question: 'Apakah ada refund?',
+        answer: 'Tidak ada. Semua pembayaran Paket Business bersifat final dan non-refundable.',
+      },
+    ],
+  },
+  {
+    category: 'Data & Privasi',
+    items: [
+      {
+        question: 'Siapa yang memiliki data toko saya?',
+        answer: 'Kamu. Semua konten — produk, foto, deskripsi, logo — adalah milikmu. Fibidy hanya menyimpan dan menampilkannya.',
+      },
+      {
+        question: 'Apakah Fibidy mengambil data pelanggan toko saya?',
+        answer: 'Tidak. Komunikasi antara situsmu dan pelangganmu lewat WhatsApp terjadi di luar sistem Fibidy. Kami tidak punya akses ke sana.',
+      },
+      {
+        question: 'Apakah saya bisa hapus akun?',
+        answer: 'Ya, kapan saja. Hubungi kami di admin@fibidy.com. Data toko dihapus permanen dalam 30 hari setelah permintaan dikonfirmasi.',
+      },
+    ],
+  },
+];
+
+export default function FAQPage() {
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+        {/* Back */}
+        <Link
+          href="/legal"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Info & Legal
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">FAQ</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pertanyaan yang paling sering muncul.
+          </p>
+        </div>
+
+        {/* FAQ Groups */}
+        <div className="space-y-8">
+          {faqs.map((group) => (
+            <div key={group.category}>
+              <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+                {group.category}
+              </p>
+              <div className="rounded-xl border overflow-hidden bg-card px-4">
+                <Accordion type="single" collapsible className="w-full">
+                  {group.items.map((faq, index) => (
+                    <AccordionItem
+                      key={index}
+                      value={`${group.category}-${index}`}
+                      className="border-b border-border/60 last:border-b-0"
+                    >
+                      <AccordionTrigger className="text-left hover:no-underline py-4 text-sm font-semibold hover:text-primary transition-colors duration-200">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="bg-border/60 mt-10 mb-6" />
+        <p className="text-xs text-muted-foreground text-center">
+          Masih ada pertanyaan?{' '}
+          <Link href="/legal/contact" className="text-foreground font-semibold hover:text-primary transition-colors">
+            Hubungi kami.
+          </Link>
+        </p>
+
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(legal)/legal/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { HelpCircle, Phone, ScrollText, Shield, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+export const metadata: Metadata = {
+  title: 'Info & Legal',
+  description: 'FAQ, kontak, syarat layanan, dan kebijakan privasi Fibidy.',
+};
+
+const LEGAL_GROUPS = [
+  {
+    group: 'Informasi',
+    items: [
+      {
+        label: 'FAQ',
+        description: 'Pertanyaan yang sering ditanya',
+        icon: HelpCircle,
+        href: '/legal/faq',
+      },
+      {
+        label: 'Hubungi Kami',
+        description: 'Email dan media sosial Fibidy',
+        icon: Phone,
+        href: '/legal/contact',
+      },
+    ],
+  },
+  {
+    group: 'Legal',
+    items: [
+      {
+        label: 'Syarat Layanan',
+        description: 'Ketentuan penggunaan platform',
+        icon: ScrollText,
+        href: '/legal/terms',
+      },
+      {
+        label: 'Kebijakan Privasi',
+        description: 'Cara kami mengelola datamu',
+        icon: Shield,
+        href: '/legal/privacy',
+      },
+    ],
+  },
+];
+
+export default function LegalIndexPage() {
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+        {/* Back */}
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Settings
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Info & Legal</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Informasi platform dan dokumen hukum Fibidy.
+          </p>
+        </div>
+
+        {/* Groups */}
+        <div className="space-y-6">
+          {LEGAL_GROUPS.map((group) => (
+            <div key={group.group}>
+              <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
+                {group.group}
+              </p>
+              <div className="rounded-xl border divide-y overflow-hidden bg-card">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-4 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
+                    >
+                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground leading-tight">
+                          {item.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {item.description}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="bg-border/60 mt-10 mb-6" />
+        <p className="text-xs text-muted-foreground text-center">
+          Fibidy · PT Perorangan · NIB 1203260002022
+        </p>
+
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(legal)/legal/privacy/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+export const metadata: Metadata = {
+  title: 'Kebijakan Privasi',
+  description: 'Kebijakan privasi Fibidy. Cara kami mengelola datamu.',
+};
+
+interface Section {
+  number: string;
+  title: string;
+  content: string[];
+}
+
+const sections: Section[] = [
+  {
+    number: '01',
+    title: 'Siapa yang bertanggung jawab.',
+    content: [
+      'Fibidy, dioperasikan oleh PT Perorangan dengan NIB 1203260002022, berdomisili di Madiun, Jawa Timur, adalah pengendali data atas informasi yang kamu berikan saat menggunakan platform ini.',
+      'Kebijakan ini berlaku untuk semua layanan Fibidy yang dapat diakses melalui fibidy.com dan subdomain terkait. Kebijakan ini mengacu pada UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
+    ],
+  },
+  {
+    number: '02',
+    title: 'Data yang kami kumpulkan.',
+    content: [
+      'Data yang kamu berikan langsung: informasi akun (nama usaha, email, kata sandi terenkripsi), informasi toko (nama, kategori, deskripsi, nomor WhatsApp, alamat), dan konten yang kamu unggah (foto produk, logo, deskripsi).',
+      'Data yang dikumpulkan otomatis: data teknis dasar (jenis perangkat, browser) dan data penggunaan agregat melalui Vercel Analytics — dikumpulkan secara anonim, tanpa cookie pelacak.',
+      'Kami tidak menyimpan data kartu kredit, rekening bank, atau instrumen pembayaranmu. Pembayaran dilakukan manual via WhatsApp — kami hanya mengonfirmasi setelah transfer masuk.',
+    ],
+  },
+  {
+    number: '03',
+    title: 'Mengapa kami mengumpulkan data.',
+    content: [
+      'Untuk mengoperasikan akun dan layanan yang kamu gunakan.',
+      'Untuk mengelola status berlangganan dan konfirmasi pembayaran.',
+      'Untuk mengirim notifikasi penting terkait akunmu.',
+      'Untuk meningkatkan platform berdasarkan pola penggunaan secara agregat.',
+      'Kami tidak menggunakan datamu untuk keperluan iklan atau menjualnya ke pihak manapun.',
+    ],
+  },
+  {
+    number: '04',
+    title: 'Pihak ketiga yang kami gunakan.',
+    content: [
+      'Vercel — infrastruktur hosting dan analitik anonim. Berdomisili di Amerika Serikat.',
+      'Supabase — database dan autentikasi. Berdomisili di Amerika Serikat.',
+      'Cloudinary — penyimpanan file media. Berdomisili di Amerika Serikat.',
+      'Semua penyedia di atas memiliki standar keamanan yang memadai. Kami tidak berbagi datamu dengan pihak ketiga untuk keperluan komersial apapun di luar operasional platform.',
+    ],
+  },
+  {
+    number: '05',
+    title: 'Data toko dan pelangganmu.',
+    content: [
+      'Semua konten toko yang kamu unggah — produk, foto, harga, logo — adalah milikmu sepenuhnya.',
+      'Komunikasi antara situsmu dan pelangganmu melalui WhatsApp terjadi di luar sistem Fibidy. Kami tidak punya akses ke percakapan tersebut dan tidak menyimpan data pelanggan tokomu.',
+      'Kamu adalah pengendali data atas informasi pelanggan tokomu sendiri dan bertanggung jawab atas pengelolaannya.',
+    ],
+  },
+  {
+    number: '06',
+    title: 'Keamanan data.',
+    content: [
+      'Kami menerapkan enkripsi koneksi TLS/SSL, enkripsi kata sandi dengan bcrypt, dan infrastruktur database dengan isolasi data antar pengguna.',
+      'Tidak ada sistem yang bisa menjamin keamanan absolut. Jika terjadi insiden keamanan yang berdampak pada datamu, kami akan memberitahumu sesegera mungkin setelah insiden dikonfirmasi.',
+      'Jika kamu menemukan celah keamanan, laporkan ke admin@fibidy.com.',
+    ],
+  },
+  {
+    number: '07',
+    title: 'Retensi data.',
+    content: [
+      'Kami menyimpan datamu selama akunmu aktif.',
+      'Setelah akun ditutup, data toko dihapus dari sistem dalam 30 hari. Setelah itu tidak bisa dipulihkan — pastikan kamu sudah menyimpan informasi yang dibutuhkan sebelum menutup akun.',
+    ],
+  },
+  {
+    number: '08',
+    title: 'Hak-hakmu.',
+    content: [
+      'Sesuai UU PDP, kamu berhak mengakses, mengoreksi, atau meminta penghapusan datamu kapan saja.',
+      'Untuk menggunakan hak-hak ini, hubungi kami di admin@fibidy.com dengan subjek "Permintaan Data". Kami akan merespons dalam 14 hari kerja.',
+    ],
+  },
+  {
+    number: '09',
+    title: 'Cookie.',
+    content: [
+      'Kami hanya menggunakan cookie esensial yang diperlukan agar platform bisa berfungsi — manajemen sesi login dan keamanan akun.',
+      'Kami tidak menggunakan cookie iklan, tidak mengintegrasikan pixel tracking dari platform manapun, dan tidak berpartisipasi dalam jaringan iklan.',
+      'Vercel Analytics yang kami gunakan tidak memakai cookie dan tidak melacak identitas pengguna.',
+    ],
+  },
+  {
+    number: '10',
+    title: 'Perubahan kebijakan.',
+    content: [
+      'Fibidy bisa memperbarui kebijakan ini sewaktu-waktu. Perubahan material akan diberitahukan via email minimal 7 hari sebelum berlaku.',
+      'Versi terbaru selalu tersedia di fibidy.com/legal/privacy.',
+    ],
+  },
+];
+
+export default function PrivacyPage() {
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+        {/* Back */}
+        <Link
+          href="/legal"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Info & Legal
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Kebijakan Privasi</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Berlaku sejak Januari 2026. Terakhir diperbarui April 2026.
+          </p>
+        </div>
+
+        {/* Plain language summary */}
+        <div className="rounded-xl border bg-muted/30 p-5 mb-8">
+          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground mb-3">
+            Intinya
+          </p>
+          <ul className="space-y-2">
+            {[
+              'Kami kumpulkan data yang kamu berikan saat daftar dan data teknis anonim. Tidak lebih.',
+              'Kami tidak jual datamu. Tidak pernah, tidak akan.',
+              'Data toko milikmu. Kami hanya menyimpannya agar situsmu bisa tampil.',
+              'Kamu bisa minta akses, koreksi, atau hapus datamu kapan saja.',
+              'Kalau ada insiden keamanan dari sisi kami, kami beritahu kamu segera.',
+            ].map((item, i) => (
+              <li key={i} className="flex gap-3 text-sm text-muted-foreground">
+                <span className="text-primary font-bold shrink-0">{i + 1}.</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <Separator className="bg-border/60 mb-8" />
+
+        {/* Sections */}
+        <div className="space-y-0">
+          {sections.map((s) => (
+            <div key={s.number}>
+              <Separator className="bg-border/60" />
+              <div className="grid grid-cols-[48px_1fr] gap-5 py-7">
+                <span className="text-4xl font-black text-muted-foreground/20 select-none leading-none tabular-nums pt-0.5">
+                  {s.number}
+                </span>
+                <div>
+                  <h2 className="text-base font-bold tracking-tight mb-3">
+                    {s.title}
+                  </h2>
+                  <div className="space-y-2">
+                    {s.content.map((p, i) => (
+                      <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <Separator className="bg-border/60" />
+        </div>
+
+        <div className="mt-8 flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">
+            Pertanyaan?{' '}
+            <a href="mailto:admin@fibidy.com" className="text-foreground font-semibold hover:text-primary transition-colors">
+              admin@fibidy.com
+            </a>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Fibidy · PT Perorangan · NIB 1203260002022 · Madiun, Jawa Timur
+          </p>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/(legal)/legal/terms/page.tsx
+================================================================
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+export const metadata: Metadata = {
+  title: 'Syarat Layanan',
+  description: 'Syarat dan ketentuan penggunaan platform Fibidy.',
+};
+
+interface Section {
+  number: string;
+  title: string;
+  content: string[];
+}
+
+const sections: Section[] = [
+  {
+    number: '01',
+    title: 'Tentang Fibidy.',
+    content: [
+      'Fibidy adalah platform penyedia situs online berbasis langganan (SaaS) untuk UMKM Indonesia, dioperasikan oleh PT Perorangan dengan NIB 1203260002022, berdomisili di Madiun, Jawa Timur.',
+      'Fibidy bukan marketplace, bukan e-commerce, dan bukan perantara transaksi. Kami menyediakan infrastruktur digital — situsmu, katalogmu, tampilan brandmu. Transaksi antara kamu dan pelangganmu sepenuhnya terjadi di luar platform Fibidy.',
+      'Fibidy tidak memungut komisi apapun dari penjualanmu. Tidak ada iklan pihak ketiga di situsmu.',
+    ],
+  },
+  {
+    number: '02',
+    title: 'Penerimaan syarat.',
+    content: [
+      'Dengan mendaftar dan menggunakan Fibidy, kamu menyatakan telah membaca dan menyetujui syarat layanan ini.',
+      'Fibidy berhak memperbarui syarat ini sewaktu-waktu. Perubahan material akan diberitahukan via email minimal 7 hari sebelum berlaku. Penggunaan yang berlanjut dianggap sebagai persetujuan.',
+      'Layanan Fibidy ditujukan untuk pelaku usaha berusia minimal 17 tahun atau telah cakap hukum sesuai peraturan yang berlaku.',
+    ],
+  },
+  {
+    number: '03',
+    title: 'Akun dan tanggung jawab.',
+    content: [
+      'Kamu bertanggung jawab penuh atas keamanan akunmu, termasuk kerahasiaan kata sandi dan seluruh aktivitas di bawah akunmu.',
+      'Satu entitas hanya boleh memiliki satu akun aktif. Pembuatan akun ganda untuk menghindari pembatasan adalah pelanggaran.',
+      'Kamu wajib memberikan informasi yang akurat saat mendaftar dan memperbaruinya jika ada perubahan.',
+      'Segera hubungi admin@fibidy.com jika kamu mengetahui adanya akses tidak sah ke akunmu.',
+    ],
+  },
+  {
+    number: '04',
+    title: 'Konten yang dilarang.',
+    content: [
+      'Kamu tidak boleh menggunakan Fibidy untuk menampilkan atau mempromosikan hal-hal berikut:',
+      'Produk atau layanan yang ilegal berdasarkan hukum Indonesia — termasuk narkotika, senjata api, produk palsu, atau obat keras tanpa izin BPOM.',
+      'Konten yang mengandung penipuan, klaim palsu, atau informasi yang menyesatkan konsumen.',
+      'Pelanggaran hak kekayaan intelektual pihak lain.',
+      'Jasa keuangan tanpa izin OJK — pinjol ilegal, investasi bodong, skema piramida.',
+      'Konten seksual eksplisit atau konten yang membahayakan anak.',
+      'Konten yang mempromosikan kekerasan, terorisme, atau ujaran kebencian.',
+      'Fibidy berhak menghapus konten dan menangguhkan akun yang melanggar tanpa pemberitahuan sebelumnya.',
+    ],
+  },
+  {
+    number: '05',
+    title: 'Paket dan pembayaran.',
+    content: [
+      'Fibidy menyediakan dua paket: Starter (gratis) dan Business (berbayar).',
+      'Pembayaran Paket Business dilakukan secara manual via WhatsApp. Kami akan mengirimkan detail pembayaran — transfer bank atau QRIS — setelah kamu menghubungi kami.',
+      'Paket Business berlaku selama periode yang disepakati setelah pembayaran dikonfirmasi.',
+      'Fibidy berhak mengubah harga dengan pemberitahuan minimal 30 hari kepada pelanggan aktif.',
+    ],
+  },
+  {
+    number: '06',
+    title: 'Tidak ada refund.',
+    content: [
+      'Semua pembayaran Paket Business bersifat final dan tidak dapat dikembalikan.',
+      'Tidak ada pengecualian — termasuk jika kamu berhenti menggunakan layanan di tengah periode, lupa membatalkan, atau berubah pikiran.',
+    ],
+  },
+  {
+    number: '07',
+    title: 'Konten dan kepemilikan.',
+    content: [
+      'Semua konten yang kamu unggah — foto, deskripsi, logo — adalah milikmu sepenuhnya.',
+      'Dengan mengunggah konten, kamu memberi Fibidy lisensi terbatas untuk menyimpan dan menampilkannya demi mengoperasikan layanan. Lisensi ini berakhir ketika kamu menghapus konten atau menutup akun.',
+      'Kamu menjamin bahwa konten yang kamu unggah tidak melanggar hak pihak lain.',
+    ],
+  },
+  {
+    number: '08',
+    title: 'Batasan tanggung jawab.',
+    content: [
+      'Fibidy tidak bertanggung jawab atas transaksi antara kamu dan pelangganmu, kualitas produk yang kamu jual, atau sengketa yang timbul dari usahamu.',
+      'Fibidy tidak menjamin bahwa layanan akan selalu tersedia tanpa gangguan, atau bahwa situsmu akan mendapat peringkat tertentu di mesin pencari.',
+      'Total tanggung jawab Fibidy kepada kamu tidak akan melebihi jumlah yang telah kamu bayarkan dalam 3 bulan terakhir. Untuk pengguna Starter (gratis), tanggung jawab finansial Fibidy adalah nol.',
+    ],
+  },
+  {
+    number: '09',
+    title: 'Penghentian akun.',
+    content: [
+      'Kamu bisa menutup akun kapan saja dengan menghubungi admin@fibidy.com. Penutupan bersifat permanen — seluruh data dihapus dalam 30 hari.',
+      'Fibidy berhak menangguhkan atau menghapus akun yang melanggar syarat ini tanpa pemberitahuan sebelumnya. Akun yang ditangguhkan karena pelanggaran tidak berhak atas refund.',
+      'Jika Fibidy menghentikan operasional platform sepenuhnya, kami akan memberikan pemberitahuan minimal 30 hari kepada pengguna aktif.',
+    ],
+  },
+  {
+    number: '10',
+    title: 'Hukum yang berlaku.',
+    content: [
+      'Syarat layanan ini tunduk pada hukum Republik Indonesia.',
+      'Sengketa diselesaikan melalui musyawarah terlebih dahulu via email ke admin@fibidy.com. Jika tidak tercapai kesepakatan dalam 30 hari, sengketa diselesaikan melalui Pengadilan Negeri Madiun.',
+    ],
+  },
+];
+
+export default function TermsPage() {
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+        {/* Back */}
+        <Link
+          href="/legal"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Info & Legal
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Syarat Layanan</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Berlaku sejak Januari 2026. Terakhir diperbarui April 2026.
+          </p>
+        </div>
+
+        {/* Plain language summary */}
+        <div className="rounded-xl border bg-muted/30 p-5 mb-8">
+          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground mb-3">
+            Intinya
+          </p>
+          <ul className="space-y-2">
+            {[
+              'Tokomu milikmu. Datamu milikmu. Kami tidak ambil komisi.',
+              'Kami bukan marketplace. Transaksi terjadi langsung antara kamu dan pelangganmu.',
+              'Tidak ada iklan di situsmu.',
+              'Bayar Business plan via WhatsApp — transfer atau QRIS manual.',
+              'Tidak ada refund. Titik.',
+            ].map((item, i) => (
+              <li key={i} className="flex gap-3 text-sm text-muted-foreground">
+                <span className="text-primary font-bold shrink-0">{i + 1}.</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <Separator className="bg-border/60 mb-8" />
+
+        {/* Sections */}
+        <div className="space-y-0">
+          {sections.map((s) => (
+            <div key={s.number}>
+              <Separator className="bg-border/60" />
+              <div className="grid grid-cols-[48px_1fr] gap-5 py-7">
+                <span className="text-4xl font-black text-muted-foreground/20 select-none leading-none tabular-nums pt-0.5">
+                  {s.number}
+                </span>
+                <div>
+                  <h2 className="text-base font-bold tracking-tight mb-3">
+                    {s.title}
+                  </h2>
+                  <div className="space-y-2">
+                    {s.content.map((p, i) => (
+                      <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <Separator className="bg-border/60" />
+        </div>
+
+        <div className="mt-8 flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">
+            Pertanyaan?{' '}
+            <a href="mailto:admin@fibidy.com" className="text-foreground font-semibold hover:text-primary transition-colors">
+              admin@fibidy.com
+            </a>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Fibidy · PT Perorangan · NIB 1203260002022 · Madiun, Jawa Timur
+          </p>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/admin/login/client.tsx
+================================================================
+'use client';
+
+// ==========================================
+// ADMIN LOGIN CLIENT
+// File: src/app/admin/login/client.tsx
+// ==========================================
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AdminGuestGuard } from '@/components/layout/admin/admin-guard';
+import { useAdminLogin } from '@/hooks/admin/use-admin';
+
+const loginSchema = z.object({
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(8, 'Password minimal 8 karakter'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+function AdminLoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading, error } = useAdminLogin();
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data.email, data.password);
+    } catch {
+      // Error handled in hook
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+      <div className="w-full max-w-sm">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <ShieldCheck className="h-6 w-6" />
+          </div>
+          <h1 className="text-2xl font-bold">Fibidy Admin</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sign in to admin panel
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="admin@fibidy.com"
+                        autoComplete="email"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          autoComplete="current-password"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
+              </Button>
+            </form>
+          </Form>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Restricted access. Authorized personnel only.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function AdminLoginClient() {
+  return (
+    <AdminGuestGuard>
+      <AdminLoginForm />
+    </AdminGuestGuard>
+  );
+}
+
+================================================================
+FILE : app/admin/login/page.tsx
+================================================================
+// ==========================================
+// ADMIN LOGIN PAGE
+// File: src/app/admin/login/page.tsx
+//
+// NOTE: Ini di luar route group (admin)
+// karena login tidak butuh AdminGuard
+// ==========================================
+
+import type { Metadata } from 'next';
+import { AdminLoginClient } from './client';
+
+export const metadata: Metadata = {
+  title: 'Admin Login | Fibidy',
+  robots: 'noindex, nofollow',
+};
+
+export default function AdminLoginPage() {
+  return <AdminLoginClient />;
+}
+
+================================================================
+FILE : app/layout.tsx
+================================================================
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import { Providers } from '@/lib/providers/root-provider';
+import { Toaster } from '@/components/ui/sonner';
+import { seoConfig } from '@/lib/constants/shared/seo.config';
+import { getFullUrl } from '@/lib/shared/seo';
+import { OrganizationSchema } from '@/components/store/shared/organization-schema';
+import { PwaInstallPrompt } from '@/components/dashboard/shared/pwa-install-prompt';
+import './globals.css';
+
+// ==========================================
+// FONT CONFIGURATION
+// ==========================================
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+// ==========================================
+// VIEWPORT CONFIGURATION
+// ==========================================
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: seoConfig.themeColor },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
+};
+
+// ==========================================
+// ROOT METADATA (Fallback for all pages)
+// ==========================================
+
+export const metadata: Metadata = {
+  title: {
+    default: seoConfig.defaultTitle,
+    template: seoConfig.titleTemplate,
+  },
+  description: seoConfig.defaultDescription,
+  keywords: [...seoConfig.defaultKeywords],
+  applicationName: seoConfig.siteName,
+  authors: [{ name: seoConfig.siteName, url: seoConfig.siteUrl }],
+  creator: seoConfig.siteName,
+  publisher: seoConfig.siteName,
+  generator: 'Next.js',
+  metadataBase: new URL(seoConfig.siteUrl),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'id-ID': '/',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/manifest.json',
+  openGraph: {
+    type: 'website',
+    locale: seoConfig.locale,
+    url: seoConfig.siteUrl,
+    siteName: seoConfig.siteName,
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+    images: [
+      {
+        url: getFullUrl(seoConfig.defaultOgImage),
+        width: 1200,
+        height: 630,
+        alt: seoConfig.siteName,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+    site: seoConfig.twitterHandle,
+    creator: seoConfig.twitterHandle,
+    images: [getFullUrl(seoConfig.defaultOgImage)],
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: seoConfig.siteName,
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  category: 'technology',
+};
+
+// ==========================================
+// ROOT LAYOUT
+// ==========================================
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
+  return (
+    <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+
+        {/* DNS Prefetch */}
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+        {/* Preconnect to API (production) */}
+        {seoConfig.isProduction && (
+          <>
+            <link rel="preconnect" href="https://api.fibidy.com" />
+            <link rel="dns-prefetch" href="https://api.fibidy.com" />
+          </>
+        )}
+
+        {/* PWA Theme Color (fallback) */}
+        <meta name="theme-color" content="#ec4899" />
+
+        {/* Apple PWA Meta Tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Fibidy" />
+
+        {/* MS Tile */}
+        <meta name="msapplication-TileColor" content="#ec4899" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        {/* Organization + WebSite Schema (JSON-LD) */}
+        <OrganizationSchema />
+      </head>
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <Providers>
+          {children}
+          <Toaster position="top-center" richColors />
+          <PwaInstallPrompt />
+        </Providers>
+      </body>
+    </html>
+  );
+}
+
+================================================================
+FILE : app/opengraph-image.tsx
+================================================================
+/* eslint-disable @next/next/no-img-element */
+import { ImageResponse } from 'next/og';
+
+// ==========================================
+// DEFAULT PLATFORM OPEN GRAPH IMAGE
+// Route: /opengraph-image
+// ==========================================
+
+export const runtime = 'edge';
+export const alt = 'Fibidy - Platform Toko Online untuk UMKM Indonesia';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+export const revalidate = 3600;
+
+export default async function OgImage() {
+  const logoUrl = new URL('/apple-touch-icon.png', 'https://www.fibidy.com').toString();
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          background: '#FF1F6D',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background geometric accent */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '-120px',
+            right: '-120px',
+            width: '480px',
+            height: '480px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.06)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-80px',
+            left: '320px',
+            width: '300px',
+            height: '300px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.04)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(135deg, #FF1F6D 0%, #e0185f 50%, #cc1257 100%)',
+            display: 'flex',
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            padding: '72px 80px',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Top — Logo + Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '14px',
+                background: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={logoUrl}
+                alt="Fibidy"
+                width={52}
+                height={52}
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+            <div
+              style={{
+                fontSize: '32px',
+                fontWeight: '800',
+                color: 'white',
+                letterSpacing: '-0.01em',
+                display: 'flex',
+              }}
+            >
+              Fibidy
+            </div>
+          </div>
+
+          {/* Middle — Main Copy */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div
+              style={{
+                fontSize: '80px',
+                fontWeight: '900',
+                color: 'white',
+                lineHeight: 1.0,
+                letterSpacing: '-0.03em',
+                display: 'flex',
+                flexWrap: 'wrap',
+                maxWidth: '900px',
+              }}
+            >
+              Toko Online
+              <br />
+              untuk UMKM
+            </div>
+            <div
+              style={{
+                fontSize: '26px',
+                fontWeight: '500',
+                color: 'rgba(255,255,255,0.8)',
+                letterSpacing: '0.01em',
+                display: 'flex',
+                maxWidth: '600px',
+              }}
+            >
+              Buat toko, tambah produk, terima pesanan via WhatsApp. Gratis selamanya.
+            </div>
+          </div>
+
+          {/* Bottom — Stats + URL */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+              {[
+                { label: 'Gratis', sub: 'Selamanya' },
+                { label: '5 Menit', sub: 'Setup' },
+                { label: 'WhatsApp', sub: 'Order' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: i < 2 ? '32px' : '0' }}>
+                    <div
+                      style={{
+                        fontSize: '22px',
+                        fontWeight: '800',
+                        color: 'white',
+                        display: 'flex',
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: 'rgba(255,255,255,0.6)',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        display: 'flex',
+                      }}
+                    >
+                      {item.sub}
+                    </div>
+                  </div>
+                  {i < 2 && (
+                    <div
+                      style={{
+                        width: '1px',
+                        height: '32px',
+                        background: 'rgba(255,255,255,0.2)',
+                        marginRight: '32px',
+                        display: 'flex',
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: 'rgba(255,255,255,0.5)',
+                letterSpacing: '0.05em',
+                display: 'flex',
+              }}
+            >
+              fibidy.com
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630 }
+  );
+}
+
+================================================================
+FILE : app/page.tsx
+================================================================
+// src/app/page.tsx
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('fibidy_auth');
+
+  if (token) {
+    redirect('/dashboard/products');
+  } else {
+    redirect('/login');
+  }
+}
+
+================================================================
+FILE : app/server-sitemap/[page]/route.ts
+================================================================
+// ============================================================================
+// FILE: src/app/server-sitemap/[page]/route.ts
+// PURPOSE: Sitemap dinamis per halaman — list semua toko aktif
+// URL: /server-sitemap/1, /server-sitemap/2, dst
+// ============================================================================
+
+import { getServerSideSitemap } from 'next-sitemap';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const SITE_URL = 'https://www.fibidy.com';
+const LIMIT = 200; // tenant per halaman sitemap
+
+interface TenantSitemapItem {
+  slug: string;
+  updatedAt: string;
+}
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ page: string }> },
+) {
+  const { page } = await params;
+  const pageNumber = parseInt(page, 10) || 1;
+
+  try {
+    const res = await fetch(
+      `${API_URL}/tenants/sitemap?page=${pageNumber}&limit=${LIMIT}`,
+      {
+        next: { revalidate: 3600 }, // revalidate tiap 1 jam
+      },
+    );
+
+    if (!res.ok) {
+      return getServerSideSitemap([]);
+    }
+
+    const data = await res.json();
+    const tenants: TenantSitemapItem[] = data?.data ?? [];
+
+    // Generate sitemap entries per toko
+    // Setiap toko punya 4 URL: home, products, about, contact
+    const fields = tenants.flatMap((tenant) => {
+      const lastmod = new Date(tenant.updatedAt).toISOString();
+      const baseUrl = `${SITE_URL}/store/${tenant.slug}`;
+
+      return [
+        {
+          loc: baseUrl,
+          lastmod,
+          changefreq: 'daily' as const,
+          priority: 0.8,
+        },
+        {
+          loc: `${baseUrl}/products`,
+          lastmod,
+          changefreq: 'daily' as const,
+          priority: 0.7,
+        },
+        {
+          loc: `${baseUrl}/about`,
+          lastmod,
+          changefreq: 'weekly' as const,
+          priority: 0.5,
+        },
+        {
+          loc: `${baseUrl}/contact`,
+          lastmod,
+          changefreq: 'monthly' as const,
+          priority: 0.4,
+        },
+      ];
+    });
+
+    return getServerSideSitemap(fields);
+  } catch {
+    // Fallback — jangan crash
+    return getServerSideSitemap([]);
+  }
+}
+
+================================================================
+FILE : app/server-sitemap-index.xml/route.ts
+================================================================
+// ============================================================================
+// FILE: src/app/server-sitemap-index.xml/route.ts
+// PURPOSE: Sitemap index untuk semua toko aktif
+// URL: /server-sitemap-index.xml
+// ============================================================================
+
+import { getServerSideSitemapIndex } from 'next-sitemap';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const SITE_URL = 'https://www.fibidy.com';
+
+export async function GET() {
+  try {
+    // Fetch total tenant untuk hitung jumlah halaman sitemap
+    const res = await fetch(`${API_URL}/tenants/sitemap?page=1&limit=1`, {
+      next: { revalidate: 3600 }, // revalidate tiap 1 jam
+    });
+
+    if (!res.ok) {
+      // Kalau API error, return sitemap index kosong daripada error
+      return getServerSideSitemapIndex([]);
+    }
+
+    const data = await res.json();
+    const totalPages = data?.meta?.totalPages ?? 1;
+
+    // Generate URL sitemap per page
+    const sitemaps = Array.from({ length: totalPages }, (_, i) => {
+      const page = i + 1;
+      return `${SITE_URL}/server-sitemap/${page}`;
+    });
+
+    return getServerSideSitemapIndex(sitemaps);
+  } catch {
+    // Fallback — jangan crash, return kosong
+    return getServerSideSitemapIndex([]);
+  }
+}
+
+================================================================
+FILE : app/store/[slug]/about/page.tsx
+================================================================
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { tenantsApi } from '@/lib/api/tenants';
+import { TenantAbout } from '@/components/store/about/tenant-about';
+
+interface AboutPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+async function getTenant(slug: string) {
+  try {
+    return await tenantsApi.getBySlug(slug);
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+  if (!tenant) return { title: 'Not Found' };
+  return { title: `About Us | ${tenant.name}` };
+}
+
+export default async function AboutPage({ params }: AboutPageProps) {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+  if (!tenant) notFound();
+
+  return <TenantAbout features={tenant!.aboutFeatures || []} />;
+}
+
+================================================================
+FILE : app/store/[slug]/contact/page.tsx
+================================================================
+import { notFound } from 'next/navigation';
+import { tenantsApi } from '@/lib/api/tenants';
+import { TenantContact } from '@/components/store/contact/tenant-contact';
+
+interface ContactPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+async function getTenant(slug: string) {
+  try {
+    return await tenantsApi.getBySlug(slug);
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: ContactPageProps) {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+  if (!tenant) return { title: 'Not Found' };
+  return { title: `Contact | ${tenant.name}` };
+}
+
+export default async function ContactPage({ params }: ContactPageProps) {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+
+  if (!tenant) notFound();
+
+  return <TenantContact tenant={tenant!} />;
+}
+
+================================================================
+FILE : app/store/[slug]/layout.tsx
+================================================================
+import { tenantsApi } from '@/lib/api/tenants';
+import { StoreHeader } from '@/components/layout/store/store-header';
+import { StoreFooter } from '@/components/layout/store/store-footer';
+import { StoreNotFound } from '@/components/layout/store/store-not-found';
+import { LocalBusinessSchema } from '@/components/store/shared/local-business-schema';
+import { generateThemeCSS } from '@/lib/shared/colors';
+import { createTenantMetadata } from '@/lib/shared/seo';
+import type { Metadata } from 'next';
+import type { PublicTenant } from '@/types/tenant';
+
+export const dynamic = 'force-dynamic';
+
+interface StoreLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ slug: string }>;
+}
+
+async function getTenant(slug: string): Promise<PublicTenant | null> {
+  try {
+    const tenant = await tenantsApi.getBySlug(slug);
+    return tenant;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+
+  if (!tenant) {
+    return {
+      title: 'Store Not Found',
+      description: 'The store you are looking for does not exist or is no longer active.',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  return createTenantMetadata({
+    tenant: {
+      name: tenant.name,
+      slug: tenant.slug,
+      description: tenant.description,
+      logo: tenant.logo,
+      heroBackgroundImage: tenant.heroBackgroundImage,
+      metaTitle: tenant.metaTitle,
+      metaDescription: tenant.metaDescription,
+    },
+  });
+}
+
+export default async function StoreLayout({
+  children,
+  params,
+}: StoreLayoutProps) {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+
+  if (!tenant || tenant.status !== 'ACTIVE') {
+    return <StoreNotFound slug={slug} />;
+  }
+
+  const primaryHex = tenant.theme?.primaryColor || '';
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: generateThemeCSS(primaryHex) }} />
+
+      <div className="tenant-theme flex min-h-screen flex-col">
+        <LocalBusinessSchema
+          tenant={{
+            name: tenant.name,
+            slug: tenant.slug,
+            description: tenant.description,
+            category: tenant.category,
+            whatsapp: tenant.whatsapp || '',
+            phone: tenant.phone,
+            address: tenant.address,
+            logo: tenant.logo,
+            heroBackgroundImage: tenant.heroBackgroundImage,
+            socialLinks: tenant.socialLinks,
+          }}
+        />
+
+        <StoreHeader tenant={tenant} />
+
+        <main className="flex-1">
+          {children}
+        </main>
+
+        <StoreFooter tenant={tenant} />
+      </div>
+    </>
+  );
+}
+
+================================================================
+FILE : app/store/[slug]/opengraph-image.tsx
+================================================================
+import { ImageResponse } from 'next/og';
+import { getApiUrl, optimizeImageUrl, createFallbackImage, getInitials } from '@/components/dashboard/shared/og-image';
+
+// ==========================================
+// PRODUCT OPEN GRAPH IMAGE
+// Route: /store/[slug]/products/[id]/opengraph-image
+// ==========================================
+
+export const runtime = 'edge';
+export const alt = 'Product';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+
+interface Props {
+  params: Promise<{ slug: string; id: string }>;
+}
+
+// ── Minimal types untuk OG image — tidak butuh full Product type ──
+interface OgProduct {
+  name?: string;
+  price?: number;
+  comparePrice?: number | null;
+  category?: string | null;
+  images?: Array<string | { url?: string; secure_url?: string }>;
+}
+
+interface OgTenant {
+  name?: string;
+}
+
+async function getProduct(id: string): Promise<OgProduct | null> {
+  const apiUrl = getApiUrl();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${apiUrl}/products/public/${id}`, {
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    return await res.json() as OgProduct;
+  } catch {
+    return null;
+  }
+}
+
+async function getTenant(slug: string): Promise<OgTenant | null> {
+  const apiUrl = getApiUrl();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${apiUrl}/tenants/by-slug/${slug}`, {
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    return await res.json() as OgTenant;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ProductOgImage({ params }: Props) {
+  try {
+    const { slug, id } = await params;
+    if (!slug || !id) return createFallbackImage('Invalid Request');
+
+    const [tenant, product] = await Promise.all([getTenant(slug), getProduct(id)]);
+    if (!tenant) return createFallbackImage('Toko Tidak Ditemukan');
+    if (!product) return createFallbackImage('Produk Tidak Ditemukan');
+
+    const productName = product.name || 'Produk';
+    const productPrice = product.price || 0;
+    const productCategory = product.category || null;
+    const comparePrice = product.comparePrice || null;
+    const tenantName = tenant.name || 'Toko';
+
+    const hasDiscount = comparePrice && comparePrice > productPrice;
+    const discountPercent = hasDiscount
+      ? Math.round((1 - productPrice / comparePrice) * 100)
+      : 0;
+
+    const rawImageUrl =
+      typeof product?.images?.[0] === 'string'
+        ? product.images[0]
+        : (product?.images?.[0] as { url?: string; secure_url?: string } | undefined)?.url
+        ?? (product?.images?.[0] as { url?: string; secure_url?: string } | undefined)?.secure_url
+        ?? null;
+
+    const productImage = optimizeImageUrl(rawImageUrl);
+
+    return new ImageResponse(
+      (
+        <div style={{ width: '100%', height: '100%', display: 'flex', background: '#ffffff' }}>
+
+          {/* Left — Product Image */}
+          <div
+            style={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f9fafb',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {productImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={productImage}
+                alt={productName}
+                width="540"
+                height="630"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div
+                style={{
+                  fontSize: '20px',
+                  color: '#9ca3af',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                }}
+              >
+                No Image
+              </div>
+            )}
+
+            {hasDiscount && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '32px',
+                  left: '32px',
+                  background: '#111827',
+                  color: 'white',
+                  padding: '10px 20px',
+                  fontSize: '22px',
+                  fontWeight: '700',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                }}
+              >
+                -{discountPercent}%
+              </div>
+            )}
+          </div>
+
+          {/* Vertical Separator */}
+          <div
+            style={{
+              width: '1px',
+              height: '100%',
+              background: '#e5e7eb',
+              display: 'flex',
+              flexShrink: 0,
+            }}
+          />
+
+          {/* Right — Product Info */}
+          <div
+            style={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '64px 56px',
+            }}
+          >
+            {/* Top */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {productCategory && (
+                <div
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#9ca3af',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    marginBottom: '24px',
+                    display: 'flex',
+                  }}
+                >
+                  {productCategory}
+                </div>
+              )}
+
+              <div
+                style={{
+                  fontSize: '52px',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.02em',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {productName.length > 40
+                  ? productName.substring(0, 40) + '...'
+                  : productName}
+              </div>
+
+              <div
+                style={{
+                  width: '48px',
+                  height: '2px',
+                  background: '#111827',
+                  marginTop: '32px',
+                  marginBottom: '32px',
+                  display: 'flex',
+                }}
+              />
+
+              {/* Price */}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+                <div
+                  style={{
+                    fontSize: '40px',
+                    fontWeight: 'bold',
+                    color: '#111827',
+                    display: 'flex',
+                  }}
+                >
+                  Rp {productPrice.toLocaleString('id-ID')}
+                </div>
+                {hasDiscount && comparePrice && (
+                  <div
+                    style={{
+                      fontSize: '26px',
+                      color: '#d1d5db',
+                      textDecoration: 'line-through',
+                      display: 'flex',
+                    }}
+                  >
+                    Rp {comparePrice.toLocaleString('id-ID')}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom — Store Info */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div
+                style={{
+                  width: '100%',
+                  height: '1px',
+                  background: '#e5e7eb',
+                  marginBottom: '28px',
+                  display: 'flex',
+                }}
+              />
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '8px',
+                      background: '#111827',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: 'white',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                      }}
+                    >
+                      {getInitials(tenantName)}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '700',
+                        color: '#111827',
+                        display: 'flex',
+                      }}
+                    >
+                      {tenantName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '14px',
+                        color: '#9ca3af',
+                        letterSpacing: '0.05em',
+                        display: 'flex',
+                      }}
+                    >
+                      {slug}.fibidy.com
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '16px',
+                    color: '#d1d5db',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                  }}
+                >
+                  fibidy.com
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[OG-Product] Error:', message);
+    return createFallbackImage('Error');
+  }
+}
+
+================================================================
+FILE : app/store/[slug]/page.tsx
+================================================================
+import { notFound } from 'next/navigation';
+import { tenantsApi } from '@/lib/api/tenants';
+import { productsApi } from '@/lib/api/products';
+import { TenantHero } from '@/components/dashboard/blocks/block';
+import { TenantProducts } from '@/components/store/products/tenant-products';
+import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
+import { ProductListSchema } from '@/components/store/shared/product-list-schema';
+import { generateTenantBreadcrumbs } from '@/lib/shared/seo';
+import type { PublicTenant } from '@/types/tenant';
+import type { Product } from '@/types/product';
+
+export const dynamic = 'force-dynamic';
+
+interface StorePageProps {
+  params: Promise<{ slug: string }>;
+}
+
+async function getTenant(slug: string): Promise<PublicTenant | null> {
+  try {
+    return await tenantsApi.getBySlug(slug);
+  } catch {
+    return null;
+  }
+}
+
+async function getProducts(slug: string, limit = 8): Promise<Product[]> {
+  try {
+    const response = await productsApi.getByStore(slug, {
+      isActive: true,
+      limit,
+    });
+    return response.data;
+  } catch {
+    return [];
+  }
+}
+
+export default async function StorePage({ params }: StorePageProps) {
+  const { slug } = await params;
+  const tenant = await getTenant(slug);
+
+  if (!tenant) {
+    notFound();
+  }
+
+  const landingConfig = tenant.landingConfig;
+
+  const breadcrumbs = generateTenantBreadcrumbs({
+    name: tenant.name,
+    slug: tenant.slug,
+  });
+
+  const productLimit = (landingConfig?.products?.config?.limit as number) || 8;
+  const products = await getProducts(slug, productLimit);
+
+  const heroEnabled = landingConfig?.hero?.enabled === true;
+  const productsEnabled = products.length > 0;
+  const hasAnySectionEnabled = heroEnabled || productsEnabled;
+
+  return (
+    <>
+      <BreadcrumbSchema items={breadcrumbs} />
+      {products.length > 0 && (
+        <ProductListSchema
+          products={products.map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            price: p.price,
+            images: p.images,
+          }))}
+          tenant={{ name: tenant.name, slug: tenant.slug }}
+          listName={`${tenant.name} Products`}
+        />
+      )}
+
+      <div className="container px-4 py-8 space-y-8">
+        {heroEnabled && (
+          <TenantHero config={landingConfig?.hero} tenant={tenant} />
+        )}
+        {productsEnabled && (
+          <TenantProducts
+            products={products}
+            config={landingConfig?.products}
+            storeSlug={slug}
+            tenant={tenant}
+          />
+        )}
+
+        {!hasAnySectionEnabled && (
+          <div className="text-center py-12 bg-muted/30 rounded-lg">
+            <p className="text-muted-foreground mb-2">
+              Landing page not configured yet
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Enable sections in Dashboard &gt; Landing Builder
+            </p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+================================================================
+FILE : app/store/[slug]/products/[id]/not-found.tsx
+================================================================
+import Link from 'next/link';
+import { Package, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+// ==========================================
+// PRODUCT NOT FOUND PAGE
+// ==========================================
+
+export default function ProductNotFound() {
+  return (
+    <div className="container px-4 py-16">
+      <div className="text-center max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <div className="rounded-full bg-muted p-6">
+            <Package className="h-12 w-12 text-muted-foreground" />
+          </div>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
+
+        <p className="text-muted-foreground mb-6">
+          This product could not be found or is no longer available.
+        </p>
+
+        <Button asChild>
+          <Link href="..">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Store
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+================================================================
+FILE : app/store/[slug]/products/[id]/opengraph-image.tsx
+================================================================
+import { ImageResponse } from 'next/og';
+import { getApiUrl, optimizeImageUrl, createFallbackImage, getInitials } from '@/components/dashboard/shared/og-image';
+
+// ==========================================
+// STORE OPEN GRAPH IMAGE
+// Route: /store/[slug]/opengraph-image
+// ==========================================
+
+export const runtime = 'edge';
+export const alt = 'Product';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+
+interface Props {
+  params: Promise<{ slug: string; id: string }>;
+}
+
+// ── Minimal types untuk OG image — tidak butuh full Product type ──
+interface OgProduct {
+  name?: string;
+  price?: number;
+  comparePrice?: number | null;
+  category?: string | null;
+  images?: Array<string | { url?: string; secure_url?: string }>;
+}
+
+interface OgTenant {
+  name?: string;
+}
+
+async function getProduct(id: string): Promise<OgProduct | null> {
+  const apiUrl = getApiUrl();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${apiUrl}/products/public/${id}`, {
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    return await res.json() as OgProduct;
+  } catch {
+    return null;
+  }
+}
+
+async function getTenant(slug: string): Promise<OgTenant | null> {
+  const apiUrl = getApiUrl();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${apiUrl}/tenants/by-slug/${slug}`, {
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    return await res.json() as OgTenant;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ProductOgImage({ params }: Props) {
+  try {
+    const { slug, id } = await params;
+    if (!slug || !id) return createFallbackImage('Invalid Request');
+
+    const [tenant, product] = await Promise.all([getTenant(slug), getProduct(id)]);
+    if (!tenant) return createFallbackImage('Toko Tidak Ditemukan');
+    if (!product) return createFallbackImage('Produk Tidak Ditemukan');
+
+    const productName = product.name || 'Produk';
+    const productPrice = product.price || 0;
+    const productCategory = product.category || null;
+    const comparePrice = product.comparePrice || null;
+    const tenantName = tenant.name || 'Toko';
+
+    const hasDiscount = comparePrice && comparePrice > productPrice;
+    const discountPercent = hasDiscount
+      ? Math.round((1 - productPrice / comparePrice) * 100)
+      : 0;
+
+    const rawImageUrl =
+      typeof product?.images?.[0] === 'string'
+        ? product.images[0]
+        : (product?.images?.[0] as { url?: string; secure_url?: string } | undefined)?.url
+        ?? (product?.images?.[0] as { url?: string; secure_url?: string } | undefined)?.secure_url
+        ?? null;
+
+    const productImage = optimizeImageUrl(rawImageUrl);
+
+    return new ImageResponse(
+      (
+        <div style={{ width: '100%', height: '100%', display: 'flex', background: '#ffffff' }}>
+
+          {/* Left — Product Image */}
+          <div
+            style={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f9fafb',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {productImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={productImage}
+                alt={productName}
+                width="540"
+                height="630"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div
+                style={{
+                  fontSize: '20px',
+                  color: '#9ca3af',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                }}
+              >
+                No Image
+              </div>
+            )}
+
+            {hasDiscount && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '32px',
+                  left: '32px',
+                  background: '#111827',
+                  color: 'white',
+                  padding: '10px 20px',
+                  fontSize: '22px',
+                  fontWeight: '700',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                }}
+              >
+                -{discountPercent}%
+              </div>
+            )}
+          </div>
+
+          {/* Vertical Separator */}
+          <div
+            style={{
+              width: '1px',
+              height: '100%',
+              background: '#e5e7eb',
+              display: 'flex',
+              flexShrink: 0,
+            }}
+          />
+
+          {/* Right — Product Info */}
+          <div
+            style={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '64px 56px',
+            }}
+          >
+            {/* Top */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {productCategory && (
+                <div
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#9ca3af',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    marginBottom: '24px',
+                    display: 'flex',
+                  }}
+                >
+                  {productCategory}
+                </div>
+              )}
+
+              <div
+                style={{
+                  fontSize: '52px',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.02em',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {productName.length > 40
+                  ? productName.substring(0, 40) + '...'
+                  : productName}
+              </div>
+
+              <div
+                style={{
+                  width: '48px',
+                  height: '2px',
+                  background: '#111827',
+                  marginTop: '32px',
+                  marginBottom: '32px',
+                  display: 'flex',
+                }}
+              />
+
+              {/* Price */}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+                <div
+                  style={{
+                    fontSize: '40px',
+                    fontWeight: 'bold',
+                    color: '#111827',
+                    display: 'flex',
+                  }}
+                >
+                  Rp {productPrice.toLocaleString('id-ID')}
+                </div>
+                {hasDiscount && comparePrice && (
+                  <div
+                    style={{
+                      fontSize: '26px',
+                      color: '#d1d5db',
+                      textDecoration: 'line-through',
+                      display: 'flex',
+                    }}
+                  >
+                    Rp {comparePrice.toLocaleString('id-ID')}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom — Store Info */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div
+                style={{
+                  width: '100%',
+                  height: '1px',
+                  background: '#e5e7eb',
+                  marginBottom: '28px',
+                  display: 'flex',
+                }}
+              />
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '8px',
+                      background: '#111827',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: 'white',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                      }}
+                    >
+                      {getInitials(tenantName)}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '700',
+                        color: '#111827',
+                        display: 'flex',
+                      }}
+                    >
+                      {tenantName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '14px',
+                        color: '#9ca3af',
+                        letterSpacing: '0.05em',
+                        display: 'flex',
+                      }}
+                    >
+                      {slug}.fibidy.com
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    fontSize: '16px',
+                    color: '#d1d5db',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                  }}
+                >
+                  fibidy.com
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[OG-Store] Error:', message);
+    return createFallbackImage('Error');
+  }
+}
+
+================================================================
+FILE : app/store/[slug]/products/[id]/page.tsx
+================================================================
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import type { PublicTenant } from '@/types/tenant';
+import type { Product } from '@/types/product';
+import { tenantsApi } from '@/lib/api/tenants';
+import { productsApi } from '@/lib/api/products';
+import { StoreBreadcrumb } from '@/components/layout/store/store-breadcrumb';
+import { ProductGallery } from '@/components/store/showcase/product-gallery';
+import { ProductInfo } from '@/components/store/showcase/product-info';
+import { ProductActions } from '@/components/store/showcase/product-actions';
+import { PaymentShippingInfo } from '@/components/store/showcase/payment-shipping-info';
+import { RelatedProducts } from '@/components/store/showcase/related-products';
+import { ProductGridSkeleton } from '@/components/layout/store/store-skeleton';
+import { ProductSchema } from '@/components/store/shared/product-schema';
+import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
+import { SocialShare } from '@/components/store/shared/social-share';
+import { generateProductBreadcrumbs } from '@/lib/shared/seo';
+import { createProductMetadata } from '@/lib/shared/seo';
+import { Separator } from '@/components/ui/separator';
+
+// ==========================================
+// TYPES
+// ==========================================
+
+interface ProductPageProps {
+  params: Promise<{ slug: string; id: string }>;
+}
+
+// ==========================================
+// DATA FETCHING
+// ==========================================
+
+async function getTenant(slug: string): Promise<PublicTenant | null> {
+  try {
+    return await tenantsApi.getBySlug(slug);
+  } catch {
+    return null;
+  }
+}
+
+async function getProduct(slug: string, productId: string): Promise<Product | null> {
+  try {
+    return await productsApi.getByStoreAndId(slug, productId);
+  } catch {
+    return null;
+  }
+}
+
+async function getRelatedProducts(
+  slug: string,
+  currentId: string,
+  category?: string | null
+): Promise<Product[]> {
+  try {
+    const response = await productsApi.getByStore(slug, {
+      isActive: true,
+      category: category || undefined,
+      limit: 4,
+    });
+    return response.data.filter((p) => p.id !== currentId);
+  } catch {
+    return [];
+  }
+}
+
+// ==========================================
+// METADATA
+// ==========================================
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { slug, id } = await params;
+  const [tenant, product] = await Promise.all([getTenant(slug), getProduct(slug, id)]);
+
+  if (!tenant || !product) {
+    return {
+      title: 'Product Not Found',
+      description: 'The product you are looking for could not be found.',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  return createProductMetadata({
+    product: {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      price: product.price,
+      images: product.images,
+      category: product.category,
+    },
+    tenant: {
+      name: tenant.name,
+      slug: tenant.slug,
+    },
+  });
+}
+
+// ==========================================
+// PAGE
+// ==========================================
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug, id } = await params;
+
+  const [tenant, product] = await Promise.all([getTenant(slug), getProduct(slug, id)]);
+
+  if (!tenant || !product) notFound();
+
+  const relatedProducts = await getRelatedProducts(slug, id, product.category);
+  const productUrl = `https://www.fibidy.com/store/${tenant.slug}/products/${product.id}`;
+
+  const breadcrumbs = generateProductBreadcrumbs(
+    { name: tenant.name, slug: tenant.slug },
+    { name: product.name, id: product.id, slug: product.slug, category: product.category }
+  );
+
+  return (
+    <>
+      <BreadcrumbSchema items={breadcrumbs} />
+      <ProductSchema
+        product={{
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          price: product.price,
+          comparePrice: product.comparePrice,
+          images: product.images,
+          category: product.category,
+        }}
+        tenant={{
+          name: tenant.name,
+          slug: tenant.slug,
+          whatsapp: tenant.whatsapp || '',
+        }}
+      />
+
+      <div className="container px-4 py-8">
+
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <StoreBreadcrumb
+            storeSlug={slug}
+            storeName={tenant.name}
+            items={[
+              { label: 'Products', href: `/store/${slug}/products` },
+              { label: product.name },
+            ]}
+          />
+        </div>
+
+        {/* Product Detail */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          <ProductGallery images={product.images} productName={product.name} />
+
+          <div className="space-y-6">
+            <ProductInfo product={product} />
+            <PaymentShippingInfo tenant={tenant} />
+
+            {/* Share */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Share this product:</span>
+              <SocialShare
+                url={productUrl}
+                title={`${product.name} - ${tenant.name}`}
+                description={product.description || `Buy ${product.name} at ${tenant.name}`}
+                variant="buttons"
+              />
+            </div>
+
+            <Separator />
+            <ProductActions product={product} tenant={tenant} />
+          </div>
+        </div>
+
+        {/* Related Products */}
+        <Suspense fallback={<ProductGridSkeleton count={4} />}>
+          <RelatedProducts products={relatedProducts} storeSlug={slug} />
+        </Suspense>
+
+      </div>
+    </>
+  );
+}
+
+================================================================
+FILE : app/store/[slug]/products/page.tsx
+================================================================
+import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import type { Product } from '@/types/product';
+import type { PaginatedResponse } from '@/types/api';
+import { productsApi } from '@/lib/api/products';
+import { CategoryList } from '@/components/store/showcase/category-list';
+import { ProductFilters } from '@/components/store/showcase/product-filters';
+import { ProductGrid } from '@/components/store/showcase/product-grid';
+import { ProductPagination } from '@/components/store/showcase/product-pagination';
+import { ProductGridSkeleton } from '@/components/layout/store/store-skeleton';
+
+interface ProductsPageProps {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export const metadata: Metadata = {
+  title: 'Semua Produk',
+};
+
+async function getProducts(
+  slug: string,
+  searchParams: { [key: string]: string | string[] | undefined }
+): Promise<PaginatedResponse<Product>> {
+  const page = Number(searchParams.page) || 1;
+  const search = searchParams.search as string | undefined;
+  const category = searchParams.category as string | undefined;
+
+  try {
+    return await productsApi.getByStore(slug, {
+      page,
+      limit: 12,
+      search,
+      category,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+      isActive: true,
+    });
+  } catch {
+    return {
+      data: [],
+      meta: { total: 0, page: 1, limit: 12, totalPages: 0 },
+    };
+  }
+}
+
+// ✅ Extract categories dari hasil getProducts — tidak ada API call tambahan
+function extractCategories(products: Product[]): string[] {
+  const categories = new Set<string>();
+  products.forEach((p) => {
+    if (p.category) categories.add(p.category);
+  });
+  return Array.from(categories).sort();
+}
+
+export default async function ProductsPage({
+  params,
+  searchParams,
+}: ProductsPageProps) {
+  const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const productsResponse = await getProducts(slug, resolvedSearchParams);
+  const { data: products, meta } = productsResponse;
+
+  // ✅ Categories di-derive dari data yang sudah ada — zero extra API call
+  const categories = extractCategories(products);
+  const currentCategory = resolvedSearchParams.category as string | undefined;
+
+  return (
+    <div className="container px-4 py-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Semua Produk</h1>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <ProductFilters storeSlug={slug} />
+      </div>
+
+      {/* Category List */}
+      {categories.length > 0 && (
+        <div className="mb-6">
+          <CategoryList
+            categories={categories}
+            storeSlug={slug}
+            currentCategory={currentCategory}
+          />
+        </div>
+      )}
+
+      <Suspense fallback={<ProductGridSkeleton count={12} />}>
+        <ProductGrid
+          products={products}
+          storeSlug={slug}
+        />
+      </Suspense>
+
+      {/* Pagination */}
+      <ProductPagination
+        storeSlug={slug}
+        currentPage={meta.page}
+        totalPages={meta.totalPages}
+        total={meta.total}
+      />
+    </div>
+  );
+}
+
+================================================================
+FILE : app/twitter-image.tsx
+================================================================
+/* eslint-disable @next/next/no-img-element */
+import { ImageResponse } from 'next/og';
+
+// ==========================================
+// DEFAULT TWITTER IMAGE
+// Route: /twitter-image
+// ==========================================
+
+export const runtime = 'edge';
+export const alt = 'Fibidy - Platform Toko Online untuk UMKM Indonesia';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+export const revalidate = 3600;
+
+export default async function TwitterImage() {
+  const logoUrl = new URL('/apple-touch-icon.png', 'https://www.fibidy.com').toString();
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          background: '#FF1F6D',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background geometric accent */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '-120px',
+            right: '-120px',
+            width: '480px',
+            height: '480px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.06)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-80px',
+            left: '320px',
+            width: '300px',
+            height: '300px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.04)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(135deg, #FF1F6D 0%, #e0185f 50%, #cc1257 100%)',
+            display: 'flex',
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            padding: '72px 80px',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Top — Logo + Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '14px',
+                background: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={logoUrl}
+                alt="Fibidy"
+                width={52}
+                height={52}
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+            <div
+              style={{
+                fontSize: '32px',
+                fontWeight: '800',
+                color: 'white',
+                letterSpacing: '-0.01em',
+                display: 'flex',
+              }}
+            >
+              Fibidy
+            </div>
+          </div>
+
+          {/* Middle — Main Copy */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div
+              style={{
+                fontSize: '80px',
+                fontWeight: '900',
+                color: 'white',
+                lineHeight: 1.0,
+                letterSpacing: '-0.03em',
+                display: 'flex',
+                flexWrap: 'wrap',
+                maxWidth: '900px',
+              }}
+            >
+              Toko Online
+              <br />
+              untuk UMKM
+            </div>
+            <div
+              style={{
+                fontSize: '26px',
+                fontWeight: '500',
+                color: 'rgba(255,255,255,0.8)',
+                letterSpacing: '0.01em',
+                display: 'flex',
+                maxWidth: '600px',
+              }}
+            >
+              Buat toko, tambah produk, terima pesanan via WhatsApp. Gratis selamanya.
+            </div>
+          </div>
+
+          {/* Bottom — Stats + URL */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+              {[
+                { label: 'Gratis', sub: 'Selamanya' },
+                { label: '5 Menit', sub: 'Setup' },
+                { label: 'WhatsApp', sub: 'Order' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: i < 2 ? '32px' : '0' }}>
+                    <div
+                      style={{
+                        fontSize: '22px',
+                        fontWeight: '800',
+                        color: 'white',
+                        display: 'flex',
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: 'rgba(255,255,255,0.6)',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        display: 'flex',
+                      }}
+                    >
+                      {item.sub}
+                    </div>
+                  </div>
+                  {i < 2 && (
+                    <div
+                      style={{
+                        width: '1px',
+                        height: '32px',
+                        background: 'rgba(255,255,255,0.2)',
+                        marginRight: '32px',
+                        display: 'flex',
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: 'rgba(255,255,255,0.5)',
+                letterSpacing: '0.05em',
+                display: 'flex',
+              }}
+            >
+              fibidy.com
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630 }
+  );
+}
+
+################################################################
+##  SUMMARY
+##  Collected : 43 files
+################################################################

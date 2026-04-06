@@ -37,6 +37,9 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
     queryFn: () => subscriptionApi.getMyPlan(),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+    // Jangan redirect ke /login kalau 401 — bisa jadi SSR hydration tanpa cookie
+    // Error akan di-swallow, placeholderData jadi fallback
+    retry: false,
     // Fallback aman: jangan lock apapun kalau fetch gagal
     placeholderData: {
       subscription: { plan: 'STARTER' } as never,

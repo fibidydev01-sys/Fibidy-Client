@@ -22,6 +22,9 @@ export function DashboardClient() {
     queryFn: () => subscriptionApi.getMyPlan(),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+    // Jangan retry & jangan redirect kalau 401 —
+    // bisa jadi SSR hydration phase tanpa cookie
+    retry: false,
   });
 
   const showUpgradeModal = (message: string) => {
