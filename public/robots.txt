@@ -1,0 +1,58 @@
+# *
+User-agent: *
+Allow: /
+Allow: /store/
+Allow: /legal/
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+
+# Googlebot
+User-agent: Googlebot
+Allow: /
+Allow: /store/
+Allow: /legal/
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+
+# AhrefsBot
+User-agent: AhrefsBot
+Disallow: /
+
+# SemrushBot
+User-agent: SemrushBot
+Disallow: /
+
+# MJ12bot
+User-agent: MJ12bot
+Disallow: /
+
+# DotBot
+User-agent: DotBot
+Disallow: /
+
+# BLEXBot
+User-agent: BLEXBot
+Disallow: /
+
+# PetalBot
+User-agent: PetalBot
+Disallow: /
+
+# DataForSeoBot
+User-agent: DataForSeoBot
+Disallow: /
+
+# Host
+Host: https://www.fibidy.com
+
+# Sitemaps
+Sitemap: https://www.fibidy.com/sitemap.xml
+Sitemap: https://www.fibidy.com/server-sitemap-index.xml
