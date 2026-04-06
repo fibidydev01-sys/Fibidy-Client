@@ -3,7 +3,7 @@
 // ==========================================
 // SUBSCRIPTION CLIENT
 // Terima initialData dari server → tidak ada 401 saat pertama load
-// TanStack Query handle refetch setelah interaksi
+// enabled: false → client TIDAK PERNAH re-fetch, hanya invalidate setelah mutasi
 // ==========================================
 
 import { useState } from 'react';
@@ -67,20 +67,20 @@ export function SubscriptionClient({
   const { data: planInfo, isLoading: isLoadingPlan } = useQuery({
     queryKey: queryKeys.subscription.plan(),
     queryFn: () => subscriptionApi.getMyPlan(),
-    // Hanya fetch dari client kalau server tidak berhasil kirim data
+    // Server sudah fetch — pakai initialData, jangan re-fetch dari client
     initialData: initialPlanInfo ?? undefined,
-    enabled: !initialPlanInfo,
-    staleTime: 1000 * 60 * 2,
+    enabled: false,       // ← FIX: jangan pernah fetch dari client
+    staleTime: Infinity,  // ← FIX: fresh sampai di-invalidate setelah mutasi
     gcTime: 1000 * 60 * 10,
   });
 
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
     queryKey: queryKeys.subscription.payments(),
     queryFn: () => subscriptionApi.getPaymentHistory(),
-    // initialPayments selalu array (bisa kosong) — cek length bukan null
-    initialData: initialPayments.length > 0 ? initialPayments : undefined,
-    enabled: initialPayments.length === 0,
-    staleTime: 1000 * 60 * 2,
+    // Set [] pun sebagai initialData — jangan trigger fetch dari client
+    initialData: initialPayments,
+    enabled: false,       // ← FIX: jangan pernah fetch dari client
+    staleTime: Infinity,  // ← FIX: fresh sampai di-invalidate setelah mutasi
     gcTime: 1000 * 60 * 10,
   });
 
@@ -93,7 +93,7 @@ export function SubscriptionClient({
     try {
       const result = await subscriptionApi.requestUpgrade();
       window.open(result.waUrl, '_blank');
-      // Setelah upgrade request → invalidate supaya refetch fresh data dari server
+      // Setelah upgrade request → invalidate supaya server page di-refresh
       await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.plan() });
       await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.payments() });
     } catch (error: unknown) {
@@ -105,7 +105,7 @@ export function SubscriptionClient({
 
   // ==========================================
   // LOADING STATE
-  // Hanya tampil kalau initialData tidak ada (edge case)
+  // Hanya tampil kalau initialData tidak ada (edge case: server gagal total)
   // ==========================================
 
   if (isLoadingPlan || isLoadingPayments) {

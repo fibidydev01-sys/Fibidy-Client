@@ -3,7 +3,7 @@
 // ==========================================
 // EDIT PRODUCT CLIENT
 // Terima initialData dari server → tidak ada 401 saat pertama load
-// TanStack Query handle refetch setelah interaksi (create/update/delete)
+// enabled: false → client TIDAK PERNAH re-fetch, hanya invalidate setelah mutasi
 // ==========================================
 
 import { notFound } from 'next/navigation';
@@ -32,9 +32,10 @@ export function EditProductClient({
   } = useQuery({
     queryKey: queryKeys.products.detail(id),
     queryFn: () => productsApi.getById(id),
+    // Server sudah fetch — set sebagai initialData, client tidak perlu fetch ulang
     initialData: initialProduct ?? undefined,
-    enabled: !initialProduct,
-    staleTime: 1000 * 60 * 5,
+    enabled: false,       // ← FIX: jangan pernah fetch dari client
+    staleTime: Infinity,  // ← FIX: anggap data fresh selamanya sampai invalidated
     gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
@@ -42,12 +43,10 @@ export function EditProductClient({
   const { data: categories = [] } = useQuery({
     queryKey: queryKeys.products.categories(),
     queryFn: () => productsApi.getCategories(),
-    // Kalau initialCategories ada isinya → set sebagai initialData yang valid
-    // TanStack Query tidak akan refetch sampai staleTime habis
-    initialData: initialCategories.length > 0 ? initialCategories : undefined,
-    // Hanya fetch kalau memang server tidak kirim data sama sekali
-    enabled: initialCategories.length === 0,
-    staleTime: 1000 * 60 * 10,
+    // Set selalu sebagai initialData, even [] — jangan trigger fetch dari client
+    initialData: initialCategories,
+    enabled: false,       // ← FIX: jangan pernah fetch dari client
+    staleTime: Infinity,  // ← FIX: anggap data fresh selamanya sampai invalidated
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   });

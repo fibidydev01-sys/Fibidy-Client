@@ -1,0 +1,1363 @@
+################################################################
+##  HOOKS COLLECTION
+##  Generated: 2026-04-07 01:31:11
+##  Source: src/hooks/
+################################################################
+
+================================================================
+FILE: hooks/admin/use-admin.ts
+================================================================
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAdminStore } from '@/stores/admin-store';
+import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
+import { queryKeys } from '@/lib/shared/query-keys';
+import { toast } from '@/lib/providers/root-provider';
+import type { TenantQueryParams } from '@/types/admin';
+
+// ==========================================
+// USE ADMIN AUTH CHECK
+// ==========================================
+
+export function useAdminAuthCheck() {
+  const { setAdmin, setChecked, isChecked } = useAdminStore();
+
+  const checkAuth = useCallback(async () => {
+    if (isChecked) return;
+    try {
+      const admin = await adminApi.me();
+      setAdmin(admin);
+    } catch {
+      setAdmin(null);
+    } finally {
+      setChecked(true);
+    }
+  }, [isChecked, setAdmin, setChecked]);
+
+  useEffect(() => { checkAuth(); }, [checkAuth]);
+
+  return { checkAuth };
+}
+
+// ==========================================
+// USE ADMIN LOGIN
+// ==========================================
+
+export function useAdminLogin() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setAdmin, setChecked } = useAdminStore();
+  const router = useRouter();
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await adminApi.login(email, password);
+        setAdmin(response.admin);
+        setChecked(true);
+        toast.success('Login berhasil', `Selamat datang, ${response.admin.name ?? response.admin.email}`);
+        router.push('/admin');
+        return response;
+      } catch (err) {
+        const message = getErrorMessage(err);
+        setError(message);
+        toast.error('Login gagal', message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setAdmin, setChecked, router],
+  );
+
+  return { login, isLoading, error };
+}
+
+// ==========================================
+// USE ADMIN LOGOUT
+// ==========================================
+
+export function useAdminLogout() {
+  const { reset } = useAdminStore();
+  const router = useRouter();
+
+  const logout = useCallback(async () => {
+    try {
+      await adminApi.logout();
+    } catch {
+      // Ignore error
+    }
+    reset();
+    toast.success('Logout berhasil');
+    router.push('/admin/login');
+  }, [reset, router]);
+
+  return { logout };
+}
+
+// ==========================================
+// USE ADMIN STATS
+// ==========================================
+
+export function useAdminStats() {
+  const { data: stats, isLoading, error } = useQuery({
+    queryKey: queryKeys.admin.stats(),
+    queryFn: () => adminApi.getStats(),
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  return {
+    stats,
+    isLoading,
+    error: error ? getErrorMessage(error) : null,
+  };
+}
+
+// ==========================================
+// USE ADMIN TENANTS
+// ==========================================
+
+export function useAdminTenants(params: TenantQueryParams = {}) {
+  const { data: result, isLoading, error } = useQuery({
+    queryKey: queryKeys.admin.tenants(params as Record<string, unknown>),
+    queryFn: () => adminApi.getTenants(params),
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  return {
+    result,
+    isLoading,
+    error: error ? getErrorMessage(error) : null,
+  };
+}
+
+// ==========================================
+// USE ADMIN TENANT DETAIL
+// ==========================================
+
+export function useAdminTenantDetail(id: string) {
+  const queryClient = useQueryClient();
+
+  const { data: tenant, isLoading, error } = useQuery({
+    queryKey: queryKeys.admin.tenant(id),
+    queryFn: () => adminApi.getTenantDetail(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  const refetch = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.admin.tenant(id) });
+  }, [queryClient, id]);
+
+  return {
+    tenant,
+    isLoading,
+    error: error ? getErrorMessage(error) : null,
+    refetch,
+  };
+}
+
+// ==========================================
+// USE SUSPEND TENANT
+// ==========================================
+
+export function useSuspendTenant() {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: suspend, isPending: isLoading } = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      adminApi.suspendTenant(id, reason),
+    onSuccess: (res) => {
+      toast.success('Tenant di-suspend', res.message);
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+    onError: (err) => {
+      toast.error('Gagal suspend', getErrorMessage(err));
+    },
+  });
+
+  const { mutateAsync: unsuspend } = useMutation({
+    mutationFn: (id: string) => adminApi.unsuspendTenant(id),
+    onSuccess: (res) => {
+      toast.success('Tenant diaktifkan', res.message);
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+    onError: (err) => {
+      toast.error('Gagal unsuspend', getErrorMessage(err));
+    },
+  });
+
+  return {
+    suspend: (id: string, reason: string) => suspend({ id, reason }),
+    unsuspend,
+    isLoading,
+  };
+}
+
+// ==========================================
+// USE ADMIN LOGS
+// ==========================================
+
+export function useAdminLogs(params: {
+  page?: number;
+  limit?: number;
+  action?: string;
+  from?: string;
+  to?: string;
+} = {}) {
+  const { data: result, isLoading, error } = useQuery({
+    queryKey: queryKeys.admin.logs(params as Record<string, unknown>),
+    queryFn: () => adminApi.getLogs(params),
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  return {
+    result,
+    isLoading,
+    error: error ? getErrorMessage(error) : null,
+  };
+}
+
+================================================================
+FILE: hooks/auth/use-auth.ts
+================================================================
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/stores/auth-store';
+import { getErrorMessage } from '@/lib/api/client';
+import { authApi, } from '@/lib/api/auth';
+import { tenantsApi } from '@/lib/api/tenants';
+import { toast } from '@/lib/providers/root-provider';
+import type { LoginInput, RegisterInput } from '@/types/auth';
+
+// ==========================================
+// USE LOGIN
+// ==========================================
+
+export function useLogin() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setTenant, setChecked } = useAuthStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const login = useCallback(
+    async (data: LoginInput) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await authApi.login(data);
+
+        setTenant(response.tenant);
+        setChecked(true);
+
+        toast.success('Logged in!', `Welcome back, ${response.tenant.name}`);
+
+        const from = searchParams.get('from');
+        router.push(from || '/dashboard/products');
+
+        return response;
+      } catch (err) {
+        const message = getErrorMessage(err);
+        setError(message);
+        toast.error('Login failed', message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setTenant, setChecked, router, searchParams],
+  );
+
+  const reset = useCallback(() => setError(null), []);
+
+  return { login, isLoading, error, reset };
+}
+
+// ==========================================
+// USE REGISTER
+// ==========================================
+
+export function useRegister() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setTenant, setChecked } = useAuthStore();
+  const router = useRouter();
+
+  const register = useCallback(
+    async (data: RegisterInput) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await authApi.register(data);
+
+        setTenant(response.tenant);
+        setChecked(true);
+
+        toast.success('Registration successful!', 'Your store is ready to use');
+        router.push('/dashboard/studio');
+
+        return response;
+      } catch (err) {
+        const message = getErrorMessage(err);
+        setError(message);
+        toast.error('Registration failed', message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setTenant, setChecked, router],
+  );
+
+  const reset = useCallback(() => setError(null), []);
+
+  return { register, isLoading, error, reset };
+}
+
+// ==========================================
+// USE LOGOUT
+// ==========================================
+
+export function useLogout() {
+  const { reset } = useAuthStore();
+  const router = useRouter();
+
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignore error
+    }
+
+    reset();
+    toast.success('Logged out');
+    router.push('/login');
+  }, [reset, router]);
+
+  return { logout };
+}
+
+// ==========================================
+// USE CHECK SLUG
+// ✅ Pindah ke tenantsApi → GET /tenants/check-slug/:slug
+// ==========================================
+
+export function useCheckSlug() {
+  const [isChecking, setIsChecking] = useState(false);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+
+  const checkSlug = useCallback(async (slug: string) => {
+    if (slug.length < 3) {
+      setIsAvailable(null);
+      return;
+    }
+
+    setIsChecking(true);
+
+    try {
+      const response = await tenantsApi.checkSlug(slug);
+      setIsAvailable(response.available);
+    } catch {
+      setIsAvailable(null);
+    } finally {
+      setIsChecking(false);
+    }
+  }, []);
+
+  const reset = useCallback(() => setIsAvailable(null), []);
+
+  return { checkSlug, isChecking, isAvailable, reset };
+}
+
+================================================================
+FILE: hooks/auth/use-register-wizard.ts
+================================================================
+'use client';
+
+import { useState } from 'react';
+import type { RegisterFormData } from '@/lib/shared/validations';
+
+// ==========================================
+// TYPES
+// ==========================================
+
+interface WizardState extends Partial<RegisterFormData> {
+  currentStep: number;
+}
+
+const TOTAL_STEPS = 5;
+
+// ==========================================
+// HOOK
+// ==========================================
+
+export function useRegisterWizard() {
+  const [state, setState] = useState<WizardState>({
+    currentStep: 1,
+    category: '',
+    name: '',
+    slug: '',
+    description: '',
+    email: '',
+    password: '',
+    whatsapp: '',
+  });
+
+  const updateState = (data: Partial<WizardState>) => {
+    setState((prev) => ({ ...prev, ...data }));
+  };
+
+  const nextStep = () => {
+    if (state.currentStep < TOTAL_STEPS) {
+      setState((prev) => ({ ...prev, currentStep: prev.currentStep + 1 }));
+    }
+  };
+
+  const prevStep = () => {
+    if (state.currentStep > 1) {
+      setState((prev) => ({ ...prev, currentStep: prev.currentStep - 1 }));
+    }
+  };
+
+  const goToStep = (step: number) => {
+    if (step >= 1 && step <= TOTAL_STEPS) {
+      setState((prev) => ({ ...prev, currentStep: step }));
+    }
+  };
+
+  const reset = () => {
+    setState({
+      currentStep: 1,
+      category: '',
+      name: '',
+      slug: '',
+      description: '',
+      email: '',
+      password: '',
+      whatsapp: '',
+    });
+  };
+
+  return {
+    state,
+    updateState,
+    nextStep,
+    prevStep,
+    goToStep,
+    reset,
+    progress: (state.currentStep / TOTAL_STEPS) * 100,
+    isFirstStep: state.currentStep === 1,
+    isLastStep: state.currentStep === TOTAL_STEPS,
+    totalSteps: TOTAL_STEPS,
+  };
+}
+
+
+================================================================
+FILE: hooks/dashboard/use-landing-config.ts
+================================================================
+// ============================================================================
+// FILE: src/hooks/dashboard/use-landing-config.ts
+// PURPOSE: Custom hook for managing Landing Page configuration
+// ============================================================================
+
+'use client';
+
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
+import { tenantsApi } from '@/lib/api/tenants';
+import type { TenantLandingConfig } from '@/types/landing';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
+  enabled: false,
+  hero: {
+    enabled: false,
+    title: '',
+    subtitle: '',
+    config: {
+      ctaText: 'Lihat Produk',
+      ctaLink: '/products',
+    },
+  },
+  products: {
+    enabled: false,
+    config: {
+      limit: 8,
+      showViewAll: false,
+    },
+  },
+};
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface UseLandingConfigOptions {
+  initialConfig?: TenantLandingConfig | null;
+  onSaveSuccess?: () => void;
+  onValidationError?: (errors: string[]) => void;
+}
+
+interface UseLandingConfigReturn {
+  config: TenantLandingConfig;
+  savedConfig: TenantLandingConfig;
+  hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  validationErrors: string[];
+  updateConfig: (config: TenantLandingConfig) => void;
+  publishChanges: () => Promise<boolean>;
+  discardChanges: () => void;
+  resetToDefaults: () => Promise<boolean>;
+  clearValidationErrors: () => void;
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function deepClone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function mergeLandingConfig(
+  tenant?: Partial<TenantLandingConfig> | null
+): TenantLandingConfig {
+  const dHero = DEFAULT_LANDING_CONFIG.hero!;
+  const dProducts = DEFAULT_LANDING_CONFIG.products!;
+
+  if (!tenant) return deepClone(DEFAULT_LANDING_CONFIG);
+
+  return {
+    enabled: tenant.enabled ?? DEFAULT_LANDING_CONFIG.enabled,
+    hero: {
+      enabled: tenant.hero?.enabled ?? dHero.enabled,
+      title: tenant.hero?.title ?? dHero.title,
+      subtitle: tenant.hero?.subtitle ?? dHero.subtitle,
+      block: tenant.hero?.block,
+      config: { ...dHero.config, ...(tenant.hero?.config ?? {}) },
+    },
+    products: {
+      enabled: tenant.products?.enabled ?? dProducts.enabled,
+      block: tenant.products?.block,
+      config: { ...dProducts.config, ...(tenant.products?.config ?? {}) },
+    },
+  };
+}
+
+function extractErrorMessages(error: unknown): string[] {
+  if (error instanceof ApiRequestError) {
+    const messages = [error.message, ...(error.errors ?? [])].filter(Boolean);
+    return [...new Set(messages)];
+  }
+  if (error instanceof Error) return [error.message];
+  return ['An unknown error occurred'];
+}
+
+// ============================================================================
+// HOOK
+// ============================================================================
+
+export function useLandingConfig({
+  initialConfig,
+  onSaveSuccess,
+  onValidationError,
+}: UseLandingConfigOptions): UseLandingConfigReturn {
+  const mergedInitial = mergeLandingConfig(initialConfig);
+
+  const [config, setConfig] = useState<TenantLandingConfig>(mergedInitial);
+  const [savedConfig, setSavedConfig] = useState<TenantLandingConfig>(mergedInitial);
+  const [isSaving, setIsSaving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const isInitialized = useRef(false);
+
+  // --------------------------------------------------------------------------
+  // Sync when initial config loads
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    if (initialConfig && !isInitialized.current) {
+      const merged = mergeLandingConfig(initialConfig);
+      setConfig(merged);
+      setSavedConfig(deepClone(merged));
+      isInitialized.current = true;
+    }
+  }, [initialConfig]);
+
+  const hasUnsavedChanges = JSON.stringify(config) !== JSON.stringify(savedConfig);
+
+  // --------------------------------------------------------------------------
+  // Update config locally (no auto-save)
+  // --------------------------------------------------------------------------
+  const updateConfig = useCallback((newConfig: TenantLandingConfig) => {
+    setConfig(newConfig);
+    setValidationErrors([]);
+  }, []);
+
+  const clearValidationErrors = useCallback(() => setValidationErrors([]), []);
+
+  // --------------------------------------------------------------------------
+  // Publish to server
+  // --------------------------------------------------------------------------
+  const publishChanges = useCallback(async (): Promise<boolean> => {
+    setIsSaving(true);
+    setValidationErrors([]);
+
+    try {
+      await tenantsApi.update({ landingConfig: { ...config } });
+
+      setSavedConfig(deepClone(config));
+      toast.success('Landing page published!');
+      onSaveSuccess?.();
+      return true;
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[useLandingConfig] Publish error:', error);
+      }
+
+      if (error instanceof ApiRequestError && error.isValidationError()) {
+        const errors = extractErrorMessages(error);
+        setValidationErrors(errors);
+        onValidationError?.(errors);
+        toast.error('Validation failed', {
+          description: errors.length === 1
+            ? errors[0]
+            : `${errors.length} errors found. Please review your settings.`,
+        });
+      } else {
+        toast.error('Failed to save landing page', {
+          description: getErrorMessage(error),
+        });
+      }
+
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [config, onSaveSuccess, onValidationError]);
+
+  // --------------------------------------------------------------------------
+  // Discard local changes
+  // --------------------------------------------------------------------------
+  const discardChanges = useCallback(() => {
+    setConfig(deepClone(savedConfig));
+    setValidationErrors([]);
+    toast.info('Changes discarded');
+  }, [savedConfig]);
+
+  // --------------------------------------------------------------------------
+  // Reset to defaults
+  // --------------------------------------------------------------------------
+  const resetToDefaults = useCallback(async (): Promise<boolean> => {
+    setIsSaving(true);
+    setValidationErrors([]);
+
+    try {
+      const resetConfig = deepClone(DEFAULT_LANDING_CONFIG);
+      await tenantsApi.update({ landingConfig: resetConfig });
+
+      setConfig(resetConfig);
+      setSavedConfig(deepClone(resetConfig));
+
+      toast.success('Landing page reset to defaults');
+      onSaveSuccess?.();
+      return true;
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[useLandingConfig] Reset error:', error);
+      }
+
+      if (error instanceof ApiRequestError && error.isValidationError()) {
+        const errors = extractErrorMessages(error);
+        setValidationErrors(errors);
+        toast.error('Failed to reset landing page', { description: errors[0] });
+      } else {
+        toast.error('Failed to reset landing page', {
+          description: getErrorMessage(error),
+        });
+      }
+
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [onSaveSuccess]);
+
+  // --------------------------------------------------------------------------
+  // Return
+  // --------------------------------------------------------------------------
+  return {
+    config,
+    savedConfig,
+    hasUnsavedChanges,
+    isSaving,
+    validationErrors,
+    updateConfig,
+    publishChanges,
+    discardChanges,
+    resetToDefaults,
+    clearValidationErrors,
+  };
+}
+
+================================================================
+FILE: hooks/dashboard/use-products.ts
+================================================================
+'use client';
+
+// ==========================================
+// USE PRODUCTS — TanStack Query
+// Menggantikan: useState+useEffect manual + products-store
+// ==========================================
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { productsApi } from '@/lib/api/products';
+import { getErrorMessage } from '@/lib/api/client';
+import { queryKeys } from '@/lib/shared/query-keys';
+import type { ProductQueryParams, CreateProductInput, UpdateProductInput } from '@/types/product';
+
+// ==========================================
+// USE PRODUCTS — list dengan optional filters
+// ==========================================
+
+export function useProducts(params?: ProductQueryParams) {
+  return useQuery({
+    queryKey: queryKeys.products.list(params as Record<string, unknown>),
+    queryFn: () => productsApi.getAll(params),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+}
+
+// ==========================================
+// USE PRODUCT CATEGORIES
+// Di-derive dari cache products — tidak ada API call tambahan
+// Fallback ke productsApi.getCategories() kalau cache kosong
+// ==========================================
+
+export function useProductCategories() {
+  return useQuery({
+    queryKey: queryKeys.products.categories(),
+    queryFn: async () => {
+      try {
+        const categories = await productsApi.getCategories();
+        if (Array.isArray(categories) && categories.length > 0) {
+          return categories;
+        }
+      } catch {
+        // Fallback ke ekstrak dari semua produk
+      }
+
+      const all = await productsApi.getAll({ limit: 200 });
+      return [...new Set(
+        all.data
+          .map((p) => p.category)
+          .filter((c): c is string => Boolean(c))
+      )].sort();
+    },
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
+}
+
+// ==========================================
+// USE CREATE PRODUCT
+// ==========================================
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+
+  const { mutate: createProduct, isPending: isLoading } = useMutation({
+    mutationFn: (data: CreateProductInput) => productsApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      toast.success('Product added');
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err));
+    },
+  });
+
+  return { createProduct, isLoading };
+}
+
+// ==========================================
+// USE UPDATE PRODUCT
+// FIX: mutationFn terima { id, data } object — konsisten dengan cara panggil
+// di product-form.tsx: updateProduct({ id: product.id, data: payload })
+// ==========================================
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+
+  const { mutate: updateProduct, isPending: isLoading } = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateProductInput }) =>
+      productsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      toast.success('Product updated');
+    },
+    onError: (err) => {
+      toast.error(getErrorMessage(err));
+    },
+  });
+
+  return { updateProduct, isLoading };
+}
+
+================================================================
+FILE: hooks/dashboard/use-subscription-plan.ts
+================================================================
+'use client';
+
+// ==========================================
+// USE SUBSCRIPTION PLAN HOOK
+// File: src/hooks/dashboard/use-subscription-plan.ts
+//
+// Infinity tidak bisa di-serialize JSON (jadi null).
+// Backend kirim 999999 untuk BUSINESS.
+// Frontend treat null / >= 999 sebagai Infinity (unlimited).
+// ==========================================
+
+import { useQuery } from '@tanstack/react-query';
+import { subscriptionApi } from '@/lib/api/subscription';
+import { queryKeys } from '@/lib/shared/query-keys';
+
+interface SubscriptionPlanInfo {
+  plan: 'STARTER' | 'BUSINESS';
+  blockVariantLimit: number;
+  isLoading: boolean;
+  isBusiness: boolean;
+}
+
+/**
+ * Normalize limit dari API:
+ * - null / undefined / 0 → Infinity (unlimited)
+ * - >= 999 → Infinity (backend kirim 999999 untuk unlimited)
+ * - angka valid (misal 3) → pakai apa adanya
+ */
+function normalizeLimit(raw: number | null | undefined): number {
+  if (raw == null || raw === 0 || raw >= 999) return Infinity;
+  return raw;
+}
+
+export function useSubscriptionPlan(): SubscriptionPlanInfo {
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.subscription.plan(),
+    queryFn: () => subscriptionApi.getMyPlan(),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    // Jangan redirect ke /login kalau 401 — bisa jadi SSR hydration tanpa cookie
+    // Error akan di-swallow, placeholderData jadi fallback
+    retry: false,
+    // Fallback aman: jangan lock apapun kalau fetch gagal
+    placeholderData: {
+      subscription: { plan: 'STARTER' } as never,
+      limits: { componentBlockVariants: Infinity, maxProducts: Infinity },
+      usage: { products: 0 },
+      isAtLimit: { products: false },
+      isOverLimit: { products: false },
+    },
+  });
+
+  const plan = data?.subscription.plan ?? 'STARTER';
+  const blockVariantLimit = normalizeLimit(data?.limits.componentBlockVariants);
+
+  return {
+    plan,
+    blockVariantLimit,
+    isLoading,
+    isBusiness: plan === 'BUSINESS',
+  };
+}
+
+================================================================
+FILE: hooks/shared/use-cloudinary-upload.ts
+================================================================
+'use client';
+
+// ==========================================
+// USE CLOUDINARY UPLOAD
+// File: src/hooks/shared/use-cloudinary-upload.ts
+//
+// Hook shared untuk Cloudinary upload widget.
+// Dipakai di: step-media.tsx, step-highlights.tsx, step-appearance.tsx
+// ==========================================
+
+import { useEffect, useRef, useState } from 'react';
+import { ensureCloudinaryScript } from '@/lib/shared/cloudinary';
+import type { CloudinaryUploadResult } from '@/types/cloudinary';
+
+interface UseCloudinaryUploadOptions {
+  folder: string;
+  maxFiles?: number;
+  multiple?: boolean;
+  onSuccess: (url: string) => void;
+}
+
+interface UseCloudinaryUploadReturn {
+  isUploading: boolean;
+  openWidget: (slots?: number) => void;
+  scriptReady: boolean;
+}
+
+export function useCloudinaryUpload({
+  folder,
+  maxFiles = 1,
+  multiple = false,
+  onSuccess,
+}: UseCloudinaryUploadOptions): UseCloudinaryUploadReturn {
+  const [scriptReady, setScriptReady] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const widgetRef = useRef<{ open: () => void; destroy: () => void } | null>(null);
+
+  useEffect(() => {
+    ensureCloudinaryScript(() => setScriptReady(true));
+    return () => {
+      widgetRef.current?.destroy();
+      widgetRef.current = null;
+    };
+  }, []);
+
+  const openWidget = (slots?: number) => {
+    if (!scriptReady || isUploading || !window.cloudinary) return;
+
+    const slotsToUse = slots ?? maxFiles;
+    if (slotsToUse <= 0) return;
+
+    widgetRef.current?.destroy();
+    widgetRef.current = null;
+
+    widgetRef.current = window.cloudinary.createUploadWidget(
+      {
+        cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '',
+        uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? '',
+        folder,
+        maxFiles: slotsToUse,
+        multiple: slotsToUse > 1 && multiple,
+        resourceType: 'image',
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        maxFileSize: 10_000_000,
+        sources: ['local', 'url', 'camera'],
+        styles: {
+          palette: {
+            window: '#FFFFFF',
+            windowBorder: '#E5E7EB',
+            tabIcon: '#10B981',
+            menuIcons: '#6B7280',
+            textDark: '#111827',
+            textLight: '#FFFFFF',
+            link: '#10B981',
+            action: '#10B981',
+            inactiveTabIcon: '#9CA3AF',
+            error: '#EF4444',
+            inProgress: '#10B981',
+            complete: '#10B981',
+            sourceBg: '#F9FAFB',
+          },
+        },
+      },
+      (error: unknown, result: CloudinaryUploadResult) => {
+        if (error) {
+          setIsUploading(false);
+          return;
+        }
+        switch (result.event) {
+          case 'queues-start':
+            setIsUploading(true);
+            break;
+          case 'success':
+            if (result.info?.secure_url) {
+              onSuccess(result.info.secure_url);
+            }
+            break;
+          case 'close':
+          case 'queues-end':
+            setIsUploading(false);
+            break;
+        }
+      }
+    );
+
+    widgetRef.current.open();
+  };
+
+  return { isUploading, openWidget, scriptReady };
+}
+
+================================================================
+FILE: hooks/shared/use-dark-mode.ts
+================================================================
+'use client';
+
+// ==========================================
+// useDarkMode
+// Sync isDark state dengan document class via MutationObserver
+// Toggle dark/light + persist ke localStorage
+//
+// Nama: useDarkMode (bukan useTheme — hindari konflik next-themes)
+// Dipakai di: dashboard-sidebar, mobile-navbar,
+//             admin-sidebar, admin-mobile-navbar
+// ==========================================
+
+import { useEffect, useState } from 'react';
+
+interface UseDarkModeReturn {
+  isDark: boolean;
+  toggleDarkMode: () => void;
+}
+
+export function useDarkMode(): UseDarkModeReturn {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+
+    sync();
+
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleDarkMode = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
+  return { isDark, toggleDarkMode };
+}
+
+================================================================
+FILE: hooks/shared/use-debounce.ts
+================================================================
+'use client';
+
+import { useState, useEffect } from 'react';
+
+// ==========================================
+// USE DEBOUNCE
+// ==========================================
+
+export function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+================================================================
+FILE: hooks/shared/use-media-query.ts
+================================================================
+'use client';
+
+import { useSyncExternalStore, useCallback } from 'react';
+
+// ==========================================
+// USE MEDIA QUERY
+// ==========================================
+
+export function useMediaQuery(query: string): boolean {
+  const subscribe = useCallback(
+    (callback: () => void) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener('change', callback);
+      return () => mediaQuery.removeEventListener('change', callback);
+    },
+    [query],
+  );
+
+  const getSnapshot = useCallback(() => window.matchMedia(query).matches, [query]);
+  const getServerSnapshot = useCallback(() => false, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+// ==========================================
+// BREAKPOINT HOOKS
+// ==========================================
+
+export function useIsMobile(): boolean {
+  return useMediaQuery('(max-width: 639px)');
+}
+
+export const breakpoints = {
+  sm: '(min-width: 640px)',
+  md: '(min-width: 768px)',
+  lg: '(min-width: 1024px)',
+  xl: '(min-width: 1280px)',
+  '2xl': '(min-width: 1536px)',
+} as const;
+
+================================================================
+FILE: hooks/shared/use-mounted.ts
+================================================================
+'use client';
+
+import { useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => () => { };
+
+// ==========================================
+// USE MOUNTED
+// Check if component is hydrated client-side
+// ==========================================
+
+export function useMounted(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
+================================================================
+FILE: hooks/shared/use-nav-guard.ts
+================================================================
+'use client';
+
+// ==========================================
+// useNavGuard
+// Guard navigasi ketika ada unsaved changes di builder
+// Intercept Link click + router.push
+//
+// Dipakai di: dashboard-sidebar, mobile-navbar
+// (Admin tidak butuh — tidak ada builder)
+// ==========================================
+
+import { usePathname, useRouter } from 'next/navigation';
+import { useBuilderStore } from '@/stores/use-builder-store';
+
+interface UseNavGuardReturn {
+  handleNavClick: (e: React.MouseEvent, href: string) => void;
+  handleDropdownNavClick: (href: string) => void;
+}
+
+export function useNavGuard(): UseNavGuardReturn {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { hasUnsavedChanges, onNavigateAway } = useBuilderStore();
+
+  const isInBuilder = pathname.startsWith('/dashboard/landing-builder');
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (isInBuilder && hasUnsavedChanges && onNavigateAway) {
+      e.preventDefault();
+      onNavigateAway(href);
+    }
+  };
+
+  const handleDropdownNavClick = (href: string) => {
+    if (isInBuilder && hasUnsavedChanges && onNavigateAway) {
+      onNavigateAway(href);
+    } else {
+      router.push(href);
+    }
+  };
+
+  return { handleNavClick, handleDropdownNavClick };
+}
+
+================================================================
+FILE: hooks/shared/use-pwa-install.ts
+================================================================
+'use client';
+
+// ==========================================
+// USE PWA INSTALL
+// File: src/hooks/shared/use-pwa-install.ts
+//
+// Handles:
+// - Android: intercept beforeinstallprompt
+// - iOS: detect Safari standalone mode
+// ==========================================
+
+import { useState, useEffect } from 'react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+interface UsePwaInstallReturn {
+  // Android
+  canInstallAndroid: boolean;
+  promptInstall: () => Promise<void>;
+  // iOS
+  isIos: boolean;
+  isIosSafari: boolean;
+  // Common
+  isInstalled: boolean;
+  isDismissed: boolean;
+  dismiss: () => void;
+}
+
+const DISMISSED_KEY = 'fibidy_pwa_dismissed';
+const DISMISSED_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+export function usePwaInstall(): UsePwaInstallReturn {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [canInstallAndroid, setCanInstallAndroid] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [isIos, setIsIos] = useState(false);
+  const [isIosSafari, setIsIosSafari] = useState(false);
+
+  useEffect(() => {
+    // Check if already dismissed recently
+    try {
+      const dismissedAt = localStorage.getItem(DISMISSED_KEY);
+      if (dismissedAt) {
+        const elapsed = Date.now() - parseInt(dismissedAt, 10);
+        if (elapsed < DISMISSED_DURATION_MS) {
+          setIsDismissed(true);
+          return;
+        }
+        localStorage.removeItem(DISMISSED_KEY);
+      }
+    } catch {
+      // ignore localStorage errors
+    }
+
+    // Check if already installed (standalone mode)
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+
+    if (isStandalone) {
+      setIsInstalled(true);
+      return;
+    }
+
+    // Detect iOS
+    const ua = window.navigator.userAgent;
+    const iosDevice = /iphone|ipad|ipod/i.test(ua);
+    setIsIos(iosDevice);
+
+    // Detect iOS Safari specifically (not Chrome/Firefox on iOS)
+    const iosSafari =
+      iosDevice &&
+      /safari/i.test(ua) &&
+      !/crios|fxios|opios|edgios/i.test(ua);
+    setIsIosSafari(iosSafari);
+
+    // Android: listen for beforeinstallprompt
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setCanInstallAndroid(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Listen for app installed
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+      setCanInstallAndroid(false);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
+  const promptInstall = async () => {
+    if (!deferredPrompt) return;
+    await deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    if (choice.outcome === 'accepted') {
+      setIsInstalled(true);
+      setCanInstallAndroid(false);
+    }
+    setDeferredPrompt(null);
+  };
+
+  const dismiss = () => {
+    setIsDismissed(true);
+    try {
+      localStorage.setItem(DISMISSED_KEY, String(Date.now()));
+    } catch {
+      // ignore
+    }
+  };
+
+  return {
+    canInstallAndroid,
+    promptInstall,
+    isIos,
+    isIosSafari,
+    isInstalled,
+    isDismissed,
+    dismiss,
+  };
+}
+
+================================================================
+FILE: hooks/shared/use-tenant.ts
+================================================================
+'use client';
+
+import { useCallback } from 'react';
+import { useAuthStore, useIsAuthenticated } from '@/stores/auth-store';
+import { tenantsApi } from '@/lib/api/tenants';
+
+// ==========================================
+// USE TENANT
+// Get current authenticated tenant
+// ==========================================
+
+export function useTenant() {
+  const { tenant, setTenant } = useAuthStore();
+  const isAuthenticated = useIsAuthenticated();
+
+  const refresh = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const data = await tenantsApi.me();
+      setTenant(data);
+      return data;
+    } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Failed to refresh tenant:', err);
+      }
+    }
+  }, [isAuthenticated, setTenant]);
+
+  return { tenant, refresh };
+}
+
