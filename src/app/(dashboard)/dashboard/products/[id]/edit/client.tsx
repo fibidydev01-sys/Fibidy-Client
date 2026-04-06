@@ -34,13 +34,22 @@ export function EditProductClient({
     queryFn: () => productsApi.getById(id),
     initialData: initialProduct ?? undefined,
     enabled: !initialProduct,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: queryKeys.products.categories(),
     queryFn: () => productsApi.getCategories(),
-    initialData: initialCategories,
+    // Kalau initialCategories ada isinya → set sebagai initialData yang valid
+    // TanStack Query tidak akan refetch sampai staleTime habis
+    initialData: initialCategories.length > 0 ? initialCategories : undefined,
+    // Hanya fetch kalau memang server tidak kirim data sama sekali
     enabled: initialCategories.length === 0,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
   });
 
   if (isLoadingProduct) {
