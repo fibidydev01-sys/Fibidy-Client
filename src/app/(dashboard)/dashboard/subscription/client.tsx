@@ -67,7 +67,9 @@ export function SubscriptionClient({
   const { data: planInfo, isLoading: isLoadingPlan } = useQuery({
     queryKey: queryKeys.subscription.plan(),
     queryFn: () => subscriptionApi.getMyPlan(),
+    // Hanya fetch dari client kalau server tidak berhasil kirim data
     initialData: initialPlanInfo ?? undefined,
+    enabled: !initialPlanInfo,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -75,7 +77,9 @@ export function SubscriptionClient({
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
     queryKey: queryKeys.subscription.payments(),
     queryFn: () => subscriptionApi.getPaymentHistory(),
-    initialData: initialPayments,
+    // initialPayments selalu array (bisa kosong) — cek length bukan null
+    initialData: initialPayments.length > 0 ? initialPayments : undefined,
+    enabled: initialPayments.length === 0,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -89,6 +93,7 @@ export function SubscriptionClient({
     try {
       const result = await subscriptionApi.requestUpgrade();
       window.open(result.waUrl, '_blank');
+      // Setelah upgrade request → invalidate supaya refetch fresh data dari server
       await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.plan() });
       await queryClient.invalidateQueries({ queryKey: queryKeys.subscription.payments() });
     } catch (error: unknown) {
