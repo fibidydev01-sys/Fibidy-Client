@@ -1,9 +1,11 @@
+import { getServerHeaders } from '@/lib/api/server-headers';
+import { productsApi } from '@/lib/api/products';
 import { EditProductClient } from './client';
 
 // ==========================================
 // EDIT PRODUCT PAGE — Server Component
-// Tidak ada server-side fetch — cookie issue di prod
-// ID di-pass ke client, fetch dilakukan browser-side
+// Fetch initial data server-side via getServerHeaders()
+// Pass ke client sebagai initialData → tidak ada 401 race condition
 // ==========================================
 
 interface EditProductPageProps {
@@ -12,5 +14,19 @@ interface EditProductPageProps {
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
-  return <EditProductClient id={id} />;
+
+  const headers = await getServerHeaders();
+
+  const [product, categories] = await Promise.all([
+    productsApi.getById(id, headers).catch(() => null),
+    productsApi.getCategories(headers).catch(() => []),
+  ]);
+
+  return (
+    <EditProductClient
+      id={id}
+      initialProduct={product}
+      initialCategories={categories}
+    />
+  );
 }

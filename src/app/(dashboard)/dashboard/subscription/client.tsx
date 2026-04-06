@@ -2,9 +2,8 @@
 
 // ==========================================
 // SUBSCRIPTION CLIENT
-// TanStack Query fetch browser-side
-// Browser kirim cookie otomatis → tidak ada 401 di prod
-// initialData dihapus — tidak ada lagi server-side fetch
+// Terima initialData dari server → tidak ada 401 saat pertama load
+// TanStack Query handle refetch setelah interaksi
 // ==========================================
 
 import { useState } from 'react';
@@ -14,7 +13,7 @@ import { Rocket, Crown, Loader2, Calendar, Receipt, AlertTriangle, MessageCircle
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { subscriptionApi } from '@/lib/api/subscription';
+import { subscriptionApi, type SubscriptionInfo, type PaymentHistory } from '@/lib/api/subscription';
 import { queryKeys } from '@/lib/shared/query-keys';
 import { getErrorMessage } from '@/lib/api/client';
 
@@ -46,16 +45,29 @@ function getDaysRemaining(dateStr: string): number {
 }
 
 // ==========================================
+// PROPS
+// ==========================================
+
+interface SubscriptionClientProps {
+  initialPlanInfo: SubscriptionInfo | null;
+  initialPayments: PaymentHistory[];
+}
+
+// ==========================================
 // COMPONENT
 // ==========================================
 
-export function SubscriptionClient() {
+export function SubscriptionClient({
+  initialPlanInfo,
+  initialPayments,
+}: SubscriptionClientProps) {
   const queryClient = useQueryClient();
   const [requestingUpgrade, setRequestingUpgrade] = useState(false);
 
   const { data: planInfo, isLoading: isLoadingPlan } = useQuery({
     queryKey: queryKeys.subscription.plan(),
     queryFn: () => subscriptionApi.getMyPlan(),
+    initialData: initialPlanInfo ?? undefined,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -63,6 +75,7 @@ export function SubscriptionClient() {
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
     queryKey: queryKeys.subscription.payments(),
     queryFn: () => subscriptionApi.getPaymentHistory(),
+    initialData: initialPayments,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -87,6 +100,7 @@ export function SubscriptionClient() {
 
   // ==========================================
   // LOADING STATE
+  // Hanya tampil kalau initialData tidak ada (edge case)
   // ==========================================
 
   if (isLoadingPlan || isLoadingPayments) {

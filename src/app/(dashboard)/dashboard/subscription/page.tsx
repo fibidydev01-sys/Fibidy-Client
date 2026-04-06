@@ -1,11 +1,25 @@
+import { getServerHeaders } from '@/lib/api/server-headers';
+import { subscriptionApi } from '@/lib/api/subscription';
 import { SubscriptionClient } from './client';
 
 // ==========================================
 // SUBSCRIPTION PAGE — Server Component
-// Tidak ada server-side fetch — cookie issue di prod
-// Fetch dilakukan browser-side via TanStack Query
+// Fetch initial data server-side via getServerHeaders()
+// Pass ke client sebagai initialData → tidak ada 401 race condition
 // ==========================================
 
-export default function SubscriptionPage() {
-  return <SubscriptionClient />;
+export default async function SubscriptionPage() {
+  const headers = await getServerHeaders();
+
+  const [planInfo, payments] = await Promise.all([
+    subscriptionApi.getMyPlan(headers).catch(() => null),
+    subscriptionApi.getPaymentHistory(headers).catch(() => []),
+  ]);
+
+  return (
+    <SubscriptionClient
+      initialPlanInfo={planInfo}
+      initialPayments={payments}
+    />
+  );
 }
