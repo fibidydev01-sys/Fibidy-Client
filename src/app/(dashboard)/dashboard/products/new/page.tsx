@@ -1,21 +1,24 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { productsApi } from '@/lib/api/products';
-import { getServerHeaders } from '@/lib/api/server-headers';
 import { ProductForm } from '@/components/dashboard/product/form/product';
 
-async function getCategories(): Promise<string[]> {
-  try {
-    const headers = await getServerHeaders();
-    const categories = await productsApi.getCategories(headers);
-    if (Array.isArray(categories) && categories.length > 0) {
-      return categories;
-    }
-  } catch {
-    // Fallback ke array kosong
-  }
-  return [];
-}
+export default function NewProductPage() {
+  const [categories, setCategories] = useState<string[]>([]);
 
-export default async function NewProductPage() {
-  const categories = await getCategories();
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const fetched = await productsApi.getCategories();
+        setCategories(fetched);
+      } catch {
+        // Categories kosong, tidak blocking — user tetap bisa tambah produk
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return <ProductForm categories={categories} />;
 }
