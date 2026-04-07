@@ -123,17 +123,16 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string, config?: RequestConfig): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, skipCache);
+    const url = this.buildURL(endpoint, config?.params, config?.skipCache);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
       url,
-      { method: 'GET', headers, ...restConfig },
-      timeout,
+      { method: 'GET', headers, ...config },
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async post<T>(
@@ -141,8 +140,7 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
@@ -151,12 +149,12 @@ class ApiClient {
         method: 'POST',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...config,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async patch<T>(
@@ -164,8 +162,7 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
@@ -174,12 +171,12 @@ class ApiClient {
         method: 'PATCH',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...config,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async put<T>(
@@ -187,8 +184,7 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
@@ -197,26 +193,25 @@ class ApiClient {
         method: 'PUT',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...config,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async delete<T>(endpoint: string, config?: RequestConfig): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
       url,
-      { method: 'DELETE', headers, ...restConfig },
-      timeout,
+      { method: 'DELETE', headers, ...config },
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async deleteWithBody<T>(
@@ -224,8 +219,7 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
 
     const response = await this.fetchWithTimeout(
@@ -234,12 +228,12 @@ class ApiClient {
         method: 'DELETE',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...config,
       },
-      timeout ?? 60000,
+      config?.timeout || 60000,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async upload<T>(
@@ -247,8 +241,7 @@ class ApiClient {
     formData: FormData,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = new Headers(config?.headers);
 
     const response = await this.fetchWithTimeout(
@@ -257,12 +250,12 @@ class ApiClient {
         method: 'POST',
         headers,
         body: formData,
-        ...restConfig,
+        ...config,
       },
-      timeout ?? 60000,
+      config?.timeout || 60000,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 }
 
