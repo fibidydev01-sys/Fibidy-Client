@@ -14,8 +14,8 @@ export const productsApi = {
   getByStore: async (slug: string, params?: ProductQueryParams): Promise<PaginatedResponse<Product>> =>
     api.get<PaginatedResponse<Product>>(`/products/store/${slug}`, { params }),
 
-  getById: async (id: string, headers?: HeadersInit): Promise<Product> =>
-    api.get<Product>(`/products/${id}`, { headers }),
+  getById: async (id: string): Promise<Product> =>
+    api.get<Product>(`/products/${id}`),
 
   getByStoreAndId: async (slug: string, productId: string): Promise<Product> =>
     api.get<Product>(`/products/store/${slug}/${productId}`),
@@ -29,8 +29,8 @@ export const productsApi = {
   delete: async (id: string): Promise<{ message: string }> =>
     api.delete<{ message: string }>(`/products/${id}`),
 
-  getCategories: async (headers?: HeadersInit): Promise<string[]> => {
-    const response = await api.get<{ categories: string[] }>('/products/categories', { headers });
+  getCategories: async (): Promise<string[]> => {
+    const response = await api.get<{ categories: string[] }>('/products/categories');
     return response.categories || [];
   },
 };
