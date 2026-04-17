@@ -2,6 +2,9 @@
 
 // ==========================================
 // WHATSAPP ORDER BUTTON
+// v3: tambah customLabel prop
+//   - Default: "Order via WhatsApp" (Custom/Jasa)
+//   - Custom: "Tanya Seller via WhatsApp" (Digital — pre-sales)
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
@@ -24,6 +27,8 @@ interface WhatsAppOrderButtonProps {
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   children?: ReactNode;
+  // v3: custom label untuk mode "Tanya Seller" (Digital product)
+  customLabel?: string;
 }
 
 export function WhatsAppOrderButton({
@@ -33,6 +38,7 @@ export function WhatsAppOrderButton({
   variant = 'default',
   size = 'default',
   children,
+  customLabel,
 }: WhatsAppOrderButtonProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -61,6 +67,8 @@ Thank you! 🙏`;
     setIsSubmitting(false);
   };
 
+  const buttonLabel = customLabel ?? 'Order via WhatsApp';
+
   return (
     <Drawer.Root open={open} onOpenChange={setOpen}>
       <Drawer.Trigger asChild>
@@ -68,7 +76,7 @@ Thank you! 🙏`;
           {children || (
             <>
               <MessageCircle className="mr-2 h-4 w-4" />
-              Order via WhatsApp
+              {buttonLabel}
             </>
           )}
         </Button>
@@ -102,9 +110,12 @@ Thank you! 🙏`;
           {/* Header */}
           <div className="px-6 pb-3 border-b shrink-0">
             <div className="max-w-2xl mx-auto w-full">
-              <h3 className="font-semibold text-lg">Order {product.name}</h3>
+              <h3 className="font-semibold text-lg">{buttonLabel}</h3>
               <p className="text-sm text-muted-foreground">
-                Complete your order details to send to {tenant.name}
+                {customLabel
+                  ? `Tanyakan tentang "${product.name}" ke ${tenant.name}`
+                  : `Complete your order details to send to ${tenant.name}`
+                }
               </p>
             </div>
           </div>
@@ -121,10 +132,16 @@ Thank you! 🙏`;
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="order-notes">Notes (optional)</Label>
+              <Label htmlFor="order-notes">
+                {customLabel ? 'Pertanyaan (optional)' : 'Notes (optional)'}
+              </Label>
               <Textarea
                 id="order-notes"
-                placeholder="Any additional notes..."
+                placeholder={
+                  customLabel
+                    ? 'Tulis pertanyaanmu di sini...'
+                    : 'Any additional notes...'
+                }
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}

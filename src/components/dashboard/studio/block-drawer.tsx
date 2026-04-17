@@ -1,5 +1,18 @@
 'use client';
 
+// ==========================================
+// BLOCK DRAWER
+// File: src/components/dashboard/studio/block-drawer.tsx
+//
+// [TIDUR-NYENYAK v3 FIX]
+// useIsMobile() hook was calling setIsMobile(mq.matches) inside
+// useEffect which triggered a cascading re-render (react-hooks/set-state-in-effect).
+//
+// Fix: lazy-initialize useState with matchMedia().matches so state is
+// correct from the first render. Effect only subscribes to `change`
+// events afterward. SSR-safe via typeof window check.
+// ==========================================
+
 import { useState, useEffect, memo, useCallback } from 'react';
 import {
   Drawer,
@@ -27,15 +40,24 @@ interface BlockDrawerProps {
   blockVariantLimit?: number;
 }
 
+const MOBILE_QUERY = '(max-width: 768px)';
+
 function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+  // [v3 FIX] Lazy initializer reads matchMedia synchronously on mount.
+  // No setState-in-effect, no flash of wrong initial value.
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(MOBILE_QUERY).matches;
+  });
+
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)');
-    setIsMobile(mq.matches);
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia(MOBILE_QUERY);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);
+
   return isMobile;
 }
 

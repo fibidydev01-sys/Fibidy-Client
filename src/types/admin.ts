@@ -1,5 +1,8 @@
 // ==========================================
 // ADMIN TYPES
+//
+// CLEANED: removed AdminPendingPayment
+// (backend endpoint deleted in Batch 1)
 // ==========================================
 
 // ==========================================
@@ -68,7 +71,7 @@ export interface AdminTenantDetail extends Omit<AdminTenant, 'subscription'> {
 }
 
 // ==========================================
-// PAYMENT
+// PAYMENT HISTORY (used in AdminTenantDetail)
 // ==========================================
 
 interface AdminPaymentHistory {
@@ -78,20 +81,6 @@ interface AdminPaymentHistory {
   paymentMethod: string | null;
   paidAt: string | null;
   createdAt: string;
-}
-
-export interface AdminPendingPayment {
-  id: string;
-  tenantId: string;
-  amount: number;
-  currency: string;
-  createdAt: string;
-  tenant: {
-    id: string;
-    name: string;
-    email: string;
-    slug: string;
-  };
 }
 
 // ==========================================

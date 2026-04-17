@@ -1,4 +1,3 @@
-
 // ==========================================
 // AUTH TYPES
 // ==========================================
@@ -12,7 +11,7 @@ export interface LoginInput {
 }
 
 /**
- * Register request payload
+ * Register (seller) request payload — wizard penuh /register
  */
 export interface RegisterInput {
   slug: string;
@@ -26,3 +25,11 @@ export interface RegisterInput {
   address?: string;
 }
 
+/**
+ * Register buyer request payload — dialog di /discover
+ * Hanya email + password. Role BUYER auto-set di server.
+ */
+export interface RegisterBuyerInput {
+  email: string;
+  password: string;
+}

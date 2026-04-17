@@ -1,10 +1,27 @@
 'use client';
 
+// [TIDUR-NYENYAK FIX #6] Added "Maintenance" route.
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ScrollText, Menu, Sun, Moon, LogOut } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Users,
+  ScrollText,
+  Wrench,
+  Menu,
+  Sun,
+  Moon,
+  LogOut,
+} from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAdminLogout } from '@/hooks/admin/use-admin';
 import { useDarkMode } from '@/hooks/shared/use-dark-mode';
 
@@ -12,6 +29,8 @@ const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/tenants', icon: Users, label: 'Tenants' },
   { href: '/admin/logs', icon: ScrollText, label: 'Audit Logs' },
+  // [FIX #6] New route
+  { href: '/admin/maintenance', icon: Wrench, label: 'Maintenance' },
 ];
 
 export function AdminMobileNavbar() {
@@ -37,10 +56,17 @@ export function AdminMobileNavbar() {
               href={item.href}
               className={cn(
                 'flex items-center justify-center px-2 py-2 rounded-lg transition-colors min-w-[50px]',
-                active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                active
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <item.icon className={cn('h-5 w-5 transition-transform', active && 'scale-110')} />
+              <item.icon
+                className={cn(
+                  'h-5 w-5 transition-transform',
+                  active && 'scale-110',
+                )}
+              />
               {active && (
                 <span className="absolute -bottom-0 w-1 h-1 rounded-full bg-primary" />
               )}
@@ -50,19 +76,32 @@ export function AdminMobileNavbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={cn(
-              'flex items-center justify-center px-2 py-2 rounded-lg transition-colors min-w-[50px]',
-              'text-muted-foreground hover:text-foreground'
-            )}>
+            <button
+              className={cn(
+                'flex items-center justify-center px-2 py-2 rounded-lg transition-colors min-w-[50px]',
+                'text-muted-foreground hover:text-foreground',
+              )}
+            >
               <Menu className="h-5 w-5" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 rounded-lg" side="top" align="end" sideOffset={8}>
+          <DropdownMenuContent
+            className="w-56 rounded-lg"
+            side="top"
+            align="end"
+            sideOffset={8}
+          >
             <DropdownMenuItem onClick={toggleDarkMode}>
               {isDark ? (
-                <><Sun className="mr-3 h-5 w-5" />Light mode</>
+                <>
+                  <Sun className="mr-3 h-5 w-5" />
+                  Light mode
+                </>
               ) : (
-                <><Moon className="mr-3 h-5 w-5" />Dark mode</>
+                <>
+                  <Moon className="mr-3 h-5 w-5" />
+                  Dark mode
+                </>
               )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />

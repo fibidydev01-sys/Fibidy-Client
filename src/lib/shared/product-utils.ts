@@ -1,13 +1,22 @@
 // ============================================================================
 // FILE: src/lib/shared/product-utils.ts
 // PURPOSE: Shared product logic — pricing, display helpers
+// 3-tier image limits (FREE/STARTER/BUSINESS)
 // ============================================================================
 
 import type { Product } from '@/types/product';
+import type { SubscriptionTier } from '@/lib/api/subscription';
+
+// ==========================================
+// DIGITAL CHECK
+// ==========================================
+
+export function isDigitalProduct(product: Pick<Product, 'fileKey'>): boolean {
+  return !!product.fileKey;
+}
 
 // ==========================================
 // PRICING
-// Dipakai di: ProductCard, ProductInfo, ProductPreviewDrawer, OgImage
 // ==========================================
 
 interface ProductPricing {
@@ -33,8 +42,6 @@ export function getProductPricing(product: Pick<Product, 'price' | 'comparePrice
 
 // ==========================================
 // SHOW PRICE
-// Derive showPrice dari metadata produk
-// Dipakai di: ProductForm
 // ==========================================
 
 export function getShowPrice(product?: Pick<Product, 'metadata'>): boolean {
@@ -44,12 +51,22 @@ export function getShowPrice(product?: Pick<Product, 'metadata'>): boolean {
 }
 
 // ==========================================
-// MAX IMAGES
-// Business logic limit foto per plan
-// STARTER = 3, BUSINESS = 5
-// Dipakai di: ProductForm, StepMedia
+// MAX IMAGES — 3-tier system
+//
+// FREE:     2 photos per product
+// STARTER:  3 photos per product
+// BUSINESS: 5 photos per product
 // ==========================================
 
-export function getMaxImages(isBusiness: boolean): number {
-  return isBusiness ? 5 : 3;
+const IMAGE_LIMITS: Record<SubscriptionTier, number> = {
+  FREE: 2,
+  STARTER: 3,
+  BUSINESS: 5,
+};
+
+/**
+ * Get max images based on subscription tier.
+ */
+export function getMaxImages(tier: SubscriptionTier): number {
+  return IMAGE_LIMITS[tier] ?? IMAGE_LIMITS.FREE;
 }

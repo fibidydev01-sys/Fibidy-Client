@@ -1,19 +1,45 @@
 'use client';
 
+// ==========================================
+// MOBILE NAVBAR
+//
+// EDIT: Role-based navigation
+//
+// SELLER: Products, Studio, Digital, Library, Settings
+// BUYER:  Library, Mulai Berjualan
+// ==========================================
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Layout, Settings, PlusSquare } from 'lucide-react';
+import { LayoutDashboard, Layout, Settings, History , BookOpen, Store } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
+import { useAuthStore } from '@/stores/auth-store';
+import type { LucideIcon } from 'lucide-react';
 
-const navItems = [
+interface NavItemDef {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+}
+
+const sellerNavItems: NavItemDef[] = [
   { href: '/dashboard/products', icon: LayoutDashboard, label: 'Products' },
-  { href: '/dashboard/products/new', icon: PlusSquare, label: 'Add' },
   { href: '/dashboard/studio', icon: Layout, label: 'Studio' },
+  { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
+  { href: '/dashboard/products/downloads', icon: History, label: 'Riwayat'  },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+];
+
+const buyerNavItems: NavItemDef[] = [
+  { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
+  { href: '/dashboard/setup-store', icon: Store, label: 'Berjualan' },
 ];
 
 export function MobileNavbar() {
   const pathname = usePathname();
+  const tenant = useAuthStore((s) => s.tenant);
+
+  const navItems = tenant?.role === 'SELLER' ? sellerNavItems : buyerNavItems;
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -33,7 +59,7 @@ export function MobileNavbar() {
               href={item.href}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-[50px]',
-                active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
               )}
             >
               <item.icon className={cn('h-5 w-5 transition-transform', active && 'scale-110')} />

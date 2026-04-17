@@ -9,7 +9,6 @@ import { StoreBreadcrumb } from '@/components/layout/store/store-breadcrumb';
 import { ProductGallery } from '@/components/store/showcase/product-gallery';
 import { ProductInfo } from '@/components/store/showcase/product-info';
 import { ProductActions } from '@/components/store/showcase/product-actions';
-import { PaymentShippingInfo } from '@/components/store/showcase/payment-shipping-info';
 import { RelatedProducts } from '@/components/store/showcase/related-products';
 import { ProductGridSkeleton } from '@/components/layout/store/store-skeleton';
 import { ProductSchema } from '@/components/store/shared/product-schema';
@@ -157,7 +156,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           <div className="space-y-6">
             <ProductInfo product={product} />
-            <PaymentShippingInfo tenant={tenant} />
 
             {/* Share */}
             <div className="flex items-center justify-between">

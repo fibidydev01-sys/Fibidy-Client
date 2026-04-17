@@ -1,8 +1,10 @@
 'use client';
 
-// ─── Preview Product Sheet ─────────────────────────────────────────────────
+// ─── Preview Product Sheet — v3 unified ────────────────────────────────────
+// v5: Display file size in KB instead of MB
 
 import Image from 'next/image';
+import { FileText } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -13,6 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
+import { formatFileSizeFromBytes } from '@/lib/shared/format';
 import type { ProductFormData } from '@/lib/shared/validations';
 
 interface PreviewProductProps {
@@ -21,9 +24,8 @@ interface PreviewProductProps {
   onSave: () => Promise<void>;
   isSaving: boolean;
   formData: ProductFormData;
-  showPrice: boolean;
-  currency: string;
   isEditing: boolean;
+  selectedFile?: File | null;
 }
 
 function PreviewSection({
@@ -72,15 +74,14 @@ export function PreviewProduct({
   onSave,
   isSaving,
   formData,
-  showPrice,
-  currency,
   isEditing,
+  selectedFile,
 }: PreviewProductProps) {
   const images = formData.images || [];
   const firstImage = images[0];
 
   const formatPrice = (val?: number | null) =>
-    val ? `${currency} ${val.toLocaleString()}` : null;
+    val ? `$${val.toFixed(2)}` : null;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -112,12 +113,7 @@ export function PreviewProduct({
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-[10px] text-muted-foreground/40">No image</p>
-                </div>
-              )}
-              {images.length > 1 && (
-                <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/60 text-white text-[9px] rounded font-medium">
-                  +{images.length - 1}
+                  <FileText className="h-8 w-8 text-muted-foreground/30" />
                 </div>
               )}
             </div>
@@ -144,13 +140,25 @@ export function PreviewProduct({
             </div>
           </PreviewSection>
 
-          {/* Media */}
-          <PreviewSection label="Media">
+          {/* File */}
+          <PreviewSection label="File Digital">
+            <div className="rounded-xl border bg-card px-3 py-1">
+              <PreviewRow
+                label="File"
+                value={selectedFile ? `${selectedFile.name} (${formatFileSizeFromBytes(selectedFile.size)})` : isEditing ? 'File sudah diupload' : null}
+                missing="Belum ada file"
+                valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
+              />
+            </div>
+          </PreviewSection>
+
+          {/* Cover Images */}
+          <PreviewSection label="Cover Images">
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
                 label="Foto"
                 value={images.length > 0 ? `${images.length} foto diupload` : null}
-                missing="Tidak ada foto"
+                missing="Tidak ada foto (opsional)"
                 valueClass={images.length > 0 ? 'text-emerald-600' : undefined}
               />
             </div>
@@ -159,25 +167,22 @@ export function PreviewProduct({
           {/* Pricing */}
           <PreviewSection label="Harga">
             <div className="rounded-xl border bg-card overflow-hidden px-3 py-1">
-              {showPrice ? (
-                <>
-                  <PreviewRow
-                    label="Harga jual"
-                    value={formatPrice(formData.price)}
-                    missing="Belum diisi"
-                    valueClass="text-primary"
-                  />
-                  <PreviewRow
-                    label="Harga coret"
-                    value={formatPrice(formData.comparePrice)}
-                    missing="—"
-                  />
-                </>
-              ) : (
-                <div className="py-2.5">
-                  <p className="text-xs font-medium text-orange-600">Harga atas permintaan</p>
-                </div>
-              )}
+              <PreviewRow
+                label="Harga jual"
+                value={formatPrice(formData.price)}
+                missing="Belum diisi"
+                valueClass="text-primary"
+              />
+              <PreviewRow
+                label="Harga coret"
+                value={formatPrice(formData.comparePrice)}
+                missing="—"
+              />
+              <PreviewRow
+                label="Currency"
+                value="USD"
+                valueClass="text-muted-foreground"
+              />
             </div>
           </PreviewSection>
 
@@ -191,23 +196,13 @@ export function PreviewProduct({
               />
             </div>
           </PreviewSection>
-
         </div>
 
         <SheetFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 flex-row gap-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onClose}
-            disabled={isSaving}
-          >
+          <Button variant="outline" className="flex-1" onClick={onClose} disabled={isSaving}>
             Back to edit
           </Button>
-          <Button
-            className="flex-1"
-            onClick={onSave}
-            disabled={isSaving}
-          >
+          <Button className="flex-1" onClick={onSave} disabled={isSaving}>
             {isSaving
               ? (isEditing ? 'Saving...' : 'Publishing...')
               : (isEditing ? 'Save changes' : 'Publish listing')

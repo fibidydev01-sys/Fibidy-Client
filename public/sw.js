@@ -1,6 +1,15 @@
 // ==========================================
 // SERVICE WORKER - FIBIDY PWA
 // V1 — Production Ready
+//
+// [TIDUR-NYENYAK v3.1 FIX]
+// - Removed unused `isCacheValid` helper function (line 23 warning)
+//   — was dead code, never called anywhere in fetch handler.
+//   TTL-based cache invalidation isn't currently wired up, kept the
+//   TTL constants only as reference for future implementation.
+// - Removed unused `ttl` from destructure at line 109 (warning) —
+//   only `isStore` is actually consumed in the fetch handler.
+//   If you want to implement per-route TTL later, re-add the destructure.
 // ==========================================
 
 const STATIC_CACHE = 'fibidy-static-v1';
@@ -14,18 +23,14 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png',
 ];
 
+// TTL constants kept as reference — not currently wired up.
+// If you want TTL-based cache invalidation, re-introduce isCacheValid()
+// helper and check cached response age in the fetch handler.
 const TTL = {
   STORE_PAGE: 60 * 60 * 24 * 1000,
   STORE_PRODUCT: 60 * 60 * 1000,
   STORE_PRODUCTS_LIST: 60 * 60 * 4 * 1000,
 };
-
-function isCacheValid(response, ttl) {
-  if (!response) return false;
-  const cachedAt = response.headers.get('sw-cached-at');
-  if (!cachedAt) return false;
-  return Date.now() - parseInt(cachedAt) < ttl;
-}
 
 function stampResponse(response) {
   const headers = new Headers(response.headers);
@@ -106,7 +111,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  const { isStore, ttl } = getStoreRouteType(url.pathname);
+  // [v3.1 FIX] Only destructure what we use — `ttl` was unused warning
+  const { isStore } = getStoreRouteType(url.pathname);
 
   if (isStore) {
     event.respondWith(

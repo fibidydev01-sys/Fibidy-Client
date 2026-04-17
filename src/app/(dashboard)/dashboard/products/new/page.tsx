@@ -13,10 +13,9 @@ export default function NewProductPage() {
         const fetched = await productsApi.getCategories();
         setCategories(fetched);
       } catch {
-        // Categories kosong, tidak blocking — user tetap bisa tambah produk
+        // Categories kosong, tidak blocking
       }
     };
-
     fetchCategories();
   }, []);
 

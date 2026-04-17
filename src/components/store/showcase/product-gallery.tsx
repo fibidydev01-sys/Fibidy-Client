@@ -1,6 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+// ==========================================
+// PRODUCT GALLERY
+// File: src/components/store/showcase/product-gallery.tsx
+//
+// [TIDUR-NYENYAK v3 FIX]
+// useEffect (keyboard handler for zoom modal) had stale refs to
+// goToNext/goToPrevious because they weren't in the deps array
+// (react-hooks/exhaustive-deps warning line 40).
+//
+// Fix: wrap goToPrevious/goToNext in useCallback so references are
+// stable, then add them to the effect's deps array. Keyboard nav
+// now always uses the latest callbacks.
+// ==========================================
+
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ZoomIn, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
@@ -19,13 +33,15 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const hasMultipleImages = images.length > 1;
   const currentImage = hasImages ? images[selectedIndex] : null;
 
-  const goToPrevious = () => {
+  // [v3 FIX] Wrapped in useCallback so refs are stable
+  // across renders. Required for effect deps below.
+  const goToPrevious = useCallback(() => {
     setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   useEffect(() => {
     if (!zoomOpen) return;
@@ -37,7 +53,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [zoomOpen, hasMultipleImages]);
+    // [v3 FIX] Added goToNext + goToPrevious to deps
+  }, [zoomOpen, hasMultipleImages, goToNext, goToPrevious]);
 
   return (
     <div className="space-y-4">

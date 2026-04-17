@@ -24,6 +24,7 @@ export type RegisterFormData = {
   address?: string;
 };
 
+// v3: productSchema — digital product, USD pricing
 export const productSchema = z.object({
   name: z
     .string()

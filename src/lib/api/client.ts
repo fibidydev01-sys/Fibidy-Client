@@ -3,6 +3,14 @@ import type { ApiError } from '@/types/api';
 
 // ==========================================
 // API CLIENT CONFIGURATION
+//
+// [TIDUR-NYENYAK FIX #5] 401 handler detects "session expired"
+// cases (password change, tokenVersion mismatch) and passes a
+// ?reason param to /login for banner display.
+//
+// [TIDUR-NYENYAK LINT v2] Removed 13 unused destructure warnings
+// by inlining the config spread instead of destructuring then
+// rebuilding. Same behavior, cleaner lint output.
 // ==========================================
 
 export interface RequestConfig extends RequestInit {
@@ -14,7 +22,34 @@ export interface RequestConfig extends RequestInit {
 
 interface ApiClientConfig {
   baseURL: string;
-  onUnauthorized?: () => void;
+  onUnauthorized?: (reason?: string) => void;
+}
+
+// ==========================================
+// HELPER — strip client-only fields from RequestConfig
+// ==========================================
+
+function toRequestInit(
+  config: RequestConfig | undefined,
+): Omit<RequestConfig, 'params' | 'timeout' | 'skipAuthRedirect' | 'skipCache' | 'headers'> {
+  if (!config) return {};
+  // Explicit peel of non-fetch fields. Keep everything else.
+  // NOTE: `headers` is peeled because we reconstruct it separately.
+  const {
+    params: _params,
+    timeout: _timeout,
+    skipAuthRedirect: _skipAuthRedirect,
+    skipCache: _skipCache,
+    headers: _headers,
+    ...rest
+  } = config;
+  // Silence "declared but never read" for the peeled names
+  void _params;
+  void _timeout;
+  void _skipAuthRedirect;
+  void _skipCache;
+  void _headers;
+  return rest;
 }
 
 // ==========================================
@@ -23,7 +58,7 @@ interface ApiClientConfig {
 
 class ApiClient {
   private baseURL: string;
-  private onUnauthorized?: () => void;
+  private onUnauthorized?: (reason?: string) => void;
 
   constructor(config: ApiClientConfig) {
     this.baseURL = config.baseURL;
@@ -78,10 +113,6 @@ class ApiClient {
     const isJson = contentType?.includes('application/json');
 
     if (!response.ok) {
-      if (response.status === 401 && !skipAuthRedirect) {
-        this.onUnauthorized?.();
-      }
-
       let error: ApiError;
       if (isJson) {
         error = await response.json();
@@ -90,6 +121,12 @@ class ApiClient {
           statusCode: response.status,
           message: response.statusText || 'An error occurred',
         };
+      }
+
+      // [FIX #5] Detect session invalidation reason from backend error
+      if (response.status === 401 && !skipAuthRedirect) {
+        const reason = detectAuthReason(error);
+        this.onUnauthorized?.(reason);
       }
 
       throw new ApiRequestError(error);
@@ -123,17 +160,17 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string, config?: RequestConfig): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, skipCache);
+    const url = this.buildURL(endpoint, config?.params, config?.skipCache);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
-      { method: 'GET', headers, ...restConfig },
-      timeout,
+      { method: 'GET', headers, ...rest },
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async post<T>(
@@ -141,9 +178,9 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
@@ -151,12 +188,12 @@ class ApiClient {
         method: 'POST',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...rest,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async patch<T>(
@@ -164,9 +201,9 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
@@ -174,12 +211,12 @@ class ApiClient {
         method: 'PATCH',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...rest,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async put<T>(
@@ -187,9 +224,9 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
@@ -197,26 +234,26 @@ class ApiClient {
         method: 'PUT',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...rest,
       },
-      timeout,
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async delete<T>(endpoint: string, config?: RequestConfig): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
-      { method: 'DELETE', headers, ...restConfig },
-      timeout,
+      { method: 'DELETE', headers, ...rest },
+      config?.timeout,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async deleteWithBody<T>(
@@ -224,9 +261,9 @@ class ApiClient {
     data?: unknown,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = this.getHeaders(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
@@ -234,12 +271,12 @@ class ApiClient {
         method: 'DELETE',
         headers,
         body: data ? JSON.stringify(data) : undefined,
-        ...restConfig,
+        ...rest,
       },
-      timeout ?? 60000,
+      config?.timeout ?? 60000,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 
   async upload<T>(
@@ -247,9 +284,9 @@ class ApiClient {
     formData: FormData,
     config?: RequestConfig,
   ): Promise<T> {
-    const { headers: _h, params, timeout, skipCache, skipAuthRedirect, ...restConfig } = config ?? {};
-    const url = this.buildURL(endpoint, params, false);
+    const url = this.buildURL(endpoint, config?.params, false);
     const headers = new Headers(config?.headers);
+    const rest = toRequestInit(config);
 
     const response = await this.fetchWithTimeout(
       url,
@@ -257,12 +294,12 @@ class ApiClient {
         method: 'POST',
         headers,
         body: formData,
-        ...restConfig,
+        ...rest,
       },
-      timeout ?? 60000,
+      config?.timeout ?? 60000,
     );
 
-    return this.handleResponse<T>(response, skipAuthRedirect);
+    return this.handleResponse<T>(response, config?.skipAuthRedirect);
   }
 }
 
@@ -301,16 +338,43 @@ export class ApiRequestError extends Error {
     return this.statusCode === 404;
   }
 
+  isConflict(): boolean {
+    return this.statusCode === 409;
+  }
+
   isServerError(): boolean {
     return this.statusCode >= 500;
   }
 }
 
 // ==========================================
+// [FIX #5] AUTH REASON DETECTION
+// ==========================================
+
+/**
+ * Inspect 401 error message to infer why session was invalidated.
+ * Backend error messages to match (keep in sync with server):
+ *   - "Sesi telah berakhir, silakan login kembali" → session_expired
+ *   - "Password berubah, silakan login kembali"    → password_changed
+ *   - "Token tidak valid"                          → session_expired
+ */
+function detectAuthReason(error: ApiError): string {
+  const msg = Array.isArray(error.message)
+    ? error.message.join(' ').toLowerCase()
+    : String(error.message ?? '').toLowerCase();
+
+  if (msg.includes('password')) return 'password_changed';
+  if (msg.includes('sesi') || msg.includes('session') || msg.includes('token')) {
+    return 'session_expired';
+  }
+  return 'session_expired';
+}
+
+// ==========================================
 // CREATE API CLIENT INSTANCE
 // ==========================================
 
-function handleUnauthorized(): void {
+function handleUnauthorized(reason?: string): void {
   if (typeof window === 'undefined') return;
 
   if (window.location.pathname === '/login') return;
@@ -325,8 +389,10 @@ function handleUnauthorized(): void {
 
   setTimeout(() => {
     const currentPath = window.location.pathname + window.location.search;
-    const loginUrl = `/login?from=${encodeURIComponent(currentPath)}`;
-    window.location.href = loginUrl;
+    const params = new URLSearchParams();
+    params.set('from', currentPath);
+    if (reason) params.set('reason', reason);
+    window.location.href = `/login?${params.toString()}`;
   }, 100);
 }
 

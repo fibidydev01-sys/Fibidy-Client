@@ -1,9 +1,14 @@
 'use client';
 
+// ==========================================
+// PRODUCT CARD — Public Store
+// Adaptive: Digital (fileKey != null) vs Custom/Jasa (fileKey == null)
+// ==========================================
+
 import { useMemo } from 'react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import Link from 'next/link';
-import { Package } from 'lucide-react';
+import { Package, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/shared/format';
 import { productUrl } from '@/lib/public/store-url';
@@ -17,7 +22,15 @@ interface ProductCardProps {
 
 export function ProductCard({ product, storeSlug }: ProductCardProps) {
   const { hasDiscount, discountPercent, isCustomPrice } = getProductPricing(product);
-  const imageUrl = product.images?.[0];
+
+  // ── Adaptive: detect tipe produk dari fileKey ──────────────────
+  // fileKey != null → Digital → Stripe checkout
+  // fileKey == null → Custom/Jasa → WA order
+  const isDigital = !!product.fileKey;
+  const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
+
+  // Gunakan thumbnail pertama dari images array
+  const imageUrl = product.images?.[0] ?? null;
   const url = useMemo(() => productUrl(storeSlug, product.id), [storeSlug, product.id]);
 
   return (
@@ -26,22 +39,34 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-muted">
-          <OptimizedImage
-            src={imageUrl}
-            alt={product.name}
-            fill
-            crop="fill"
-            gravity="auto"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform group-hover:scale-105"
-            fallback={
-              <div className="flex h-full items-center justify-center">
-                <Package className="h-10 w-10 text-muted-foreground/30" />
-              </div>
-            }
-          />
+          {imageUrl ? (
+            <OptimizedImage
+              src={imageUrl}
+              alt={product.name}
+              fill
+              crop="fill"
+              gravity="auto"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform group-hover:scale-105"
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  {isDigital
+                    ? <FileText className="h-10 w-10 text-muted-foreground/30" />
+                    : <Package className="h-10 w-10 text-muted-foreground/30" />
+                  }
+                </div>
+              }
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              {isDigital
+                ? <FileText className="h-10 w-10 text-muted-foreground/30" />
+                : <Package className="h-10 w-10 text-muted-foreground/30" />
+              }
+            </div>
+          )}
 
-          {/* Badges */}
+          {/* Badge: Diskon */}
           {hasDiscount && (
             <div className="absolute top-2 left-2">
               <Badge variant="destructive" className="text-xs px-1.5 py-0">
@@ -49,6 +74,19 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
               </Badge>
             </div>
           )}
+
+          {/* Badge: Tipe produk (top right) */}
+          <div className="absolute top-2 right-2">
+            {isDigital ? (
+              <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600 text-white">
+                Digital
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-background/80">
+                Custom
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
@@ -65,14 +103,20 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
           {!isCustomPrice && (
             <div className="mt-1.5 flex items-baseline gap-1.5">
               <span className="font-semibold text-sm text-primary">
-                {formatPrice(product.price)}
+                {formatPrice(product.price, currency)}
               </span>
               {hasDiscount && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {formatPrice(product.comparePrice!)}
+                  {formatPrice(product.comparePrice!, currency)}
                 </span>
               )}
             </div>
+          )}
+
+          {isCustomPrice && (
+            <p className="mt-1.5 text-xs text-muted-foreground italic">
+              Hubungi seller
+            </p>
           )}
         </div>
       </Link>

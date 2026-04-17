@@ -1,6 +1,17 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+// ==========================================
+// LANDING BUILDER PAGE
+// File: src/app/(dashboard)/dashboard/studio/page.tsx
+//
+// [TIDUR-NYENYAK TYPECHECK FIX]
+// `TenantLandingConfig.hero.enabled` is `boolean | undefined` (optional),
+// but `hasProBlocks()` expects `LandingConfig` with `hero.enabled: boolean`
+// (required). Fix: normalize config via local helper that coerces
+// `enabled` to a concrete boolean before passing through.
+// ==========================================
+
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { LivePreview } from '@/components/dashboard/studio/live-preview';
 import { LandingErrorBoundary } from '@/components/dashboard/studio/landing-error-boundary';
@@ -14,9 +25,43 @@ import { useLandingConfig } from '@/hooks/dashboard/use-landing-config';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { hasProBlocks } from '@/components/dashboard/studio/block-options';
 import { useBuilderStore } from '@/stores/use-builder-store';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import type { TenantLandingConfig } from '@/types/landing';
+
+// [TYPECHECK FIX] Helper to coerce optional `enabled` boolean to required
+// before passing to hasProBlocks(). Returns a shape compatible with
+// LandingConfig (what hasProBlocks expects).
+type HeroWithRequiredEnabled = NonNullable<TenantLandingConfig['hero']> & {
+  enabled: boolean;
+};
+
+type NormalizedConfig = Omit<TenantLandingConfig, 'hero'> & {
+  hero?: HeroWithRequiredEnabled;
+};
+
+function normalizeLandingConfig(
+  config: TenantLandingConfig | null | undefined,
+): NormalizedConfig | null {
+  if (!config) return null;
+  if (!config.hero) return config as NormalizedConfig;
+  return {
+    ...config,
+    hero: {
+      ...config.hero,
+      enabled: config.hero.enabled === true,
+    },
+  };
+}
 
 export default function LandingBuilderPage() {
   const { tenant, refresh } = useTenant();
@@ -30,7 +75,11 @@ export default function LandingBuilderPage() {
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
-  const { setHasUnsavedChanges, setHeroEnabled, reset: resetBuilderStore } = useBuilderStore();
+  const {
+    setHasUnsavedChanges,
+    setHeroEnabled,
+    reset: resetBuilderStore,
+  } = useBuilderStore();
 
   const {
     config: landingConfig,
@@ -43,7 +92,17 @@ export default function LandingBuilderPage() {
     onSaveSuccess: () => refresh(),
   });
 
-  const configHasProBlocks = !isBusiness && hasProBlocks(landingConfig, blockVariantLimit);
+  // [TYPECHECK FIX] Normalize once per config change
+  const normalizedConfig = useMemo(
+    () => normalizeLandingConfig(landingConfig),
+    [landingConfig],
+  );
+
+  const configHasProBlocks =
+    !isBusiness &&
+    normalizedConfig !== null &&
+    hasProBlocks(normalizedConfig, blockVariantLimit);
+
   const heroEnabled = landingConfig?.hero?.enabled === true;
 
   // ── Lock body scroll & mark builder active ──
@@ -90,14 +149,17 @@ export default function LandingBuilderPage() {
   }, [hasUnsavedChanges]);
 
   // ── Handle navigate away (dipanggil dari sidebar/mobile nav) ──
-  const handleNavigateAway = useCallback((href: string) => {
-    if (hasUnsavedChanges) {
-      setPendingRoute(href);
-      setUnsavedModalOpen(true);
-      return;
-    }
-    router.push(href);
-  }, [hasUnsavedChanges, router]);
+  const handleNavigateAway = useCallback(
+    (href: string) => {
+      if (hasUnsavedChanges) {
+        setPendingRoute(href);
+        setUnsavedModalOpen(true);
+        return;
+      }
+      router.push(href);
+    },
+    [hasUnsavedChanges, router],
+  );
 
   // Expose ke store supaya nav bisa panggil
   useEffect(() => {
@@ -112,11 +174,17 @@ export default function LandingBuilderPage() {
     await publishToServer();
   }, [configHasProBlocks, publishToServer]);
 
-  const handleBlockSelect = useCallback((block: string) => {
-    if (!landingConfig) return;
-    const currentHero = landingConfig.hero || {};
-    setLandingConfig({ ...landingConfig, hero: { ...currentHero, block } } as TenantLandingConfig);
-  }, [landingConfig, setLandingConfig]);
+  const handleBlockSelect = useCallback(
+    (block: string) => {
+      if (!landingConfig) return;
+      const currentHero = landingConfig.hero || {};
+      setLandingConfig({
+        ...landingConfig,
+        hero: { ...currentHero, block },
+      } as TenantLandingConfig);
+    },
+    [landingConfig, setLandingConfig],
+  );
 
   const handleEnableHero = useCallback(() => {
     if (!landingConfig) return;

@@ -1,10 +1,36 @@
 'use client';
 
+// [TIDUR-NYENYAK FIX #6] Added "Maintenance" menu item.
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ScrollText, Menu, Moon, Sun, LogOut, type LucideIcon } from 'lucide-react';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  LayoutDashboard,
+  Users,
+  ScrollText,
+  Wrench,
+  Menu,
+  Moon,
+  Sun,
+  LogOut,
+  type LucideIcon,
+} from 'lucide-react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAdminLogout } from '@/hooks/admin/use-admin';
 import { useDarkMode } from '@/hooks/shared/use-dark-mode';
 
@@ -18,6 +44,8 @@ const navigation: NavItem[] = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { title: 'Tenants', href: '/admin/tenants', icon: Users },
   { title: 'Audit Logs', href: '/admin/logs', icon: ScrollText },
+  // [FIX #6] New route
+  { title: 'Maintenance', href: '/admin/maintenance', icon: Wrench },
 ];
 
 export function AdminSidebar() {
@@ -62,12 +90,23 @@ export function AdminSidebar() {
                   <span>Menu</span>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 rounded-lg" side="top" align="start" sideOffset={4}>
+              <DropdownMenuContent
+                className="w-56 rounded-lg"
+                side="top"
+                align="start"
+                sideOffset={4}
+              >
                 <DropdownMenuItem onClick={toggleDarkMode}>
                   {isDark ? (
-                    <><Sun className="mr-3 h-5 w-5" />Light mode</>
+                    <>
+                      <Sun className="mr-3 h-5 w-5" />
+                      Light mode
+                    </>
                   ) : (
-                    <><Moon className="mr-3 h-5 w-5" />Dark mode</>
+                    <>
+                      <Moon className="mr-3 h-5 w-5" />
+                      Dark mode
+                    </>
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

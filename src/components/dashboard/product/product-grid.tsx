@@ -1,62 +1,31 @@
 'use client';
 
 // ==========================================
-// PRODUCTS GRID — Dashboard
+// PRODUCTS GRID — v4 Unified Dashboard
+// v4: Hooks dari use-products (bukan use-digital-products)
 // ==========================================
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/lib/shared/query-keys';
-import { productsApi } from '@/lib/api/products';
-import { getErrorMessage } from '@/lib/api/client';
-import { toast } from 'sonner';
+import { useUpdateProductFile, useDeleteProduct } from '@/hooks/dashboard/use-products';
 import { ProductGridCard, ProductGridCardSkeleton } from './product-grid-card';
 import { ProductPreviewDrawer } from './product-preview-drawer';
 import { ProductDeleteDialog } from './product-delete-dialog';
 import type { Product } from '@/types/product';
-import { useMutation } from '@tanstack/react-query';
 
-// FIX: Hapus dead props isAtLimit & onAtLimit yang dideklarasi tapi tidak pernah dipakai
 interface ProductsGridProps {
   products: Product[];
 }
 
-export function ProductsGrid({
-  products,
-}: ProductsGridProps) {
+export function ProductsGrid({ products }: ProductsGridProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
-  // ── Toggle Active ─────────────────────────────────────────────
-  const { mutate: toggleActive } = useMutation({
-    mutationFn: (product: Product) =>
-      productsApi.update(product.id, { isActive: !product.isActive }),
-    onSuccess: (_, product) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      toast.success(product.isActive ? 'Product deactivated' : 'Product activated');
-    },
-    onError: (err) => {
-      toast.error(getErrorMessage(err));
-    },
-  });
-
-  // ── Delete ────────────────────────────────────────────────────
-  const { mutate: confirmDelete, isPending: isDeleting } = useMutation({
-    mutationFn: (product: Product) => productsApi.delete(product.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      toast.success('Product deleted');
-      setDeleteProduct(null);
-    },
-    onError: (err) => {
-      toast.error(getErrorMessage(err));
-    },
-  });
+  const { updateProduct } = useUpdateProductFile();
+  const { deleteProduct: confirmDeleteMutation, isLoading: isDeleting } = useDeleteProduct();
 
   // ── Handlers ──────────────────────────────────────────────────
   const handleProductClick = (product: Product) => {
@@ -78,19 +47,23 @@ export function ProductsGrid({
   }, []);
 
   const onToggleActive = useCallback((product: Product) => {
-    toggleActive(product);
-  }, [toggleActive]);
+    updateProduct({ id: product.id, data: { isActive: !product.isActive } });
+  }, [updateProduct]);
 
   const handleDelete = useCallback(() => {
     if (!deleteProduct) return;
-    confirmDelete(deleteProduct);
-  }, [deleteProduct, confirmDelete]);
+    confirmDeleteMutation(deleteProduct.id);
+    setDeleteProduct(null);
+  }, [deleteProduct, confirmDeleteMutation]);
 
   // ── Empty State ───────────────────────────────────────────────
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No products yet</p>
+        <p className="text-muted-foreground">Belum ada produk digital.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Klik &quot;Tambah Produk&quot; untuk mulai menjual.
+        </p>
       </div>
     );
   }

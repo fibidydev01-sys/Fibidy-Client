@@ -1,8 +1,9 @@
 'use client';
 
+// [TIDUR-NYENYAK v3 FIX] Removed unused `cn` import (line 5 warning)
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/shared/utils';
 import type { SocialFormData, SocialLinks } from '@/types/tenant';
 
 const SOCIAL_GROUPS: {

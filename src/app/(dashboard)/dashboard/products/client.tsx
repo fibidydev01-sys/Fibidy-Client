@@ -1,102 +1,42 @@
 'use client';
 
 // ══════════════════════════════════════════════════════════════
-// DASHBOARD CLIENT - Products Only
+// DASHBOARD CLIENT — v4 Unified Products
+// v4: Import dari use-products (bukan use-digital-products)
+//     StorageUsageBar dari dashboard/product/ (bukan digital-products/)
 // ══════════════════════════════════════════════════════════════
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { subscriptionApi } from '@/lib/api/subscription';
-import { queryKeys } from '@/lib/shared/query-keys';
-import { useProducts } from '@/hooks/dashboard/use-products';
-import { getErrorMessage } from '@/lib/api/client';
+import { useProductsFlat } from '@/hooks/dashboard/use-products';
+import { StorageUsageBar } from '@/components/dashboard/product/storage-usage-bar';
 import { ProductsGrid, ProductsGridSkeleton } from '@/components/dashboard/product/product-grid';
-import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export function DashboardClient() {
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [upgradeMessage, setUpgradeMessage] = useState('');
-
-  const { data: planInfo } = useQuery({
-    queryKey: queryKeys.subscription.plan(),
-    queryFn: () => subscriptionApi.getMyPlan(),
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 10,
-    // Jangan retry & jangan redirect kalau 401 —
-    // bisa jadi SSR hydration phase tanpa cookie
-    retry: false,
-  });
-
-  const showUpgradeModal = (message: string) => {
-    setUpgradeMessage(message);
-    setUpgradeOpen(true);
-  };
+  const { data: products, isLoading } = useProductsFlat();
 
   return (
-    <div>
-      <UpgradeModal
-        open={upgradeOpen}
-        onOpenChange={setUpgradeOpen}
-        description={upgradeMessage}
-      />
+    <div className="space-y-6">
+      {/* Storage usage bar */}
+      <StorageUsageBar />
 
-      <ProductsTabContent
-        isAtLimit={planInfo?.isAtLimit?.products}
-        onAtLimit={() =>
-          showUpgradeModal(
-            `You've reached the ${planInfo?.limits.maxProducts} product limit. Upgrade to Business for unlimited products.`
-          )
-        }
-      />
-    </div>
-  );
-}
+      {/* Actions */}
+      <div className="flex items-center justify-end">
+        <Button asChild>
+          <Link href="/dashboard/products/new">
+            <Plus className="h-4 w-4 mr-2" />
+            add
+          </Link>
+        </Button>
+      </div>
 
-function ErrorBlock({ message, error }: { message: string; error: string }) {
-  return (
-    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-      <p className="text-destructive font-medium">{message}</p>
-      <p className="text-sm text-muted-foreground mt-1">{error}</p>
-    </div>
-  );
-}
-
-function ProductsTabContent({
-  isAtLimit,
-  onAtLimit,
-}: {
-  isAtLimit?: boolean;
-  onAtLimit?: () => void;
-}) {
-  const { data, isLoading, isError, error } = useProducts({ limit: 100 });
-
-  if (isLoading) return <ProductsGridSkeleton />;
-
-  if (isError) {
-    return (
-      <ErrorBlock
-        message="Failed to load products"
-        error={getErrorMessage(error)}
-      />
-    );
-  }
-
-  return (
-    <>
-      {isAtLimit && onAtLimit && (
-        <div
-          className="mb-4 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/20 px-4 py-3 flex items-center justify-between gap-4 cursor-pointer"
-          onClick={onAtLimit}
-        >
-          <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
-            Batas produk tercapai. Upgrade untuk tambah lebih banyak.
-          </p>
-          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 shrink-0">
-            Upgrade →
-          </span>
-        </div>
+      {/* Product Grid */}
+      {isLoading ? (
+        <ProductsGridSkeleton />
+      ) : (
+        <ProductsGrid products={products ?? []} />
       )}
-      <ProductsGrid products={data?.data ?? []} />
-    </>
+    </div>
   );
 }

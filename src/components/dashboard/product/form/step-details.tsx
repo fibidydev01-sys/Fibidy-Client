@@ -1,6 +1,8 @@
 'use client';
 
-// ─── Step 1: Details ───────────────────────────────────────────────────────
+// ─── Step 0: Details — v3 unified digital ──────────────────────────────────
+// USD only, no showPrice toggle, no WhatsApp order flow
+// v5: Field harga USD & harga coret seragam (min, step, visual)
 
 import { useState } from 'react';
 import {
@@ -35,51 +37,10 @@ import type { ProductFormData } from '@/lib/shared/validations';
 
 interface StepDetailsProps {
   form: UseFormReturn<ProductFormData>;
-  showPrice: boolean;
-  onShowPriceChange: (val: boolean) => void;
-  currency: string;
   categories: string[];
 }
 
-// ─── Currency Input ───────────────────────────────────────────────────────
-function CurrencyInput({
-  currency,
-  placeholder,
-  field,
-  onChange,
-  value,
-}: {
-  currency: string;
-  placeholder: string;
-  field: Record<string, unknown>;
-  onChange: (val: number | undefined) => void;
-  value: number | undefined;
-}) {
-  return (
-    <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground select-none pointer-events-none">
-        {currency}
-      </span>
-      <Input
-        type="number"
-        min="0"
-        placeholder={placeholder}
-        className={cn('h-11 font-medium tabular-nums', currency.length <= 3 ? 'pl-14' : 'pl-16')}
-        {...field}
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-      />
-    </div>
-  );
-}
-
-export function StepDetails({
-  form,
-  showPrice,
-  onShowPriceChange,
-  currency,
-  categories,
-}: StepDetailsProps) {
+export function StepDetails({ form, categories }: StepDetailsProps) {
   const watchCategory = form.watch('category');
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
@@ -110,10 +71,8 @@ export function StepDetails({
   return (
     <div className="space-y-6">
 
-      {/* ── LAYER 1: Aktif/Nonaktif + Category ──────────────────── */}
+      {/* ── LAYER 1: Active toggle + Category ──────────────────── */}
       <div className="flex items-start gap-4">
-
-        {/* Aktif/Nonaktif — kiri */}
         <FormField
           control={form.control}
           name="isActive"
@@ -133,7 +92,6 @@ export function StepDetails({
           )}
         />
 
-        {/* Category — kanan */}
         <FormField
           control={form.control}
           name="category"
@@ -208,12 +166,10 @@ export function StepDetails({
             </FormItem>
           )}
         />
-
       </div>
 
-      {/* ── LAYER 2: Product Name + Description ─────────────────── */}
+      {/* ── LAYER 2: Name + Description ─────────────────────────── */}
       <div className="space-y-4">
-
         <FormField
           control={form.control}
           name="name"
@@ -224,7 +180,7 @@ export function StepDetails({
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="cth. Nasi Goreng Spesial, Headphone Wireless"
+                  placeholder="cth. Ebook Belajar NestJS, Template Notion"
                   className="h-11"
                   {...field}
                 />
@@ -242,107 +198,87 @@ export function StepDetails({
               <FormLabel className="text-sm font-semibold">Deskripsi</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Deskripsikan produk — bahan, ukuran, fitur utama..."
+                  placeholder="Deskripsikan produk — isi, jumlah halaman, fitur utama..."
                   rows={4}
                   className="resize-none"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Deskripsi yang jelas membantu pelanggan membeli dengan lebih yakin.
+                Deskripsi yang jelas membantu buyer membeli dengan lebih yakin.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
       </div>
 
-      {/* ── LAYER 3: Pricing ────────────────────────────────────── */}
+      {/* ── LAYER 3: Price (USD) — unified visual with comparePrice ── */}
       <div className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold">
+                  Harga (USD) <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground select-none pointer-events-none">
+                      $
+                    </span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="9.99"
+                      className="h-11 pl-8 font-medium tabular-nums"
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>Harga dalam USD — buyer bayar via Stripe</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Toggle harga */}
-        <div className="flex items-center justify-between gap-4 rounded-xl border p-4">
-          <div>
-            <Label className="text-sm font-medium">
-              {showPrice ? 'Tampilkan harga' : 'Harga atas permintaan'}
-            </Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {showPrice
-                ? 'Pelanggan melihat harga di listing'
-                : 'Pelanggan akan melihat tombol "Hubungi kami"'}
-            </p>
-          </div>
-          <Switch checked={showPrice} onCheckedChange={onShowPriceChange} />
+          <FormField
+            control={form.control}
+            name="comparePrice"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-semibold">Harga coret</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground select-none pointer-events-none">
+                      $
+                    </span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="19.99"
+                      className="h-11 pl-8 font-medium tabular-nums"
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>
+                  Harga sebelum diskon — ditampilkan dengan coretan
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-
-        {/* Notice harga atas permintaan */}
-        {!showPrice && (
-          <div className="rounded-xl border border-dashed border-orange-400/40 bg-orange-500/5 px-4 py-3.5">
-            <p className="text-sm font-medium text-orange-700 dark:text-orange-400">
-              Harga atas permintaan aktif
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Tidak ada kolom harga yang diperlukan. Pelanggan akan menghubungi Anda langsung.
-            </p>
-          </div>
-        )}
-
-        {/* Kolom harga */}
-        {showPrice && (
-          <div className="grid sm:grid-cols-2 gap-4">
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-semibold">
-                    Harga jual <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <CurrencyInput
-                      currency={currency}
-                      placeholder="0"
-                      field={field}
-                      value={field.value as number | undefined}
-                      onChange={(v) => field.onChange(v ?? 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>Harga yang ditampilkan ke pelanggan</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="comparePrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-semibold">Harga coret</FormLabel>
-                  <FormControl>
-                    <CurrencyInput
-                      currency={currency}
-                      placeholder="0"
-                      field={field}
-                      value={field.value as number | undefined}
-                      onChange={(v) => field.onChange(v)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Harga sebelum diskon — ditampilkan dengan coretan
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-          </div>
-        )}
-
       </div>
-
     </div>
   );
 }

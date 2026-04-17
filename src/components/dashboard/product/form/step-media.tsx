@@ -1,7 +1,11 @@
 'use client';
 
-// ─── Step 2: Media ─────────────────────────────────────────────────────────
-// Satu grid terintegrasi: foto terisi + slot kosong + slot locked (Crown)
+// ─── Step 2: Media — tier-aware ──────────────────────────────────────────
+// Image slots based on actual subscription tier:
+//   FREE:     2 slots
+//   STARTER:  3 slots
+//   BUSINESS: 5 slots
+// Locked slots show upgrade prompt
 
 import { useRef } from 'react';
 import { Crown, GripVertical } from 'lucide-react';
@@ -24,21 +28,22 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { cn } from '@/lib/shared/utils';
 import { useCloudinaryUpload } from '@/hooks/shared/use-cloudinary-upload';
-import { TOTAL_SLOTS, FREE_SLOTS } from '@/lib/constants/shared/constants';
+import { TOTAL_SLOTS } from '@/lib/constants/shared/constants';
 import { FilledSlot, EmptySlot, LockedSlot } from '@/components/dashboard/shared/image-slot';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ProductFormData } from '@/lib/shared/validations';
+import type { SubscriptionTier } from '@/lib/api/subscription';
 
 interface StepMediaProps {
   form: UseFormReturn<ProductFormData>;
   maxImages: number;
-  isBusiness: boolean;
+  /** Subscription tier — determines which slots are locked */
+  tier: SubscriptionTier;
   onUpgrade: () => void;
 }
 
-export function StepMedia({ form, maxImages, isBusiness, onUpgrade }: StepMediaProps) {
+export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) {
   const imagesRef = useRef<string[]>([]);
 
   const { isUploading, openWidget } = useCloudinaryUpload({
@@ -55,6 +60,20 @@ export function StepMedia({ form, maxImages, isBusiness, onUpgrade }: StepMediaP
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
+
+  // Next tier label for locked slot prompt
+  const nextTierLabel =
+    tier === 'FREE' ? 'Starter' :
+      tier === 'STARTER' ? 'Business' :
+        null;
+
+  // Slot description based on tier
+  const slotDescription =
+    tier === 'BUSINESS'
+      ? 'Upload up to 5 photos. The first photo becomes the main thumbnail.'
+      : tier === 'STARTER'
+        ? `Upload up to 3 photos. Slots 4 & 5 are available on Business plan.`
+        : `Upload up to 2 photos. Upgrade for more slots.`;
 
   return (
     <FormField
@@ -87,15 +106,12 @@ export function StepMedia({ form, maxImages, isBusiness, onUpgrade }: StepMediaP
                 {/* Context label */}
                 <div className="rounded-xl border px-4 py-3 text-sm bg-muted/50 border-border text-muted-foreground">
                   <p>
-                    <span className="font-semibold">Foto produk —</span>{' '}
-                    {isBusiness
-                      ? 'Upload hingga 5 foto. Foto pertama jadi thumbnail utama.'
-                      : `Upload hingga ${FREE_SLOTS} foto. Slot 4 & 5 tersedia di Business Plan.`
-                    }
+                    <span className="font-semibold">Product photos —</span>{' '}
+                    {slotDescription}
                   </p>
                 </div>
 
-                {/* Grid 5 slot */}
+                {/* 5 slot grid */}
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={images} strategy={rectSortingStrategy}>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -111,7 +127,8 @@ export function StepMedia({ form, maxImages, isBusiness, onUpgrade }: StepMediaP
                             />
                           );
                         }
-                        if (!isBusiness && i >= FREE_SLOTS) {
+                        // Slots beyond tier limit → locked
+                        if (i >= maxImages) {
                           return <LockedSlot key={`locked-${i}`} onClick={onUpgrade} />;
                         }
                         return (
@@ -129,22 +146,22 @@ export function StepMedia({ form, maxImages, isBusiness, onUpgrade }: StepMediaP
 
                 {/* Footer */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="tabular-nums">{images.length} / {maxImages} foto</span>
+                  <span className="tabular-nums">{images.length} / {maxImages} photos</span>
                   <div className="flex items-center gap-3">
                     {images.length > 1 && (
                       <span className="flex items-center gap-1 opacity-60">
                         <GripVertical className="h-3 w-3" />
-                        Drag untuk urutkan
+                        Drag to reorder
                       </span>
                     )}
-                    {!isBusiness && (
+                    {nextTierLabel && (
                       <button
                         type="button"
                         onClick={onUpgrade}
                         className="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline"
                       >
                         <Crown className="h-3 w-3" />
-                        Upgrade ke Business
+                        Upgrade to {nextTierLabel}
                       </button>
                     )}
                   </div>

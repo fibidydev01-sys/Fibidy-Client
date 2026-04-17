@@ -1,9 +1,16 @@
 // ============================================================================
 // FILE: src/types/tenant.ts
-// PURPOSE: Tenant type definitions
+// PURPOSE: Tenant type definitions — v3 unified
+// v3: paymentMethods + shippingMethods REMOVED from schema
 // ============================================================================
 
 import type { TenantLandingConfig } from './landing';
+
+// ==========================================
+// TENANT ROLE
+// ==========================================
+
+export type TenantRole = 'BUYER' | 'SELLER';
 
 // ==========================================
 // SOCIAL LINKS
@@ -36,68 +43,8 @@ export interface FeatureItem {
 }
 
 // ==========================================
-// PAYMENT SETTINGS
-// ==========================================
-
-export type BankName =
-  | 'BCA' | 'Mandiri' | 'BRI' | 'BNI' | 'BSI' | 'BTN'
-  | 'CIMB Niaga' | 'Permata' | 'Danamon' | 'Maybank ID'
-  | 'Panin' | 'Jenius' | 'SeaBank' | 'Blu by BCA'
-  | 'Bank Jago' | 'Allo Bank' | 'OCBC Indonesia' | 'Other';
-
-export type EWalletProvider =
-  | 'GoPay' | 'OVO' | 'DANA' | 'ShopeePay'
-  | 'LinkAja' | 'QRIS' | 'Other';
-
-export type CourierName =
-  | 'JNE' | 'J&T Express' | 'SiCepat' | 'SPX Express'
-  | 'Ninja Express' | 'Paxel' | 'Lion Parcel' | 'Pos Indonesia'
-  | 'TIKI' | 'Pos Laju' | 'GDEX' | 'City-Link Express'
-  | 'Thailand Post' | 'Flash Express' | 'Kerry Express'
-  | 'SingPost' | 'Lalamove' | 'LBC Express' | '2GO Express'
-  | 'JRS Express' | 'GHN' | 'GHTK' | 'Viettel Post'
-  | 'Pos Brunei' | 'Ninja Van' | 'DHL Express' | 'Other';
-
-export interface BankAccount {
-  id: string;
-  bank: BankName;
-  enabled: boolean;
-}
-
-export interface EWallet {
-  id: string;
-  provider: EWalletProvider;
-  enabled: boolean;
-}
-
-interface CodSettings {
-  enabled: boolean;
-  note?: string;
-}
-
-export interface PaymentMethods {
-  bankAccounts: BankAccount[];
-  eWallets: EWallet[];
-  cod: CodSettings;
-}
-
-// ==========================================
-// SHIPPING SETTINGS
-// ==========================================
-
-export interface Courier {
-  id: string;
-  name: CourierName;
-  enabled: boolean;
-  note?: string;
-}
-
-export interface ShippingMethods {
-  couriers: Courier[];
-}
-
-// ==========================================
 // BASE TENANT (shared between Tenant & PublicTenant)
+// v3: paymentMethods + shippingMethods REMOVED
 // ==========================================
 
 interface BaseTenant {
@@ -105,6 +52,7 @@ interface BaseTenant {
   slug: string;
   name: string;
   email: string;
+  role: TenantRole;
   category: string;
   description?: string;
   whatsapp?: string;
@@ -114,10 +62,8 @@ interface BaseTenant {
   theme?: { primaryColor?: string };
   landingConfig?: TenantLandingConfig;
   socialLinks?: SocialLinks;
-  // Payment & Shipping
+  // Currency (display only)
   currency: string;
-  paymentMethods?: PaymentMethods;
-  shippingMethods?: ShippingMethods;
   // SEO
   metaTitle?: string;
   metaDescription?: string;
@@ -158,6 +104,7 @@ export interface PublicTenant extends BaseTenant {
 
 // ==========================================
 // UPDATE TENANT INPUT
+// v3: paymentMethods + shippingMethods REMOVED
 // ==========================================
 
 export interface UpdateTenantInput {
@@ -170,8 +117,6 @@ export interface UpdateTenantInput {
   theme?: { primaryColor?: string };
   landingConfig?: TenantLandingConfig;
   socialLinks?: SocialLinks;
-  paymentMethods?: PaymentMethods;
-  shippingMethods?: ShippingMethods;
   heroTitle?: string;
   heroSubtitle?: string;
   heroCtaText?: string;
@@ -183,6 +128,17 @@ export interface UpdateTenantInput {
   contactMapUrl?: string;
   contactShowMap?: boolean;
   contactShowForm?: boolean;
+}
+
+// ==========================================
+// UPGRADE TO SELLER INPUT
+// ==========================================
+
+export interface UpgradeToSellerInput {
+  slug: string;
+  name: string;
+  category: string;
+  whatsapp: string;
 }
 
 // ==========================================
@@ -215,14 +171,6 @@ export interface ContactFormData {
   phone: string;
   whatsapp: string;
   address: string;
-}
-
-export interface PembayaranFormData {
-  paymentMethods: PaymentMethods;
-}
-
-export interface PengirimanFormData {
-  shippingMethods: ShippingMethods;
 }
 
 export interface SocialFormData {

@@ -9,10 +9,6 @@ import { tenantsApi } from '@/lib/api/tenants';
 import { toast } from '@/lib/providers/root-provider';
 import type { LoginInput, RegisterInput } from '@/types/auth';
 
-// ==========================================
-// USE LOGIN
-// ==========================================
-
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +30,10 @@ export function useLogin() {
         toast.success('Logged in!', `Welcome back, ${response.tenant.name}`);
 
         const from = searchParams.get('from');
-        router.push(from || '/dashboard/products');
+        const defaultRedirect = response.tenant.role === 'SELLER'
+          ? '/dashboard/products'
+          : '/dashboard/library';
+        router.push(from || defaultRedirect);
 
         return response;
       } catch (err) {
@@ -53,10 +52,6 @@ export function useLogin() {
 
   return { login, isLoading, error, reset };
 }
-
-// ==========================================
-// USE REGISTER
-// ==========================================
 
 export function useRegister() {
   const [isLoading, setIsLoading] = useState(false);
@@ -96,10 +91,6 @@ export function useRegister() {
   return { register, isLoading, error, reset };
 }
 
-// ==========================================
-// USE LOGOUT
-// ==========================================
-
 export function useLogout() {
   const { reset } = useAuthStore();
   const router = useRouter();
@@ -118,11 +109,6 @@ export function useLogout() {
 
   return { logout };
 }
-
-// ==========================================
-// USE CHECK SLUG
-// ✅ Pindah ke tenantsApi → GET /tenants/check-slug/:slug
-// ==========================================
 
 export function useCheckSlug() {
   const [isChecking, setIsChecking] = useState(false);

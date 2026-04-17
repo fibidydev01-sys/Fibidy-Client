@@ -23,27 +23,23 @@ export default function EditProductPage() {
 
     const fetchData = async () => {
       try {
-        // Product dulu — blocking
         const productData = await productsApi.getById(id);
         setProduct(productData);
 
-        // Categories — non-blocking, best effort
         let fetched: string[] = [];
         try {
           fetched = await productsApi.getCategories();
         } catch {
-          // Fallback: ekstrak dari semua produk
           try {
             const all = await productsApi.getAll({ limit: 200 });
             const unique = new Set<string>();
             all.data.forEach((p) => { if (p.category) unique.add(p.category); });
             fetched = Array.from(unique).sort();
           } catch {
-            // Categories tetap kosong, tidak blocking
+            // Categories tetap kosong
           }
         }
 
-        // Pastikan kategori produk ini selalu ada di list
         if (productData.category && !fetched.includes(productData.category)) {
           fetched = [productData.category, ...fetched].sort();
         }

@@ -1,36 +1,43 @@
 'use client';
 
+// ==========================================
+// SETTINGS CLIENT
+// File: src/app/(dashboard)/dashboard/settings/client.tsx
+//
+// CLEANED: removed PembayaranSection + PengirimanSection (ghost features)
+// paymentMethods + shippingMethods removed from Prisma schema in v3.
+//
+// [TIDUR-NYENYAK FIX #5] Added "password" section to Account group.
+// ==========================================
+
 import { useState } from 'react';
 import {
   Home,
   FileText,
   MapPin,
-  CreditCard,
-  Truck,
   Share2,
   ChevronRight,
   Sun,
   Moon,
   Crown,
   LogOut,
-  HelpCircle,
-  ScrollText,
-  Shield,
-  Phone,
   Info,
+  KeyRound,
 } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 import { useDarkMode } from '@/hooks/shared/use-dark-mode';
 import { useLogout } from '@/hooks/auth/use-auth';
 import { useRouter } from 'next/navigation';
+import { useKycStatus, useKycReturnHandler } from '@/hooks/dashboard/use-products';
+import { KycBanner } from '@/components/dashboard/product/kyc-banner';
 
 // ── Section components ────────────────────────────────────────────────────
 import { HeroSection } from '@/components/dashboard/settings/hero';
 import { AboutSection } from '@/components/dashboard/settings/about';
 import { ContactSection } from '@/components/dashboard/settings/contact';
-import { PembayaranSection } from '@/components/dashboard/settings/payment';
-import { PengirimanSection } from '@/components/dashboard/settings/shipping';
 import { SocialSection } from '@/components/dashboard/settings/social';
+// [FIX #5] New section
+import { PasswordSection } from '@/components/dashboard/settings/password';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -38,9 +45,8 @@ type SettingId =
   | 'hero'
   | 'about'
   | 'contact'
-  | 'pembayaran'
-  | 'pengiriman'
-  | 'social';
+  | 'social'
+  | 'password'; // [FIX #5]
 
 interface SettingItem {
   id: SettingId;
@@ -82,20 +88,6 @@ const SETTING_GROUPS = [
   {
     group: 'Channels',
     items: [
-      {
-        id: 'pembayaran' as const,
-        label: 'Payment',
-        description: 'Bank accounts, e-wallets & COD',
-        icon: CreditCard,
-        group: 'Channels',
-      },
-      {
-        id: 'pengiriman' as const,
-        label: 'Shipping',
-        description: 'Courier options for your store',
-        icon: Truck,
-        group: 'Channels',
-      },
       {
         id: 'social' as const,
         label: 'Social',
@@ -155,8 +147,21 @@ function SettingsList({ onSelect }: { onSelect: (id: SettingId) => void }) {
   const { logout } = useLogout();
   const router = useRouter();
 
+  const { data: kyc } = useKycStatus();
+  const { isPolling } = useKycReturnHandler();
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+
+      {/* KYC Stripe Verification Banner */}
+      <KycBanner
+        kycStatus={kyc?.kycStatus}
+        hasStripeAccount={kyc?.hasStripeAccount}
+        errors={kyc?.errors}
+        hasFutureRequirements={kyc?.hasFutureRequirements}
+        futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
+        isPolling={isPolling}
+      />
 
       {/* Toko */}
       <div>
@@ -206,6 +211,13 @@ function SettingsList({ onSelect }: { onSelect: (id: SettingId) => void }) {
             description="Manage your plan and billing"
             onClick={() => router.push('/dashboard/subscription')}
           />
+          {/* [FIX #5] New row */}
+          <RowButton
+            icon={KeyRound}
+            label="Ubah Password"
+            description="Ganti password & logout dari perangkat lain"
+            onClick={() => onSelect('password')}
+          />
           <RowButton
             icon={isDark ? Sun : Moon}
             label={isDark ? 'Light Mode' : 'Dark Mode'}
@@ -230,7 +242,7 @@ function SettingsList({ onSelect }: { onSelect: (id: SettingId) => void }) {
         </div>
       </div>
 
-      {/* Sign Out — card sendiri, destructive */}
+      {/* Sign Out */}
       <div>
         <div className="rounded-xl border border-destructive/20 overflow-hidden bg-card">
           <button
@@ -272,9 +284,9 @@ export function SettingsClient() {
     hero: <HeroSection onBack={handleBack} />,
     about: <AboutSection onBack={handleBack} />,
     contact: <ContactSection onBack={handleBack} />,
-    pembayaran: <PembayaranSection onBack={handleBack} />,
-    pengiriman: <PengirimanSection onBack={handleBack} />,
     social: <SocialSection onBack={handleBack} />,
+    // [FIX #5]
+    password: <PasswordSection onBack={handleBack} />,
   };
 
   return sectionMap[activeId];

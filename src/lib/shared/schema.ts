@@ -2,7 +2,6 @@ import { seoConfig } from '@/lib/constants/shared/seo.config';
 
 // ==========================================
 // INTERNAL HELPERS
-// Tidak diimport dari luar — resolve langsung via seoConfig
 // ==========================================
 
 function getFullUrl(path: string = ''): string {
@@ -106,24 +105,24 @@ export function generateLocalBusinessSchema(tenant: {
     '@id': `${tenantUrl}/#business`,
     name: tenant.name,
     url: tenantUrl,
-    description: tenant.description || `${tenant.name} - Toko online terpercaya`,
+    description: tenant.description || `${tenant.name} - Trusted online store`,
     image: tenant.heroBackgroundImage || tenant.logo || getFullUrl(seoConfig.defaultOgImage),
     logo: tenant.logo || seoConfig.organization.logo,
-    telephone: tenant.phone || `+${tenant.whatsapp}`,
+    telephone: tenant.phone || (tenant.whatsapp ? `+${tenant.whatsapp}` : undefined),
     email: tenant.email || undefined,
     address: tenant.address
       ? { '@type': 'PostalAddress', streetAddress: tenant.address, addressCountry: 'ID' }
       : undefined,
     priceRange: '$$',
-    paymentAccepted: 'Cash, Bank Transfer, E-Wallet',
-    currenciesAccepted: 'IDR',
-    areaServed: { '@type': 'Country', name: 'Indonesia' },
-    contactPoint: {
+    paymentAccepted: 'Credit Card, Stripe',
+    currenciesAccepted: 'USD',
+    areaServed: { '@type': 'Country', name: 'Worldwide' },
+    contactPoint: tenant.whatsapp ? {
       '@type': 'ContactPoint',
       telephone: `+${tenant.whatsapp}`,
       contactType: 'customer service',
-      availableLanguage: ['Indonesian'],
-    },
+      availableLanguage: ['English', 'Indonesian'],
+    } : undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
   };
 }
@@ -136,8 +135,10 @@ export function generateProductSchema(
     description?: string | null;
     price: number;
     comparePrice?: number | null;
+    currency?: string | null;
     images?: string[];
     category?: string | null;
+    fileKey?: string | null;
   },
   tenant: {
     name: string;
@@ -149,6 +150,10 @@ export function generateProductSchema(
   const productUrl = getTenantUrl(tenant.slug, productPath);
   const tenantUrl = getTenantUrl(tenant.slug);
 
+  // Resolve currency: digital → USD, custom → product.currency or USD fallback
+  const isDigital = !!product.fileKey;
+  const priceCurrency = product.currency ?? (isDigital ? 'USD' : 'USD');
+
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
@@ -158,7 +163,7 @@ export function generateProductSchema(
     '@type': 'Product',
     '@id': `${productUrl}/#product`,
     name: product.name,
-    description: product.description || `${product.name} dari ${tenant.name}`,
+    description: product.description || `${product.name} from ${tenant.name}`,
     url: productUrl,
     image: product.images?.[0] || getFullUrl(seoConfig.defaultOgImage),
     category: product.category || undefined,
@@ -167,7 +172,7 @@ export function generateProductSchema(
     offers: {
       '@type': 'Offer',
       url: productUrl,
-      priceCurrency: 'IDR',
+      priceCurrency,
       price: product.price,
       priceValidUntil,
       availability: 'https://schema.org/InStock',
@@ -207,7 +212,7 @@ export function generateProductListSchema(
     images?: string[];
   }>,
   tenant: { name: string; slug: string },
-  listName: string = 'Daftar Produk'
+  listName: string = 'Product List'
 ) {
   return {
     '@context': 'https://schema.org',
@@ -226,4 +231,3 @@ export function generateProductListSchema(
     }),
   };
 }
-

@@ -1,6 +1,11 @@
 // ==========================================
 // ADMIN API SERVICE
 // File: src/lib/api/admin.ts
+//
+// CLEANED: removed getPendingPayments + approveSubscription
+// (backend endpoints deleted in Batch 1)
+//
+// [TIDUR-NYENYAK FIX #6] Added cleanupLogs() for admin maintenance.
 // ==========================================
 
 import { adminApiClient } from './admin-client';
@@ -9,13 +14,35 @@ import type {
   AdminStats,
   AdminTenant,
   AdminTenantDetail,
-  AdminPendingPayment,
   AdminLog,
   AdminPaginatedResponse,
   TenantQueryParams,
 } from '@/types/admin';
 
 const BASE = '/admin';
+
+// ==========================================
+// [TIDUR-NYENYAK FIX #6] MAINTENANCE TYPES
+// ==========================================
+
+export interface CleanupLogsInput {
+  /** Delete DownloadLog entries older than this many days. Default: 90 */
+  downloadLogOlderThanDays?: number;
+  /** Delete WebhookEvent entries older than this many days. Default: 90 */
+  webhookEventOlderThanDays?: number;
+}
+
+export interface CleanupLogsResponse {
+  message: string;
+  deleted: {
+    downloadLogs: number;
+    webhookEvents: number;
+  };
+  thresholds: {
+    downloadLogOlderThanDays: number;
+    webhookEventOlderThanDays: number;
+  };
+}
 
 export const adminApi = {
   // ============================================================
@@ -62,24 +89,6 @@ export const adminApi = {
     adminApiClient.patch(`${BASE}/tenants/${id}/unsuspend`),
 
   // ============================================================
-  // SUBSCRIPTIONS
-  // ============================================================
-
-  /**
-   * Lihat semua payment yang masih pending
-   * GET /api/admin/subscriptions/pending
-   */
-  getPendingPayments: (): Promise<AdminPendingPayment[]> =>
-    adminApiClient.get(`${BASE}/subscriptions/pending`),
-
-  /**
-   * Admin approve → BUSINESS aktif, payment jadi paid
-   * PATCH /api/admin/tenants/:id/approve
-   */
-  approveSubscription: (tenantId: string): Promise<{ message: string }> =>
-    adminApiClient.patch(`${BASE}/tenants/${tenantId}/approve`),
-
-  // ============================================================
   // ADMIN LOGS
   // ============================================================
 
@@ -91,4 +100,19 @@ export const adminApi = {
     to?: string;
   } = {}): Promise<AdminPaginatedResponse<AdminLog>> =>
     adminApiClient.get(`${BASE}/logs`, { params }),
+
+  // ============================================================
+  // [TIDUR-NYENYAK FIX #6] MAINTENANCE
+  // ============================================================
+
+  /**
+   * POST /admin/maintenance/cleanup-logs
+   *
+   * Deletes old DownloadLog and WebhookEvent rows to prevent
+   * DB bloat. Safe to run manually or via cron.
+   *
+   * Returns counts of deleted rows.
+   */
+  cleanupLogs: (input: CleanupLogsInput = {}): Promise<CleanupLogsResponse> =>
+    adminApiClient.post(`${BASE}/maintenance/cleanup-logs`, input),
 };

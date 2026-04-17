@@ -1,0 +1,221 @@
+// src/app/checkout/success/client.tsx
+'use client';
+
+// ==========================================
+// CHECKOUT SUCCESS — POLLING FLOW
+//
+// Problem:
+//   Stripe redirect buyer ke sini SEBELUM webhook sempat masuk.
+//   Kalau buyer langsung buka Library → kosong.
+//
+// Solution:
+//   Poll GET /checkout/verify?sessionId=xxx setiap 2 detik.
+//   Tampilkan loading sampai purchase record ada di DB.
+//   Timeout 60 detik → fallback message.
+//
+// State machine:
+//   VERIFYING → COMPLETED | TIMEOUT | NO_SESSION
+//
+// [TIDUR-NYENYAK LINT FIX]
+// `useRef<number>(Date.now())` broke react-hooks/purity because
+// Date.now() is an impure function called during render.
+// Fix: init ref to null, set actual timestamp inside effect.
+// ==========================================
+
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { checkoutApi } from '@/lib/api/checkout';
+import type { VerifySessionResponse } from '@/lib/api/checkout';
+import { queryKeys } from '@/lib/shared/query-keys';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, BookOpen, Info, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 60000;
+
+type PageState = 'verifying' | 'completed' | 'timeout' | 'no_session';
+
+export function CheckoutSuccessClient() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('session_id');
+  const queryClient = useQueryClient();
+
+  const [state, setState] = useState<PageState>(
+    sessionId ? 'verifying' : 'no_session',
+  );
+  const [purchase, setPurchase] = useState<
+    VerifySessionResponse['purchase'] | null
+  >(null);
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // [LINT FIX] Don't call Date.now() during render — init inside effect
+  const startTimeRef = useRef<number | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  // Poll verify endpoint
+  useEffect(() => {
+    if (!sessionId) return;
+
+    // [LINT FIX] Set start time here, inside the effect (effects can be impure)
+    startTimeRef.current = Date.now();
+
+    const poll = async () => {
+      // Timeout check
+      const startTime = startTimeRef.current ?? Date.now();
+      if (Date.now() - startTime > POLL_TIMEOUT_MS) {
+        stopPolling();
+        setState('timeout');
+        queryClient.invalidateQueries({ queryKey: queryKeys.library.all });
+        return;
+      }
+
+      try {
+        const result = await checkoutApi.verifySession(sessionId);
+
+        if (result.status === 'completed') {
+          stopPolling();
+          setPurchase(result.purchase ?? null);
+          setState('completed');
+          queryClient.invalidateQueries({ queryKey: queryKeys.library.all });
+        }
+        // status === 'pending' → continue polling
+      } catch {
+        // Network error / 401 → continue polling, jangan langsung gagal
+      }
+    };
+
+    // Immediate first check
+    poll();
+
+    // Then poll setiap 2 detik
+    intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
+
+    return stopPolling;
+  }, [sessionId, queryClient, stopPolling]);
+
+  // ── VERIFYING — waiting for webhook ─────────────────────────
+  if (state === 'verifying') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Memproses Pembayaran...</h1>
+            <p className="text-muted-foreground">
+              Pembayaran sedang dikonfirmasi. Ini biasanya hanya butuh beberapa
+              detik.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── COMPLETED — purchase confirmed ──────────────────────────
+  if (state === 'completed') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Pembelian Berhasil!</h1>
+            {purchase ? (
+              <p className="text-muted-foreground">
+                <strong>{purchase.productName}</strong> sudah tersedia di
+                Library kamu.
+              </p>
+            ) : (
+              <p className="text-muted-foreground">
+                Produk sudah tersedia di Library kamu.
+              </p>
+            )}
+          </div>
+
+          {purchase && (
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-sm font-medium">
+                ${purchase.paidAmount.toFixed(2)} {purchase.currency}
+              </p>
+            </div>
+          )}
+
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-sm text-muted-foreground">
+              <Info className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+              All sales are final. Digital products cannot be returned once
+              purchased.
+            </p>
+          </div>
+
+          <Button asChild size="lg" className="w-full">
+            <Link href="/dashboard/library">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Buka Library
+            </Link>
+          </Button>
+
+          <Button variant="ghost" asChild className="w-full">
+            <Link href="/discover">Jelajahi Produk Lainnya</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── TIMEOUT / NO_SESSION — fallback ─────────────────────────
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="flex justify-center">
+          <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Pembayaran Diterima!</h1>
+          <p className="text-muted-foreground">
+            Produk akan muncul di Library kamu dalam beberapa saat. Silakan
+            cek Library.
+          </p>
+        </div>
+
+        <div className="bg-muted/50 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground">
+            <Info className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
+            All sales are final. Digital products cannot be returned once
+            purchased.
+          </p>
+        </div>
+
+        <Button asChild size="lg" className="w-full">
+          <Link href="/dashboard/library">
+            <BookOpen className="mr-2 h-4 w-4" />
+            Buka Library
+          </Link>
+        </Button>
+
+        <Button variant="ghost" asChild className="w-full">
+          <Link href="/discover">Jelajahi Produk Lainnya</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}

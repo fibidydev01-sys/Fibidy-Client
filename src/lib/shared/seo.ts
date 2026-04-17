@@ -60,7 +60,7 @@ export function createTenantMetadata({
   const description = pageDescription
     || tenant.metaDescription
     || tenant.description
-    || `${tenant.name} - Belanja mudah dan pesan langsung via WhatsApp.`;
+    || `${tenant.name} - Shop online and order directly.`;
 
   const canonicalUrl = getTenantUrl(tenant.slug, path);
   const imageUrl = ogImage || tenant.heroBackgroundImage || tenant.logo;
@@ -96,7 +96,7 @@ export function createTenantMetadata({
       description: truncateDescription(description),
       images: imageUrl ? [imageUrl.startsWith('http') ? imageUrl : getFullUrl(imageUrl)] : undefined,
     },
-    keywords: [tenant.name, 'toko online', 'belanja online', 'whatsapp order', 'fibidy'],
+    keywords: [tenant.name, 'online store', 'shop online', 'digital products', 'fibidy'],
   };
 }
 
@@ -110,8 +110,10 @@ export function createProductMetadata({
     slug?: string | null;
     description?: string | null;
     price: number;
+    currency?: string | null;
     images?: string[];
     category?: string | null;
+    fileKey?: string | null;
   };
   tenant: {
     name: string;
@@ -120,14 +122,23 @@ export function createProductMetadata({
 }): Metadata {
   const title = `${product.name} - ${tenant.name} | Fibidy`;
 
-  const priceFormatted = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(product.price);
+  // Resolve currency from product:
+  // - Digital (fileKey != null) → USD
+  // - Custom/service → product.currency or fallback USD
+  const isDigital = !!product.fileKey;
+  const currency = product.currency ?? (isDigital ? 'USD' : 'USD');
+
+  const priceFormatted = new Intl.NumberFormat(
+    currency === 'USD' ? 'en-US' : 'id-ID',
+    {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: currency === 'USD' ? 2 : 0,
+    }
+  ).format(product.price);
 
   const description = product.description
-    || `Beli ${product.name} di ${tenant.name} ${priceFormatted}. Order langsung via WhatsApp!`;
+    || `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;
 
   const productPath = product.slug ? `/p/${product.slug}` : `/product/${product.id}`;
   const canonicalUrl = getTenantUrl(tenant.slug, productPath);
@@ -157,7 +168,7 @@ export function createProductMetadata({
       description: truncateDescription(description),
       images: ogImage ? [ogImage] : undefined,
     },
-    keywords: [product.name, tenant.name, product.category || '', 'beli online', 'whatsapp order'].filter(Boolean),
+    keywords: [product.name, tenant.name, product.category || '', 'buy online', 'digital download'].filter(Boolean),
   };
 }
 

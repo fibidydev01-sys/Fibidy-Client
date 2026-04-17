@@ -2,10 +2,15 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthLayout } from '@/components/layout/auth/auth-layout';
 import { LoginForm } from '@/components/auth/login/login';
+import { LoginPageBanner } from './banner';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // ==========================================
 // LOGIN PAGE
+//
+// [TIDUR-NYENYAK FIX #5] Added <LoginPageBanner />
+// Reads ?reason=password_changed|session_expired and shows
+// user-friendly explanation above login form.
 // ==========================================
 
 export const metadata: Metadata = {
@@ -46,7 +51,11 @@ export default function LoginPage() {
       image="/auth-picture/auth-login.jpg"
       imageAlt="Login illustration"
     >
-      {/* Suspense diperlukan: LoginForm menggunakan useSearchParams via useLogin hook */}
+      {/* [FIX #5] Banner reads ?reason= param */}
+      <Suspense fallback={null}>
+        <LoginPageBanner />
+      </Suspense>
+
       <Suspense fallback={<LoginFormSkeleton />}>
         <LoginForm />
       </Suspense>

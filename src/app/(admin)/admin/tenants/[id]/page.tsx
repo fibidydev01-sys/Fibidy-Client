@@ -3,6 +3,13 @@
 // ==========================================
 // ADMIN TENANT DETAIL PAGE
 // File: src/app/(admin)/admin/tenants/[id]/page.tsx
+//
+// CLEANED: removed approve subscription flow
+// (backend endpoint deleted in Batch 1)
+// Removed: handleApprove, hasPendingPayment, isApproving,
+//          approve AlertDialog, adminApi import, CheckCircle icon
+//
+// [TIDUR-NYENYAK v3 FIX] Removed unused `toast` import (line 41 warning)
 // ==========================================
 
 import { useState } from 'react';
@@ -13,7 +20,6 @@ import {
   ShieldOff,
   ShieldCheck,
   Loader2,
-  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,9 +40,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useAdminTenantDetail, useSuspendTenant } from '@/hooks/admin/use-admin';
-import { adminApi } from '@/lib/api/admin';
-import { toast } from '@/lib/providers/root-provider';
-import { getErrorMessage } from '@/lib/api/client';
+// [v3 FIX] Removed unused import:
+// import { toast } from '@/lib/providers/root-provider';
 
 // ==========================================
 // INFO ROW
@@ -70,7 +75,6 @@ export default function AdminTenantDetailPage() {
   const { suspend, unsuspend, isLoading: isActing } = useSuspendTenant();
 
   const [suspendReason, setSuspendReason] = useState('');
-  const [isApproving, setIsApproving] = useState(false);
 
   const handleSuspend = async () => {
     if (!suspendReason.trim()) return;
@@ -82,19 +86,6 @@ export default function AdminTenantDetailPage() {
   const handleUnsuspend = async () => {
     await unsuspend(id);
     refetch();
-  };
-
-  const handleApprove = async () => {
-    setIsApproving(true);
-    try {
-      const result = await adminApi.approveSubscription(id);
-      toast.success(result.message || 'Subscription approved!');
-      refetch();
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    } finally {
-      setIsApproving(false);
-    }
   };
 
   if (isLoading) {
@@ -118,9 +109,6 @@ export default function AdminTenantDetailPage() {
   }
 
   const isSuspended = tenant.status === 'SUSPENDED';
-  const hasPendingPayment = tenant.subscription?.payments?.some(
-    (p) => p.paymentStatus === 'pending',
-  );
 
   return (
     <div className="space-y-6">
@@ -151,38 +139,6 @@ export default function AdminTenantDetailPage() {
               Lihat Toko
             </a>
           </Button>
-
-          {/* Approve Button — muncul kalau ada pending payment */}
-          {hasPendingPayment && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="sm" disabled={isApproving}>
-                  {isApproving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                  )}
-                  Approve
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Approve Subscription?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tenant <strong>{tenant.name}</strong> akan di-upgrade ke
-                    Business Plan selama 30 hari. Payment pending akan otomatis
-                    jadi Paid.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleApprove}>
-                    Ya, Approve
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
 
           {isSuspended ? (
             <AlertDialog>

@@ -1,6 +1,7 @@
 import { api } from './client';
 import type { Tenant } from '@/types/tenant';
-import type { LoginInput, RegisterInput, } from '@/types/auth';
+import type { LoginInput, RegisterInput, RegisterBuyerInput } from '@/types/auth';
+
 // ==========================================
 // AUTH RESPONSE TYPES
 // ==========================================
@@ -26,6 +27,13 @@ export const authApi = {
 
   register: (data: RegisterInput): Promise<AuthResponse> => {
     return api.post<AuthResponse>('/auth/register', data);
+  },
+
+  // ── TAMBAHAN: register buyer (dialog di /discover) ────────────
+  // Hanya email + password. Role BUYER auto-set di server.
+  // Cookie fibidy_auth di-set sama seperti register seller.
+  registerBuyer: (data: RegisterBuyerInput): Promise<AuthResponse> => {
+    return api.post<AuthResponse>('/auth/register-buyer', data);
   },
 
   logout: (): Promise<{ message: string }> => {
