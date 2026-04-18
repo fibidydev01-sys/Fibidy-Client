@@ -114,7 +114,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
   const currentYear = new Date().getFullYear();
 
   const whatsappLink = tenant.whatsapp
-    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Halo ${tenant.name}, saya tertarik dengan produk Anda.`)}`
+    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Hi ${tenant.name}, I'm interested in your products.`)}`
     : null;
 
   const hasSocial = SOCIAL_CONFIG.some(
@@ -133,15 +133,15 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
 
         <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
-          {/* KIRI — Hubungi Langsung */}
+          {/* LEFT — Contact Directly */}
           {whatsappLink && (
             <div className="border-2 border-foreground rounded-2xl p-8 md:p-10 flex flex-col gap-6">
               <div className="space-y-2">
                 <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
-                  Hubungi Langsung
+                  Contact Directly
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Respon cepat via WhatsApp. Kami siap membantu pertanyaan Anda.
+                  Quick response via WhatsApp. We&apos;re ready to help with your questions.
                 </p>
               </div>
               <a
@@ -160,7 +160,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
             </div>
           )}
 
-          {/* KANAN — Social Links */}
+          {/* RIGHT — Social Links */}
           {hasSocial && (
             <div className="border border-border rounded-2xl p-6 md:p-8">
               <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-4">

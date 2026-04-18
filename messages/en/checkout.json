@@ -1,0 +1,34 @@
+{
+  "checkout": {
+    "metadata": {
+      "successTitle": "Purchase Successful — Fibidy",
+      "successDescription": "Your digital product is now available in your Library",
+      "cancelTitle": "Purchase Canceled — Fibidy"
+    },
+    "success": {
+      "verifying": {
+        "title": "Processing Payment...",
+        "body": "Your payment is being confirmed. This usually takes just a few seconds."
+      },
+      "completed": {
+        "title": "Purchase Successful!",
+        "productBodyWithName": "<strong>{name}</strong> is now available in your Library.",
+        "productBodyFallback": "Your product is now available in your Library."
+      },
+      "timeout": {
+        "title": "Payment Received!",
+        "body": "Your product will appear in your Library shortly. Please check your Library."
+      },
+      "policyNotice": "All sales are final. Digital products cannot be returned once purchased.",
+      "openLibrary": "Open Library",
+      "browseOthers": "Browse Other Products"
+    },
+    "cancel": {
+      "title": "Purchase Canceled",
+      "body": "No payment was processed. You can come back anytime.",
+      "backToProduct": "Back to Product",
+      "browseProducts": "Browse Products",
+      "browseOthers": "Browse Other Products"
+    }
+  }
+}

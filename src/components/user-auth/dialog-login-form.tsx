@@ -3,14 +3,14 @@
 // ==========================================
 // DIALOG LOGIN FORM
 //
-// Form login di dalam AuthDialog (tab "Masuk").
-// Setelah login:
-//   1. Set tenant ke store
-//   2. Tutup dialog
-//   3. User langsung bisa klik "Beli"
+// Login form inside AuthDialog (tab "Sign in").
+// After login:
+//   1. Set tenant in store
+//   2. Close dialog
+//   3. User can immediately click "Buy"
 //
-// Tidak ada redirect — user tetap di halaman produk.
-// Pattern sama dengan LoginForm di /login, tapi tanpa redirect.
+// No redirect — user stays on the product page.
+// Same pattern as LoginForm in /login, but without redirect.
 // ==========================================
 
 import { useState } from 'react';
@@ -36,8 +36,8 @@ import { getErrorMessage } from '@/lib/api/client';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  email: z.string().email('Format email tidak valid'),
-  password: z.string().min(1, 'Password tidak boleh kosong'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password cannot be empty'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -64,9 +64,9 @@ export function DialogLoginForm() {
       setTenant(response.tenant);
       setChecked(true);
 
-      toast.success('Login berhasil!');
+      toast.success('Signed in successfully!');
 
-      // Tutup dialog — tetap di halaman produk
+      // Close dialog — stay on product page
       close();
     } catch (err) {
       const message = getErrorMessage(err);
@@ -94,7 +94,7 @@ export function DialogLoginForm() {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="email@contoh.com"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   disabled={isLoading}
                   {...field}
@@ -144,10 +144,10 @@ export function DialogLoginForm() {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Masuk...
+              Signing in...
             </>
           ) : (
-            'Masuk'
+            'Sign in'
           )}
         </Button>
       </form>

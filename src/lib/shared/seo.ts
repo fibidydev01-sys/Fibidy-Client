@@ -2,6 +2,17 @@ import { Metadata } from 'next';
 import { seoConfig } from '@/lib/constants/shared/seo.config';
 
 // ==========================================
+// METADATA GENERATORS
+//
+// [I18N MIGRATION] Phase 1 = English only.
+// - All fallback strings in English
+// - locale pulled from seoConfig.locale ('en_US')
+// - Breadcrumb "Home" label remains literal EN — once Layer 4 wires
+//   up page-level translations, consumers of this helper can pass
+//   a pre-translated label via generateBreadcrumbs caller side if needed
+// ==========================================
+
+// ==========================================
 // URL UTILITIES
 // ==========================================
 
@@ -57,10 +68,11 @@ export function createTenantMetadata({
     ? `${pageTitle} | ${tenant.name}`
     : tenant.metaTitle || `${tenant.name} | Fibidy`;
 
-  const description = pageDescription
-    || tenant.metaDescription
-    || tenant.description
-    || `${tenant.name} - Shop online and order directly.`;
+  const description =
+    pageDescription ||
+    tenant.metaDescription ||
+    tenant.description ||
+    `${tenant.name} — Shop online and order directly.`;
 
   const canonicalUrl = getTenantUrl(tenant.slug, path);
   const imageUrl = ogImage || tenant.heroBackgroundImage || tenant.logo;
@@ -81,20 +93,24 @@ export function createTenantMetadata({
       siteName: tenant.name,
       locale: seoConfig.locale,
       type: 'website',
-      images: imageUrl ? [
-        {
-          url: imageUrl.startsWith('http') ? imageUrl : getFullUrl(imageUrl),
-          width: 1200,
-          height: 630,
-          alt: tenant.name,
-        },
-      ] : undefined,
+      images: imageUrl
+        ? [
+          {
+            url: imageUrl.startsWith('http') ? imageUrl : getFullUrl(imageUrl),
+            width: 1200,
+            height: 630,
+            alt: tenant.name,
+          },
+        ]
+        : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: truncateDescription(description),
-      images: imageUrl ? [imageUrl.startsWith('http') ? imageUrl : getFullUrl(imageUrl)] : undefined,
+      images: imageUrl
+        ? [imageUrl.startsWith('http') ? imageUrl : getFullUrl(imageUrl)]
+        : undefined,
     },
     keywords: [tenant.name, 'online store', 'shop online', 'digital products', 'fibidy'],
   };
@@ -120,7 +136,7 @@ export function createProductMetadata({
     slug: string;
   };
 }): Metadata {
-  const title = `${product.name} - ${tenant.name} | Fibidy`;
+  const title = `${product.name} — ${tenant.name} | Fibidy`;
 
   // Resolve currency from product:
   // - Digital (fileKey != null) → USD
@@ -137,8 +153,8 @@ export function createProductMetadata({
     }
   ).format(product.price);
 
-  const description = product.description
-    || `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;
+  const description =
+    product.description || `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;
 
   const productPath = product.slug ? `/p/${product.slug}` : `/product/${product.id}`;
   const canonicalUrl = getTenantUrl(tenant.slug, productPath);
@@ -160,7 +176,9 @@ export function createProductMetadata({
       siteName: tenant.name,
       locale: seoConfig.locale,
       type: 'website',
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: product.name }] : undefined,
+      images: ogImage
+        ? [{ url: ogImage, width: 1200, height: 630, alt: product.name }]
+        : undefined,
     },
     twitter: {
       card: 'summary_large_image',
@@ -168,7 +186,13 @@ export function createProductMetadata({
       description: truncateDescription(description),
       images: ogImage ? [ogImage] : undefined,
     },
-    keywords: [product.name, tenant.name, product.category || '', 'buy online', 'digital download'].filter(Boolean),
+    keywords: [
+      product.name,
+      tenant.name,
+      product.category || '',
+      'buy online',
+      'digital download',
+    ].filter(Boolean),
   };
 }
 
@@ -181,34 +205,48 @@ export interface BreadcrumbItem {
   url: string;
 }
 
-export function generateTenantBreadcrumbs(tenant: {
-  name: string;
-  slug: string;
-}): BreadcrumbItem[] {
+/**
+ * Build the tenant breadcrumb chain.
+ *
+ * `homeLabel` defaults to 'Home' (EN). Server Components that already
+ * have a `t` function can pass `t('common.breadcrumb.home')` to override,
+ * but Phase 1 consumers can simply use the default.
+ */
+export function generateTenantBreadcrumbs(
+  tenant: { name: string; slug: string },
+  homeLabel: string = 'Home'
+): BreadcrumbItem[] {
   return [
-    { name: 'Home', url: getFullUrl('/') },
+    { name: homeLabel, url: getFullUrl('/') },
     { name: tenant.name, url: getTenantUrl(tenant.slug) },
   ];
 }
 
 export function generateProductBreadcrumbs(
   tenant: { name: string; slug: string },
-  product: { name: string; id: string; slug?: string | null; category?: string | null }
+  product: { name: string; id: string; slug?: string | null; category?: string | null },
+  homeLabel: string = 'Home'
 ): BreadcrumbItem[] {
   const breadcrumbs: BreadcrumbItem[] = [
-    { name: 'Home', url: getFullUrl('/') },
+    { name: homeLabel, url: getFullUrl('/') },
     { name: tenant.name, url: getTenantUrl(tenant.slug) },
   ];
 
   if (product.category) {
     breadcrumbs.push({
       name: product.category,
-      url: getTenantUrl(tenant.slug, `/products?category=${encodeURIComponent(product.category)}`),
+      url: getTenantUrl(
+        tenant.slug,
+        `/products?category=${encodeURIComponent(product.category)}`
+      ),
     });
   }
 
   const productPath = product.slug ? `/p/${product.slug}` : `/product/${product.id}`;
-  breadcrumbs.push({ name: product.name, url: getTenantUrl(tenant.slug, productPath) });
+  breadcrumbs.push({
+    name: product.name,
+    url: getTenantUrl(tenant.slug, productPath),
+  });
 
   return breadcrumbs;
 }

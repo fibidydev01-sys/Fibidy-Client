@@ -33,7 +33,7 @@ export function DiscoverFilters({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Cari produk digital..."
+          placeholder="Search digital products..."
           className="pl-10 pr-8"
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
@@ -55,7 +55,7 @@ export function DiscoverFilters({
           className="rounded-full"
           onClick={() => onFileTypeChange('')}
         >
-          Semua
+          All
         </Button>
         {FILE_TYPES.map((type) => (
           <Button

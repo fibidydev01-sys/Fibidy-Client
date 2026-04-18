@@ -1,6 +1,14 @@
 import { seoConfig } from '@/lib/constants/shared/seo.config';
 
 // ==========================================
+// SCHEMA.ORG JSON-LD GENERATORS
+//
+// [I18N MIGRATION] Phase 1 = English only.
+// All fallback strings are in English.
+// `availableLanguage` and `inLanguage` pull from seoConfig (single source of truth).
+// ==========================================
+
+// ==========================================
 // INTERNAL HELPERS
 // ==========================================
 
@@ -105,7 +113,7 @@ export function generateLocalBusinessSchema(tenant: {
     '@id': `${tenantUrl}/#business`,
     name: tenant.name,
     url: tenantUrl,
-    description: tenant.description || `${tenant.name} - Trusted online store`,
+    description: tenant.description || `${tenant.name} — Trusted online store`,
     image: tenant.heroBackgroundImage || tenant.logo || getFullUrl(seoConfig.defaultOgImage),
     logo: tenant.logo || seoConfig.organization.logo,
     telephone: tenant.phone || (tenant.whatsapp ? `+${tenant.whatsapp}` : undefined),
@@ -117,12 +125,14 @@ export function generateLocalBusinessSchema(tenant: {
     paymentAccepted: 'Credit Card, Stripe',
     currenciesAccepted: 'USD',
     areaServed: { '@type': 'Country', name: 'Worldwide' },
-    contactPoint: tenant.whatsapp ? {
-      '@type': 'ContactPoint',
-      telephone: `+${tenant.whatsapp}`,
-      contactType: 'customer service',
-      availableLanguage: ['English', 'Indonesian'],
-    } : undefined,
+    contactPoint: tenant.whatsapp
+      ? {
+        '@type': 'ContactPoint',
+        telephone: `+${tenant.whatsapp}`,
+        contactType: 'customer service',
+        availableLanguage: seoConfig.organization.contactPoint.availableLanguage,
+      }
+      : undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
   };
 }

@@ -1,18 +1,21 @@
 // ==========================================
-// KONFIGURASI SITE
+// SITE CONFIGURATION
+//
+// [I18N MIGRATION] Phase 1 = English only.
 // ==========================================
 
 export const siteConfig = {
   name: 'Fibidy',
-  description: 'Platform situs online untuk UMKM Indonesia. Bikin situs sendiri dalam hitungan menit, tanpa ngoding.',
-  tagline: 'Rumah digital untuk usahamu.',
+  description:
+    'Sell digital products with your own online store. Launch in minutes, get paid via Stripe, no commission.',
+  tagline: 'Your digital storefront, ready in minutes.',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://fibidy.com',
   ogImage: '/og-image.png',
 
-  // Kontak
+  // Contact
   email: 'admin@fibidy.com',
 
-  // Media sosial
+  // Social
   links: {
     instagram: 'https://instagram.com/fibidy_com',
     tiktok: 'https://tiktok.com/@fibidy.com',
@@ -21,14 +24,14 @@ export const siteConfig = {
 
   // SEO
   keywords: [
-    'situs online',
-    'toko online umkm',
-    'jualan online',
-    'platform umkm indonesia',
-    'bikin situs sendiri',
-    'indonesia',
+    'sell digital products',
+    'online store',
+    'digital downloads',
+    'creator platform',
+    'stripe storefront',
+    'no-code store',
   ],
 
-  // Pembuat
+  // Creator
   creator: 'Bayu Surya Pranata',
 };

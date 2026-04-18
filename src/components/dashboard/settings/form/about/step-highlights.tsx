@@ -159,7 +159,7 @@ export function StepHighlights({
             className="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline"
           >
             <Crown className="h-3 w-3" />
-            Upgrade ke Business
+            Upgrade to Business
           </button>
         )}
       </div>

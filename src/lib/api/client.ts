@@ -11,6 +11,14 @@ import type { ApiError } from '@/types/api';
 // [TIDUR-NYENYAK LINT v2] Removed 13 unused destructure warnings
 // by inlining the config spread instead of destructuring then
 // rebuilding. Same behavior, cleaner lint output.
+//
+// [I18N MIGRATION] Error messages are emitted as translation KEYS
+// (e.g. 'error.network.timeout'), not user-facing strings. The
+// UI layer passes them through `t()` before rendering.
+// getErrorMessage() accepts an optional `t` function — when provided,
+// keys are translated; when omitted (non-UI caller), the raw key is
+// returned. This keeps the API client framework-agnostic while
+// staying i18n-aware.
 // ==========================================
 
 export interface RequestConfig extends RequestInit {
@@ -33,8 +41,6 @@ function toRequestInit(
   config: RequestConfig | undefined,
 ): Omit<RequestConfig, 'params' | 'timeout' | 'skipAuthRedirect' | 'skipCache' | 'headers'> {
   if (!config) return {};
-  // Explicit peel of non-fetch fields. Keep everything else.
-  // NOTE: `headers` is peeled because we reconstruct it separately.
   const {
     params: _params,
     timeout: _timeout,
@@ -43,7 +49,6 @@ function toRequestInit(
     headers: _headers,
     ...rest
   } = config;
-  // Silence "declared but never read" for the peeled names
   void _params;
   void _timeout;
   void _skipAuthRedirect;
@@ -119,7 +124,9 @@ class ApiClient {
       } else {
         error = {
           statusCode: response.status,
-          message: response.statusText || 'An error occurred',
+          // Fallback to statusText; if also empty, use a translation key.
+          // UI layer translates via getErrorMessage(err, t).
+          message: response.statusText || 'error.generic.unknown',
         };
       }
 
@@ -353,10 +360,7 @@ export class ApiRequestError extends Error {
 
 /**
  * Inspect 401 error message to infer why session was invalidated.
- * Backend error messages to match (keep in sync with server):
- *   - "Sesi telah berakhir, silakan login kembali" → session_expired
- *   - "Password berubah, silakan login kembali"    → password_changed
- *   - "Token tidak valid"                          → session_expired
+ * Returns a short reason code the login page can use.
  */
 function detectAuthReason(error: ApiError): string {
   const msg = Array.isArray(error.message)
@@ -409,15 +413,38 @@ function isApiError(error: unknown): error is ApiRequestError {
   return error instanceof ApiRequestError;
 }
 
-export function getErrorMessage(error: unknown): string {
+/** Translation function signature — compatible with next-intl's `t`. */
+type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
+
+/**
+ * Extract a user-displayable error message.
+ *
+ * When called from UI code, pass the `t` function so translation keys
+ * (e.g. 'error.network.timeout') are resolved. Non-UI callers can omit
+ * `t` — they'll receive the raw key or the backend's message as-is.
+ *
+ * Usage:
+ *   const t = useTranslations();
+ *   try { ... } catch (err) { toast.error(getErrorMessage(err, t)); }
+ */
+export function getErrorMessage(error: unknown, t?: TranslateFn): string {
+  const translate = (key: string) => (t ? t(key) : key);
+
   if (isApiError(error)) {
-    return error.message;
-  }
-  if (error instanceof Error) {
-    if (error.name === 'AbortError') {
-      return 'Request timeout - coba lagi dalam beberapa saat';
+    // Backend may already return a human-readable message in some cases.
+    // If it looks like a translation key (contains '.'), translate it.
+    if (t && error.message.includes('.') && !error.message.includes(' ')) {
+      return translate(error.message);
     }
     return error.message;
   }
-  return 'Terjadi kesalahan yang tidak diketahui';
+
+  if (error instanceof Error) {
+    if (error.name === 'AbortError') {
+      return translate('error.network.timeout');
+    }
+    return error.message;
+  }
+
+  return translate('error.generic.unknown');
 }

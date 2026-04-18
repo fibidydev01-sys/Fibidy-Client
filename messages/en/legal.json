@@ -1,0 +1,45 @@
+{
+  "legal": {
+    "nav": {
+      "title": "Legal & Help",
+      "groups": {
+        "support": "Support",
+        "policies": "Policies"
+      },
+      "items": {
+        "contact": {
+          "label": "Contact",
+          "description": "Get in touch with our team"
+        },
+        "faq": {
+          "label": "FAQ",
+          "description": "Frequently asked questions"
+        },
+        "terms": {
+          "label": "Terms of Service",
+          "description": "The rules of using Fibidy"
+        },
+        "privacy": {
+          "label": "Privacy Policy",
+          "description": "How we handle your data"
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "lead": "Need help? Reach out through any of the channels below and we'll get back to you."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "lead": "Find quick answers to the most common questions about Fibidy."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lead": "Last updated: April 2026"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lead": "Last updated: April 2026"
+    }
+  }
+}

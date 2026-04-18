@@ -58,11 +58,11 @@ export function CleanupCard() {
       });
 
       setLastResult(result);
-      toast.success('Cleanup berhasil', {
-        description: `${result.deleted.downloadLogs} download logs + ${result.deleted.webhookEvents} webhook events dihapus.`,
+      toast.success('Cleanup successful', {
+        description: `${result.deleted.downloadLogs} download logs + ${result.deleted.webhookEvents} webhook events deleted.`,
       });
     } catch (err) {
-      toast.error('Cleanup gagal', { description: getErrorMessage(err) });
+      toast.error('Cleanup failed', { description: getErrorMessage(err) });
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +77,9 @@ export function CleanupCard() {
             <CardTitle>Cleanup Logs</CardTitle>
           </div>
           <CardDescription>
-            Hapus DownloadLog dan WebhookEvent lama untuk mencegah DB bloat.
-            Aman dijalankan kapan saja — data historis yang dibutuhkan untuk
-            accounting tidak ikut terhapus.
+            Delete old DownloadLog and WebhookEvent records to prevent DB
+            bloat. Safe to run anytime — historical data required for
+            accounting is not deleted.
           </CardDescription>
         </CardHeader>
 
@@ -88,7 +88,7 @@ export function CleanupCard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="download-days" className="text-xs font-medium">
-                Download Logs (hari)
+                Download Logs (days)
               </Label>
               <Input
                 id="download-days"
@@ -102,13 +102,13 @@ export function CleanupCard() {
                 className="h-10"
               />
               <p className="text-[11px] text-muted-foreground">
-                Hapus yang lebih tua dari {downloadLogDays} hari
+                Delete records older than {downloadLogDays} days
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="webhook-days" className="text-xs font-medium">
-                Webhook Events (hari)
+                Webhook Events (days)
               </Label>
               <Input
                 id="webhook-days"
@@ -122,7 +122,7 @@ export function CleanupCard() {
                 className="h-10"
               />
               <p className="text-[11px] text-muted-foreground">
-                Hapus yang lebih tua dari {webhookEventDays} hari
+                Delete records older than {webhookEventDays} days
               </p>
             </div>
           </div>
@@ -132,10 +132,10 @@ export function CleanupCard() {
             <div className="flex gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                <p className="font-medium mb-0.5">Tidak bisa di-undo.</p>
+                <p className="font-medium mb-0.5">This cannot be undone.</p>
                 <p className="text-amber-700 dark:text-amber-400">
-                  Pastikan threshold sudah benar sebelum menjalankan. Data yang
-                  terhapus tidak bisa dipulihkan.
+                  Make sure the thresholds are correct before running. Deleted
+                  data cannot be recovered.
                 </p>
               </div>
             </div>
@@ -151,12 +151,12 @@ export function CleanupCard() {
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Menghapus data...
+                Deleting records...
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Jalankan Cleanup
+                Run Cleanup
               </>
             )}
           </Button>
@@ -176,13 +176,13 @@ export function CleanupCard() {
                   <div className="rounded-md bg-white/60 dark:bg-black/20 px-3 py-2">
                     <p className="text-emerald-700 dark:text-emerald-400">Download logs</p>
                     <p className="text-lg font-bold text-emerald-800 dark:text-emerald-300">
-                      {lastResult.deleted.downloadLogs.toLocaleString('id-ID')}
+                      {lastResult.deleted.downloadLogs.toLocaleString('en-US')}
                     </p>
                   </div>
                   <div className="rounded-md bg-white/60 dark:bg-black/20 px-3 py-2">
                     <p className="text-emerald-700 dark:text-emerald-400">Webhook events</p>
                     <p className="text-lg font-bold text-emerald-800 dark:text-emerald-300">
-                      {lastResult.deleted.webhookEvents.toLocaleString('id-ID')}
+                      {lastResult.deleted.webhookEvents.toLocaleString('en-US')}
                     </p>
                   </div>
                 </div>
@@ -198,43 +198,43 @@ export function CleanupCard() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Jalankan cleanup?
+              Run cleanup?
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  Data berikut akan dihapus permanen dari database:
+                  The following data will be permanently deleted from the database:
                 </p>
                 <ul className="space-y-1 text-sm">
                   <li className="flex items-start gap-2">
                     <span className="text-destructive">•</span>
                     <span>
-                      <strong>DownloadLog</strong> lebih tua dari{' '}
-                      <strong>{downloadLogDays} hari</strong>
+                      <strong>DownloadLog</strong> older than{' '}
+                      <strong>{downloadLogDays} days</strong>
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-destructive">•</span>
                     <span>
-                      <strong>WebhookEvent</strong> lebih tua dari{' '}
-                      <strong>{webhookEventDays} hari</strong>
+                      <strong>WebhookEvent</strong> older than{' '}
+                      <strong>{webhookEventDays} days</strong>
                     </span>
                   </li>
                 </ul>
                 <p className="text-xs text-muted-foreground">
-                  Purchase records, Tenant data, dan Subscription history TIDAK akan
-                  terpengaruh.
+                  Purchase records, Tenant data, and Subscription history will NOT
+                  be affected.
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Ya, Hapus
+              Yes, delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

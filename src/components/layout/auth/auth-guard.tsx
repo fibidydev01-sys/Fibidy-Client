@@ -7,8 +7,8 @@ import { authApi } from '@/lib/api/auth';
 
 // ==========================================
 // useAuthCheck — shared internal hook
-// Dipanggil di AuthGuard dan GuestGuard
-// Cek session ke server sekali saat mount
+// Called in AuthGuard and GuestGuard
+// Check session with server once on mount
 // ==========================================
 
 function useAuthCheck() {
@@ -74,11 +74,11 @@ export function AuthGuard({
   }, [isHydrated, isChecked, isAuthenticated, requireAuth, redirectTo, pathname, router]);
 
   if (!isHydrated || !isChecked) {
-    return <LoadingScreen message="Memeriksa autentikasi..." />;
+    return <LoadingScreen message="Checking authentication..." />;
   }
 
   if (requireAuth && !isAuthenticated) {
-    return <LoadingScreen message="Mengalihkan..." />;
+    return <LoadingScreen message="Redirecting..." />;
   }
 
   return <>{children}</>;
@@ -121,7 +121,7 @@ export function GuestGuard({
   }
 
   if (isAuthenticated) {
-    return <LoadingScreen message="Anda sudah login..." />;
+    return <LoadingScreen message="You're already signed in..." />;
   }
 
   return <>{children}</>;
@@ -142,7 +142,7 @@ function LoadingScreen({ message }: { message: string }) {
         </div>
         <div className="text-center space-y-2">
           <p className="text-sm font-medium text-foreground">{message}</p>
-          <p className="text-xs text-muted-foreground">Mohon tunggu sebentar</p>
+          <p className="text-xs text-muted-foreground">Please wait a moment</p>
         </div>
       </div>
     </div>

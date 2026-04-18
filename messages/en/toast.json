@@ -1,0 +1,97 @@
+{
+  "toast": {
+    "auth": {
+      "loginSuccess": "Logged in!",
+      "loginSuccessDetail": "Welcome back, {name}",
+      "loginFailed": "Login failed",
+      "registerSuccess": "Registration successful!",
+      "registerSuccessDetail": "Your store is ready to use",
+      "registerBuyerSuccessDetail": "You can now purchase products.",
+      "registerFailed": "Registration failed",
+      "logoutSuccess": "Logged out",
+      "passwordChangedSuccess": "Password changed successfully",
+      "passwordChangedDetail": "Other signed-in devices will be logged out and must sign in again.",
+      "passwordChangedFailed": "Failed to change password",
+      "dialogLoginSuccess": "Signed in successfully!"
+    },
+    "products": {
+      "added": "Product added",
+      "updated": "Product updated",
+      "deleted": "Product deleted"
+    },
+    "upgrade": {
+      "success": "Congratulations!",
+      "successDetail": "Your store is live. Start selling products now!",
+      "failed": "Upgrade failed",
+      "categoryRequired": "Please select a business type",
+      "nameRequired": "Store name is required",
+      "slugRequired": "Store URL is required",
+      "whatsappRequired": "WhatsApp number is required",
+      "agreementRequired": "Please agree to the Terms of Service to continue"
+    },
+    "refund": {
+      "approved": "Refund approved! Funds will return to your account in 5-10 business days.",
+      "rejectedFileValid": "File is accessible and valid. Refund cannot be processed.",
+      "rejectedOutOfWindow": "Refund window (7 days) has expired.",
+      "rejectedAlreadyRefunded": "This purchase has already been refunded.",
+      "rejectedGeneric": "Refund request was rejected."
+    },
+    "subscription": {
+      "paymentSuccess": "Payment successful!",
+      "paymentSuccessDetail": "Your plan is now {tier}.",
+      "paymentSuccessGeneric": "Your subscription is active.",
+      "paymentCanceled": "Payment canceled.",
+      "verificationFailed": "Verification failed",
+      "verificationFailedDetail": "Please try again or contact support if you have already been charged.",
+      "reconcileFailed": "Reconcile failed",
+      "reconcileSuccess": "Subscription active!",
+      "reconcileSuccessDetail": "Your plan is now {tier}."
+    },
+    "checkout": {
+      "cancelFailed": "Checkout was canceled.",
+      "duplicateLockTitle": "Still processing your previous checkout",
+      "duplicateLockBody": "Wait a few seconds and try again. If you were already redirected to Stripe, complete the payment in that tab."
+    },
+    "settings": {
+      "heroSaved": "Hero section saved successfully",
+      "heroFailed": "Failed to save hero section",
+      "aboutSaved": "Highlights saved successfully",
+      "aboutFailed": "Failed to save highlights",
+      "contactSaved": "Contact section saved successfully",
+      "contactFailed": "Failed to save contact section",
+      "socialSaved": "Social links saved successfully",
+      "socialFailed": "Failed to save social links",
+      "logoRemoved": "Logo removed successfully",
+      "logoRemoveFailed": "Failed to remove logo",
+      "heroBgRemoved": "Background image removed successfully",
+      "heroBgRemoveFailed": "Failed to remove background image"
+    },
+    "admin": {
+      "loginSuccess": "Login successful",
+      "loginSuccessDetail": "Welcome, {name}",
+      "loginFailed": "Login failed",
+      "logoutSuccess": "Logged out",
+      "tenantSuspended": "Tenant suspended",
+      "tenantReactivated": "Tenant reactivated",
+      "suspendFailed": "Failed to suspend tenant",
+      "unsuspendFailed": "Failed to reactivate tenant",
+      "cleanupSuccess": "Cleanup successful",
+      "cleanupDetail": "{downloadLogs} download logs + {webhookEvents} webhook events deleted.",
+      "cleanupFailed": "Cleanup failed"
+    },
+    "landing": {
+      "published": "Landing page published!",
+      "validationFailed": "Validation failed",
+      "validationDetailOne": "{error}",
+      "validationDetailMany": "{count} errors found. Please review your settings.",
+      "saveFailed": "Failed to save landing page",
+      "resetSuccess": "Landing page reset to defaults",
+      "resetFailed": "Failed to reset landing page",
+      "discarded": "Changes discarded"
+    },
+    "share": {
+      "copySuccess": "Link copied successfully!",
+      "copyFailed": "Failed to copy link"
+    }
+  }
+}

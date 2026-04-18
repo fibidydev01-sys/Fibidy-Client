@@ -42,7 +42,7 @@ const sellerNavigation: NavGroup[] = [
     items: [
       { title: 'Products', href: '/dashboard/products', icon: LayoutDashboard },
       { title: 'Studio', href: '/dashboard/studio', icon: Layout },
-      { title: 'Riwayat', href: '/dashboard/products/downloads', icon: History },
+      { title: 'History', href: '/dashboard/products/downloads', icon: History },
       { title: 'Library', href: '/dashboard/library', icon: BookOpen },
     ],
   },
@@ -56,9 +56,9 @@ const buyerNavigation: NavGroup[] = [
     ],
   },
   {
-    title: 'Lainnya',
+    title: 'More',
     items: [
-      { title: 'Mulai Berjualan', href: '/dashboard/setup-store', icon: Store },
+      { title: 'Start Selling', href: '/dashboard/setup-store', icon: Store },
     ],
   },
 ];

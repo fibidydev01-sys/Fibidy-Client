@@ -1,6 +1,32 @@
 // src/proxy.ts
+//
+// ==========================================
+// PHASE 1 I18N: Composed with next-intl middleware.
+//
+// ROUTING FLOW:
+//  1. Skip static/api/OG/sitemap
+//  2. Subdomain (tokoA.fibidy.com) → rewrite to /en/store/tokoA
+//  3. Custom domain → rewrite to /en/store/{slug}
+//  4. [NEW] Path-based (/store/{slug}) → rewrite to /en/store/{slug}
+//     This handles localhost dev + fibidy.com/store/{slug} access,
+//     mirroring the subdomain experience so internal file structure
+//     stays unified under [locale]/store/[slug]/.
+//  5. Fallback → delegate to next-intl middleware
+//
+// UNCHANGED:
+//  - All subdomain extraction logic
+//  - Reserved subdomains list
+//  - Custom domain resolution via /api/tenant/resolve-domain
+//  - Skip rules for static/api/OG/sitemap
+//  - x-custom-domain + x-tenant-slug headers
+//  - DEBUG logging
+//  - Matcher config
+// ==========================================
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { routing } from '@/i18n/routing';
 
 const PROD_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'fibidy.com';
 const DEBUG = process.env.NODE_ENV === 'development';
@@ -14,6 +40,13 @@ const RESERVED_SUBDOMAINS = [
   'store', 'shop', 'toko', 'fibidy', 'test', 'demo',
   'null', 'undefined', 'root', 'system', 'mail', 'email',
 ];
+
+// ==========================================
+// NEXT-INTL MIDDLEWARE INSTANCE
+// Handles locale detection / redirect for main-domain (non-tenant) routes.
+// ==========================================
+
+const intlMiddleware = createMiddleware(routing);
 
 function extractSubdomain(hostname: string): string | null {
   if (
@@ -72,6 +105,26 @@ async function resolveCustomDomain(
   }
 }
 
+/**
+ * Defensive: strip a leading locale prefix from the pathname before we
+ * inject our own. Covers the edge case where a user types
+ * `tokoA.fibidy.com/en/products` — without this, we'd end up with
+ * `/en/store/tokoA/en/products` (double-locale, broken route).
+ *
+ * With Phase 1 having only 'en', this is mostly future-proofing.
+ */
+function stripLocalePrefix(pathname: string): string {
+  for (const loc of routing.locales) {
+    if (pathname.startsWith(`/${loc}/`)) {
+      return pathname.substring(loc.length + 1);
+    }
+    if (pathname === `/${loc}`) {
+      return '/';
+    }
+  }
+  return pathname;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
@@ -87,14 +140,11 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/static') ||
-    // ✅ CRITICAL FIX: Skip OG image routes
     pathname.includes('/opengraph-image') ||
     pathname.includes('/twitter-image') ||
-    // ✅ Skip other Next.js special routes
     pathname === '/sitemap.xml' ||
     pathname === '/robots.txt' ||
     pathname.startsWith('/server-sitemap') ||
-    // Static file extensions
     pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf)$/)
   ) {
     if (DEBUG && (pathname.includes('/opengraph-image') || pathname.includes('/twitter-image'))) {
@@ -104,31 +154,37 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 2. SUBDOMAIN ROUTING
+  // 2. SUBDOMAIN ROUTING — inject locale into rewrite path
   // ==========================================
   const subdomain = extractSubdomain(hostname);
 
   if (subdomain) {
     const url = request.nextUrl.clone();
-    url.pathname = pathname === '/'
-      ? `/store/${subdomain}`
-      : `/store/${subdomain}${pathname}`;
+    const locale = routing.defaultLocale; // Phase 1: always 'en'
+    const cleanPath = stripLocalePrefix(pathname);
+
+    url.pathname = cleanPath === '/'
+      ? `/${locale}/store/${subdomain}`
+      : `/${locale}/store/${subdomain}${cleanPath}`;
 
     if (DEBUG) console.log('[Proxy] Subdomain rewrite:', url.pathname);
     return NextResponse.rewrite(url);
   }
 
   // ==========================================
-  // 3. CUSTOM DOMAIN ROUTING
+  // 3. CUSTOM DOMAIN ROUTING — inject locale into rewrite path
   // ==========================================
   if (isCustomDomain(hostname)) {
     const slug = await resolveCustomDomain(hostname, request);
 
     if (slug) {
       const url = request.nextUrl.clone();
-      url.pathname = pathname === '/'
-        ? `/store/${slug}`
-        : `/store/${slug}${pathname}`;
+      const locale = routing.defaultLocale; // Phase 1: always 'en'
+      const cleanPath = stripLocalePrefix(pathname);
+
+      url.pathname = cleanPath === '/'
+        ? `/${locale}/store/${slug}`
+        : `/${locale}/store/${slug}${cleanPath}`;
 
       if (DEBUG) console.log('[Proxy] Custom domain rewrite:', url.pathname);
 
@@ -140,11 +196,32 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 4. PASS THROUGH
-  // Let page.tsx and guards handle auth
+  // 4. [NEW] PATH-BASED STORE ROUTING
+  //
+  // Main domain (including localhost in dev) hitting /store/{slug}
+  // gets rewritten to /{locale}/store/{slug} so that:
+  //   - Dev experience mirrors prod subdomain rewrite
+  //   - User URL stays clean (no /en visible)
+  //   - Next.js matches the correct [locale]/store/[slug] route
   // ==========================================
-  if (DEBUG) console.log('[Proxy] Pass through');
-  return NextResponse.next();
+  if (pathname.startsWith('/store/')) {
+    const url = request.nextUrl.clone();
+    const locale = routing.defaultLocale; // Phase 1: always 'en'
+    const cleanPath = stripLocalePrefix(pathname);
+
+    url.pathname = `/${locale}${cleanPath}`;
+
+    if (DEBUG) console.log('[Proxy] Path-based store rewrite:', url.pathname);
+    return NextResponse.rewrite(url);
+  }
+
+  // ==========================================
+  // 5. MAIN APP — delegate to next-intl middleware
+  // Handles locale detection and (if localePrefix='always') the `/` → `/en` redirect.
+  // With localePrefix='as-needed', this is effectively a no-op for the default locale.
+  // ==========================================
+  if (DEBUG) console.log('[Proxy] Delegating to next-intl middleware');
+  return intlMiddleware(request);
 }
 
 export const config = {

@@ -27,13 +27,13 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
   });
 
   const whatsappLink = tenant.whatsapp
-    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Halo ${tenant.name}, saya tertarik dengan produk Anda.`)}`
+    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Hi ${tenant.name}, I'm interested in your products.`)}`
     : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (tenant.whatsapp) {
-      const message = `Halo ${tenant.name}!\n\nNama: ${formData.name}\nEmail: ${formData.email}\nPesan: ${formData.message}`;
+      const message = `Hi ${tenant.name}!\n\nName: ${formData.name}\nEmail: ${formData.email}\nMessage: ${formData.message}`;
       window.open(`https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
     }
   };
@@ -53,7 +53,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
 
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
 
-        {/* KIRI — Info kontak */}
+        {/* LEFT — Contact info */}
         <div className="divide-y divide-border">
 
           {tenant.whatsapp && whatsappLink && (
@@ -82,7 +82,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Telepon</p>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Phone</p>
                   <p className="text-sm font-medium text-foreground">{tenant.phone}</p>
                 </div>
               </div>
@@ -110,21 +110,21 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
             <div className="flex items-start gap-3 py-4">
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Alamat</p>
+                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Address</p>
                 <p className="text-sm font-medium text-foreground">{tenant.address}</p>
               </div>
             </div>
           )}
 
-          {/* Form (jika showForm aktif) */}
+          {/* Form (if showForm is active) */}
           {showForm && (
             <form onSubmit={handleSubmit} className="space-y-5 pt-6">
-              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">Kirim Pesan</p>
+              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">Send a Message</p>
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-xs font-medium">Nama</Label>
+                <Label htmlFor="name" className="text-xs font-medium">Name</Label>
                 <Input
                   id="name"
-                  placeholder="Nama Anda"
+                  placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -142,10 +142,10 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="message" className="text-xs font-medium">Pesan</Label>
+                <Label htmlFor="message" className="text-xs font-medium">Message</Label>
                 <Textarea
                   id="message"
-                  placeholder="Tulis pesan Anda..."
+                  placeholder="Write your message..."
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -154,13 +154,13 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               </div>
               <Button type="submit" className="w-full gap-2">
                 <Send className="h-4 w-4" />
-                Kirim via WhatsApp
+                Send via WhatsApp
               </Button>
             </form>
           )}
         </div>
 
-        {/* KANAN — Maps */}
+        {/* RIGHT — Maps */}
         {showMap && (
           <div className="rounded-xl overflow-hidden border border-border">
             <iframe

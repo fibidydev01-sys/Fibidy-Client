@@ -2,9 +2,9 @@
 
 // ==========================================
 // WHATSAPP ORDER BUTTON
-// v3: tambah customLabel prop
-//   - Default: "Order via WhatsApp" (Custom/Jasa)
-//   - Custom: "Tanya Seller via WhatsApp" (Digital — pre-sales)
+// v3: added customLabel prop
+//   - Default: "Order via WhatsApp" (Custom/Service)
+//   - Custom: "Ask Seller via WhatsApp" (Digital — pre-sales)
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
@@ -27,7 +27,7 @@ interface WhatsAppOrderButtonProps {
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   children?: ReactNode;
-  // v3: custom label untuk mode "Tanya Seller" (Digital product)
+  // v3: custom label for "Ask Seller" mode (Digital product)
   customLabel?: string;
 }
 
@@ -113,7 +113,7 @@ Thank you! 🙏`;
               <h3 className="font-semibold text-lg">{buttonLabel}</h3>
               <p className="text-sm text-muted-foreground">
                 {customLabel
-                  ? `Tanyakan tentang "${product.name}" ke ${tenant.name}`
+                  ? `Ask ${tenant.name} about "${product.name}"`
                   : `Complete your order details to send to ${tenant.name}`
                 }
               </p>
@@ -133,13 +133,13 @@ Thank you! 🙏`;
             </div>
             <div className="space-y-2">
               <Label htmlFor="order-notes">
-                {customLabel ? 'Pertanyaan (optional)' : 'Notes (optional)'}
+                {customLabel ? 'Question (optional)' : 'Notes (optional)'}
               </Label>
               <Textarea
                 id="order-notes"
                 placeholder={
                   customLabel
-                    ? 'Tulis pertanyaanmu di sini...'
+                    ? 'Write your question here...'
                     : 'Any additional notes...'
                 }
                 value={notes}

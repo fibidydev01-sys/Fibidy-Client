@@ -1,6 +1,11 @@
 // ==========================================
 // SEO CONFIGURATION
 // Subdomain-Ready Architecture + Custom Domain Support
+//
+// [I18N MIGRATION] Phase 1 = English only.
+// - All user-facing strings in English
+// - locale: 'en_US', language: 'en'
+// - availableLanguage: ['English'] (will expand in Phase 2)
 // ==========================================
 
 // Environment
@@ -72,24 +77,24 @@ export const seoConfig = {
   ] as string[],
 
   // ==========================================
-  // DEFAULT META
+  // DEFAULT META — ENGLISH
   // ==========================================
-  defaultTitle: 'Fibidy — Platform Situs Online untuk UMKM Indonesia',
+  defaultTitle: 'Fibidy — Sell Digital Products Online',
   titleTemplate: '%s | Fibidy',
   defaultDescription:
-    'Bikin situs online sendiri dalam hitungan menit. Kelola produk, atur tampilan, edit sesuka hati — dimanapun, kapanpun. Gratis mulai.',
+    'Launch your online store in minutes. Upload files, set prices, get paid via Stripe. Free forever, no commission.',
 
   // ==========================================
-  // KEYWORDS
+  // KEYWORDS — ENGLISH
   // ==========================================
   defaultKeywords: [
-    'situs online umkm',
-    'platform umkm indonesia',
-    'jualan online',
-    'bikin situs online gratis',
-    'toko online indonesia',
-    'e-commerce umkm',
-    'situs digital umkm',
+    'sell digital products',
+    'online store platform',
+    'digital downloads',
+    'creator marketplace',
+    'stripe payments',
+    'digital product storefront',
+    'no-code store builder',
     'fibidy',
   ] as string[],
 
@@ -105,10 +110,11 @@ export const seoConfig = {
   logoUrl: '/logo.png',
 
   // ==========================================
-  // LOCALE
+  // LOCALE — ENGLISH (Phase 1)
+  // Will expand in Phase 2 (alternates.languages)
   // ==========================================
-  locale: 'id_ID',
-  language: 'id',
+  locale: 'en_US',
+  language: 'en',
 
   // ==========================================
   // THEME
@@ -121,7 +127,7 @@ export const seoConfig = {
   // ==========================================
   organization: {
     name: 'Fibidy',
-    legalName: 'Fibidy Indonesia',
+    legalName: 'Fibidy',
     url: PROD_URL,
     logo: `${PROD_URL}/logo.png`,
     foundingDate: '2026',
@@ -130,7 +136,7 @@ export const seoConfig = {
     },
     contactPoint: {
       contactType: 'customer service',
-      availableLanguage: ['Indonesian', 'English'],
+      availableLanguage: ['English'],
     },
     sameAs: [
       'https://instagram.com/fibidy_com',

@@ -2,7 +2,7 @@
 //
 // [TIDUR-NYENYAK FIX #1] Q2=B treatment:
 // When downloadRevoked = true → Download button replaced with
-// "Akses Dicabut" badge + tooltip explaining reason.
+// "Access Revoked" badge + tooltip explaining reason.
 //
 // Card stays visible (not grayed out) — buyer still sees purchase
 // history, but cannot download the file anymore.
@@ -62,8 +62,8 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
 
   const revokedReason =
     purchase.refundRequest?.status === 'APPROVED'
-      ? 'Akses dicabut karena refund sudah disetujui.'
-      : 'Akses download untuk produk ini telah dicabut.';
+      ? 'Access revoked because the refund has been approved.'
+      : 'Download access for this product has been revoked.';
 
   return (
     <div className="border rounded-xl p-4 space-y-3">
@@ -80,7 +80,7 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
           </p>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-muted-foreground">
-              {new Date(purchase.purchasedAt).toLocaleDateString('id-ID')}
+              {new Date(purchase.purchasedAt).toLocaleDateString('en-US')}
             </span>
             <span className="text-xs text-muted-foreground">·</span>
             <span className="text-xs font-medium">
@@ -93,7 +93,7 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
       {/* Actions row — adaptive based on revoke state */}
       <div className="flex items-center gap-2">
         {isRevoked ? (
-          // [FIX #1] Q2=B: Replace download with "Akses Dicabut" badge + tooltip
+          // [FIX #1] Q2=B: Replace download with "Access Revoked" badge + tooltip
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -102,7 +102,7 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
                   className="flex-1 justify-center py-1.5 text-destructive border-destructive/30 bg-destructive/5 cursor-help"
                 >
                   <Ban className="h-3.5 w-3.5 mr-1.5" />
-                  Akses Dicabut
+                  Access Revoked
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[260px]">

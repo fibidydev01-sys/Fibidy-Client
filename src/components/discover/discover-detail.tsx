@@ -40,11 +40,11 @@ export function DiscoverDetail({ product, pageCount }: DiscoverDetailProps) {
           {product.totalSales != null && (
             <>
               <ShoppingBag className="inline h-3.5 w-3.5 mr-0.5 -mt-0.5" />
-              {product.totalSales} terjual
+              {product.totalSales} sold
             </>
           )}
           {product.totalSales != null && pageCount != null && ' · '}
-          {pageCount != null && `${pageCount} halaman`}
+          {pageCount != null && `${pageCount} pages`}
         </span>
       </div>
 
@@ -53,7 +53,7 @@ export function DiscoverDetail({ product, pageCount }: DiscoverDetailProps) {
       {product.description && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            Deskripsi
+            Description
           </h2>
           <p className="text-sm leading-relaxed whitespace-pre-line">
             {product.description}

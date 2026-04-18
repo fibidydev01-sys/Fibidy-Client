@@ -3,18 +3,18 @@
 // ==========================================
 // DIALOG REGISTER FORM
 //
-// Form register buyer di dalam AuthDialog (tab "Daftar").
-// Hanya email + password — tidak ada field lain.
-// Identitas = toko, bukan individu. Email cukup sebagai identifier.
+// Buyer register form inside AuthDialog (tab "Sign up").
+// Email + password only — no other fields.
+// Identity = the store, not the individual. Email is sufficient as identifier.
 //
-// Setelah register:
-//   1. role: BUYER auto-set di server
-//   2. Set tenant ke store
-//   3. Tutup dialog
-//   4. User langsung bisa klik "Beli"
+// After register:
+//   1. role: BUYER auto-set on the server
+//   2. Set tenant in store
+//   3. Close dialog
+//   4. User can immediately click "Buy"
 //
-// Tidak ada link ke /register.
-// Seller yang niat jualan dari awal sudah tahu /register.
+// No link to /register.
+// Sellers who want to sell from the start already know about /register.
 // ==========================================
 
 import { useState } from 'react';
@@ -36,10 +36,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBuyerRegister } from '@/hooks/user/use-buyer-register';
 
 const registerBuyerSchema = z.object({
-  email: z.string().email('Format email tidak valid'),
+  email: z.string().email('Please enter a valid email address'),
   password: z
     .string()
-    .min(8, 'Password minimal 8 karakter'),
+    .min(8, 'Password must be at least 8 characters'),
 });
 
 type RegisterBuyerFormData = z.infer<typeof registerBuyerSchema>;
@@ -57,7 +57,7 @@ export function DialogRegisterForm() {
     try {
       await registerBuyer(data);
     } catch {
-      // Error ditangani di hook
+      // Error handled in the hook
     }
   };
 
@@ -79,7 +79,7 @@ export function DialogRegisterForm() {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="email@contoh.com"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   disabled={isLoading}
                   {...field}
@@ -100,7 +100,7 @@ export function DialogRegisterForm() {
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Minimal 8 karakter"
+                    placeholder="At least 8 characters"
                     autoComplete="new-password"
                     disabled={isLoading}
                     {...field}
@@ -129,22 +129,22 @@ export function DialogRegisterForm() {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Mendaftar...
+              Signing up...
             </>
           ) : (
-            'Daftar'
+            'Sign up'
           )}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
-          Dengan mendaftar, kamu menyetujui{' '}
+          By signing up, you agree to our{' '}
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-            Syarat & Ketentuan
+            Terms of Service
           </a>
         </p>
 
-        {/* Tidak ada link ke /register */}
-        {/* Seller yang niat jualan dari awal sudah tahu /register */}
+        {/* No link to /register */}
+        {/* Sellers who want to sell from the start already know about /register */}
       </form>
     </Form>
   );

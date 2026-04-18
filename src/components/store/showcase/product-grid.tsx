@@ -27,9 +27,9 @@ export function ProductGrid({
           <Package />
         </EmptyMedia>
         <EmptyHeader>
-          <EmptyTitle>Tidak ada produk ditemukan</EmptyTitle>
+          <EmptyTitle>No products found</EmptyTitle>
           <EmptyDescription>
-            Coba ubah filter atau kata kunci pencarian.
+            Try adjusting your filters or search keywords.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

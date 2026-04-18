@@ -2,7 +2,7 @@
 
 // ==========================================
 // PRODUCT CARD — Public Store
-// Adaptive: Digital (fileKey != null) vs Custom/Jasa (fileKey == null)
+// Adaptive: Digital (fileKey != null) vs Custom/Service (fileKey == null)
 // ==========================================
 
 import { useMemo } from 'react';
@@ -23,13 +23,13 @@ interface ProductCardProps {
 export function ProductCard({ product, storeSlug }: ProductCardProps) {
   const { hasDiscount, discountPercent, isCustomPrice } = getProductPricing(product);
 
-  // ── Adaptive: detect tipe produk dari fileKey ──────────────────
+  // ── Adaptive: detect product type from fileKey ─────────────────
   // fileKey != null → Digital → Stripe checkout
-  // fileKey == null → Custom/Jasa → WA order
+  // fileKey == null → Custom/Service → WA order
   const isDigital = !!product.fileKey;
   const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
 
-  // Gunakan thumbnail pertama dari images array
+  // Use the first thumbnail from the images array
   const imageUrl = product.images?.[0] ?? null;
   const url = useMemo(() => productUrl(storeSlug, product.id), [storeSlug, product.id]);
 
@@ -66,7 +66,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badge: Diskon */}
+          {/* Badge: Discount */}
           {hasDiscount && (
             <div className="absolute top-2 left-2">
               <Badge variant="destructive" className="text-xs px-1.5 py-0">
@@ -75,7 +75,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badge: Tipe produk (top right) */}
+          {/* Badge: Product type (top right) */}
           <div className="absolute top-2 right-2">
             {isDigital ? (
               <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600 text-white">
@@ -115,7 +115,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
           {isCustomPrice && (
             <p className="mt-1.5 text-xs text-muted-foreground italic">
-              Hubungi seller
+              Contact seller
             </p>
           )}
         </div>

@@ -18,7 +18,7 @@ interface DownloadHistoryTableProps {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('id-ID', {
+  return new Date(iso).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -41,18 +41,18 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
   if (logs.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        <p>Belum ada riwayat download.</p>
+        <p>No download history yet.</p>
       </div>
     );
   }
 
   return (
     <div className="border rounded-xl overflow-hidden">
-      {/* Header — hidden di mobile */}
+      {/* Header — hidden on mobile */}
       <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-        <div className="col-span-4">Produk</div>
-        <div className="col-span-3">Pembeli</div>
-        <div className="col-span-3">Waktu</div>
+        <div className="col-span-4">Product</div>
+        <div className="col-span-3">Buyer</div>
+        <div className="col-span-3">Time</div>
         <div className="col-span-2">IP</div>
       </div>
 
@@ -66,7 +66,7 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
               key={log.id}
               className="px-4 py-3 sm:grid sm:grid-cols-12 sm:gap-4 sm:items-center space-y-2 sm:space-y-0"
             >
-              {/* Produk */}
+              {/* Product */}
               <div className="col-span-4 flex items-center gap-2 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   <Icon className="h-4 w-4 text-muted-foreground" />
@@ -79,13 +79,13 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
                 </div>
               </div>
 
-              {/* Pembeli */}
+              {/* Buyer */}
               <div className="col-span-3 min-w-0">
                 <p className="text-sm truncate">{log.buyerName || '—'}</p>
                 <p className="text-xs text-muted-foreground truncate">{log.buyerEmail}</p>
               </div>
 
-              {/* Waktu */}
+              {/* Time */}
               <div className="col-span-3">
                 <p className="text-sm text-muted-foreground">
                   {formatDate(log.downloadedAt)}

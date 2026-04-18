@@ -2,18 +2,18 @@
 'use client';
 
 /**
- * Render preview halaman pertama PDF via pdfjs-dist.
+ * Render preview of the first PDF pages using pdfjs-dist.
  *
- * ⚠️ pdfjs-dist mengakses DOMMatrix saat import — browser-only API.
- *    TIDAK BOLEH import di top-level karena Next.js SSR akan crash.
- *    Solusi: dynamic import() di dalam useEffect (client-only).
+ * ⚠️ pdfjs-dist accesses DOMMatrix on import — a browser-only API.
+ *    MUST NOT be imported at the top level because Next.js SSR will crash.
+ *    Solution: dynamic import() inside useEffect (client-only).
  *
  * Flow:
  *   1. useEffect → dynamic import('pdfjs-dist')
  *   2. Set worker URL
- *   3. Load PDF dari previewUrl (signed URL R2, TTL 15 menit)
- *   4. Render maxPages halaman pertama langsung ke <canvas>
- *   5. Tampilkan footer "X dari Y halaman"
+ *   3. Load PDF from previewUrl (signed R2 URL, TTL 15 minutes)
+ *   4. Render the first `maxPages` pages directly to <canvas>
+ *   5. Show footer "X of Y pages"
  *
  * Dependency: pdfjs-dist
  *   npm install pdfjs-dist
@@ -25,7 +25,7 @@ import { Loader2, RefreshCw } from 'lucide-react';
 
 const RENDER_SCALE = 1.5;
 
-// ── Sub-component: render satu halaman PDF ke canvas ──────────
+// ── Sub-component: render a single PDF page to canvas ──────────
 
 function PdfPage({
   renderPage,
@@ -82,10 +82,10 @@ export function PdfPreview({
       setReady(false);
 
       try {
-        // Dynamic import — hanya di client, tidak di server
+        // Dynamic import — client only, never on the server
         const pdfjsLib = await import('pdfjs-dist');
 
-        // Set worker — harus sebelum getDocument
+        // Set worker — must be done before getDocument
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
         const doc = await pdfjsLib.getDocument(previewUrl).promise;
@@ -98,7 +98,7 @@ export function PdfPreview({
         }
       } catch {
         if (!cancelled) {
-          setError('Preview tidak dapat dimuat. URL mungkin sudah expired.');
+          setError('Preview could not be loaded. The URL may have expired.');
           setLoading(false);
         }
       }
@@ -126,10 +126,10 @@ export function PdfPreview({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // pdfjs v5: `canvas` wajib ada di RenderParameters
+        // pdfjs v5: `canvas` is required in RenderParameters
         await page.render({ canvasContext: ctx, viewport, canvas }).promise;
       } catch {
-        // Silent fail per page — page lain tetap render
+        // Silent fail per page — other pages still render
       }
     },
     [],
@@ -141,13 +141,13 @@ export function PdfPreview({
       <div className="flex items-center justify-center h-64 bg-muted/30 rounded-lg">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Memuat preview...</span>
+          <span className="text-sm">Loading preview...</span>
         </div>
       </div>
     );
   }
 
-  // ── Error — tombol retry re-fetch signed URL ────────────────
+  // ── Error — retry button re-fetches signed URL ──────────────
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 bg-muted/30 rounded-lg gap-3">
@@ -155,7 +155,7 @@ export function PdfPreview({
         {onRefresh && (
           <Button variant="outline" size="sm" onClick={onRefresh}>
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            Muat Ulang
+            Reload
           </Button>
         )}
       </div>
@@ -174,14 +174,14 @@ export function PdfPreview({
         <PdfPage key={num} renderPage={renderPage} pageNumber={num} />
       ))}
 
-      {/* Footer — "3 dari 48 halaman" */}
+      {/* Footer — "3 of 48 pages" */}
       {pageCount != null && pageCount > pagesToRender && (
         <div className="text-center py-4 bg-muted/30 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            Preview menampilkan {pagesToRender} dari {pageCount} halaman.
+            Preview shows {pagesToRender} of {pageCount} pages.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Beli untuk akses semua halaman.
+            Buy to access all pages.
           </p>
         </div>
       )}

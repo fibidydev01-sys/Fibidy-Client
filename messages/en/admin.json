@@ -1,0 +1,166 @@
+{
+  "admin": {
+    "metadata": {
+      "layoutTemplate": "%s | Admin - Fibidy",
+      "layoutDefault": "Admin - Fibidy"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "tenants": "Tenants",
+      "logs": "Audit Logs",
+      "maintenance": "Maintenance",
+      "menu": "Menu",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode",
+      "signOut": "Sign out"
+    },
+    "guard": {
+      "verifyingSession": "Verifying session..."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Overview of all platform metrics",
+      "stats": {
+        "totalTenants": "Total Tenants",
+        "totalTenantsSub": "+{count} this month",
+        "activeTenants": "Active Tenants",
+        "activeTenantsSub": "{count} suspended",
+        "suspendedTenants": "Suspended Tenants",
+        "suspendedTenantsSub": "Need attention",
+        "businessPlan": "Business Plan",
+        "businessPlanSub": "Active subscriptions",
+        "revenueThisMonth": "Revenue This Month",
+        "revenueThisMonthSub": "Total: {total}",
+        "newTenantsThisMonth": "New Tenants This Month",
+        "newTenantsThisMonthSub": "Latest registrations"
+      }
+    },
+    "tenants": {
+      "title": "Tenants",
+      "subtitleLoading": "Loading...",
+      "subtitleCount": "{count} tenants registered",
+      "searchPlaceholder": "Search name, email, or slug...",
+      "statusFilter": {
+        "placeholder": "Status",
+        "all": "All statuses",
+        "active": "Active",
+        "suspended": "Suspended",
+        "inactive": "Inactive"
+      },
+      "columns": {
+        "store": "Store",
+        "email": "Email",
+        "plan": "Plan",
+        "status": "Status",
+        "products": "Products",
+        "joined": "Joined"
+      },
+      "empty": "No tenants found",
+      "dash": "—",
+      "actions": {
+        "view": "View",
+        "suspend": "Suspend",
+        "unsuspend": "Unsuspend",
+        "viewStore": "View Store"
+      },
+      "detail": {
+        "notFound": "Tenant not found",
+        "sections": {
+          "storeInformation": "Store Information",
+          "subscription": "Subscription",
+          "paymentHistory": "Payment History"
+        },
+        "fields": {
+          "email": "Email",
+          "category": "Category",
+          "whatsapp": "WhatsApp",
+          "phone": "Phone",
+          "totalProducts": "Total Products",
+          "joined": "Joined",
+          "updated": "Updated",
+          "plan": "Plan",
+          "status": "Status",
+          "activeUntil": "Active Until",
+          "price": "Price",
+          "free": "Free"
+        },
+        "noSubscription": "No subscription yet",
+        "suspendDialog": {
+          "title": "Suspend Tenant?",
+          "descriptionPrefix": "Tenant",
+          "descriptionSuffix": "will not be able to log in after being suspended.",
+          "reasonLabel": "Suspend reason",
+          "reasonPlaceholder": "Enter suspend reason...",
+          "cancel": "Cancel",
+          "confirm": "Yes, suspend"
+        },
+        "unsuspendDialog": {
+          "title": "Unsuspend Tenant?",
+          "descriptionPrefix": "Tenant",
+          "descriptionSuffix": "will be reactivated.",
+          "cancel": "Cancel",
+          "confirm": "Yes, reactivate"
+        }
+      }
+    },
+    "logs": {
+      "title": "Audit Logs",
+      "subtitleLoading": "Loading...",
+      "subtitleCount": "{count} logs recorded",
+      "filters": {
+        "actionPlaceholder": "Filter action",
+        "allActions": "All actions",
+        "fromPlaceholder": "From date",
+        "toPlaceholder": "To date",
+        "reset": "Reset"
+      },
+      "actions": {
+        "SUSPEND_TENANT": "Suspend Tenant",
+        "UNSUSPEND_TENANT": "Unsuspend Tenant",
+        "EXTEND_SUBSCRIPTION": "Extend Subscription",
+        "CHANGE_PLAN": "Change Plan",
+        "CREATE_REDEEM_CODES": "Create Redeem Codes",
+        "DELETE_REDEEM_CODE": "Delete Redeem Code"
+      },
+      "columns": {
+        "time": "Time",
+        "action": "Action",
+        "targetId": "Target ID",
+        "details": "Details"
+      },
+      "empty": "No logs found",
+      "dash": "—"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "subtitle": "Tools to keep the database and platform healthy",
+      "cleanup": {
+        "title": "Cleanup Logs",
+        "description": "Delete old DownloadLog and WebhookEvent records to prevent DB bloat. Safe to run anytime — historical data required for accounting is not deleted.",
+        "downloadLogsLabel": "Download Logs (days)",
+        "downloadLogsHelper": "Delete records older than {days} days",
+        "webhookEventsLabel": "Webhook Events (days)",
+        "webhookEventsHelper": "Delete records older than {days} days",
+        "warningBold": "This cannot be undone.",
+        "warningBody": "Make sure the thresholds are correct before running. Deleted data cannot be recovered.",
+        "runButton": "Run Cleanup",
+        "runningButton": "Deleting records...",
+        "resultDownloadLogs": "Download logs",
+        "resultWebhookEvents": "Webhook events",
+        "confirmDialog": {
+          "title": "Run cleanup?",
+          "descIntro": "The following data will be permanently deleted from the database:",
+          "bullet1Bold": "DownloadLog",
+          "bullet1Middle": "older than",
+          "bullet1Suffix": "{days} days",
+          "bullet2Bold": "WebhookEvent",
+          "bullet2Middle": "older than",
+          "bullet2Suffix": "{days} days",
+          "footnote": "Purchase records, Tenant data, and Subscription history will NOT be affected.",
+          "cancel": "Cancel",
+          "confirm": "Yes, delete"
+        }
+      }
+    }
+  }
+}

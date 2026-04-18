@@ -67,7 +67,7 @@ export function TenantAbout({ features = [] }: { features: FeatureItem[] }) {
               ))}
             </CarouselContent>
 
-            {/* Desktop — arrow di luar kiri & kanan */}
+            {/* Desktop — arrows outside left & right */}
             {validFeatures.length > 1 && (
               <>
                 <CarouselPrevious className="hidden md:flex -left-10 lg:-left-12" />
@@ -75,7 +75,7 @@ export function TenantAbout({ features = [] }: { features: FeatureItem[] }) {
               </>
             )}
 
-            {/* Mobile — arrow di bawah tengah */}
+            {/* Mobile — arrows below, centered */}
             {validFeatures.length > 1 && (
               <div className="flex md:hidden justify-center gap-3 mt-6">
                 <CarouselPrevious className="static translate-y-0 translate-x-0" />

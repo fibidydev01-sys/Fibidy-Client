@@ -6,7 +6,7 @@
 // EDIT: Role-based navigation
 //
 // SELLER: Products, Studio, Digital, Library, Settings
-// BUYER:  Library, Mulai Berjualan
+// BUYER:  Library, Start Selling
 // ==========================================
 
 import Link from 'next/link';
@@ -26,13 +26,13 @@ const sellerNavItems: NavItemDef[] = [
   { href: '/dashboard/products', icon: LayoutDashboard, label: 'Products' },
   { href: '/dashboard/studio', icon: Layout, label: 'Studio' },
   { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
-  { href: '/dashboard/products/downloads', icon: History, label: 'Riwayat'  },
+  { href: '/dashboard/products/downloads', icon: History, label: 'History'  },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
 const buyerNavItems: NavItemDef[] = [
   { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
-  { href: '/dashboard/setup-store', icon: Store, label: 'Berjualan' },
+  { href: '/dashboard/setup-store', icon: Store, label: 'Sell' },
 ];
 
 export function MobileNavbar() {

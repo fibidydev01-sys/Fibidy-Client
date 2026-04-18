@@ -1,7 +1,7 @@
 'use client';
 
-// ─── Step 1: File Upload — upload file ke R2 ──────────────────────
-// v4: Import dari @/types/product dan @/components/dashboard/product/
+// ─── Step 1: File Upload — upload file to R2 ──────────────────────
+// v4: Import from @/types/product and @/components/dashboard/product/
 // v5: Display file size in KB instead of MB
 
 import { useRouter } from 'next/navigation';
@@ -35,19 +35,19 @@ interface StepUploadProps {
 function getKycMessage(kycStatus?: KycStatus): string {
   switch (kycStatus) {
     case 'NOT_STARTED':
-      return 'Kamu belum setup pembayaran Stripe. Selesaikan verifikasi dulu untuk bisa upload produk.';
+      return "You haven't set up Stripe payments yet. Complete verification first to upload products.";
     case 'PENDING':
-      return 'Verifikasi sedang diproses oleh Stripe. Tunggu konfirmasi sebelum bisa upload produk.';
+      return 'Verification is being processed by Stripe. Please wait for confirmation before uploading products.';
     case 'NEEDS_MORE_INFO':
-      return 'Stripe membutuhkan informasi tambahan. Lengkapi verifikasi untuk bisa upload produk.';
+      return 'Stripe requires additional information. Complete verification to upload products.';
     case 'PAST_DUE':
-      return 'Batas waktu verifikasi telah lewat. Segera selesaikan agar akun tidak dinonaktifkan.';
+      return 'The verification deadline has passed. Complete it immediately to avoid account deactivation.';
     case 'CHARGES_ONLY':
-      return 'Akun aktif untuk menerima pembayaran, tapi payout belum aktif. Lengkapi verifikasi dulu.';
+      return 'Your account can accept payments, but payouts are not yet active. Complete verification first.';
     case 'REJECTED':
-      return 'Verifikasi ditolak oleh Stripe. Hubungi support di halaman Settings.';
+      return 'Verification was rejected by Stripe. Contact support on the Settings page.';
     default:
-      return 'Selesaikan verifikasi Stripe terlebih dahulu untuk bisa upload dan menjual produk.';
+      return 'Complete Stripe verification first to upload and sell products.';
   }
 }
 
@@ -70,8 +70,8 @@ export function StepUpload({
       <div className="space-y-4">
         <div className="rounded-xl border px-4 py-3 text-sm bg-muted/50 border-border text-muted-foreground">
           <p>
-            <span className="font-semibold">File produk</span> — file tidak bisa diubah setelah upload.
-            Hapus produk dan buat baru jika perlu ganti file.
+            <span className="font-semibold">Product file</span> — the file cannot be changed after upload.
+            Delete the product and create a new one if you need to replace the file.
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export function StepUpload({
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                Verifikasi diperlukan
+                Verification required
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
                 {getKycMessage(kycStatus)}
@@ -119,14 +119,14 @@ export function StepUpload({
             className="w-full"
             onClick={() => router.push('/dashboard/settings')}
           >
-            Selesaikan Verifikasi di Settings
+            Complete Verification in Settings
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
 
         <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground/40 select-none cursor-not-allowed">
           <FileText className="h-8 w-8" />
-          <p className="text-sm">Upload tersedia setelah verifikasi selesai</p>
+          <p className="text-sm">Upload available after verification is complete</p>
         </div>
       </div>
     );
@@ -137,14 +137,14 @@ export function StepUpload({
     <div className="space-y-4">
       <div className="rounded-xl border px-4 py-3 text-sm bg-muted/50 border-border text-muted-foreground">
         <p>
-          <span className="font-semibold">Upload file digital —</span>{' '}
+          <span className="font-semibold">Upload digital file —</span>{' '}
           {storage ? (
             <>
-              {storage.allowedFileTypes.map((t) => t.toUpperCase()).join(', ')} · Maks {formatFileSizeFromMb(storage.maxFileSizeMb)} ·{' '}
-              {storage.used.gb}GB / {storage.quota.gb}GB terpakai
+              {storage.allowedFileTypes.map((t) => t.toUpperCase()).join(', ')} · Max {formatFileSizeFromMb(storage.maxFileSizeMb)} ·{' '}
+              {storage.used.gb}GB / {storage.quota.gb}GB used
             </>
           ) : (
-            'Memuat info storage...'
+            'Loading storage info...'
           )}
         </p>
       </div>
@@ -164,7 +164,7 @@ export function StepUpload({
       {!storage && (
         <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground">
           <FileText className="h-8 w-8" />
-          <p className="text-sm">Memuat konfigurasi storage...</p>
+          <p className="text-sm">Loading storage configuration...</p>
         </div>
       )}
     </div>

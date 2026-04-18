@@ -4,12 +4,12 @@
 // CONTACT SELLER BUTTON — v3
 //
 // Repurposed from WhatsAppOrderButton.
-// Fungsi: pre-sales contact channel via WhatsApp.
-// Buyer bisa tanya seller sebelum beli via Stripe.
+// Purpose: pre-sales contact channel via WhatsApp.
+// Buyer can ask the seller questions before buying via Stripe.
 //
-// Dipakai di:
+// Used in:
 //   - Discover detail page (alongside Buy button)
-//   - Bisa juga di store product detail
+//   - Can also be used in store product detail
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
@@ -76,7 +76,7 @@ Thank you! 🙏`;
     setIsSubmitting(false);
   };
 
-  // Kalau seller tidak punya WhatsApp, jangan render
+  // If the seller has no WhatsApp, don't render
   if (!sellerWhatsapp) return null;
 
   return (

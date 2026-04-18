@@ -37,7 +37,7 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
   const commonProps: HeroComponentProps = {
     title: tenant.heroTitle || heroConfig?.title || tenant.name || '',
     subtitle: tenant.heroSubtitle || heroConfig?.subtitle || tenant.description || '',
-    ctaText: tenant.heroCtaText || heroConfigSettings?.ctaText || 'Lihat Produk',
+    ctaText: tenant.heroCtaText || heroConfigSettings?.ctaText || 'View Products',
     ctaLink: tenant.heroCtaLink || heroConfigSettings?.ctaLink || '/products',
     backgroundImage: tenant.heroBackgroundImage || undefined,
     description: tenant.description || undefined,

@@ -83,9 +83,9 @@ export function UploadDropzone({
     >
       <Upload className="h-8 w-8 text-muted-foreground" />
       <div className="text-center">
-        <p className="text-sm font-medium">Drop file di sini atau klik untuk browse</p>
+        <p className="text-sm font-medium">Drop file here or click to browse</p>
         <p className="text-xs text-muted-foreground mt-1">
-          {allowedFileTypes.join(', ').toUpperCase()} · Maks {formatFileSizeFromMb(maxFileSizeMb)}
+          {allowedFileTypes.join(', ').toUpperCase()} · Max {formatFileSizeFromMb(maxFileSizeMb)}
         </p>
       </div>
       <input

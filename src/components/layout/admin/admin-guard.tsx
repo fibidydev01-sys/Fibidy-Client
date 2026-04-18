@@ -4,10 +4,10 @@
 // ADMIN GUARD
 // File: src/components/admin/admin-guard.tsx
 //
-// Pattern IDENTIK dengan src/components/auth/auth-guard.tsx
-// - Cek session via GET /api/admin/auth/me
-// - Loading state saat checking
-// - Redirect ke /admin/login kalau tidak authenticated
+// Pattern IDENTICAL to src/components/auth/auth-guard.tsx
+// - Check session via GET /api/admin/auth/me
+// - Loading state while checking
+// - Redirect to /admin/login if not authenticated
 // ==========================================
 
 import { useEffect } from 'react';
@@ -45,7 +45,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Memverifikasi sesi...</p>
+          <p className="text-sm text-muted-foreground">Verifying session...</p>
         </div>
       </div>
     );
@@ -58,8 +58,8 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
 // ==========================================
 // ADMIN GUEST GUARD
-// Redirect ke /admin kalau sudah login
-// Dipakai di halaman /admin/login
+// Redirect to /admin if already logged in
+// Used on /admin/login page
 // ==========================================
 
 export function AdminGuestGuard({ children }: AdminGuardProps) {

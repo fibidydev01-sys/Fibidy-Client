@@ -52,13 +52,13 @@ export function useAdminLogin() {
         const response = await adminApi.login(email, password);
         setAdmin(response.admin);
         setChecked(true);
-        toast.success('Login berhasil', `Selamat datang, ${response.admin.name ?? response.admin.email}`);
+        toast.success('Login successful', `Welcome, ${response.admin.name ?? response.admin.email}`);
         router.push('/admin');
         return response;
       } catch (err) {
         const message = getErrorMessage(err);
         setError(message);
-        toast.error('Login gagal', message);
+        toast.error('Login failed', message);
         throw err;
       } finally {
         setIsLoading(false);
@@ -85,7 +85,7 @@ export function useAdminLogout() {
       // Ignore error
     }
     reset();
-    toast.success('Logout berhasil');
+    toast.success('Logged out');
     router.push('/admin/login');
   }, [reset, router]);
 
@@ -168,22 +168,22 @@ export function useSuspendTenant() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       adminApi.suspendTenant(id, reason),
     onSuccess: (res) => {
-      toast.success('Tenant di-suspend', res.message);
+      toast.success('Tenant suspended', res.message);
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
     },
     onError: (err) => {
-      toast.error('Gagal suspend', getErrorMessage(err));
+      toast.error('Failed to suspend', getErrorMessage(err));
     },
   });
 
   const { mutateAsync: unsuspend } = useMutation({
     mutationFn: (id: string) => adminApi.unsuspendTenant(id),
     onSuccess: (res) => {
-      toast.success('Tenant diaktifkan', res.message);
+      toast.success('Tenant reactivated', res.message);
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
     },
     onError: (err) => {
-      toast.error('Gagal unsuspend', getErrorMessage(err));
+      toast.error('Failed to unsuspend', getErrorMessage(err));
     },
   });
 

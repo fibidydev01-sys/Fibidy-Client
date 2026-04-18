@@ -1,0 +1,178 @@
+{
+  "store": {
+    "metadata": {
+      "notFoundTitle": "Store Not Found",
+      "notFoundDescription": "The store you are looking for does not exist or is no longer active.",
+      "productNotFoundTitle": "Product Not Found",
+      "productNotFoundDescription": "The product you are looking for could not be found.",
+      "aboutTitle": "About Us | {tenant}",
+      "contactTitle": "Contact | {tenant}",
+      "productsTitle": "All Products",
+      "notFound": "Not Found"
+    },
+    "header": {
+      "nav": {
+        "home": "Home",
+        "featured": "Featured",
+        "products": "Products",
+        "contact": "Contact"
+      },
+      "menuLabel": "Menu",
+      "reachUs": "Reach us through:",
+      "whatsapp": "WhatsApp",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "viewContactPage": "View contact page"
+    },
+    "footer": {
+      "directContact": {
+        "eyebrow": "Direct Contact",
+        "description": "Fast WhatsApp responses. We're here to help with your questions.",
+        "cta": "Chat via WhatsApp"
+      },
+      "socialTitle": "Social Media",
+      "whatsappTemplate": "Hi {name}, I'm interested in your products.",
+      "copyright": "© {year} {name}. All rights reserved."
+    },
+    "products": {
+      "title": "All Products",
+      "collectionEyebrow": "Collection",
+      "viewAll": "View All Products",
+      "empty": "No products found",
+      "emptyHint": "Try adjusting your filters or search keywords.",
+      "searchPlaceholder": "Search products...",
+      "filterAll": "All",
+      "featuredTitle": "Featured Products",
+      "relatedTitle": "Related products",
+      "breadcrumb": "Products",
+      "showing": "Showing page {current} of {total} ({total} products)",
+      "showingLabel": "Showing page {current} of {total} ({count} products)"
+    },
+    "product": {
+      "detail": {
+        "shareLabel": "Share this product:",
+        "buyFallbackDescription": "Buy {name} at {tenant}",
+        "imageAlt": "{name} — image {index}",
+        "thumbAlt": "{name} — thumbnail {index}",
+        "descriptionHeading": "Product description",
+        "actionsDivider": "or",
+        "imagePosition": "{current} / {total}"
+      },
+      "gallery": {
+        "noImage": "No Image",
+        "zoomButton": "Zoom"
+      },
+      "badge": {
+        "digital": "Digital",
+        "custom": "Custom",
+        "main": "★ Main",
+        "business": "Business"
+      },
+      "info": {
+        "priceContactSeller": "Price: Contact seller",
+        "discountBadge": "-{percent}%"
+      },
+      "notFound": {
+        "title": "Product Not Found",
+        "description": "This product could not be found or is no longer available.",
+        "backToStore": "Back to Store"
+      }
+    },
+    "notFound": {
+      "title": "Store Not Found",
+      "descriptionWithSlug": "The store \"{slug}\" does not exist or is no longer active.",
+      "descriptionGeneric": "The store you are looking for does not exist or is no longer active.",
+      "backHome": "Back to Home"
+    },
+    "landingNotConfigured": {
+      "title": "Landing page not configured yet",
+      "description": "Enable sections in Dashboard > Landing Builder."
+    },
+    "contactForm": {
+      "sectionTitle": "Send a Message",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "email@example.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write your message...",
+      "sendButton": "Send via WhatsApp",
+      "whatsappTemplate": "Hi {name}!\n\nName: {senderName}\nEmail: {senderEmail}\nMessage: {message}"
+    },
+    "tenantContact": {
+      "heading": "Contact Us",
+      "whatsappTemplate": "Hi {name}, I'm interested in your products.",
+      "sectionEyebrow": "Send a Message"
+    },
+    "tenantProducts": {
+      "collectionBadge": "Collection"
+    },
+    "checkout": {
+      "contactSeller": "Contact Seller",
+      "contactSellerDialog": {
+        "title": "Contact Seller",
+        "subtitlePrefix": "Ask {name} about",
+        "nameLabel": "Name (optional)",
+        "namePlaceholder": "Your name",
+        "questionLabel": "Question (optional)",
+        "questionPlaceholder": "Any questions about this product...",
+        "cancel": "Cancel",
+        "send": "Send via WhatsApp"
+      },
+      "contactSellerWhatsappTemplate": "Hi {name},\n\nI'm interested in your product:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nThank you! 🙏",
+      "askSellerWhatsapp": "Ask Seller via WhatsApp",
+      "orderWhatsapp": "Order via WhatsApp",
+      "orderDialog": {
+        "titleGeneric": "Order via WhatsApp",
+        "titleAskSeller": "Ask Seller via WhatsApp",
+        "subtitleOrder": "Complete your order details to send to {name}",
+        "subtitleAsk": "Ask {name} about \"{product}\"",
+        "nameLabel": "Name (optional)",
+        "namePlaceholder": "Your name",
+        "notesLabel": "Notes (optional)",
+        "notesLabelAsk": "Question (optional)",
+        "notesPlaceholder": "Any additional notes...",
+        "notesPlaceholderAsk": "Write your question here...",
+        "cancel": "Cancel",
+        "send": "Send via WhatsApp"
+      },
+      "orderWhatsappTemplate": "Hi {name},\n\nI'd like to order:\n\n*{product}*\n{namePart}{notesPart}\n\nPlease confirm availability.\nThank you! 🙏",
+      "stripe": {
+        "signInToBuy": "Sign in to Buy",
+        "buyNow": "Buy Now — {price}",
+        "loading": "Loading...",
+        "redirecting": "Redirecting to Stripe...",
+        "stillProcessingTitle": "Still processing your previous checkout",
+        "stillProcessingBody": "Wait a few seconds and try again. If you were already redirected to Stripe, complete the payment in that tab."
+      }
+    },
+    "productList": {
+      "suffix": "{tenant} Products"
+    },
+    "breadcrumb": {
+      "products": "Products"
+    },
+    "socialShare": {
+      "trigger": "Share",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "whatsapp": "WhatsApp",
+      "copyLink": "Copy Link",
+      "copiedLink": "Copied!",
+      "nativeShare": "Share...",
+      "titles": {
+        "facebook": "Share to Facebook",
+        "twitter": "Share to Twitter",
+        "linkedin": "Share to LinkedIn",
+        "whatsapp": "Share to WhatsApp",
+        "copyLink": "Copy Link"
+      },
+      "toast": {
+        "copySuccess": "Link copied successfully!",
+        "copyFailed": "Failed to copy link"
+      }
+    }
+  }
+}

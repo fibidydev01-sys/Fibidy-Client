@@ -149,13 +149,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       {/* Full-screen zoom */}
       {zoomOpen && (
         <>
-          {/* Backdrop — klik nutup */}
+          {/* Backdrop — click to close */}
           <div
             className="fixed inset-0 z-50 bg-black/95"
             onClick={() => setZoomOpen(false)}
           />
 
-          {/* Content — pointer-events-none biar klik tembus ke backdrop, kecuali elemen interaktif */}
+          {/* Content — pointer-events-none so clicks pass through to backdrop, except interactive elements */}
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
 
             {/* Image */}

@@ -1,7 +1,7 @@
 // ==========================================
 // PRODUCT INFO
-// Fix: pass currency ke formatPrice
-// Digital → USD, Custom/Jasa → IDR atau sesuai product.currency
+// Fix: pass currency to formatPrice
+// Digital → USD, Custom/Service → IDR or based on product.currency
 // ==========================================
 
 import { Badge } from '@/components/ui/badge';
@@ -18,8 +18,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const { isCustomPrice, hasDiscount, discountPercent } = getProductPricing(product);
 
   // Resolve currency:
-  //   Digital (fileKey != null) → pakai product.currency (selalu 'USD' dari BE)
-  //   Custom/Jasa (fileKey == null) → fallback 'IDR'
+  //   Digital (fileKey != null) → use product.currency (always 'USD' from BE)
+  //   Custom/Service (fileKey == null) → fallback 'IDR'
   const isDigital = !!product.fileKey;
   const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
 
@@ -52,7 +52,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {isCustomPrice && (
         <p className="text-lg text-muted-foreground italic">
-          Harga: Hubungi seller
+          Price: Contact seller
         </p>
       )}
 

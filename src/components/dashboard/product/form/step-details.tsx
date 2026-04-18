@@ -2,7 +2,7 @@
 
 // ─── Step 0: Details — v3 unified digital ──────────────────────────────────
 // USD only, no showPrice toggle, no WhatsApp order flow
-// v5: Field harga USD & harga coret seragam (min, step, visual)
+// v5: USD price & compare price fields unified (min, step, visual)
 
 import { useState } from 'react';
 import {
@@ -85,7 +85,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                   id="isActive"
                 />
                 <Label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
-                  Aktifkan
+                  Active
                 </Label>
               </div>
             </FormItem>
@@ -109,7 +109,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                         !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value || 'Kategori'}
+                      {field.value || 'Category'}
                       <span className="ml-2 text-muted-foreground/50 text-xs">▼</span>
                     </Button>
                   </FormControl>
@@ -117,19 +117,19 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                 <PopoverContent className="w-[260px] p-0" align="end">
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Cari atau buat kategori..."
+                      placeholder="Search or create category..."
                       value={categorySearch}
                       onValueChange={setCategorySearch}
                     />
                     <CommandList>
                       <CommandEmpty className="py-3 px-4 text-sm text-muted-foreground">
                         {categorySearch
-                          ? <span>Tidak ada kategori &quot;{categorySearch}&quot;</span>
-                          : <span>Ketik untuk mencari atau membuat kategori</span>
+                          ? <span>No category &quot;{categorySearch}&quot;</span>
+                          : <span>Type to search or create a category</span>
                         }
                       </CommandEmpty>
                       {filteredCategories.length > 0 && (
-                        <CommandGroup heading="Kategori">
+                        <CommandGroup heading="Category">
                           {filteredCategories.map((cat) => (
                             <CommandItem
                               key={cat}
@@ -148,14 +148,14 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                         </CommandGroup>
                       )}
                       {isNewCategory && (
-                        <CommandGroup heading="Buat baru">
+                        <CommandGroup heading="Create new">
                           <CommandItem
                             value={`__create__${categorySearch}`}
                             onSelect={handleCreateCategory}
                             className="text-primary font-medium"
                           >
                             <span className="mr-2">+</span>
-                            Buat &quot;{categorySearch}&quot;
+                            Create &quot;{categorySearch}&quot;
                           </CommandItem>
                         </CommandGroup>
                       )}
@@ -176,11 +176,11 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-semibold">
-                Nama produk <span className="text-destructive">*</span>
+                Product name <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="cth. Ebook Belajar NestJS, Template Notion"
+                  placeholder="e.g. NestJS Learning Ebook, Notion Template"
                   className="h-11"
                   {...field}
                 />
@@ -195,17 +195,17 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-semibold">Deskripsi</FormLabel>
+              <FormLabel className="text-sm font-semibold">Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Deskripsikan produk — isi, jumlah halaman, fitur utama..."
+                  placeholder="Describe the product — contents, page count, key features..."
                   rows={4}
                   className="resize-none"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Deskripsi yang jelas membantu buyer membeli dengan lebih yakin.
+                A clear description helps buyers purchase with confidence.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -222,7 +222,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-semibold">
-                  Harga (USD) <span className="text-destructive">*</span>
+                  Price (USD) <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -241,7 +241,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                     />
                   </div>
                 </FormControl>
-                <FormDescription>Harga dalam USD — buyer bayar via Stripe</FormDescription>
+                <FormDescription>Price in USD — buyers pay via Stripe</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -252,7 +252,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
             name="comparePrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">Harga coret</FormLabel>
+                <FormLabel className="text-sm font-semibold">Compare-at price</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground select-none pointer-events-none">
@@ -271,7 +271,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                   </div>
                 </FormControl>
                 <FormDescription>
-                  Harga sebelum diskon — ditampilkan dengan coretan
+                  Original price before discount — shown with strikethrough
                 </FormDescription>
                 <FormMessage />
               </FormItem>

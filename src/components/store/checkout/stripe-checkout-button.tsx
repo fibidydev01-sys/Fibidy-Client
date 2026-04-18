@@ -3,12 +3,12 @@
 // ==========================================
 // STRIPE CHECKOUT BUTTON — Store Product Detail
 //
-// Dipakai di: /store/[slug]/products/[id]
-// Berbeda dari BuyButton di /discover:
-//   - Tidak perlu policy checkbox (itu khusus discover marketplace)
-//   - Langsung redirect ke Stripe checkout
-//   - Buyer harus login dulu (redirect ke /login kalau belum)
-//   - Source: DIRECT (beli langsung dari toko seller)
+// Used in: /store/[slug]/products/[id]
+// Different from BuyButton in /discover:
+//   - No policy checkbox needed (that's specific to the discover marketplace)
+//   - Redirects directly to Stripe checkout
+//   - Buyer must sign in first (redirects to /login if not)
+//   - Source: DIRECT (bought directly from the seller's store)
 //
 // [TIDUR-NYENYAK FIX #4] Explicit 409 Conflict handling:
 // - Backend uses Redis setNX lock (TTL 120s) to prevent duplicate
@@ -47,7 +47,7 @@ export function StripeCheckoutButton({
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
-      // Redirect ke login dengan return URL
+      // Redirect to login with return URL
       const returnUrl = encodeURIComponent(window.location.pathname);
       router.push(`/login?from=${returnUrl}`);
       return;
@@ -65,10 +65,10 @@ export function StripeCheckoutButton({
       // Redis lock is still held. Tell them to wait, don't panic.
       if (err instanceof ApiRequestError && err.isConflict()) {
         toast.warning(
-          'Sedang memproses checkout sebelumnya',
+          'Still processing your previous checkout',
           {
             description:
-              'Tunggu beberapa detik lalu coba lagi. Jika kamu sudah diarahkan ke Stripe, selesaikan pembayaran di tab tersebut.',
+              'Wait a few seconds and try again. If you were already redirected to Stripe, complete the payment in that tab.',
           },
         );
       } else {
@@ -78,12 +78,12 @@ export function StripeCheckoutButton({
     }
   };
 
-  // Skeleton selama auth belum dicek
+  // Skeleton while auth is still being checked
   if (!isChecked) {
     return (
       <Button className={className} disabled size="lg">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Memuat...
+        Loading...
       </Button>
     );
   }
@@ -92,7 +92,7 @@ export function StripeCheckoutButton({
     return (
       <Button className={className} size="lg" onClick={handleCheckout}>
         <LogIn className="mr-2 h-4 w-4" />
-        Login untuk Membeli
+        Sign in to Buy
       </Button>
     );
   }
@@ -107,12 +107,12 @@ export function StripeCheckoutButton({
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Mengarahkan ke Stripe...
+          Redirecting to Stripe...
         </>
       ) : (
         <>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Beli Sekarang — {formatPrice(price, currency)}
+          Buy Now — {formatPrice(price, currency)}
         </>
       )}
     </Button>

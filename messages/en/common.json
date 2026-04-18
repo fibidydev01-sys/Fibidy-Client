@@ -1,0 +1,92 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "retry": "Retry",
+      "close": "Close",
+      "open": "Open",
+      "upload": "Upload",
+      "download": "Download",
+      "search": "Search",
+      "filter": "Filter",
+      "reset": "Reset",
+      "submit": "Submit",
+      "signIn": "Sign in",
+      "signOut": "Sign out",
+      "signUp": "Sign up",
+      "tryAgain": "Try Again",
+      "viewAll": "View All",
+      "or": "or"
+    },
+    "state": {
+      "loading": "Loading...",
+      "notFound": "Not found",
+      "empty": "Nothing here yet",
+      "error": "Something went wrong",
+      "success": "Success",
+      "comingSoon": "Coming soon",
+      "noImage": "No Image",
+      "noResults": "No results found"
+    },
+    "labels": {
+      "optional": "Optional",
+      "required": "Required",
+      "photo": "Photo {index}",
+      "dash": "—",
+      "file": "File"
+    },
+    "pagination": {
+      "page": "Page {current} of {total}",
+      "pageShort": "{current} / {total}",
+      "prev": "Previous",
+      "next": "Next",
+      "showing": "Showing page {current} of {total} ({count} products)",
+      "countSuffix": "({count} products)",
+      "downloadsSuffix": "({count} downloads)"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "products": "Products",
+      "backToStore": "Back to Store",
+      "backToHome": "Back to Home"
+    },
+    "categories": {
+      "groups": {
+        "FOOD_DRINK": "Food & Drink",
+        "HEALTH_BEAUTY": "Health & Beauty",
+        "RETAIL": "Retail",
+        "HOME_SERVICES": "Home Services",
+        "AUTOMOTIVE": "Automotive",
+        "LIFESTYLE_ENTERTAINMENT": "Lifestyle & Entertainment",
+        "PROFESSIONAL_SERVICES": "Professional Services"
+      }
+    },
+    "pwa": {
+      "androidTitle": "Install Fibidy on your phone",
+      "iosTitle": "Add Fibidy to your home screen"
+    },
+    "time": {
+      "daysLeft": "{days} days left",
+      "daysLeftShort": "({days}d left)"
+    },
+    "productType": {
+      "digital": "Digital",
+      "custom": "Custom",
+      "fileFallback": "FILE",
+      "contactSeller": "Contact seller"
+    },
+    "price": {
+      "discountBadge": "-{percent}%",
+      "currencyUsd": "USD"
+    }
+  }
+}

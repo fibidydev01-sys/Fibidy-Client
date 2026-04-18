@@ -1,19 +1,19 @@
 'use client';
 
-// KYC Banner — selalu visible, teks berubah per state.
+// KYC Banner — always visible, text changes per state.
 //
 // State coverage:
-//   NOT_STARTED (no account)    → Setup Pembayaran
-//   NOT_STARTED (has account)   → Lanjutkan Setup
+//   NOT_STARTED (no account)    → Setup Payment
+//   NOT_STARTED (has account)   → Continue Setup
 //   PENDING                     → info, no action
-//   NEEDS_MORE_INFO (no errors) → warning, Lengkapi Dokumen
+//   NEEDS_MORE_INFO (no errors) → warning, Complete Documents
 //   NEEDS_MORE_INFO (errors)    → warning, render error list
-//   PAST_DUE                    → error merah, urgent
-//   CHARGES_ONLY                → warning, Aktifkan Payout
-//   ACTIVE (no future req)      → success hijau, no action
-//   ACTIVE (has future req)     → info, Lihat Pembaruan
-//   REJECTED                    → error merah, Hubungi Support
-//   isPolling                   → loading state setelah balik dari Stripe
+//   PAST_DUE                    → red error, urgent
+//   CHARGES_ONLY                → warning, Activate Payout
+//   ACTIVE (no future req)      → green success, no action
+//   ACTIVE (has future req)     → info, View Updates
+//   REJECTED                    → red error, Contact Support
+//   isPolling                   → loading state after returning from Stripe
 
 import { useInitiateKyc } from '@/hooks/dashboard/use-products';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -32,7 +32,7 @@ interface KycBannerProps {
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('id-ID', {
+  return new Date(iso).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -49,7 +49,7 @@ export function KycBanner({
 }: KycBannerProps) {
   const { initiateKyc, isLoading } = useInitiateKyc();
 
-  // ── isPolling — merchant baru balik dari Stripe ───────────────
+  // ── isPolling — merchant just returned from Stripe ───────────
   if (isPolling) {
     return (
       <Alert>
@@ -57,21 +57,21 @@ export function KycBanner({
           <Label />
           <div className="flex items-center gap-2 mt-1">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-            <span className="text-sm">Memeriksa status verifikasi...</span>
+            <span className="text-sm">Checking verification status...</span>
           </div>
         </AlertDescription>
       </Alert>
     );
   }
 
-  // ── Belum ada data dari server ────────────────────────────────
+  // ── No data from server yet ───────────────────────────────────
   if (!kycStatus) {
     return (
       <Alert>
         <AlertDescription>
           <Label />
           <p className="text-sm mt-1 text-muted-foreground">
-            Memuat status verifikasi...
+            Loading verification status...
           </p>
         </AlertDescription>
       </Alert>
@@ -87,15 +87,15 @@ export function KycBanner({
           <Label />
           <p className="text-sm">
             {isReturning
-              ? 'Kamu belum menyelesaikan setup pembayaran. Lanjutkan dari mana kamu berhenti.'
-              : 'Setup pembayaran untuk mulai menjual produk digital.'}
+              ? "You haven't finished setting up payments. Pick up where you left off."
+              : 'Set up payments to start selling digital products.'}
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
           >
-            {isReturning ? 'Lanjutkan Setup' : 'Setup Pembayaran'}
+            {isReturning ? 'Continue Setup' : 'Set Up Payments'}
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -109,8 +109,8 @@ export function KycBanner({
         <AlertDescription className="space-y-2">
           <Label />
           <p className="text-sm">
-            Sedang diverifikasi oleh Stripe. Proses ini biasanya memakan
-            waktu 1–2 hari kerja.
+            Verification in progress with Stripe. This usually takes 1–2
+            business days.
           </p>
         </AlertDescription>
       </Alert>
@@ -126,7 +126,7 @@ export function KycBanner({
           {errors.length > 0 ? (
             <>
               <p className="text-sm font-medium">
-                Verifikasi membutuhkan perbaikan:
+                Verification requires fixes:
               </p>
               <ul className="list-disc list-inside space-y-1">
                 {errors.map((err, i) => (
@@ -138,8 +138,8 @@ export function KycBanner({
             </>
           ) : (
             <p className="text-sm">
-              Stripe membutuhkan informasi tambahan untuk melanjutkan
-              verifikasi akun.
+              Stripe needs additional information to continue account
+              verification.
             </p>
           )}
           <ActionButton
@@ -148,7 +148,7 @@ export function KycBanner({
             isLoading={isLoading}
             variant="outline"
           >
-            Lengkapi Dokumen
+            Complete Documents
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -162,11 +162,11 @@ export function KycBanner({
         <AlertDescription className="space-y-2">
           <Label />
           <p className="text-sm font-semibold">
-            MENDESAK: Batas waktu verifikasi telah lewat.
+            URGENT: The verification deadline has passed.
           </p>
           <p className="text-sm">
-            Akun kamu berisiko dinonaktifkan segera. Lengkapi verifikasi
-            sekarang.
+            Your account is at risk of being deactivated soon. Complete
+            verification now.
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
@@ -174,7 +174,7 @@ export function KycBanner({
             isLoading={isLoading}
             variant="outline"
           >
-            Lengkapi Sekarang
+            Complete Now
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -188,16 +188,15 @@ export function KycBanner({
         <AlertDescription className="space-y-2">
           <Label />
           <p className="text-sm">
-            Akun aktif untuk menerima pembayaran. Pencairan dana ke
-            rekening belum aktif — lengkapi verifikasi untuk mengaktifkan
-            payout.
+            Account active for accepting payments. Payouts to your bank are
+            not yet active — complete verification to enable payouts.
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
           >
-            Aktifkan Payout
+            Activate Payouts
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -212,10 +211,10 @@ export function KycBanner({
           <AlertDescription className="space-y-2">
             <Label />
             <p className="text-sm">
-              Akun aktif. Ada pembaruan persyaratan dari Stripe yang perlu
-              dilengkapi
+              Account active. Stripe has new requirement updates that need
+              to be completed
               {futureRequirementsDeadline
-                ? ` sebelum ${formatDate(futureRequirementsDeadline)}`
+                ? ` before ${formatDate(futureRequirementsDeadline)}`
                 : ''}
               .
             </p>
@@ -225,7 +224,7 @@ export function KycBanner({
               isLoading={isLoading}
               variant="outline"
             >
-              Lihat Pembaruan
+              View Updates
             </ActionButton>
           </AlertDescription>
         </Alert>
@@ -237,8 +236,7 @@ export function KycBanner({
         <AlertDescription>
           <Label className="text-green-700 dark:text-green-400" />
           <p className="text-sm text-green-800 dark:text-green-300 mt-1">
-            Akun terverifikasi. Kamu bisa menerima pembayaran dan
-            mencairkan dana.
+            Account verified. You can accept payments and withdraw funds.
           </p>
         </AlertDescription>
       </Alert>
@@ -252,11 +250,11 @@ export function KycBanner({
         <AlertDescription className="space-y-2">
           <Label />
           <p className="text-sm">
-            Verifikasi akun ditolak oleh Stripe. Hubungi tim support kami
-            untuk bantuan.
+            Account verification was rejected by Stripe. Contact our support
+            team for help.
           </p>
           <Button size="sm" variant="outline" asChild>
-            <a href="mailto:support@fibidy.com">Hubungi Support</a>
+            <a href="mailto:support@fibidy.com">Contact Support</a>
           </Button>
         </AlertDescription>
       </Alert>
@@ -273,7 +271,7 @@ function Label({ className }: { className?: string }) {
     <p
       className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${className ?? ''}`}
     >
-      Verifikasi Stripe Connect
+      Stripe Connect Verification
     </p>
   );
 }

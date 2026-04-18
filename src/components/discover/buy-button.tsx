@@ -32,10 +32,10 @@ export function BuyButton({
       <div className="mt-8 space-y-2">
         <Button className="w-full" size="lg" onClick={open}>
           <LogIn className="mr-2 h-4 w-4" />
-          Login untuk Membeli
+          Sign in to Buy
         </Button>
         <p className="text-xs text-center text-muted-foreground">
-          Butuh akun untuk melanjutkan pembelian
+          An account is required to continue with the purchase
         </p>
       </div>
     );
@@ -64,8 +64,8 @@ export function BuyButton({
       >
         <ShoppingCart className="mr-2 h-4 w-4" />
         {isLoading
-          ? 'Mengarahkan ke Stripe...'
-          : `Beli — $${product.price.toFixed(2)}`}
+          ? 'Redirecting to Stripe...'
+          : `Buy — $${product.price.toFixed(2)}`}
       </Button>
     </div>
   );

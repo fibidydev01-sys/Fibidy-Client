@@ -2,7 +2,7 @@
 
 // ==========================================
 // PRODUCTS GRID — v4 Unified Dashboard
-// v4: Hooks dari use-products (bukan use-digital-products)
+// v4: Hooks from use-products (not use-digital-products)
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -60,9 +60,9 @@ export function ProductsGrid({ products }: ProductsGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Belum ada produk digital.</p>
+        <p className="text-muted-foreground">No digital products yet.</p>
         <p className="text-sm text-muted-foreground mt-1">
-          Klik &quot;Tambah Produk&quot; untuk mulai menjual.
+          Click &quot;Add Product&quot; to start selling.
         </p>
       </div>
     );

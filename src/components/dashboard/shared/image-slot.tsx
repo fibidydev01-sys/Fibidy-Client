@@ -61,7 +61,7 @@ export function FilledSlot({ url, index, onRemove, draggable = false, children }
       >
         <Image
           src={url}
-          alt={`Foto ${index + 1}`}
+          alt={`Photo ${index + 1}`}
           fill
           className="object-cover pointer-events-none"
           sizes="(max-width: 640px) 50vw, 20vw"
@@ -134,7 +134,7 @@ export function EmptySlot({ index, onClick, isLoading, label, children }: EmptyS
           <>
             <ImagePlus className="h-6 w-6 text-muted-foreground/50" />
             <span className="text-[11px] font-medium text-muted-foreground/60">
-              {label ?? `Foto ${index + 1}`}
+              {label ?? `Photo ${index + 1}`}
             </span>
           </>
         )}

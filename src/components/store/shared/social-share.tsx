@@ -50,7 +50,7 @@ export function SocialShare({
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedDescription}`,
-    // ✅ FIX: WhatsApp dengan line break agar URL terpisah (trigger OG fetch)
+    // ✅ FIX: WhatsApp with line break so URL is separated (triggers OG fetch)
     whatsapp: `https://wa.me/?text=${encodedTitle}%0A%0A${encodedUrl}`,
   };
 
@@ -59,10 +59,10 @@ export function SocialShare({
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      toast.success('Link berhasil disalin!');
+      toast.success('Link copied successfully!');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Gagal menyalin link');
+      toast.error('Failed to copy link');
     }
   };
 
@@ -99,7 +99,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('facebook')}
-          title="Share ke Facebook"
+          title="Share to Facebook"
           className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
         >
           <Facebook className="h-4 w-4" />
@@ -108,7 +108,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('twitter')}
-          title="Share ke Twitter"
+          title="Share to Twitter"
           className="hover:bg-sky-50 hover:text-sky-500 hover:border-sky-200"
         >
           <Twitter className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('linkedin')}
-          title="Share ke LinkedIn"
+          title="Share to LinkedIn"
           className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
         >
           <Linkedin className="h-4 w-4" />
@@ -126,7 +126,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('whatsapp')}
-          title="Share ke WhatsApp"
+          title="Share to WhatsApp"
           className="hover:bg-green-50 hover:text-green-600 hover:border-green-200"
         >
           <MessageCircle className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={handleCopyLink}
-          title="Salin Link"
+          title="Copy Link"
         >
           {copied ? (
             <Check className="h-4 w-4 text-green-600" />
@@ -153,7 +153,7 @@ export function SocialShare({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className={className}>
           <Share2 className="h-4 w-4 mr-2" />
-          Bagikan
+          Share
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -179,12 +179,12 @@ export function SocialShare({
           ) : (
             <Link2 className="h-4 w-4 mr-2" />
           )}
-          {copied ? 'Tersalin!' : 'Salin Link'}
+          {copied ? 'Copied!' : 'Copy Link'}
         </DropdownMenuItem>
         {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
           <DropdownMenuItem onClick={handleNativeShare}>
             <Share2 className="h-4 w-4 mr-2" />
-            Bagikan...
+            Share...
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

@@ -1,4 +1,25 @@
+// ==========================================
+// NEXT.JS CONFIG — WRAPPED WITH next-intl PLUGIN
+//
+// CHANGES FROM ORIGINAL:
+//   1. Import createNextIntlPlugin
+//   2. Pass config through withNextIntl() in the default export
+//
+// UNCHANGED:
+//   - typescript.ignoreBuildErrors
+//   - turbopack config
+//   - images config (all remotePatterns + formats + sizes)
+//   - experimental.optimizePackageImports
+//   - headers() (security, caching, sitemap, manifest, sw.js, favicon)
+//   - redirects() (empty)
+//   - reactStrictMode, poweredByHeader, trailingSlash, compress
+// ==========================================
+
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// Point the plugin at our request config file
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // ==========================================
@@ -136,4 +157,4 @@ const nextConfig: NextConfig = {
   compress: true,
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -1,0 +1,55 @@
+{
+  "discover": {
+    "metadata": {
+      "listTitle": "Discover Digital Products",
+      "listDescription": "Browse digital products from all creators on Fibidy",
+      "layoutTemplate": "%s | Discover — Fibidy",
+      "layoutDefault": "Discover Digital Products — Fibidy",
+      "detailNotFound": "Product Not Found",
+      "detailFallbackDescription": "Buy {name} on Fibidy"
+    },
+    "header": {
+      "title": "Discover"
+    },
+    "list": {
+      "title": "Discover",
+      "searchPlaceholder": "Search digital products...",
+      "filterAll": "All",
+      "empty": "No products found."
+    },
+    "detail": {
+      "previewHeading": "Preview",
+      "previewNotAvailable": "Preview not available",
+      "descriptionHeading": "Description",
+      "pages": "{count} pages",
+      "sold": "{count} sold",
+      "policyNotice": {
+        "boldPrefix": "All sales are final.",
+        "body": "Digital products cannot be returned once purchased. Please review the preview above before buying."
+      },
+      "contactHint": "Have questions? Contact the seller directly via WhatsApp before purchasing."
+    },
+    "buyButton": {
+      "signInToBuy": "Sign in to Buy",
+      "signInHint": "An account is required to continue with the purchase",
+      "buyNow": "Buy — ${price}",
+      "redirecting": "Redirecting to Stripe...",
+      "policyAgreement": "I understand that all sales are final and digital products cannot be returned once purchased."
+    },
+    "pdfPreview": {
+      "loading": "Loading preview...",
+      "error": "Preview could not be loaded. The URL may have expired.",
+      "reload": "Reload",
+      "pageRange": "Preview shows {shown} of {total} pages.",
+      "buyHint": "Buy to access all pages."
+    },
+    "notFound": {
+      "title": "Product Not Found",
+      "description": "This product is not available or has been removed.",
+      "backButton": "Back to Discover"
+    },
+    "error": {
+      "retryButton": "Try Again"
+    }
+  }
+}

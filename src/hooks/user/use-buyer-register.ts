@@ -3,13 +3,13 @@
 // ==========================================
 // USE BUYER REGISTER
 //
-// Hook untuk register buyer dari AuthDialog di /discover.
-// Setelah register:
-//   1. Set tenant ke store (isAuthenticated = true)
-//   2. Tutup dialog
-//   3. User langsung bisa klik "Beli" tanpa redirect
+// Hook for buyer registration from AuthDialog on /discover.
+// After register:
+//   1. Set tenant to store (isAuthenticated = true)
+//   2. Close dialog
+//   3. User can immediately click "Buy" without redirect
 //
-// Tidak ada redirect — user tetap di halaman produk.
+// No redirect — user stays on product page.
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -37,18 +37,18 @@ export function useBuyerRegister() {
         setTenant(response.tenant);
         setChecked(true);
 
-        toast.success('Pendaftaran berhasil!', {
-          description: 'Kamu sekarang bisa membeli produk.',
+        toast.success('Registration successful!', {
+          description: 'You can now purchase products.',
         });
 
-        // Tutup dialog — tetap di halaman produk
+        // Close dialog — stay on product page
         close();
 
         return response;
       } catch (err) {
         const message = getErrorMessage(err);
         setError(message);
-        toast.error('Pendaftaran gagal', { description: message });
+        toast.error('Registration failed', { description: message });
         throw err;
       } finally {
         setIsLoading(false);

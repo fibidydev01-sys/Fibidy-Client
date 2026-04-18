@@ -4,11 +4,11 @@
 // PRODUCT ACTIONS — Adaptive
 //
 // fileKey != null → Digital:
-//   - "Tanya Seller" (WA) — pre-sales questions
-//   - "Beli Sekarang" (Stripe) — primary action
+//   - "Ask Seller" (WA) — pre-sales questions
+//   - "Buy Now" (Stripe) — primary action
 //
-// fileKey == null → Custom/Jasa:
-//   - "Pesan via WhatsApp" only
+// fileKey == null → Custom/Service:
+//   - "Order via WhatsApp" only
 // ==========================================
 
 import { WhatsAppOrderButton } from '../checkout/whatsapp-order-button';
@@ -42,21 +42,21 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">atau</span>
+            <span className="text-xs text-muted-foreground">or</span>
             <div className="flex-1 border-t border-border" />
           </div>
 
-          {/* Secondary: WA untuk tanya sebelum beli */}
+          {/* Secondary: WA for pre-sales questions */}
           <WhatsAppOrderButton
             product={product}
             tenant={tenant}
             className="w-full"
             variant="outline"
-            customLabel="Tanya Seller via WhatsApp"
+            customLabel="Ask Seller via WhatsApp"
           />
         </div>
       ) : (
-        // ── Custom/Jasa: WA only ─────────────────────────────────
+        // ── Custom/Service: WA only ─────────────────────────────────
         <WhatsAppOrderButton
           product={product}
           tenant={tenant}
@@ -67,7 +67,7 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
       {/* Description */}
       {product.description && (
         <div className="space-y-1">
-          <p className="text-sm font-semibold">Deskripsi produk</p>
+          <p className="text-sm font-semibold">Product description</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {product.description}
           </p>

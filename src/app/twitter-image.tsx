@@ -7,7 +7,7 @@ import { ImageResponse } from 'next/og';
 // ==========================================
 
 export const runtime = 'edge';
-export const alt = 'Fibidy - Platform Toko Online untuk UMKM Indonesia';
+export const alt = 'Fibidy - Online Store Platform for Digital Creators';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const revalidate = 3600;
@@ -126,9 +126,9 @@ export default async function TwitterImage() {
                 maxWidth: '900px',
               }}
             >
-              Toko Online
+              Sell Digital
               <br />
-              untuk UMKM
+              Products
             </div>
             <div
               style={{
@@ -140,7 +140,7 @@ export default async function TwitterImage() {
                 maxWidth: '600px',
               }}
             >
-              Buat toko, tambah produk, terima pesanan via WhatsApp. Gratis selamanya.
+              Create a store, upload your files, get paid via Stripe. Free forever.
             </div>
           </div>
 
@@ -154,9 +154,9 @@ export default async function TwitterImage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
               {[
-                { label: 'Gratis', sub: 'Selamanya' },
-                { label: '5 Menit', sub: 'Setup' },
-                { label: 'WhatsApp', sub: 'Order' },
+                { label: 'Free', sub: 'Forever' },
+                { label: '5 Min', sub: 'Setup' },
+                { label: 'Stripe', sub: 'Payments' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: i < 2 ? '32px' : '0' }}>

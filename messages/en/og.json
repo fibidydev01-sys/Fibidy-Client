@@ -1,0 +1,35 @@
+{
+  "og": {
+    "platform": {
+      "brand": "Fibidy",
+      "altText": "Fibidy - Online Store Platform for Digital Creators",
+      "headlineLine1": "Sell Digital",
+      "headlineLine2": "Products",
+      "subtitle": "Create a store, upload your files, get paid via Stripe. Free forever.",
+      "stats": {
+        "free": "Free",
+        "freeSub": "Forever",
+        "setup": "5 Min",
+        "setupSub": "Setup",
+        "payments": "Stripe",
+        "paymentsSub": "Payments"
+      },
+      "url": "fibidy.com"
+    },
+    "store": {
+      "notFound": "Store Not Found",
+      "error": "Error",
+      "invalidRequest": "Invalid Request",
+      "noImage": "No Image",
+      "fallbackDomain": "{slug}.fibidy.com",
+      "rootDomain": "fibidy.com"
+    },
+    "product": {
+      "notFound": "Product Not Found",
+      "fallbackName": "Product"
+    },
+    "tenant": {
+      "fallbackName": "Store"
+    }
+  }
+}

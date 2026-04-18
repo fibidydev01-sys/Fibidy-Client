@@ -36,8 +36,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     "DEADCODE/payment-settings.tsx",
-    "src/app/(dashboard)/dashboard/subscription/client.tsx"
-, "../server/src/stripe/kyc-utils.ts"  ],
+    "src/app/[locale]/(dashboard)/dashboard/subscription/client.tsx",
+    "../server/src/stripe/kyc-utils.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

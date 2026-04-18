@@ -3,14 +3,14 @@
 // ==========================================
 // USE UPGRADE TO SELLER
 //
-// Hook untuk upgrade tenant dari BUYER → SELLER.
-// Dipanggil dari /dashboard/setup-store setelah wizard selesai.
+// Hook to upgrade tenant from BUYER → SELLER.
+// Called from /dashboard/setup-store after wizard completes.
 //
-// Setelah upgrade:
-//   1. Update tenant di store (role: SELLER, slug proper, dll)
-//   2. Redirect ke /dashboard/products
-//   3. Sidebar terbuka penuh
-//   4. Library tetap ada — akun sama
+// After upgrade:
+//   1. Update tenant in store (role: SELLER, proper slug, etc.)
+//   2. Redirect to /dashboard/products
+//   3. Sidebar fully unlocked
+//   4. Library preserved — same account
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -38,21 +38,21 @@ export function useUpgradeToSeller() {
           data,
         );
 
-        // Update tenant di store — role sekarang SELLER
+        // Update tenant in store — role is now SELLER
         setTenant(response.tenant);
 
-        toast.success('Selamat!', {
-          description: 'Toko kamu sudah aktif. Mulai jual produk sekarang!',
+        toast.success('Congratulations!', {
+          description: 'Your store is live. Start selling products now!',
         });
 
-        // Redirect ke dashboard seller
+        // Redirect to seller dashboard
         router.push('/dashboard/products');
 
         return response;
       } catch (err) {
         const message = getErrorMessage(err);
         setError(message);
-        toast.error('Upgrade gagal', { description: message });
+        toast.error('Upgrade failed', { description: message });
         throw err;
       } finally {
         setIsLoading(false);

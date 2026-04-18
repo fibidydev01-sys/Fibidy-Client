@@ -1,0 +1,554 @@
+{
+  "dashboard": {
+    "metadata": {
+      "productsTitle": "Products",
+      "productsDescription": "Manage your digital products",
+      "libraryTitle": "Library",
+      "libraryDescription": "Digital products you have purchased",
+      "downloadsTitle": "Download History",
+      "downloadsDescription": "Digital product download history",
+      "setupStoreTitle": "Start Selling",
+      "setupStoreDescription": "Set up your store and start selling digital products",
+      "settingsTitle": "Settings",
+      "settingsDescription": "Manage your store settings"
+    },
+    "nav": {
+      "main": "Main",
+      "more": "More",
+      "products": "Products",
+      "studio": "Studio",
+      "downloads": "History",
+      "library": "Library",
+      "settings": "Settings",
+      "subscription": "Subscription",
+      "startSelling": "Start Selling",
+      "sell": "Sell",
+      "discover": "Discover",
+      "signOut": "Sign out",
+      "logout": "Logout"
+    },
+    "products": {
+      "title": "Products",
+      "newButton": "New product",
+      "addButton": "Add",
+      "empty": "No digital products yet.",
+      "emptyHint": "Click \"Add Product\" to start selling.",
+      "card": {
+        "draft": "Draft",
+        "sold": "{count} sold",
+        "fileFallback": "FILE",
+        "mainBadge": "★ Main"
+      },
+      "storage": {
+        "label": "Storage",
+        "usageFormat": "{used}GB / {total}GB"
+      },
+      "deleteDialog": {
+        "title": "Delete product",
+        "confirmationPrefix": "Are you sure you want to delete",
+        "confirmationSuffix": "? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      },
+      "previewDrawer": {
+        "title": "Preview {name}",
+        "titleFallback": "Product Preview",
+        "descriptionFallback": "View details for {name}",
+        "description": "Description",
+        "category": "Category",
+        "created": "Created",
+        "file": "File",
+        "sales": "Sales",
+        "salesCount": "{count} sold",
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "edit": "Edit",
+        "deleteProduct": "Delete product",
+        "noImage": "No image",
+        "cannotDeleteTitle": "Products with transactions cannot be deleted.",
+        "cannotDeleteBody": "Deactivate the product to hide it from the store without removing buyers' purchase history."
+      },
+      "form": {
+        "steps": {
+          "details": {
+            "title": "Details",
+            "desc": "Name, description & pricing"
+          },
+          "file": {
+            "title": "File",
+            "desc": "Upload digital file"
+          },
+          "cover": {
+            "title": "Cover",
+            "desc": "Cover images (optional)"
+          }
+        },
+        "details": {
+          "activeLabel": "Active",
+          "categoryPlaceholder": "Category",
+          "categorySearchPlaceholder": "Search or create category...",
+          "categoryNoMatch": "No category \"{query}\"",
+          "categoryHintEmpty": "Type to search or create a category",
+          "categoryHeadingCategory": "Category",
+          "categoryHeadingCreateNew": "Create new",
+          "categoryCreateOption": "Create \"{query}\"",
+          "nameLabel": "Product name",
+          "nameRequired": "*",
+          "namePlaceholder": "e.g. NestJS Learning Ebook, Notion Template",
+          "descriptionLabel": "Description",
+          "descriptionPlaceholder": "Describe the product — contents, page count, key features...",
+          "descriptionHelper": "A clear description helps buyers purchase with confidence.",
+          "priceLabel": "Price (USD)",
+          "priceRequired": "*",
+          "pricePlaceholder": "9.99",
+          "priceHelper": "Price in USD — buyers pay via Stripe",
+          "comparePriceLabel": "Compare-at price",
+          "comparePricePlaceholder": "19.99",
+          "comparePriceHelper": "Original price before discount — shown with strikethrough"
+        },
+        "upload": {
+          "editModeNote": "Product file — the file cannot be changed after upload. Delete the product and create a new one if you need to replace the file.",
+          "editFileFallback": "FILE",
+          "kycTitle": "Verification required",
+          "kycCta": "Complete Verification in Settings",
+          "kycDropzoneDisabled": "Upload available after verification is complete",
+          "dropzoneInfo": "Upload digital file — {types} · Max {size} · {usedGb}GB / {totalGb}GB used",
+          "dropzoneInfoLoading": "Loading storage info...",
+          "dropzoneLoading": "Loading storage configuration...",
+          "kycStates": {
+            "NOT_STARTED": "You haven't set up Stripe payments yet. Complete verification first to upload products.",
+            "PENDING": "Verification is being processed by Stripe. Please wait for confirmation before uploading products.",
+            "NEEDS_MORE_INFO": "Stripe requires additional information. Complete verification to upload products.",
+            "PAST_DUE": "The verification deadline has passed. Complete it immediately to avoid account deactivation.",
+            "CHARGES_ONLY": "Your account can accept payments, but payouts are not yet active. Complete verification first.",
+            "REJECTED": "Verification was rejected by Stripe. Contact support on the Settings page.",
+            "fallback": "Complete Stripe verification first to upload and sell products."
+          }
+        },
+        "media": {
+          "descriptionBusiness": "Upload up to 5 photos. The first photo becomes the main thumbnail.",
+          "descriptionStarter": "Upload up to 3 photos. Slots 4 & 5 are available on Business plan.",
+          "descriptionFree": "Upload up to 2 photos. Upgrade for more slots.",
+          "headerPrefix": "Product photos —",
+          "slotCount": "{current} / {max} photos",
+          "dragReorder": "Drag to reorder",
+          "upgradeToStarter": "Upgrade to Starter",
+          "upgradeToBusiness": "Upgrade to Business",
+          "photoFallback": "Foto {index}",
+          "businessBadge": "Business"
+        },
+        "preview": {
+          "titleNew": "Review & publish",
+          "titleEdit": "Review changes",
+          "descriptionNew": "Double-check your listing details before publishing.",
+          "descriptionEdit": "Double-check your listing details before saving.",
+          "noName": "No name",
+          "sectionDetails": "Details",
+          "sectionDigitalFile": "Digital File",
+          "sectionCoverImages": "Cover Images",
+          "sectionPrice": "Price",
+          "sectionStatus": "Status",
+          "rowName": "Name",
+          "rowCategory": "Category",
+          "rowDescription": "Description",
+          "rowFile": "File",
+          "rowPhotos": "Photos",
+          "rowSellingPrice": "Selling price",
+          "rowComparePrice": "Compare-at price",
+          "rowCurrency": "Currency",
+          "rowVisibility": "Visibility",
+          "notFilledIn": "Not filled in",
+          "noCategory": "No category",
+          "noDescription": "No description",
+          "noFile": "No file yet",
+          "fileUploadedPrefix": "File already uploaded",
+          "fileWithSize": "{name} ({size})",
+          "noPhotos": "No photos (optional)",
+          "photosUploaded": "{count} photos uploaded",
+          "dash": "—",
+          "active": "Active",
+          "inactive": "Inactive",
+          "backToEdit": "Back to edit",
+          "saveChanges": "Save changes",
+          "publishListing": "Publish listing",
+          "saving": "Saving...",
+          "publishing": "Publishing...",
+          "reviewAndSave": "Review & Save",
+          "reviewAndPublish": "Review & Publish"
+        },
+        "upload_dropzone": {
+          "dropText": "Drop file here or click to browse",
+          "hint": "{types} · Max {size}"
+        }
+      },
+      "downloads": {
+        "title": "Download History",
+        "backTooltip": "Back",
+        "subtitleCount": "{count} total downloads",
+        "filterPlaceholder": "Filter by product",
+        "allProducts": "All Products",
+        "empty": "No download history yet.",
+        "columns": {
+          "product": "Product",
+          "buyer": "Buyer",
+          "time": "Time",
+          "ip": "IP"
+        },
+        "dash": "—"
+      }
+    },
+    "library": {
+      "title": "Library",
+      "subtitleCount": "{count} products owned",
+      "empty": "Your library is still empty.",
+      "emptyCta": "Buy digital products on",
+      "emptyCtaLink": "Discover",
+      "card": {
+        "accessRevoked": "Access Revoked",
+        "accessRevokedReasonRefund": "Access revoked because the refund has been approved.",
+        "accessRevokedReasonGeneric": "Download access for this product has been revoked.",
+        "download": "Download"
+      },
+      "refund": {
+        "button": {
+          "refunded": "Refunded",
+          "rejected": "Refund Rejected",
+          "processing": "Processing...",
+          "expired": "Refund Expired",
+          "expiredTooltip": "Refund window (7 days) has expired.",
+          "request": "Request Refund",
+          "daysLeft": "({days}d left)"
+        },
+        "rejectReasons": {
+          "FILE_ACCESSIBLE_AND_VALID": "File is accessible and not corrupted. Refund denied as per policy.",
+          "OUTSIDE_TIME_WINDOW": "Refund window (7 days) has expired.",
+          "ALREADY_REFUNDED": "This purchase has already been refunded.",
+          "fallback": "Refund request was rejected."
+        },
+        "dialog": {
+          "title": "Request Refund",
+          "policyIntro": "Our system will automatically verify your file and evaluate your request. This process takes 5-30 seconds.",
+          "approvedBold": "Approved",
+          "approvedFileUndownloadable": "if the file cannot be downloaded",
+          "approvedFileCorrupted": "if the file is corrupted or unreadable",
+          "notApprovedBold": "Not approved",
+          "rejectedContentMismatch": "for \"content doesn't match expectations\"",
+          "rejectedNoLongerNeed": "for \"I don't need it anymore\"",
+          "rejectedAccident": "for \"I bought by accident\"",
+          "previewReminder": "You had access to a preview before purchasing. Refunds are only granted for technical issues with file delivery, not subjective reasons.",
+          "cancel": "Cancel",
+          "confirm": "Request Refund",
+          "evaluating": "Evaluating..."
+        }
+      }
+    },
+    "subscription": {
+      "title": "Subscription",
+      "subtitle": "Manage your plan and billing",
+      "currentPlan": "Current plan",
+      "planSuffix": "Plan",
+      "cancel": "Cancel subscription",
+      "cancelling": "Canceling...",
+      "activeUntil": "Active until {date} ({days} days left)",
+      "badge": {
+        "active": "Active",
+        "pastDue": "Payment Past Due",
+        "canceled": "Canceled",
+        "free": "Free"
+      },
+      "verify": {
+        "verifyingTitle": "Processing payment...",
+        "verifyingBody": "Please wait a few seconds for your subscription to activate. Do not refresh the page.",
+        "reconcilingTitle": "Checking payment status with Stripe...",
+        "reconcilingBody": "This usually takes just a few seconds.",
+        "completedTitle": "Subscription active!",
+        "completedBody": "Your plan has been upgraded. Enjoy your new features! 🎉",
+        "failedTitle": "Payment verification failed.",
+        "failedBody": "If your card has already been charged, the payment will be verified automatically within a few minutes. You can try again or contact support at",
+        "supportEmail": "admin@fibidy.com",
+        "retryButton": "Retry verification"
+      },
+      "overLimit": {
+        "titlePattern": "{planName} plan limit reached",
+        "productsPart": "Products: {used}/{max}. ",
+        "digitalProductsPart": "Digital products: {used}/{max}. ",
+        "suffix": "Upgrade to increase capacity."
+      },
+      "usage": {
+        "products": "Products",
+        "digital": "Digital",
+        "storage": "Storage",
+        "infinity": "∞"
+      },
+      "plans": {
+        "FREE": {
+          "name": "Free",
+          "price": "$0",
+          "priceNote": "Forever free",
+          "features": [
+            "5 products",
+            "3 digital products",
+            "0.5 GB storage",
+            "Max 20 MB per file",
+            "2 photos per product",
+            "1 hero template"
+          ]
+        },
+        "STARTER": {
+          "name": "Starter",
+          "price": "$5",
+          "priceNote": "/month",
+          "features": [
+            "20 products",
+            "20 digital products",
+            "1 GB storage",
+            "Max 50 MB per file",
+            "3 photos per product",
+            "3 hero templates"
+          ]
+        },
+        "BUSINESS": {
+          "name": "Business",
+          "price": "$15",
+          "priceNote": "/month",
+          "features": [
+            "50 products",
+            "50 digital products",
+            "20 GB storage",
+            "Max 500 MB per file",
+            "5 photos per product",
+            "All hero templates"
+          ]
+        }
+      },
+      "platformFee": {
+        "label": "Platform fee:",
+        "FREE": "15%",
+        "STARTER": "5%",
+        "BUSINESS": "2%"
+      },
+      "cta": {
+        "currentPlan": "Current plan",
+        "upgradeStarter": "Upgrade to Starter",
+        "upgradeBusiness": "Upgrade to Business",
+        "requiresStarterFirst": "Requires Starter first",
+        "notYetQualified": "Not yet qualified",
+        "downgrade": "Downgrade",
+        "foreverFree": "Forever free"
+      },
+      "businessUnlock": {
+        "title": "Business unlock progress",
+        "description": "Meet one of the requirements to unlock Business plan upgrade",
+        "totalSales": "Total sales",
+        "totalSalesValue": "{amount} / $200",
+        "totalTransactions": "Total transactions",
+        "totalTransactionsValue": "{count} / 20",
+        "or": "or"
+      },
+      "cancelDialog": {
+        "title": "Cancel subscription?",
+        "descriptionPrefix": "Your subscription will remain active until the end of the current billing period",
+        "descriptionPeriodSuffix": " ({date})",
+        "descriptionSuffix": ". After that, your account will automatically downgrade to Free plan.",
+        "cancel": "Cancel",
+        "confirm": "Yes, cancel",
+        "canceling": "Canceling..."
+      }
+    },
+    "setupStore": {
+      "title": "Start Selling",
+      "subtitle": "Set up your store in a few steps",
+      "steps": {
+        "category": {
+          "title": "Business Type",
+          "desc": "What kind of business do you run?"
+        },
+        "storeInfo": {
+          "title": "Store Info",
+          "desc": "Name, URL & description"
+        },
+        "whatsapp": {
+          "title": "WhatsApp",
+          "desc": "Number for order notifications",
+          "label": "WhatsApp Number",
+          "placeholder": "81234567890",
+          "helper": "Used to receive order notifications via WhatsApp"
+        },
+        "review": {
+          "title": "Review",
+          "desc": "Confirm and start selling"
+        }
+      },
+      "stepIndicator": "Step {current} of {total}",
+      "review": {
+        "businessType": "Business type",
+        "storeInfo": "Store info",
+        "storeName": "Store name",
+        "storeUrl": "Store URL",
+        "storeUrlSuffix": "{slug}.fibidy.com",
+        "description": "Description",
+        "whatsapp": "WhatsApp",
+        "agreementPrefix": "By creating your store, you agree to our",
+        "termsLink": "Terms of Service",
+        "agreementAnd": "and",
+        "privacyLink": "Privacy Policy"
+      },
+      "cta": {
+        "submit": "Create my store",
+        "submitting": "Creating store..."
+      },
+      "errors": {
+        "categoryRequired": "Please select a business type",
+        "nameRequired": "Store name is required",
+        "slugRequired": "Store URL is required",
+        "whatsappRequired": "WhatsApp number is required",
+        "agreementRequired": "Please agree to the Terms of Service to continue"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "groups": {
+        "store": "Store",
+        "channels": "Channels",
+        "account": "Account",
+        "legal": "Legal"
+      },
+      "store": {
+        "bio": {
+          "label": "Bio",
+          "description": "Name, logo, headline & brand color"
+        },
+        "featured": {
+          "label": "Featured",
+          "description": "Key highlights & store selling points"
+        },
+        "contact": {
+          "label": "Contact",
+          "description": "WhatsApp, address & Google Maps"
+        }
+      },
+      "channels": {
+        "social": {
+          "label": "Social",
+          "description": "Instagram, TikTok, WhatsApp & more"
+        }
+      },
+      "account": {
+        "subscription": {
+          "label": "Subscription",
+          "description": "Manage your plan and billing"
+        },
+        "changePassword": {
+          "label": "Change Password",
+          "description": "Change password & sign out from other devices"
+        },
+        "lightMode": {
+          "label": "Light Mode",
+          "description": "Switch to light theme"
+        },
+        "darkMode": {
+          "label": "Dark Mode",
+          "description": "Switch to dark theme"
+        }
+      },
+      "legal": {
+        "aboutFibidy": {
+          "label": "About Fibidy",
+          "description": "FAQ, contact, terms, and privacy"
+        }
+      },
+      "signOut": {
+        "label": "Sign Out",
+        "description": "Log out from your account"
+      }
+    },
+    "onboard": {
+      "refreshing": "Refreshing verification link..."
+    },
+    "kycBanner": {
+      "label": "Stripe Connect Verification",
+      "loading": "Loading verification status...",
+      "polling": "Checking verification status...",
+      "states": {
+        "notStartedFresh": "Set up payments to start selling digital products.",
+        "notStartedReturning": "You haven't finished setting up payments. Pick up where you left off.",
+        "pending": "Verification in progress with Stripe. This usually takes 1–2 business days.",
+        "needsMoreInfoTitle": "Verification requires fixes:",
+        "needsMoreInfoGeneric": "Stripe needs additional information to continue account verification.",
+        "pastDueHeadline": "URGENT: The verification deadline has passed.",
+        "pastDueBody": "Your account is at risk of being deactivated soon. Complete verification now.",
+        "chargesOnly": "Account active for accepting payments. Payouts to your bank are not yet active — complete verification to enable payouts.",
+        "activeWithFutureReq": "Account active. Stripe has new requirement updates that need to be completed",
+        "activeWithFutureReqDeadline": " before {date}",
+        "activeClean": "Account verified. You can accept payments and withdraw funds.",
+        "rejected": "Account verification was rejected by Stripe. Contact our support team for help."
+      },
+      "actions": {
+        "setupPayments": "Set Up Payments",
+        "continueSetup": "Continue Setup",
+        "completeDocuments": "Complete Documents",
+        "completeNow": "Complete Now",
+        "activatePayouts": "Activate Payouts",
+        "viewUpdates": "View Updates",
+        "contactSupport": "Contact Support",
+        "loading": "Loading..."
+      }
+    },
+    "pwa": {
+      "android": {
+        "title": "Install Fibidy",
+        "subtitle": "Add to your home screen",
+        "benefits": {
+          "quickAccess": "Quick access"
+        },
+        "dismiss": "Not now",
+        "install": "Install"
+      },
+      "ios": {
+        "title": "Install Fibidy",
+        "subtitle": "Add to your iOS Home Screen",
+        "steps": {
+          "one": {
+            "label": "Tap the",
+            "highlight": "Share",
+            "sub": "button in the Safari toolbar"
+          },
+          "two": {
+            "label": "Select",
+            "highlight": "Add to Home Screen",
+            "sub": "from the options list"
+          },
+          "three": {
+            "label": "Tap",
+            "highlight": "Add",
+            "sub": "in the top right corner"
+          }
+        },
+        "shareHintPrefix": "The",
+        "shareHintBold": "Share",
+        "shareHintSuffix": "button is at the bottom of the screen (iPhone) or at the top (iPad)",
+        "close": "Close"
+      }
+    },
+    "upgradeModal": {
+      "defaultTitle": "Plan limit reached",
+      "defaultDescription": "Upgrade your plan to unlock higher limits and premium features.",
+      "upgradeStarterLabel": "Upgrade to Starter — $5/mo",
+      "upgradeBusinessLabel": "Upgrade to Business — $15/mo",
+      "viewAllPlans": "View all plans",
+      "viewUpgradePlans": "View upgrade plans",
+      "maybeLater": "Maybe later"
+    },
+    "stepWizard": {
+      "stepOf": "Step {current} of {total}"
+    },
+    "wizardNav": {
+      "back": "Back",
+      "previous": "Previous",
+      "next": "Next",
+      "save": "Save",
+      "saving": "Saving..."
+    }
+  }
+}

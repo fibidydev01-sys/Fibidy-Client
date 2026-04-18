@@ -1,0 +1,229 @@
+{
+  "settings": {
+    "nav": {
+      "hero": "Hero",
+      "about": "About",
+      "contact": "Contact",
+      "social": "Social",
+      "password": "Password"
+    },
+    "hero": {
+      "title": "Hero Section",
+      "stepsMeta": {
+        "identity": {
+          "title": "Brand Identity",
+          "desc": "Name, category & CTA button"
+        },
+        "story": {
+          "title": "Brand Story",
+          "desc": "Headline & description"
+        },
+        "appearance": {
+          "title": "Appearance",
+          "desc": "Colors, logo & background"
+        }
+      },
+      "identity": {
+        "storeName": "Store Name",
+        "storeNamePlaceholder": "e.g. Burger House",
+        "buttonLabel": "Button Label",
+        "buttonLabelPlaceholder": "Order Now",
+        "buttonLabelCounter": "{current}/{max}",
+        "category": "Category",
+        "categoryNotSet": "Not set",
+        "email": "Email",
+        "storeDomain": "Store Domain",
+        "domainSuffix": "{slug}.fibidy.com"
+      },
+      "story": {
+        "headlineLabel": "Headline",
+        "headlinePlaceholder": "Write your main store headline...",
+        "subheadingLabel": "Subheading",
+        "subheadingPlaceholder": "One sentence capturing your store's main value...",
+        "taglineLabel": "Store Tagline",
+        "taglinePlaceholder": "Your store's unique tagline..."
+      },
+      "appearance": {
+        "logoHeading": "Logo",
+        "logoDescription": "Your store logo shown on the hero section",
+        "logoUploadLabel": "Upload logo",
+        "logoHelper": "PNG/JPG · 200×200px · Transparent PNG recommended",
+        "bgHeading": "Background Image",
+        "bgDescription": "Cover image for your store's hero banner",
+        "bgUploadLabel": "Upload background",
+        "bgHelper": "Square 1:1 · min 1080×1080px · JPG/PNG",
+        "colorHeading": "Brand Color",
+        "colorDescription": "Primary color for buttons & accents"
+      },
+      "ctaDefault": "View Products"
+    },
+    "about": {
+      "title": "About Section",
+      "upgradePrompt": {
+        "title": "Upgrade for more highlights",
+        "description": "Business Plan lets you have up to 7 highlights. Showcase more of what makes your store stand out.",
+        "cta": "Upgrade to Business"
+      },
+      "stepsMeta": {
+        "highlights": {
+          "title": "Highlights",
+          "description": "Showcase your store's strengths"
+        }
+      },
+      "highlightTitlePlaceholder": "Premium Quality",
+      "highlightDescriptionPlaceholder": "Describe this highlight...",
+      "counter": "{current}/{max}",
+      "slotCount": "{current} / {max} highlights",
+      "upgradeCta": "Upgrade to Business",
+      "emptySlotLabel": "Slot {index}",
+      "businessBadge": "Business",
+      "validation": {
+        "titleRequired": "Highlight #{index}: Title is required",
+        "descriptionRequired": "Highlight #{index}: Description is required"
+      }
+    },
+    "contact": {
+      "title": "Contact Section",
+      "stepsMeta": {
+        "info": {
+          "title": "Contact Info",
+          "desc": "WhatsApp, phone & address"
+        },
+        "location": {
+          "title": "Location & Map",
+          "desc": "Google Maps embed for your store"
+        },
+        "heading": {
+          "title": "Section Heading",
+          "desc": "Title & subheading for contact section"
+        }
+      },
+      "info": {
+        "whatsappLabel": "WhatsApp",
+        "whatsappRequired": "*required",
+        "whatsappRequiredShort": "*",
+        "whatsappPlaceholder": "89123456789",
+        "whatsappHelperDesktop": "Type without 0 or 62 — e.g.",
+        "whatsappHelperMobile": "No 0 or 62 — e.g.",
+        "whatsappExample": "89123456789",
+        "phoneLabel": "Phone Number",
+        "phoneOptional": "(Optional)",
+        "phonePlaceholder": "+62 812-3456-7890",
+        "addressLabel": "Full Address",
+        "addressPlaceholder": "123 Example St, City...",
+        "tipLabel": "Tip:",
+        "tipBody": "Make sure your WhatsApp number is active — customers will be connected directly when they tap the contact button."
+      },
+      "location": {
+        "urlLabel": "Google Maps Embed URL",
+        "urlPlaceholder": "https://www.google.com/maps/embed?pb=...",
+        "instructionsDesktop": "Open Google Maps → find your location → click",
+        "instructionsShareBold": "Share",
+        "instructionsThen": "→",
+        "instructionsEmbedBold": "Embed a map",
+        "instructionsCopy": "→ copy the URL from",
+        "instructionsMobile": "Share → Embed a map → copy URL from",
+        "showMapLabel": "Show Map",
+        "showMapDescDesktop": "Display Google Maps embed on your contact page",
+        "showMapDescMobile": "Google Maps on contact page",
+        "previewHeading": "Map Preview",
+        "previewEmptyUrl": "Enter a URL to see the preview",
+        "previewEmptyToggle": "Enable \"Show Map\" to preview"
+      },
+      "heading": {
+        "titleLabel": "Section Title",
+        "titlePlaceholder": "Contact Us",
+        "titleHelper": "Main heading shown in your Contact section",
+        "subheadingLabel": "Section Subheading",
+        "subheadingPlaceholder": "We're here to help",
+        "subheadingHelper": "Supporting line shown below the title"
+      }
+    },
+    "social": {
+      "title": "Social Links",
+      "stepsMeta": {
+        "links": {
+          "title": "Connect your social profiles"
+        }
+      },
+      "groups": {
+        "socialMedia": "Social Media",
+        "messaging": "Messaging",
+        "creative": "Creative & Professional"
+      },
+      "fields": {
+        "instagram": {
+          "label": "Instagram",
+          "placeholder": "https://instagram.com/username"
+        },
+        "facebook": {
+          "label": "Facebook",
+          "placeholder": "https://facebook.com/page"
+        },
+        "tiktok": {
+          "label": "TikTok",
+          "placeholder": "https://tiktok.com/@username"
+        },
+        "youtube": {
+          "label": "YouTube",
+          "placeholder": "https://youtube.com/@channel"
+        },
+        "twitter": {
+          "label": "Twitter / X",
+          "placeholder": "https://twitter.com/username"
+        },
+        "threads": {
+          "label": "Threads",
+          "placeholder": "https://threads.net/@username"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "https://wa.me/628xxxxxxxxxx"
+        },
+        "telegram": {
+          "label": "Telegram",
+          "placeholder": "https://t.me/username"
+        },
+        "pinterest": {
+          "label": "Pinterest",
+          "placeholder": "https://pinterest.com/username"
+        },
+        "behance": {
+          "label": "Behance",
+          "placeholder": "https://behance.net/username"
+        },
+        "dribbble": {
+          "label": "Dribbble",
+          "placeholder": "https://dribbble.com/username"
+        },
+        "vimeo": {
+          "label": "Vimeo",
+          "placeholder": "https://vimeo.com/username"
+        },
+        "linkedin": {
+          "label": "LinkedIn",
+          "placeholder": "https://linkedin.com/company/name"
+        }
+      },
+      "tipLabel": "Tip:",
+      "tipBody": "Social links appear in your store footer. Only add active accounts — fewer well-managed links are better than many inactive ones."
+    },
+    "password": {
+      "title": "Change Password",
+      "subtitle": "Your new password takes effect immediately. Other signed-in devices will be logged out automatically.",
+      "infoAlert": "After changing your password, all sessions on other devices (other phones, other browsers, work laptop, etc.) will be logged out automatically. You stay signed in on this device.",
+      "currentLabel": "Current Password",
+      "currentPlaceholder": "••••••••",
+      "newLabel": "New Password",
+      "newPlaceholder": "At least 8 characters",
+      "newHelper": "At least 8 characters, with an uppercase letter, a number, and a symbol.",
+      "confirmLabel": "Confirm New Password",
+      "confirmPlaceholder": "Re-type your new password",
+      "backButton": "Settings",
+      "cancelButton": "Cancel",
+      "submitButton": "Change Password",
+      "submittingButton": "Changing...",
+      "loadingHint": "Changing password..."
+    }
+  }
+}

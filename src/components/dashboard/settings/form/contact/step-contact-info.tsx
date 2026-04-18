@@ -56,7 +56,7 @@ export function StepContactInfo({ formData, updateFormData, isDesktop = false }:
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Ketik tanpa 0 atau 62 — e.g.{' '}
+            Enter without leading 0 or 62 — e.g.{' '}
             <code className="font-mono text-[11px]">89123456789</code>
           </p>
         </div>
@@ -94,7 +94,7 @@ export function StepContactInfo({ formData, updateFormData, isDesktop = false }:
         <div className="border-l-2 border-muted-foreground/20 pl-4 py-0.5">
           <p className="text-xs text-muted-foreground leading-relaxed">
             <span className="font-medium text-foreground">Tip:</span>{' '}
-            Pastikan nomor WhatsApp aktif — pelanggan akan langsung terhubung saat tap tombol kontak.
+            Make sure your WhatsApp number is active — customers will connect directly when they tap the contact button.
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export function StepContactInfo({ formData, updateFormData, isDesktop = false }:
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Tanpa 0 atau 62 — e.g. <code className="font-mono text-primary">89123456789</code>
+          Without leading 0 or 62 — e.g. <code className="font-mono text-primary">89123456789</code>
         </p>
       </div>
 

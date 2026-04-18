@@ -79,8 +79,8 @@ export function AboutSection({ onBack }: AboutSectionProps) {
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
-        title="Upgrade untuk lebih banyak highlights"
-        description="Business Plan memungkinkan hingga 7 highlights. Tampilkan lebih banyak keunggulan toko kamu."
+        title="Upgrade for more highlights"
+        description="Business Plan allows up to 7 highlights. Show more of your store's features."
       />
 
       <div className="flex-1 pb-20">

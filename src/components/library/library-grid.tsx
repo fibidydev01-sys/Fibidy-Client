@@ -28,9 +28,9 @@ export function LibraryGrid({ purchases, isLoading }: LibraryGridProps) {
   if (purchases.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        <p>Library kamu masih kosong.</p>
+        <p>Your library is still empty.</p>
         <p className="text-sm mt-1">
-          Beli produk digital di{' '}
+          Buy digital products on{' '}
           {/* [v3 FIX] was <a href="/discover"> */}
           <Link href="/discover" className="text-primary hover:underline">
             Discover

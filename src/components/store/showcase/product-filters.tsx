@@ -62,7 +62,7 @@ export function ProductFilters({
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
-        placeholder="Cari produk..."
+        placeholder="Search products..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="pl-10 pr-8"

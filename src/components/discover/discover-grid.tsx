@@ -13,7 +13,7 @@ export function DiscoverGrid({ products, isLoading }: DiscoverGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        Tidak ada produk ditemukan.
+        No products found.
       </div>
     );
   }

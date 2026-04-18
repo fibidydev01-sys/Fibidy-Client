@@ -4,8 +4,8 @@
 // PWA INSTALL PROMPT
 // File: src/components/shared/pwa-install-prompt.tsx
 //
-// Android → bottom banner dengan tombol Install
-// iOS     → modal dengan step-by-step instruksi
+// Android → bottom banner with Install button
+// iOS     → modal with step-by-step instructions
 // ==========================================
 
 import { useEffect, useState } from 'react';
@@ -83,7 +83,7 @@ function AndroidBanner({
           {/* Benefits */}
           <div className="flex items-center gap-4 mb-4 px-1">
             {[
-              'Akses cepat',
+              'Quick access',
             ].map((benefit) => (
               <div key={benefit} className="flex items-center gap-1">
                 <div className="w-1 h-1 rounded-full bg-primary" />
@@ -99,7 +99,7 @@ function AndroidBanner({
               onClick={handleDismiss}
               className="flex-1 h-10 rounded-lg border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
-              Nanti saja
+              Not now
             </button>
             <button
               type="button"
@@ -137,21 +137,21 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
   const steps = [
     {
       icon: Share,
-      label: 'Tap tombol',
+      label: 'Tap the',
       highlight: 'Share',
-      sub: 'di toolbar browser Safari',
+      sub: 'button in the Safari toolbar',
     },
     {
       icon: Plus,
-      label: 'Pilih',
+      label: 'Select',
       highlight: 'Add to Home Screen',
-      sub: 'dari daftar opsi',
+      sub: 'from the options list',
     },
     {
       icon: Smartphone,
       label: 'Tap',
       highlight: 'Add',
-      sub: 'di pojok kanan atas',
+      sub: 'in the top right corner',
     },
   ];
 
@@ -189,7 +189,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
               <div>
                 <p className="text-base font-semibold text-foreground">Install Fibidy</p>
                 <p className="text-xs text-muted-foreground">
-                  Tambahkan ke Home Screen iOS
+                  Add to your iOS Home Screen
                 </p>
               </div>
             </div>
@@ -244,8 +244,8 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           <div className="flex items-center gap-2 rounded-xl bg-muted/50 border border-border/60 px-4 py-3 mb-4">
             <Share className="h-4 w-4 text-primary shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Tombol <span className="font-semibold text-foreground">Share</span> ada di
-              bawah layar (iPhone) atau di atas (iPad)
+              The <span className="font-semibold text-foreground">Share</span> button is at the
+              bottom of the screen (iPhone) or at the top (iPad)
             </p>
           </div>
 
@@ -255,7 +255,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
             onClick={handleDismiss}
             className="w-full h-11 rounded-xl border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
-            Tutup
+            Close
           </button>
 
         </div>

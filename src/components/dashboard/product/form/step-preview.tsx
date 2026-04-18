@@ -128,25 +128,25 @@ export function PreviewProduct({
           </div>
 
           {/* Details */}
-          <PreviewSection label="Detail">
+          <PreviewSection label="Details">
             <div className="rounded-xl border bg-card overflow-hidden px-3 py-1">
-              <PreviewRow label="Nama" value={formData.name} missing="Belum diisi" />
-              <PreviewRow label="Kategori" value={formData.category} missing="Tidak ada kategori" />
+              <PreviewRow label="Name" value={formData.name} missing="Not filled in" />
+              <PreviewRow label="Category" value={formData.category} missing="No category" />
               <PreviewRow
-                label="Deskripsi"
+                label="Description"
                 value={formData.description ? `${formData.description.slice(0, 60)}${formData.description.length > 60 ? '…' : ''}` : null}
-                missing="Tidak ada deskripsi"
+                missing="No description"
               />
             </div>
           </PreviewSection>
 
           {/* File */}
-          <PreviewSection label="File Digital">
+          <PreviewSection label="Digital File">
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
                 label="File"
-                value={selectedFile ? `${selectedFile.name} (${formatFileSizeFromBytes(selectedFile.size)})` : isEditing ? 'File sudah diupload' : null}
-                missing="Belum ada file"
+                value={selectedFile ? `${selectedFile.name} (${formatFileSizeFromBytes(selectedFile.size)})` : isEditing ? 'File already uploaded' : null}
+                missing="No file yet"
                 valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
               />
             </div>
@@ -156,25 +156,25 @@ export function PreviewProduct({
           <PreviewSection label="Cover Images">
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
-                label="Foto"
-                value={images.length > 0 ? `${images.length} foto diupload` : null}
-                missing="Tidak ada foto (opsional)"
+                label="Photos"
+                value={images.length > 0 ? `${images.length} photos uploaded` : null}
+                missing="No photos (optional)"
                 valueClass={images.length > 0 ? 'text-emerald-600' : undefined}
               />
             </div>
           </PreviewSection>
 
           {/* Pricing */}
-          <PreviewSection label="Harga">
+          <PreviewSection label="Price">
             <div className="rounded-xl border bg-card overflow-hidden px-3 py-1">
               <PreviewRow
-                label="Harga jual"
+                label="Selling price"
                 value={formatPrice(formData.price)}
-                missing="Belum diisi"
+                missing="Not filled in"
                 valueClass="text-primary"
               />
               <PreviewRow
-                label="Harga coret"
+                label="Compare-at price"
                 value={formatPrice(formData.comparePrice)}
                 missing="—"
               />
@@ -190,8 +190,8 @@ export function PreviewProduct({
           <PreviewSection label="Status">
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
-                label="Visibilitas"
-                value={formData.isActive ? 'Aktif' : 'Nonaktif'}
+                label="Visibility"
+                value={formData.isActive ? 'Active' : 'Inactive'}
                 valueClass={formData.isActive ? 'text-emerald-600' : 'text-muted-foreground'}
               />
             </div>

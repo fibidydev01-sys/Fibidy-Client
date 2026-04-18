@@ -3,8 +3,8 @@
 // [TIDUR-NYENYAK FIX #9] Q3=A treatment:
 // When product has purchases (salesCount > 0):
 //   - HIDE "Delete product" button entirely
-//   - Replace with info hint: "Produk dengan transaksi tidak bisa dihapus.
-//                              Nonaktifkan untuk menyembunyikan dari toko."
+//   - Replace with info hint: "Products with transactions cannot be deleted.
+//                              Deactivate to hide from the store."
 //   - "Deactivate" button still works as normal (top action row)
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -262,7 +262,7 @@ function DrawerInner({
                 <Download className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-xs text-muted-foreground">Sales</p>
-                  <p className="text-sm font-medium">{salesCount} terjual</p>
+                  <p className="text-sm font-medium">{salesCount} sold</p>
                 </div>
               </div>
             )}
@@ -281,12 +281,12 @@ function DrawerInner({
                 {product.isActive ? (
                   <>
                     <EyeOff className="h-4 w-4 mr-2" />
-                    Nonaktifkan
+                    Deactivate
                   </>
                 ) : (
                   <>
                     <Eye className="h-4 w-4 mr-2" />
-                    Aktifkan
+                    Activate
                   </>
                 )}
               </Button>
@@ -322,11 +322,11 @@ function DrawerInner({
                 <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                   <p className="font-medium mb-0.5">
-                    Produk dengan transaksi tidak bisa dihapus.
+                    Products with transactions cannot be deleted.
                   </p>
                   <p className="text-amber-700 dark:text-amber-400">
-                    Nonaktifkan produk untuk menyembunyikan dari toko tanpa
-                    menghilangkan riwayat pembelian buyer.
+                    Deactivate the product to hide it from the store without
+                    removing buyers&apos; purchase history.
                   </p>
                 </div>
               </div>

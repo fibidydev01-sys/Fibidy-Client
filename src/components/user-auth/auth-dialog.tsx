@@ -3,20 +3,20 @@
 // ==========================================
 // AUTH DIALOG
 //
-// Dialog modal dengan 2 tab: "Masuk" dan "Daftar".
-// Mount sekali di discover/layout.tsx.
-// Trigger via useAuthDialogStore.open() dari buy-button.tsx.
+// Modal dialog with 2 tabs: "Sign in" and "Sign up".
+// Mount once in discover/layout.tsx.
+// Trigger via useAuthDialogStore.open() from buy-button.tsx.
 //
-// Setelah login/register:
-//   - Dialog tutup otomatis
-//   - User tetap di halaman produk
-//   - Langsung bisa klik "Beli"
+// After login/register:
+//   - Dialog closes automatically
+//   - User stays on the product page
+//   - Can immediately click "Buy"
 //
-// Tidak ada:
-//   - Link ke /register (tidak perlu)
-//   - Pilihan buyer/seller (tidak perlu)
-//   - Field nama (tidak perlu)
-//   - Field apapun selain email + password
+// No:
+//   - Link to /register (not needed)
+//   - Buyer/seller choice (not needed)
+//   - Name field (not needed)
+//   - Any fields other than email + password
 // ==========================================
 
 import {
@@ -38,19 +38,19 @@ export function AuthDialog() {
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) close(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Masuk atau Daftar</DialogTitle>
+          <DialogTitle>Sign in or Sign up</DialogTitle>
           <DialogDescription>
-            Masuk ke akunmu atau buat akun baru untuk membeli produk.
+            Sign in to your account or create a new one to buy products.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="login">
           <TabsList className="w-full">
             <TabsTrigger value="login" className="flex-1">
-              Masuk
+              Sign in
             </TabsTrigger>
             <TabsTrigger value="register" className="flex-1">
-              Daftar
+              Sign up
             </TabsTrigger>
           </TabsList>
 
