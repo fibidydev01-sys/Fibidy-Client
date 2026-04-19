@@ -1,78 +1,118 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { HelpCircle, Phone, ScrollText, Shield, ChevronRight, ArrowLeft } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import {
+  HelpCircle,
+  Phone,
+  ScrollText,
+  Shield,
+  Cookie,
+  CreditCard,
+  Receipt,
+  RefreshCcw,
+  UserCheck,
+  Banknote,
+  Handshake,
+  FileWarning,
+  Copyright,
+  ChevronRight,
+  ArrowLeft,
+} from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-export const metadata: Metadata = {
-  title: 'Info & Legal',
-  description: 'FAQ, kontak, syarat layanan, dan kebijakan privasi Fibidy.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('legal.index');
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+  };
+}
 
-const LEGAL_GROUPS = [
+// ──────────────────────────────────────────────────────────────
+// Group + item structure — labels/descriptions come from i18n
+// Only icons and hrefs are hardcoded here.
+// ──────────────────────────────────────────────────────────────
+
+interface Item {
+  key: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+}
+
+interface Group {
+  key: string;
+  items: Item[];
+}
+
+const GROUPS: Group[] = [
   {
-    group: 'Informasi',
+    key: 'info',
     items: [
-      {
-        label: 'FAQ',
-        description: 'Pertanyaan yang sering ditanya',
-        icon: HelpCircle,
-        href: '/legal/faq',
-      },
-      {
-        label: 'Hubungi Kami',
-        description: 'Email dan media sosial Fibidy',
-        icon: Phone,
-        href: '/legal/contact',
-      },
+      { key: 'faq', icon: HelpCircle, href: '/legal/faq' },
+      { key: 'contact', icon: Phone, href: '/legal/contact' },
     ],
   },
   {
-    group: 'Legal',
+    key: 'payment',
     items: [
-      {
-        label: 'Syarat Layanan',
-        description: 'Ketentuan penggunaan platform',
-        icon: ScrollText,
-        href: '/legal/terms',
-      },
-      {
-        label: 'Kebijakan Privasi',
-        description: 'Cara kami mengelola datamu',
-        icon: Shield,
-        href: '/legal/privacy',
-      },
+      { key: 'fees', icon: Receipt, href: '/legal/fees' },
+      { key: 'payment', icon: CreditCard, href: '/legal/payment' },
+      { key: 'refund', icon: RefreshCcw, href: '/legal/refund' },
+    ],
+  },
+  {
+    key: 'seller',
+    items: [
+      { key: 'kyc', icon: UserCheck, href: '/legal/kyc' },
+      { key: 'payout', icon: Banknote, href: '/legal/payout' },
+      { key: 'sellerAgreement', icon: Handshake, href: '/legal/seller-agreement' },
+    ],
+  },
+  {
+    key: 'rights',
+    items: [
+      { key: 'acceptableUse', icon: FileWarning, href: '/legal/acceptable-use' },
+      { key: 'copyright', icon: Copyright, href: '/legal/copyright' },
+    ],
+  },
+  {
+    key: 'core',
+    items: [
+      { key: 'terms', icon: ScrollText, href: '/legal/terms' },
+      { key: 'privacy', icon: Shield, href: '/legal/privacy' },
+      { key: 'cookies', icon: Cookie, href: '/legal/cookies' },
     ],
   },
 ];
 
-export default function LegalIndexPage() {
+export default async function LegalIndexPage() {
+  const t = await getTranslations('legal.index');
+  const tc = await getTranslations('legal.common');
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-
         {/* Back */}
         <Link
           href="/dashboard/settings"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
-          Settings
+          {t('backToSettings')}
         </Link>
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight">Info & Legal</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Informasi platform dan dokumen hukum Fibidy.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
 
         {/* Groups */}
         <div className="space-y-6">
-          {LEGAL_GROUPS.map((group) => (
-            <div key={group.group}>
+          {GROUPS.map((group) => (
+            <div key={group.key}>
               <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-                {group.group}
+                {t(`groups.${group.key}`)}
               </p>
               <div className="rounded-xl border divide-y overflow-hidden bg-card">
                 {group.items.map((item) => {
@@ -88,10 +128,10 @@ export default function LegalIndexPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-foreground leading-tight">
-                          {item.label}
+                          {t(`items.${item.key}.label`)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {item.description}
+                          {t(`items.${item.key}.description`)}
                         </p>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
@@ -105,9 +145,8 @@ export default function LegalIndexPage() {
 
         <Separator className="bg-border/60 mt-10 mb-6" />
         <p className="text-xs text-muted-foreground text-center">
-          Fibidy · PT Perorangan · NIB 1203260002022
+          {tc('brandSignature')}
         </p>
-
       </div>
     </div>
   );

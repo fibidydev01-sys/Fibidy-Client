@@ -1,45 +1,1461 @@
 {
   "legal": {
-    "nav": {
-      "title": "Legal & Bantuan",
+    "common": {
+      "backToIndex": "Info & Legal",
+      "effectiveSince": "Berlaku sejak April 2026. Terakhir diperbarui April 2026.",
+      "summaryLabel": "Intinya",
+      "questionsLabel": "Pertanyaan?",
+      "supportEmail": "admin@fibidy.com",
+      "brandSignature": "Fibidy · Indonesia"
+    },
+    "index": {
+      "backToSettings": "Pengaturan",
+      "title": "Info & Legal",
+      "subtitle": "Dokumentasi lengkap kebijakan dan operasi Fibidy.",
       "groups": {
-        "support": "Bantuan",
-        "policies": "Kebijakan"
+        "info": "Informasi",
+        "payment": "Pembayaran & Fee",
+        "seller": "Untuk Seller",
+        "rights": "Hak & Penggunaan",
+        "core": "Legal Inti"
       },
       "items": {
-        "contact": {
-          "label": "Kontak",
-          "description": "Hubungi tim kami"
-        },
         "faq": {
           "label": "FAQ",
           "description": "Pertanyaan yang sering ditanya"
         },
+        "contact": {
+          "label": "Hubungi Kami",
+          "description": "Email dan media sosial Fibidy"
+        },
+        "fees": {
+          "label": "Struktur Fee",
+          "description": "Breakdown fee platform per tier"
+        },
+        "payment": {
+          "label": "Kebijakan Pembayaran",
+          "description": "Alur pembayaran via Stripe Connect"
+        },
+        "refund": {
+          "label": "Kebijakan Refund",
+          "description": "Window 7 hari dengan auto-evaluation"
+        },
+        "kyc": {
+          "label": "Kebijakan KYC",
+          "description": "Verifikasi identitas via Stripe Connect"
+        },
+        "payout": {
+          "label": "Kebijakan Payout",
+          "description": "Jadwal payout T+7 dan currency"
+        },
+        "sellerAgreement": {
+          "label": "Perjanjian Seller",
+          "description": "Ketentuan khusus untuk Seller"
+        },
+        "acceptableUse": {
+          "label": "Acceptable Use Policy",
+          "description": "Konten dan perilaku yang dilarang"
+        },
+        "copyright": {
+          "label": "Kebijakan Hak Cipta",
+          "description": "Laporan pelanggaran dan takedown"
+        },
         "terms": {
           "label": "Syarat Layanan",
-          "description": "Aturan penggunaan Fibidy"
+          "description": "Ketentuan penggunaan Platform"
         },
         "privacy": {
           "label": "Kebijakan Privasi",
-          "description": "Cara kami mengelola data kamu"
+          "description": "Cara kami mengelola datamu"
+        },
+        "cookies": {
+          "label": "Kebijakan Cookie",
+          "description": "Cookie sesi dan kebijakan tracking"
         }
       }
     },
-    "contact": {
-      "title": "Hubungi Kami",
-      "lead": "Butuh bantuan? Hubungi kami lewat channel di bawah ini dan kami akan segera membalas."
-    },
-    "faq": {
-      "title": "Pertanyaan yang Sering Ditanya",
-      "lead": "Temukan jawaban cepat untuk pertanyaan umum seputar Fibidy."
-    },
     "terms": {
       "title": "Syarat Layanan",
-      "lead": "Terakhir diperbarui: April 2026"
+      "summary": [
+        "Fibidy adalah digital marketplace untuk produk PDF. Dioperasikan oleh individu di Indonesia.",
+        "Fibidy memfasilitasi transaksi via Stripe — bukan pihak dalam kontrak antara Seller dan Buyer.",
+        "Ada fee platform yang dipotong otomatis saat transaksi. Detail di halaman Struktur Fee.",
+        "Refund otomatis 7 hari kalau file tidak bisa didownload atau corrupt.",
+        "Penggunaan Platform tunduk pada hukum Indonesia."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Tentang Fibidy.",
+          "content": [
+            "Fibidy adalah platform digital marketplace yang memfasilitasi transaksi produk digital dalam bentuk file PDF antara penjual (Seller) dan pembeli (Buyer). Fibidy dioperasikan secara independen oleh pengelola perseorangan yang berdomisili di Indonesia.",
+            "Fibidy menyediakan infrastruktur teknis — akun, toko online, storage file, pemrosesan pembayaran via Stripe, dan fitur Discover untuk penemuan produk. Fibidy bukan pihak dalam transaksi jual-beli antara Seller dan Buyer. Kontrak jual-beli terbentuk langsung antara Seller dan Buyer.",
+            "Saat ini Fibidy hanya mendukung produk digital berformat PDF. Format lain tidak tersedia.",
+            "Untuk seluruh komunikasi resmi terkait Syarat Layanan ini, gunakan email admin@fibidy.com."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Definisi.",
+          "content": [
+            "\"Platform\" berarti situs web fibidy.com beserta seluruh subdomain dan layanan yang disediakan oleh Fibidy.",
+            "\"Pengguna\" berarti setiap orang yang memiliki akun di Platform, mencakup Buyer dan Seller.",
+            "\"Buyer\" berarti Pengguna yang membeli produk digital melalui Platform.",
+            "\"Seller\" berarti Pengguna yang telah menyelesaikan verifikasi identitas (KYC) dan menjual produk digital melalui Platform.",
+            "\"Produk Digital\" berarti file PDF yang diunggah Seller untuk dijual kepada Buyer.",
+            "\"Transaksi\" berarti pembelian Produk Digital oleh Buyer dari Seller melalui Platform.",
+            "\"Stripe\" berarti Stripe, Inc. dan afiliasinya, penyedia layanan pemrosesan pembayaran yang digunakan Platform."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Penerimaan syarat.",
+          "content": [
+            "Dengan mendaftar dan menggunakan Platform, kamu menyatakan telah membaca, memahami, dan menyetujui Syarat Layanan ini beserta seluruh kebijakan yang terkait, termasuk Kebijakan Privasi, Kebijakan Refund, dan Acceptable Use Policy.",
+            "Kamu menyatakan telah berusia minimal 17 tahun atau telah cakap hukum menurut hukum Republik Indonesia. Jika kamu mewakili sebuah entitas, kamu menyatakan berwenang untuk mengikat entitas tersebut pada Syarat ini.",
+            "Fibidy dapat memperbarui Syarat Layanan ini sewaktu-waktu. Perubahan material akan diberitahukan via email minimal 7 hari sebelum berlaku efektif. Penggunaan Platform yang berlanjut setelah tanggal efektif dianggap sebagai persetujuan terhadap versi terbaru."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Akun pengguna.",
+          "content": [
+            "Pendaftaran akun standar menghasilkan peran Buyer secara default. Pengguna yang ingin menjadi Seller wajib melakukan upgrade dan menyelesaikan proses KYC melalui Stripe Connect.",
+            "Kamu bertanggung jawab penuh atas keamanan akunmu, termasuk kerahasiaan kata sandi dan seluruh aktivitas di bawah akunmu.",
+            "Satu individu atau entitas hanya boleh memiliki satu akun aktif. Pembuatan akun ganda untuk menghindari pembatasan merupakan pelanggaran dan dapat menyebabkan penangguhan akun tanpa refund.",
+            "Kamu wajib memberikan informasi yang akurat dan terkini saat mendaftar, dan memperbaruinya jika ada perubahan. Informasi palsu atau menyesatkan dapat menyebabkan penangguhan akun.",
+            "Segera hubungi admin@fibidy.com jika kamu mengetahui adanya akses tidak sah ke akunmu. Fibidy tidak bertanggung jawab atas kerugian yang timbul akibat kelalaianmu menjaga kerahasiaan kredensial."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Peran Fibidy sebagai fasilitator.",
+          "content": [
+            "Fibidy berperan sebagai fasilitator teknis dan bukan pihak dalam transaksi antara Buyer dan Seller. Seluruh kontrak jual-beli Produk Digital terbentuk dan berlaku langsung antara Seller dan Buyer.",
+            "Fibidy tidak memiliki, tidak memproduksi, tidak menyimpan stok, dan tidak menjamin kualitas, akurasi, kelayakan komersial, atau kesesuaian tujuan Produk Digital yang dijual di Platform.",
+            "Seller bertanggung jawab penuh atas Produk Digital yang mereka jual, termasuk isi, legalitas, hak kekayaan intelektual, deskripsi, harga, dan pemenuhan kewajiban terhadap Buyer.",
+            "Jika terjadi sengketa antara Buyer dan Seller, Fibidy dapat membantu memfasilitasi komunikasi dan menyediakan bukti teknis dari sistem, tetapi bukan pihak dalam sengketa tersebut dan tidak bertanggung jawab atas penyelesaiannya."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Pembayaran dan fee platform.",
+          "content": [
+            "Pembayaran pada Platform diproses oleh Stripe. Fibidy tidak menyimpan, menerima, atau memproses data kartu pembayaran secara langsung. Seluruh pemrosesan pembayaran tunduk pada ketentuan layanan Stripe.",
+            "Platform menggunakan model Direct Charges melalui Stripe Connect. Pembayaran Buyer masuk langsung ke akun Stripe Connect milik Seller. Fibidy memotong application fee sebagai fee platform pada saat transaksi.",
+            "Struktur fee platform bervariasi berdasarkan tier langganan Seller dan sumber transaksi. Detail lengkap tersedia di Struktur Fee di fibidy.com/legal/fees.",
+            "Stripe mengenakan biaya pemrosesan pembayaran terpisah (processing fee) yang dipotong langsung dari Seller oleh Stripe, di luar fee platform Fibidy. Besaran biaya ini ditentukan dan dapat diubah oleh Stripe.",
+            "Seluruh transaksi di Platform diselesaikan (settlement) dalam mata uang USD. Buyer internasional dapat melihat harga dalam mata uang lokal melalui fitur Adaptive Pricing Stripe, namun settlement final tetap dalam USD.",
+            "Fibidy dapat mengubah struktur fee platform dengan pemberitahuan minimal 30 hari kepada Seller aktif via email. Perubahan tidak bersifat retroaktif — transaksi yang telah selesai tetap menggunakan fee yang berlaku pada saat transaksi."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Refund dan dispute.",
+          "content": [
+            "Platform menyediakan mekanisme refund otomatis untuk melindungi Buyer dari file yang tidak dapat diakses atau rusak. Buyer dapat mengajukan refund dalam jangka waktu 7 hari sejak tanggal pembelian.",
+            "Refund disetujui secara otomatis jika sistem mendeteksi file tidak dapat diunduh atau file corrupt (tidak dapat dibuka sebagai PDF yang valid). Jika refund disetujui, dana dikembalikan melalui Stripe dan akses download Buyer dicabut.",
+            "Refund ditolak secara otomatis jika file terbukti valid dan dapat diakses, jika permintaan di luar jangka waktu 7 hari, atau jika refund untuk transaksi tersebut sudah pernah diajukan.",
+            "Detail lengkap kondisi dan proses refund dijelaskan di Kebijakan Refund di fibidy.com/legal/refund.",
+            "Buyer tetap dapat mengajukan chargeback melalui bank penerbit kartu sesuai hak konsumen yang berlaku. Dispute chargeback diproses oleh Stripe sesuai kebijakan mereka. Seller yang menerima 2 atau lebih chargeback dapat dikenakan penangguhan akun otomatis."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Langganan Seller.",
+          "content": [
+            "Platform menyediakan tier langganan untuk Seller dengan variasi fitur dan fee platform. Saat ini tersedia tier Free, Starter, dan Business.",
+            "Langganan berbayar diproses oleh Stripe Billing dalam siklus bulanan. Pembayaran bersifat non-refundable untuk periode berjalan — pembatalan akan berlaku pada akhir periode berjalan tanpa refund pro-rata.",
+            "Upgrade ke tier Business memerlukan track record penjualan minimum sesuai ketentuan yang berlaku — total penjualan USD $200 atau minimum 20 transaksi pada tier Starter.",
+            "Fibidy berhak mengubah fitur, harga, atau ketentuan tier langganan dengan pemberitahuan minimal 30 hari via email."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Kewajiban KYC untuk Seller.",
+          "content": [
+            "Untuk menjadi Seller aktif dan menerima pembayaran, Pengguna wajib menyelesaikan proses verifikasi identitas (Know Your Customer / KYC) melalui Stripe Connect.",
+            "Proses KYC dilakukan langsung oleh Stripe. Fibidy tidak menyimpan data identitas yang dikumpulkan selama proses KYC — data tersebut dikelola sepenuhnya oleh Stripe sesuai kebijakan privasi mereka.",
+            "Seller wajib memberikan informasi yang akurat dan lengkap kepada Stripe. Informasi palsu, menyesatkan, atau tidak lengkap dapat menyebabkan penolakan KYC, penangguhan akun, atau pembekuan dana payout.",
+            "Seller belum dapat mengunggah Produk Digital dan belum dapat menerima payout sebelum status KYC mencapai \"Active\" atau \"Charges Only\". Detail alur KYC tersedia di Kebijakan KYC di fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Kepemilikan konten dan hak kekayaan intelektual.",
+          "content": [
+            "Seller mempertahankan seluruh hak kekayaan intelektual atas Produk Digital yang mereka unggah. Fibidy tidak mengklaim kepemilikan atas konten Seller.",
+            "Dengan mengunggah Produk Digital, Seller memberikan Fibidy lisensi terbatas, non-eksklusif, bebas royalti, dan dapat dihentikan untuk menyimpan, menampilkan, memproses, dan mendistribusikan Produk Digital tersebut semata-mata untuk tujuan mengoperasikan Platform. Lisensi ini berakhir ketika Seller menghapus konten atau menutup akun.",
+            "Buyer yang membeli Produk Digital memperoleh lisensi personal non-eksklusif untuk menggunakan file yang dibeli sesuai tujuan yang wajar. Kecuali dinyatakan lain oleh Seller, Buyer tidak berhak menjual ulang, mendistribusikan, atau mempublikasikan Produk Digital secara komersial.",
+            "Seller menjamin bahwa Produk Digital yang diunggah tidak melanggar hak kekayaan intelektual, hak privasi, atau hak lainnya dari pihak ketiga. Pelanggaran hak pihak ketiga merupakan tanggung jawab penuh Seller.",
+            "Laporan pelanggaran hak cipta dapat diajukan melalui prosedur di Kebijakan Hak Cipta di fibidy.com/legal/copyright."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Konten yang dilarang.",
+          "content": [
+            "Pengguna dilarang mengunggah, menjual, atau mendistribusikan konten yang melanggar hukum Republik Indonesia, termasuk namun tidak terbatas pada konten pornografi, konten yang membahayakan anak, konten yang mempromosikan kekerasan atau terorisme, dan konten yang melanggar Undang-Undang Informasi dan Transaksi Elektronik.",
+            "Dilarang mengunggah produk hasil pembajakan, salinan tidak sah dari karya pihak lain, atau konten yang melanggar hak kekayaan intelektual pihak ketiga.",
+            "Dilarang mengunggah file yang mengandung malware, virus, atau kode berbahaya lainnya.",
+            "Dilarang menggunakan Platform untuk penipuan, pencucian uang, penghindaran pajak, atau aktivitas ilegal lainnya.",
+            "Detail lengkap konten dan perilaku yang dilarang dijelaskan di Acceptable Use Policy di fibidy.com/legal/acceptable-use.",
+            "Fibidy berhak menghapus konten yang melanggar, menangguhkan atau menghapus akun pelanggar, dan melaporkan pelanggaran kepada otoritas yang berwenang sesuai hukum yang berlaku."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "Batasan tanggung jawab.",
+          "content": [
+            "Platform disediakan dalam kondisi \"sebagaimana adanya\" (as is) tanpa jaminan tersurat maupun tersirat atas kelayakan untuk tujuan tertentu, keandalan, ketersediaan tanpa gangguan, atau bebas dari kesalahan.",
+            "Fibidy tidak bertanggung jawab atas transaksi, kualitas produk, atau sengketa antara Buyer dan Seller. Fibidy juga tidak menjamin tingkat penjualan, peringkat mesin pencari, atau hasil komersial apapun.",
+            "Dalam batas yang diizinkan oleh hukum, total tanggung jawab finansial Fibidy kepada Pengguna untuk seluruh klaim yang timbul dari atau terkait dengan Platform tidak akan melebihi jumlah yang telah Pengguna bayarkan kepada Fibidy dalam 3 bulan terakhir sebelum timbulnya klaim. Untuk Pengguna tier Free, batas tanggung jawab adalah nol.",
+            "Fibidy tidak bertanggung jawab atas kerugian tidak langsung, konsekuensial, insidental, kehilangan keuntungan, kehilangan data, atau kehilangan goodwill yang timbul dari penggunaan atau ketidakmampuan menggunakan Platform.",
+            "Batasan tanggung jawab ini berlaku sepenuhnya kecuali dibatasi oleh hukum yang berlaku yang tidak dapat dikesampingkan."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Ganti rugi.",
+          "content": [
+            "Pengguna setuju untuk membebaskan dan mengganti rugi Fibidy atas setiap tuntutan, kerugian, atau biaya (termasuk biaya hukum yang wajar) yang timbul dari pelanggaran Syarat Layanan ini, pelanggaran hukum yang berlaku, atau pelanggaran hak pihak ketiga oleh Pengguna.",
+            "Ketentuan ini berlaku khusus bagi Seller atas Produk Digital yang mereka unggah dan jual melalui Platform."
+          ]
+        },
+        {
+          "number": "14",
+          "title": "Penangguhan dan penghentian akun.",
+          "content": [
+            "Fibidy berhak menangguhkan atau menghentikan akun Pengguna, sementara atau permanen, tanpa pemberitahuan sebelumnya jika Pengguna melanggar Syarat Layanan ini, melanggar hukum yang berlaku, atau melakukan tindakan yang membahayakan keamanan atau integritas Platform, Pengguna lain, atau pihak ketiga.",
+            "Seller yang menerima 2 atau lebih chargeback akan dikenakan penangguhan otomatis. Status dapat ditinjau ulang setelah review manual oleh tim Fibidy.",
+            "Pengguna dapat menutup akun kapan saja dengan menghubungi admin@fibidy.com. Penutupan bersifat permanen — data dihapus dalam 30 hari sesuai Kebijakan Privasi. Langganan berbayar yang masih aktif tetap berlaku sampai akhir periode tanpa refund pro-rata.",
+            "Jika Fibidy menghentikan operasional Platform secara permanen, pemberitahuan akan diberikan minimal 30 hari sebelumnya kepada seluruh Pengguna aktif via email. Seller diberi kesempatan untuk mengunduh data dan menerima payout dana yang telah ter-settle sesuai ketentuan Stripe."
+          ]
+        },
+        {
+          "number": "15",
+          "title": "Hukum yang berlaku dan penyelesaian sengketa.",
+          "content": [
+            "Syarat Layanan ini tunduk pada dan ditafsirkan berdasarkan hukum Republik Indonesia.",
+            "Setiap sengketa yang timbul dari atau terkait dengan Syarat Layanan ini akan terlebih dahulu diselesaikan melalui musyawarah secara iktikad baik via email ke admin@fibidy.com selama jangka waktu 30 hari sejak pemberitahuan sengketa.",
+            "Apabila musyawarah tidak mencapai kesepakatan, sengketa diselesaikan melalui pengadilan yang berwenang di wilayah Republik Indonesia sesuai ketentuan hukum yang berlaku."
+          ]
+        },
+        {
+          "number": "16",
+          "title": "Ketentuan lain.",
+          "content": [
+            "Jika ada ketentuan dalam Syarat Layanan ini yang dinyatakan tidak sah atau tidak dapat diberlakukan oleh pengadilan yang berwenang, ketentuan lainnya tetap berlaku penuh.",
+            "Kegagalan Fibidy untuk menegakkan suatu ketentuan dalam Syarat Layanan ini tidak dianggap sebagai pelepasan hak atas ketentuan tersebut di masa mendatang.",
+            "Syarat Layanan ini merupakan keseluruhan perjanjian antara Fibidy dan Pengguna terkait penggunaan Platform, dan menggantikan seluruh perjanjian atau kesepakatan sebelumnya.",
+            "Untuk pertanyaan terkait Syarat Layanan ini, hubungi admin@fibidy.com."
+          ]
+        }
+      ]
     },
     "privacy": {
       "title": "Kebijakan Privasi",
-      "lead": "Terakhir diperbarui: April 2026"
+      "summary": [
+        "Kami hanya kumpulkan data yang dibutuhkan untuk operasi Platform. Tidak lebih.",
+        "Data kartu pembayaran tidak pernah masuk ke server kami — semua diproses oleh Stripe.",
+        "IP dan User-Agent dicatat saat download untuk bukti chargeback. Disimpan 365 hari.",
+        "Kami tidak jual datamu. Tidak untuk iklan. Tidak untuk marketing pihak ketiga.",
+        "Kamu bisa akses, koreksi, atau minta hapus data kamu kapan saja via email."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Siapa yang bertanggung jawab atas datamu.",
+          "content": [
+            "Kebijakan Privasi ini menjelaskan bagaimana Fibidy mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi Pengguna yang menggunakan platform fibidy.com beserta seluruh subdomain dan layanannya.",
+            "Fibidy dioperasikan secara independen oleh pengelola perseorangan yang berdomisili di Indonesia. Dalam konteks Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), Fibidy bertindak sebagai Pengendali Data Pribadi untuk data yang dikumpulkan melalui Platform.",
+            "Untuk seluruh pertanyaan, permintaan, atau pengaduan terkait data pribadi, hubungi admin@fibidy.com."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Data yang kami kumpulkan.",
+          "content": [
+            "Data akun — Saat mendaftar, kami mengumpulkan alamat email dan kata sandi (disimpan dalam bentuk terenkripsi menggunakan bcrypt). Untuk Pengguna yang upgrade menjadi Seller, kami juga mengumpulkan nama toko, kategori usaha, nomor WhatsApp, deskripsi, dan alamat yang kamu berikan secara sukarela.",
+            "Data profil toko — Seller dapat mengunggah logo, foto produk, dan konten lainnya untuk menampilkan toko dan produk digital mereka.",
+            "Data produk digital — File PDF yang diunggah Seller untuk dijual, beserta metadata terkait (nama file, ukuran, jumlah halaman, waktu unggah).",
+            "Data transaksi — Untuk setiap pembelian, kami mencatat ID sesi pembayaran, ID payment intent, jumlah yang dibayar, mata uang, fee platform, dan sumber transaksi (Direct atau Discover). Data kartu pembayaran tidak pernah menyentuh server Fibidy — seluruh pemrosesan kartu dilakukan oleh Stripe.",
+            "Data log download — Untuk setiap unduhan produk oleh Buyer, kami mencatat alamat IP, User-Agent, dan waktu unduhan. Tujuannya adalah menyediakan bukti akses file sebagai evidence jika terjadi sengketa chargeback. Data ini disimpan maksimum 365 hari.",
+            "Data sesi — Kami menggunakan cookie sesi httpOnly untuk menjaga kamu tetap login. Detail di Kebijakan Cookie di fibidy.com/legal/cookies.",
+            "Data penggunaan agregat — Kami menggunakan Vercel Analytics yang mengumpulkan statistik pengunjung secara anonim, tanpa cookie pelacak dan tanpa mengidentifikasi individu."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Tujuan pengumpulan data.",
+          "content": [
+            "Menyediakan dan mengoperasikan Platform, termasuk autentikasi, manajemen akun, dan penyediaan layanan kepada Seller dan Buyer.",
+            "Memproses pembayaran dan payout melalui Stripe.",
+            "Memenuhi kewajiban verifikasi identitas (KYC) Seller melalui Stripe Connect untuk kepatuhan terhadap regulasi anti pencucian uang.",
+            "Menyediakan bukti teknis (download log) untuk dispute chargeback dan perlindungan terhadap klaim yang tidak sah.",
+            "Mengirim notifikasi penting terkait akun, transaksi, perubahan layanan, atau perubahan kebijakan.",
+            "Mencegah, mendeteksi, dan menangani penipuan, pelanggaran keamanan, atau pelanggaran Syarat Layanan.",
+            "Meningkatkan Platform berdasarkan analisis penggunaan agregat.",
+            "Memenuhi kewajiban hukum yang berlaku di Republik Indonesia.",
+            "Kami tidak menggunakan datamu untuk iklan pihak ketiga, tidak menjual datamu, dan tidak membagikannya untuk tujuan pemasaran oleh pihak lain."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Dasar hukum pemrosesan data.",
+          "content": [
+            "Pemrosesan data pribadi dilakukan berdasarkan satu atau lebih dasar hukum berikut, sesuai Pasal 20 UU PDP:",
+            "Persetujuan — kamu memberikan persetujuan eksplisit saat mendaftar dan menerima Kebijakan Privasi ini.",
+            "Pelaksanaan perjanjian — pemrosesan yang diperlukan untuk memenuhi Syarat Layanan dan menyediakan layanan kepada kamu.",
+            "Kewajiban hukum — pemrosesan yang diperlukan untuk memenuhi kewajiban hukum Fibidy.",
+            "Kepentingan sah — pemrosesan untuk tujuan yang wajar seperti keamanan Platform, pencegahan penipuan, dan perlindungan hak hukum, sepanjang tidak melanggar hak dasar Pengguna."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Pemroses data pihak ketiga.",
+          "content": [
+            "Untuk mengoperasikan Platform, kami menggunakan penyedia layanan pihak ketiga yang bertindak sebagai Pemroses Data sesuai instruksi Fibidy. Masing-masing pihak memiliki kebijakan privasi sendiri yang mengatur bagaimana mereka menangani data.",
+            "Stripe, Inc. (Amerika Serikat dan afiliasi global) — memproses pembayaran, melakukan verifikasi KYC Seller, dan mengelola payout. Stripe menerima data identitas Seller, data transaksi, dan data kartu Buyer. Kebijakan privasi Stripe tersedia di stripe.com/privacy.",
+            "Supabase, Inc. (Amerika Serikat) — menyediakan infrastruktur database PostgreSQL. Seluruh data akun, transaksi, dan metadata produk disimpan di database yang dihosting oleh Supabase.",
+            "Upstash, Inc. (Amerika Serikat) — menyediakan infrastruktur Redis untuk cache, session management, dan rate limiting. Data yang disimpan bersifat sementara dan tidak mengandung data sensitif.",
+            "Cloudflare, Inc. (global) — melalui layanan R2 kami menyimpan file PDF produk digital dan file preview yang diunggah Seller.",
+            "Cloudinary Ltd. (Amerika Serikat dan Israel) — menyimpan aset gambar seperti logo toko dan ikon feature.",
+            "Railway Corp. (Amerika Serikat) — menyediakan infrastruktur hosting untuk backend server Fibidy.",
+            "Vercel, Inc. (Amerika Serikat) — menyediakan infrastruktur hosting untuk frontend web Fibidy dan layanan analitik anonim.",
+            "Sebagian penyedia di atas berbasis di luar Indonesia. Transfer data lintas batas dilakukan dengan dasar hukum sesuai Pasal 56 UU PDP, termasuk persetujuanmu dan pelaksanaan perjanjian."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Data produk digital dan keamanan file.",
+          "content": [
+            "File PDF yang diunggah Seller disimpan secara terenkripsi di Cloudflare R2. Kunci file internal (fileKey) tidak pernah diekspos ke Buyer atau publik.",
+            "Buyer hanya memperoleh akses via signed URL sementara dengan masa berlaku 15 menit, yang dibangkitkan fresh setiap kali Buyer klik tombol download.",
+            "Untuk setiap produk PDF, sistem secara otomatis menghasilkan file preview yang berisi maksimum 3 halaman pertama. File preview ini yang ditampilkan di halaman produk publik — file asli tetap tersembunyi sampai Buyer membeli.",
+            "Integritas file diverifikasi saat upload menggunakan library pdf-lib. File yang corrupt atau tidak dapat diproses ditolak saat upload."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Log download dan bukti chargeback.",
+          "content": [
+            "Setiap kali Buyer mengunduh produk yang telah dibeli, sistem mencatat alamat IP, User-Agent browser, waktu unduhan, dan ID produk terkait.",
+            "Data log download dikumpulkan untuk dua tujuan spesifik: menyediakan bukti akses file kepada Stripe jika Buyer mengajukan chargeback, dan menyediakan histori unduhan kepada Seller untuk keperluan operasional toko.",
+            "Log download disimpan maksimum 365 hari sejak waktu unduhan, kemudian dihapus secara periodik melalui mekanisme cleanup.",
+            "Alamat IP yang tercatat dianggap data pribadi dalam kerangka UU PDP. Kami memproses data ini berdasarkan kepentingan sah untuk perlindungan dari klaim chargeback yang tidak berdasar."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Keamanan data.",
+          "content": [
+            "Kami menerapkan langkah keamanan teknis dan organisasional yang wajar untuk melindungi data pribadi, termasuk — transmisi data melalui koneksi terenkripsi HTTPS/TLS, enkripsi kata sandi dengan bcrypt cost factor 12, sesi login dengan cookie httpOnly dan secure, mekanisme token versioning untuk invalidasi sesi otomatis saat kata sandi diubah, rate limiting terhadap serangan brute force, dan isolasi data antar Pengguna pada level aplikasi dan database.",
+            "Pembayaran diproses oleh Stripe yang tersertifikasi PCI-DSS Level 1. Data kartu pembayaran tidak pernah tersimpan atau terproses di server Fibidy.",
+            "Tidak ada sistem yang dapat menjamin keamanan absolut. Jika terjadi insiden keamanan yang secara material membahayakan data pribadi Pengguna, kami akan memberitahumu sesegera mungkin setelah insiden dikonfirmasi, sesuai kewajiban notifikasi pelanggaran data dalam UU PDP.",
+            "Jika kamu menemukan celah keamanan, mohon laporkan ke admin@fibidy.com dengan subjek \"Security Report\"."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Retensi data.",
+          "content": [
+            "Data akun aktif — disimpan selama akun aktif digunakan.",
+            "Data akun tertutup — setelah permintaan penutupan akun dikonfirmasi, data akun dihapus permanen dalam 30 hari. Setelah periode tersebut data tidak dapat dipulihkan.",
+            "Data transaksi — dipertahankan untuk kepatuhan hukum dan kebutuhan audit keuangan sesuai jangka waktu yang diwajibkan oleh peraturan perpajakan dan peraturan terkait lainnya di Indonesia.",
+            "Data log download — dipertahankan maksimum 365 hari, kemudian dihapus otomatis.",
+            "Data webhook Stripe — dipertahankan maksimum 90 hari untuk mendukung pemrosesan ulang jika diperlukan, kemudian dihapus.",
+            "Data yang disimpan Stripe sebagai Pemroses Data tunduk pada kebijakan retensi Stripe, termasuk kebutuhan mempertahankan catatan transaksi dan catatan KYC sesuai regulasi keuangan yang berlaku."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Hak-hak Pengguna.",
+          "content": [
+            "Sesuai UU PDP, kamu memiliki hak sebagai Subjek Data Pribadi, termasuk:",
+            "Hak atas akses — meminta salinan data pribadi yang kami simpan tentangmu.",
+            "Hak atas perbaikan — meminta koreksi atas data yang tidak akurat atau tidak lengkap.",
+            "Hak atas penghapusan — meminta penghapusan data pribadi dengan memperhatikan kewajiban hukum yang membatasi.",
+            "Hak atas pembatasan pemrosesan — meminta pembatasan pemrosesan data dalam kondisi tertentu.",
+            "Hak atas portabilitas data — meminta salinan data dalam format yang terstruktur dan dapat dibaca mesin.",
+            "Hak untuk menarik persetujuan — menarik persetujuan pemrosesan yang sebelumnya telah kamu berikan.",
+            "Hak untuk mengajukan keberatan dan pengaduan — mengajukan keberatan atas pemrosesan tertentu atau mengajukan pengaduan kepada otoritas yang berwenang.",
+            "Untuk menggunakan hak-hak ini, kirim permintaan ke admin@fibidy.com dengan subjek \"Data Request\". Kami akan merespons dalam jangka waktu maksimum 14 hari kerja. Beberapa hak dapat dibatasi oleh kewajiban hukum atau kepentingan sah Fibidy."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Data anak di bawah umur.",
+          "content": [
+            "Platform tidak ditujukan untuk anak di bawah usia 17 tahun. Kami tidak secara sadar mengumpulkan data pribadi anak di bawah umur.",
+            "Jika kamu mengetahui atau memiliki kekhawatiran bahwa seorang anak di bawah umur telah memberikan data pribadi kepada Platform, mohon hubungi admin@fibidy.com dan kami akan menghapus data tersebut sesegera mungkin."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "Transfer data internasional.",
+          "content": [
+            "Karena beberapa Pemroses Data kami berbasis di luar Indonesia, data pribadimu dapat diproses dan disimpan di yurisdiksi di luar Indonesia, termasuk Amerika Serikat.",
+            "Transfer data lintas batas dilakukan dengan memperhatikan tingkat perlindungan data pribadi di negara tujuan sesuai Pasal 56 UU PDP, serta berdasarkan persetujuanmu dan pelaksanaan perjanjian dengan kamu."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Perubahan Kebijakan Privasi.",
+          "content": [
+            "Fibidy dapat memperbarui Kebijakan Privasi ini sewaktu-waktu. Perubahan material akan diberitahukan kepada Pengguna terdaftar via email minimal 7 hari sebelum berlaku efektif.",
+            "Versi terbaru selalu tersedia di fibidy.com/legal/privacy. Tanggal \"terakhir diperbarui\" di bagian atas halaman menunjukkan versi terbaru yang berlaku.",
+            "Penggunaan Platform yang berlanjut setelah tanggal efektif dianggap sebagai persetujuan terhadap versi terbaru."
+          ]
+        },
+        {
+          "number": "14",
+          "title": "Kontak.",
+          "content": [
+            "Untuk pertanyaan umum terkait Kebijakan Privasi ini, hubungi admin@fibidy.com.",
+            "Untuk permintaan hak sebagai Subjek Data Pribadi (akses, koreksi, penghapusan, portabilitas, dan lain-lain), gunakan email yang sama dengan subjek \"Data Request\".",
+            "Untuk laporan insiden keamanan atau kebocoran data, gunakan subjek \"Security Report\"."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Kebijakan Cookie",
+      "summary": [
+        "Kami pakai cookie sesedikit mungkin — cuma yang perlu untuk login.",
+        "fibidy_auth (7 hari) untuk Buyer/Seller. fibidy_admin (8 jam) untuk admin.",
+        "Semua cookie HttpOnly dan Secure — tidak bisa dicuri via JavaScript.",
+        "Tidak ada tracking cookie. Tidak ada Google Analytics, FB Pixel, iklan.",
+        "Stripe set cookie-nya sendiri di halaman checkout untuk keamanan."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Apa itu cookie.",
+          "content": [
+            "Cookie adalah file teks kecil yang disimpan browser di perangkatmu saat mengunjungi situs web.",
+            "Fibidy menggunakan cookie secara minimal — hanya untuk keperluan esensial agar Platform dapat berfungsi dengan aman.",
+            "Kami tidak menggunakan cookie iklan, tidak menggunakan cookie pihak ketiga, dan tidak bergabung dalam jaringan pelacakan apapun."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Cookie yang kami gunakan.",
+          "content": [
+            "fibidy_auth — Cookie sesi untuk autentikasi Buyer dan Seller. Disetel saat login, berlaku 7 hari, dan dihapus saat logout. Atribut: HttpOnly, Secure, SameSite=None.",
+            "fibidy_admin — Cookie sesi untuk autentikasi admin internal Fibidy. Disetel saat admin login, berlaku 8 jam. Atribut: HttpOnly, Secure (di production), SameSite=Lax. Cookie ini tidak disetel untuk Pengguna biasa.",
+            "Kedua cookie menggunakan flag HttpOnly yang berarti tidak dapat diakses oleh JavaScript di browser — ini adalah langkah keamanan untuk mencegah pencurian sesi melalui serangan XSS."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Cookie yang TIDAK kami gunakan.",
+          "content": [
+            "Google Analytics — kami tidak menggunakannya.",
+            "Facebook Pixel — kami tidak menggunakannya.",
+            "Cookie periklanan dari jaringan iklan manapun — kami tidak menggunakannya.",
+            "Cookie pelacak lintas situs untuk profiling Pengguna — kami tidak menggunakannya.",
+            "Vercel Analytics yang kami gunakan untuk statistik agregat tidak menggunakan cookie dan tidak mengidentifikasi individu."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Cookie pihak ketiga dari Stripe.",
+          "content": [
+            "Saat Buyer melakukan checkout, halaman Stripe Checkout dapat menyetel cookie miliknya sendiri untuk keperluan keamanan dan pencegahan fraud.",
+            "Cookie Stripe ini diatur sepenuhnya oleh Stripe dan tunduk pada kebijakan cookie Stripe. Fibidy tidak mengontrol atau memiliki akses ke cookie tersebut.",
+            "Detail lengkap tersedia di stripe.com/cookies-policy."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Mengelola cookie.",
+          "content": [
+            "Karena cookie yang kami gunakan bersifat esensial untuk fungsi Platform (autentikasi), menonaktifkan cookie akan mencegah kamu login dan menggunakan layanan.",
+            "Sebagian besar browser memungkinkan kamu mengelola cookie melalui pengaturan. Kamu dapat menghapus cookie, memblokir cookie dari situs tertentu, atau mengatur browser untuk memberitahu sebelum cookie disetel.",
+            "Detail pengaturan cookie per browser tersedia di situs dukungan browser masing-masing."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Perubahan kebijakan cookie.",
+          "content": [
+            "Fibidy dapat memperbarui Kebijakan Cookie ini jika ada perubahan pada cookie yang digunakan.",
+            "Jika kami menambahkan cookie baru yang material (misalnya jika di masa depan menambahkan analytics tool yang menggunakan cookie), pemberitahuan akan diberikan via email minimal 7 hari sebelum berlaku efektif.",
+            "Versi terbaru selalu tersedia di fibidy.com/legal/cookies."
+          ]
+        }
+      ]
+    },
+    "fees": {
+      "title": "Struktur Fee",
+      "summary": [
+        "FREE: Direct 15%, Discover 20%.",
+        "STARTER: Direct 5%, Discover 20%.",
+        "BUSINESS: Direct 2%, Discover 20%.",
+        "Plus processing fee Stripe (~2.9% + $0.30) dipotong terpisah.",
+        "Semua settlement dalam USD. Harga untuk Buyer auto-convert via Adaptive Pricing."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Fee platform per tier.",
+          "content": [
+            "Fibidy memotong application fee pada setiap transaksi sebagai fee platform. Besaran fee bervariasi berdasarkan tier langganan Seller dan sumber transaksi (Direct atau Discover).",
+            "Tier FREE — Direct 15%, Discover 20%.",
+            "Tier STARTER — Direct 5%, Discover 20%.",
+            "Tier BUSINESS — Direct 2%, Discover 20%.",
+            "Fee platform dipotong otomatis saat transaksi selesai via Stripe Connect Direct Charges. Sisa setelah fee platform dan processing fee Stripe masuk ke akun Stripe Connect Seller."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Perbedaan Direct vs Discover.",
+          "content": [
+            "Direct — Buyer datang langsung ke toko Seller via link toko atau produk yang dibagikan Seller. Fee lebih rendah karena Seller membawa traffic-nya sendiri.",
+            "Discover — Buyer menemukan produk melalui fitur Discover marketplace Fibidy. Fee flat 20% di semua tier karena Fibidy yang membawa traffic.",
+            "Sumber transaksi ditentukan otomatis oleh sistem berdasarkan dari mana Buyer memulai checkout."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Processing fee Stripe.",
+          "content": [
+            "Di luar fee platform, Stripe mengenakan processing fee untuk setiap transaksi kartu. Besaran umum adalah 2.9% + $0.30 per transaksi, namun dapat berbeda berdasarkan lokasi Buyer dan metode pembayaran.",
+            "Processing fee Stripe dipotong langsung dari Seller oleh Stripe — bukan dari Fibidy dan tidak termasuk dalam fee platform.",
+            "Detail biaya Stripe yang terbaru dapat dilihat di stripe.com/pricing."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Contoh perhitungan.",
+          "content": [
+            "Misalkan harga produk $10, Seller tier STARTER, transaksi Direct.",
+            "Fee platform Fibidy: $10 × 5% = $0.50.",
+            "Processing fee Stripe: $10 × 2.9% + $0.30 = $0.59 (perkiraan).",
+            "Yang masuk ke akun Stripe Connect Seller: $10 − $0.50 − $0.59 = $8.91.",
+            "Angka di atas hanya ilustrasi. Jumlah aktual dapat berbeda tergantung kurs, metode pembayaran, dan kebijakan Stripe yang berlaku saat transaksi."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Currency settlement.",
+          "content": [
+            "Seluruh transaksi diselesaikan dalam mata uang USD.",
+            "Buyer internasional melihat harga dalam mata uang lokal via Adaptive Pricing Stripe, namun settlement tetap USD di akun Stripe Connect Seller.",
+            "Konversi antara mata uang Buyer dan USD dilakukan Stripe menggunakan kurs yang berlaku saat transaksi. Spread kurs adalah bagian dari biaya Stripe, bukan fee Fibidy."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Fee snapshot per transaksi.",
+          "content": [
+            "Persentase fee platform yang berlaku saat transaksi dibekukan (snapshot) ke record transaksi tersebut.",
+            "Jika fee platform berubah di masa depan, transaksi yang sudah selesai tetap menggunakan fee yang berlaku saat transaksi terjadi — bukan fee baru."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Perubahan fee di masa depan.",
+          "content": [
+            "Fibidy dapat mengubah struktur fee platform dengan pemberitahuan minimal 30 hari kepada Seller aktif via email.",
+            "Perubahan tidak berlaku retroaktif. Transaksi yang terjadi sebelum tanggal efektif perubahan tetap menggunakan fee lama.",
+            "Seller dapat memilih untuk menghentikan langganan atau menutup akun sebelum tanggal efektif jika tidak setuju dengan perubahan."
+          ]
+        }
+      ]
+    },
+    "payment": {
+      "title": "Kebijakan Pembayaran",
+      "summary": [
+        "Pembayaran diproses Stripe — PCI-DSS Level 1. Data kartu tidak masuk ke Fibidy.",
+        "Pakai model Direct Charges — pembayaran langsung ke Seller, Fibidy ambil fee platform.",
+        "Settlement dalam USD. Buyer lokal lihat harga lokal via Adaptive Pricing.",
+        "Double-charge dicegah via Redis lock + DB unique constraint.",
+        "Chargeback di-handle Stripe. Evidence auto-submit dari log download."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Stripe sebagai processor.",
+          "content": [
+            "Seluruh pembayaran di Fibidy diproses oleh Stripe, Inc. Stripe tersertifikasi PCI-DSS Level 1 — standar keamanan tertinggi untuk pemrosesan kartu pembayaran.",
+            "Fibidy tidak menyimpan, menerima, atau memproses data kartu pembayaran secara langsung. Data kartu Buyer langsung dikirim dari browser ke server Stripe melalui koneksi terenkripsi.",
+            "Seluruh pemrosesan pembayaran tunduk pada ketentuan layanan Stripe, termasuk Stripe Services Agreement dan Stripe Restricted Businesses policy."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Metode pembayaran yang diterima.",
+          "content": [
+            "Kartu kredit dan debit — Visa, Mastercard, American Express, JCB, dan kartu lokal yang didukung Stripe.",
+            "Dompet digital — Apple Pay, Google Pay, dan dompet digital lain yang didukung Stripe di wilayah Buyer.",
+            "Ketersediaan metode pembayaran bervariasi berdasarkan negara Buyer. Stripe secara otomatis menampilkan metode yang tersedia di checkout."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Direct Charges model.",
+          "content": [
+            "Fibidy menggunakan model Direct Charges Stripe Connect. Dalam model ini, pembayaran Buyer diproses langsung ke akun Stripe Connect milik Seller, bukan melalui akun Fibidy.",
+            "Fibidy memotong application fee sebagai fee platform pada saat yang sama transaksi diproses. Saldo Seller setelah fee platform dan processing fee Stripe tersedia untuk payout sesuai jadwal Stripe.",
+            "Model ini berarti Seller adalah merchant of record untuk transaksi, bukan Fibidy."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Currency settlement.",
+          "content": [
+            "Seluruh transaksi diselesaikan dalam USD. Saldo di akun Stripe Connect Seller tercatat dalam USD.",
+            "Buyer internasional dapat melihat harga dalam mata uang lokal melalui Adaptive Pricing Stripe. Konversi ke USD dilakukan Stripe saat transaksi menggunakan kurs yang berlaku saat itu.",
+            "Saat payout ke rekening bank Seller, Stripe mengkonversi USD ke mata uang rekening Seller dengan kurs yang berlaku saat payout."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Record dan audit trail.",
+          "content": [
+            "Setiap transaksi menghasilkan record yang mencakup ID sesi Stripe Checkout, ID payment intent, jumlah yang dibayar oleh Buyer, mata uang presentment, mata uang settlement (USD), fee platform persentase dan jumlah, serta sumber transaksi (Direct atau Discover).",
+            "Record ini disimpan oleh Fibidy dan dapat diakses Seller melalui dashboard untuk keperluan operasional dan audit.",
+            "Record transaksi Stripe yang lebih detail tersedia di dashboard Stripe Connect Seller."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Kegagalan pembayaran.",
+          "content": [
+            "Jika pembayaran gagal karena saldo tidak cukup, kartu ditolak, atau masalah teknis lainnya, Buyer akan diberitahu oleh Stripe di halaman checkout dan dapat mencoba ulang dengan metode pembayaran lain.",
+            "Jika pembayaran Buyer berstatus pending (pembayaran asinkron seperti bank transfer), Buyer belum menerima akses ke produk sampai pembayaran dikonfirmasi Stripe.",
+            "Fibidy tidak memungut biaya untuk percobaan pembayaran yang gagal."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Pencegahan double-charge.",
+          "content": [
+            "Untuk melindungi Buyer dari double-charge akibat klik ganda atau masalah jaringan, Fibidy menerapkan lock sementara per pasangan Buyer-produk selama proses checkout.",
+            "Jika Buyer mencoba memulai checkout baru sebelum yang sebelumnya selesai, sistem akan memblokir sementara dengan pesan untuk menunggu.",
+            "Unique constraint pada level database menjadi pengaman tambahan — seorang Buyer tidak dapat membeli produk yang sama dua kali."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Sengketa dan chargeback.",
+          "content": [
+            "Buyer yang merasa ada masalah dengan pembelian dapat mengajukan refund melalui Platform dalam 7 hari. Detail di Kebijakan Refund di fibidy.com/legal/refund.",
+            "Buyer juga dapat mengajukan chargeback melalui bank penerbit kartu. Chargeback diproses oleh Stripe sesuai kebijakan mereka dan peraturan jaringan kartu yang relevan.",
+            "Ketika chargeback diajukan, sistem Fibidy secara otomatis mengumpulkan dan mensubmit evidence ke Stripe, termasuk deskripsi produk, email Buyer, dan log akses download yang menunjukkan Buyer telah mengakses file.",
+            "Seller yang menerima 2 atau lebih chargeback dapat dikenakan penangguhan akun otomatis sesuai Perjanjian Seller."
+          ]
+        }
+      ]
+    },
+    "refund": {
+      "title": "Kebijakan Refund",
+      "summary": [
+        "Window refund 7 hari sejak pembelian.",
+        "Auto-approve cuma kalau file tidak bisa didownload atau file corrupt.",
+        "Evaluasi otomatis dan instan — ga ada antrian manual review.",
+        "Kalau approved, Stripe refund + akses file Buyer dicabut.",
+        "Dana balik 5-10 hari kerja tergantung bank."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Jangka waktu refund.",
+          "content": [
+            "Buyer dapat mengajukan refund dalam jangka waktu 7 hari sejak tanggal pembelian. Permintaan setelah 7 hari akan ditolak otomatis dengan alasan OUTSIDE_TIME_WINDOW.",
+            "Setiap pembelian hanya dapat diajukan refund satu kali. Permintaan kedua untuk pembelian yang sama akan ditolak otomatis dengan alasan ALREADY_REFUNDED."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Kondisi refund disetujui.",
+          "content": [
+            "Sistem menyetujui refund secara otomatis hanya dalam dua kondisi berikut:",
+            "FILE_NOT_DOWNLOADABLE — File produk tidak dapat diakses dari storage. Sistem melakukan pengecekan HeadObject ke Cloudflare R2; jika file hilang atau tidak dapat diakses, refund disetujui.",
+            "FILE_CORRUPT — File produk corrupt atau tidak dapat diproses sebagai PDF yang valid. Sistem mengunduh file dan mencoba membukanya dengan library pdf-lib; jika gagal, refund disetujui.",
+            "Dua kondisi di atas adalah satu-satunya alasan approve. Alasan lain seperti \"berubah pikiran\", \"tidak sesuai ekspektasi\", atau \"kurang lengkap\" tidak akan disetujui sistem."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Kondisi refund ditolak.",
+          "content": [
+            "FILE_ACCESSIBLE_AND_VALID — File produk lolos pengecekan HeadObject dan pdf-lib. Artinya file masih ada, masih bisa didownload, dan masih valid secara struktur PDF. Permintaan ditolak.",
+            "OUTSIDE_TIME_WINDOW — Permintaan diajukan lebih dari 7 hari sejak tanggal pembelian.",
+            "ALREADY_REFUNDED — Permintaan refund sebelumnya sudah pernah diajukan untuk pembelian yang sama, terlepas dari hasilnya."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Proses evaluasi otomatis.",
+          "content": [
+            "Evaluasi dilakukan sinkron di saat Buyer klik \"Ajukan Refund\". Tidak ada antrian manual review oleh tim.",
+            "Urutan evaluasi: cek jangka waktu 7 hari, cek apakah sudah pernah diajukan, cek aksesibilitas file via HeadObject, cek integritas file via pdf-lib load.",
+            "Hasil evaluasi muncul langsung di halaman Buyer setelah klik. Tidak perlu menunggu response tim."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Eksekusi refund via Stripe.",
+          "content": [
+            "Ketika refund disetujui, sistem secara otomatis menginstruksikan Stripe untuk memproses refund ke kartu Buyer menggunakan Stripe Refund API dengan reverse_transfer dan refund_application_fee.",
+            "Reverse_transfer berarti dana ditarik kembali dari akun Stripe Connect Seller. Refund_application_fee berarti fee platform yang sebelumnya diambil Fibidy juga dikembalikan.",
+            "Setelah Stripe mengeksekusi refund, dana dikembalikan ke kartu Buyer dalam 5 sampai 10 hari kerja tergantung bank penerbit kartu. Fibidy tidak mengontrol timeline ini."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Pencabutan akses file.",
+          "content": [
+            "Ketika refund disetujui, akses download Buyer ke file yang di-refund dicabut secara otomatis.",
+            "Buyer tidak akan dapat mengunduh file tersebut setelah refund. Percobaan download akan ditolak oleh sistem.",
+            "Ini untuk mencegah double-dip — Buyer menerima refund sambil tetap memiliki akses ke file."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Refund yang tidak tercakup.",
+          "content": [
+            "Fee langganan Seller (Starter atau Business) tidak dapat di-refund. Pembatalan langganan berlaku di akhir periode berjalan tanpa refund pro-rata.",
+            "Transaksi di luar 7 hari window — tidak ada pengecualian.",
+            "Pembelian yang dilakukan di luar Platform Fibidy, meskipun terkait dengan Seller yang sama."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Perbedaan dengan chargeback.",
+          "content": [
+            "Refund adalah mekanisme internal Platform dengan evaluasi otomatis berdasarkan kondisi teknis file.",
+            "Chargeback adalah mekanisme eksternal yang dijalankan bank penerbit kartu Buyer. Buyer tetap berhak mengajukan chargeback ke banknya sesuai hak konsumen yang berlaku.",
+            "Chargeback diproses oleh Stripe sesuai kebijakan mereka. Fibidy secara otomatis mengumpulkan dan mensubmit evidence (log akses download, deskripsi produk, email Buyer) ke Stripe.",
+            "Seller yang menerima 2 atau lebih chargeback dapat dikenakan penangguhan akun otomatis sesuai Perjanjian Seller."
+          ]
+        }
+      ]
+    },
+    "kyc": {
+      "title": "Kebijakan KYC",
+      "summary": [
+        "Seller wajib KYC untuk upload produk dan terima payout.",
+        "Proses dilakukan Stripe, bukan Fibidy. Fibidy ga simpan data KYC.",
+        "Mayoritas KYC selesai cepat; kasus tertentu butuh review manual Stripe.",
+        "Status tracked: NOT_STARTED, PENDING, NEEDS_MORE_INFO, PAST_DUE, CHARGES_ONLY, ACTIVE, REJECTED.",
+        "Data palsu atau menyesatkan = penolakan KYC + kemungkinan akun di-suspend."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Kenapa KYC wajib.",
+          "content": [
+            "Seller yang ingin menjual produk digital di Fibidy dan menerima payout wajib menyelesaikan proses verifikasi identitas (Know Your Customer / KYC) melalui Stripe Connect.",
+            "Kewajiban KYC adalah persyaratan dari Stripe sebagai payment processor untuk kepatuhan terhadap regulasi anti pencucian uang (AML) dan counter-terrorism financing (CTF) di berbagai yurisdiksi.",
+            "Tanpa KYC yang selesai, Seller tidak dapat mengupload produk digital dan tidak dapat menerima payout dari transaksi."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Fibidy tidak menyimpan data KYC.",
+          "content": [
+            "Proses KYC dilakukan sepenuhnya oleh Stripe melalui halaman onboarding Stripe Connect. Fibidy tidak menyimpan, memproses, atau memiliki akses ke data identitas sensitif yang dikumpulkan selama KYC.",
+            "Data yang dikumpulkan Stripe umumnya mencakup nama lengkap, tanggal lahir, alamat, nomor identitas pemerintah, dokumen identitas (KTP atau paspor), dan informasi rekening bank untuk payout.",
+            "Kebijakan privasi Stripe yang mengatur penanganan data KYC tersedia di stripe.com/privacy.",
+            "Fibidy hanya menerima status KYC dari Stripe (Active, Pending, Rejected, dan sebagainya) untuk menentukan apakah Seller dapat berjualan. Fibidy tidak melihat dokumen atau data pribadi Seller."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Kapan KYC perlu diselesaikan.",
+          "content": [
+            "KYC wajib diselesaikan sebelum Seller dapat mengunggah produk digital pertama.",
+            "KYC juga wajib aktif saat payout diterima. Jika status KYC berubah dari Active (misalnya menjadi Past Due karena dokumen tambahan diminta Stripe), payout dapat ditahan sementara.",
+            "Seller dapat memulai proses KYC dari dashboard Fibidy dengan tombol \"Mulai Verifikasi\" yang akan mengarahkan ke halaman Stripe Connect."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Status KYC.",
+          "content": [
+            "Sistem melacak beberapa status KYC sesuai respons Stripe:",
+            "NOT_STARTED — Seller belum memulai proses KYC.",
+            "PENDING — Data sudah disubmit ke Stripe, sedang dalam review.",
+            "NEEDS_MORE_INFO — Stripe meminta informasi atau dokumen tambahan.",
+            "PAST_DUE — Ada requirement yang melewati deadline. Payout dapat ditahan.",
+            "CHARGES_ONLY — Seller dapat menerima pembayaran namun payout masih terbatas.",
+            "ACTIVE — KYC selesai sepenuhnya. Seller dapat berjualan dan menerima payout normal.",
+            "REJECTED — Stripe menolak KYC. Seller tidak dapat berjualan di Platform sampai masalah diselesaikan."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Timeline KYC.",
+          "content": [
+            "Sebagian besar KYC selesai instan atau dalam beberapa jam. Kasus yang memerlukan review manual Stripe dapat memakan waktu beberapa hari kerja.",
+            "Jika Stripe meminta dokumen tambahan, status akan berpindah ke NEEDS_MORE_INFO dan Seller akan mendapat notifikasi. Seller harus segera mensubmit dokumen yang diminta sebelum deadline yang ditentukan Stripe.",
+            "Jika deadline terlewati, status berpindah ke PAST_DUE dan payout dapat ditahan sampai requirement dipenuhi."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Kewajiban Seller saat KYC.",
+          "content": [
+            "Seller wajib memberikan informasi yang akurat, lengkap, dan terkini kepada Stripe.",
+            "Informasi palsu, menyesatkan, dokumen palsu, atau identitas orang lain akan menyebabkan penolakan KYC oleh Stripe dan dapat berakibat pada penangguhan permanen akun Fibidy tanpa refund.",
+            "Seller bertanggung jawab memastikan rekening bank yang didaftarkan untuk payout adalah miliknya dan masih aktif."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Konsekuensi jika KYC ditolak.",
+          "content": [
+            "Jika Stripe menolak KYC (status REJECTED), Seller tidak dapat mengunggah produk digital dan tidak dapat menerima payout.",
+            "Dana transaksi yang sudah dibayar Buyer tetap di akun Stripe Connect dan akan di-refund ke Buyer oleh Stripe sesuai kebijakan mereka.",
+            "Seller yang KYC-nya ditolak dapat menghubungi dukungan Stripe langsung untuk memahami alasan penolakan dan memperbaiki dokumen. Fibidy tidak dapat mengintervensi keputusan KYC Stripe."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Future requirements.",
+          "content": [
+            "Stripe kadang meminta informasi tambahan di masa depan (future requirements) sebelum volume transaksi tertentu tercapai, atau karena perubahan regulasi.",
+            "Seller akan diberitahu melalui dashboard Fibidy dan email Stripe ketika ada future requirement yang perlu dipenuhi.",
+            "Mengabaikan future requirements dapat menyebabkan akun KYC berpindah ke PAST_DUE dan payout tertahan."
+          ]
+        }
+      ]
+    },
+    "payout": {
+      "title": "Kebijakan Payout",
+      "summary": [
+        "Payout daily dengan delay T+7 via Stripe Connect.",
+        "Saldo USD, dikonversi ke mata uang rekening Seller saat payout.",
+        "Rekening bank didaftarkan ke Stripe, bukan ke Fibidy.",
+        "Dispute/chargeback dan KYC issue bisa menahan payout.",
+        "Kewajiban pajak di tangan Seller."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Jadwal payout.",
+          "content": [
+            "Platform menggunakan jadwal payout daily dengan delay T+7 melalui Stripe Connect. Artinya setiap transaksi yang selesai akan tersedia untuk payout 7 hari setelah tanggal transaksi.",
+            "Stripe memproses payout setiap hari untuk saldo yang sudah melewati masa delay. Dana ditransfer ke rekening bank Seller sesuai yang terdaftar di Stripe Connect.",
+            "Delay T+7 bertujuan menyediakan buffer untuk handling chargeback, dispute, dan refund sebelum dana dilepas ke Seller."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Rekening payout.",
+          "content": [
+            "Rekening bank untuk payout didaftarkan Seller selama proses KYC di Stripe Connect.",
+            "Seller dapat memperbarui rekening payout melalui dashboard Stripe Connect. Fibidy tidak menyimpan atau dapat mengubah informasi rekening bank Seller.",
+            "Seller bertanggung jawab memastikan rekening yang terdaftar adalah miliknya, masih aktif, dan dapat menerima transfer internasional jika bank mensyaratkan."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Currency settlement dan konversi.",
+          "content": [
+            "Saldo di akun Stripe Connect Seller tercatat dalam USD.",
+            "Saat payout, Stripe mengkonversi USD ke mata uang rekening Seller menggunakan kurs yang berlaku saat payout.",
+            "Spread kurs konversi adalah bagian dari biaya Stripe, bukan Fibidy. Detail kurs payout dapat dilihat di dashboard Stripe Connect Seller."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Minimum payout.",
+          "content": [
+            "Threshold minimum payout ditentukan oleh Stripe dan bervariasi berdasarkan negara Seller. Stripe hanya memproses payout jika saldo Seller mencapai threshold minimum.",
+            "Jika saldo di bawah threshold, dana tetap tersimpan di akun Stripe Connect sampai saldo mencukupi atau Seller memicu payout manual (jika fitur tersedia untuk negaranya)."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Payout yang gagal.",
+          "content": [
+            "Payout dapat gagal karena beberapa alasan — rekening bank sudah ditutup, nomor rekening salah, bank menolak transfer, atau masalah teknis di sisi bank.",
+            "Jika payout gagal, Stripe akan memberitahu Seller via email dan dashboard Stripe Connect. Dana kembali ke akun Stripe Connect dan Seller perlu memperbaiki informasi rekening sebelum payout diulang.",
+            "Fibidy tidak mengelola proses retry payout. Seluruh handling dilakukan Stripe sesuai kebijakan mereka."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Hold pada saat dispute.",
+          "content": [
+            "Ketika Buyer mengajukan chargeback melalui banknya, dana terkait transaksi tersebut dapat di-hold oleh Stripe selama proses investigasi.",
+            "Hold berlaku sepanjang dispute aktif. Jika dispute dimenangkan Seller, dana kembali tersedia untuk payout. Jika kalah, dana di-debit dari akun Seller.",
+            "Selama periode hold, saldo yang di-hold tidak termasuk dalam perhitungan payout."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Hold pada saat KYC issue.",
+          "content": [
+            "Jika status KYC Seller berubah ke PAST_DUE atau REJECTED, payout dapat ditahan Stripe sampai masalah KYC diselesaikan.",
+            "Seller akan diberitahu melalui dashboard Fibidy dan email Stripe jika ada requirement yang perlu dipenuhi.",
+            "Detail lengkap status KYC dijelaskan di Kebijakan KYC di fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Pajak dan pelaporan.",
+          "content": [
+            "Seller bertanggung jawab penuh atas kewajiban pajak atas penghasilan yang diterima dari penjualan di Platform, sesuai peraturan perpajakan di wilayah tempat Seller berdomisili.",
+            "Fibidy tidak melakukan pemotongan pajak penghasilan Seller dan tidak menyediakan layanan pelaporan pajak. Record transaksi tersedia di dashboard Fibidy dan Stripe untuk membantu Seller dalam pelaporan pajaknya sendiri.",
+            "Seller disarankan berkonsultasi dengan konsultan pajak untuk memahami kewajiban pajak yang berlaku."
+          ]
+        }
+      ]
+    },
+    "sellerAgreement": {
+      "title": "Perjanjian Seller",
+      "summary": [
+        "Seller = kontraktor independen. Bukan karyawan, bukan mitra Fibidy.",
+        "Cuma produk PDF. Harus punya hak jual, isi sesuai deskripsi, tidak melanggar hukum.",
+        "KYC wajib via Stripe sebelum bisa upload + terima payout.",
+        "Fee platform otomatis dipotong saat transaksi. Payout daily T+7 USD.",
+        "2+ chargeback = auto-suspend. Business tier butuh track record $200 atau 20 transaksi."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Status Seller.",
+          "content": [
+            "Seller adalah kontraktor independen yang menggunakan Platform Fibidy untuk menjual produk digital. Seller bukan karyawan, agen, atau mitra Fibidy.",
+            "Tidak ada hubungan kerja, kemitraan, atau joint venture yang terbentuk antara Fibidy dan Seller. Seller bertanggung jawab penuh atas pajak, izin usaha, dan kewajiban hukum lain yang berlaku atas aktivitas jualannya.",
+            "Perjanjian Seller ini berlaku bersama-sama dengan Syarat Layanan utama di fibidy.com/legal/terms. Jika ada pertentangan, ketentuan yang lebih spesifik berlaku."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Upgrade dari Buyer ke Seller.",
+          "content": [
+            "Setiap akun Fibidy default bertipe Buyer. Untuk menjadi Seller, Pengguna melakukan upgrade melalui proses yang tersedia di dashboard, mengisi informasi toko (nama, kategori, WhatsApp, dan sebagainya).",
+            "Setelah upgrade, Pengguna masih perlu menyelesaikan KYC via Stripe Connect sebelum dapat mengunggah produk dan menerima payout. Detail di fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Konten yang boleh dijual.",
+          "content": [
+            "Saat ini Platform hanya mendukung produk digital dalam format PDF. Format lain tidak tersedia.",
+            "Contoh produk yang umumnya sesuai — ebook, panduan, template, worksheet, workbook, resep, materi edukasi, dokumen penelitian, dan karya tulis digital lainnya.",
+            "Produk harus valid secara teknis — file tidak corrupt, memiliki minimum 1 halaman, dan dapat dibuka sebagai PDF standar."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Konten yang dilarang.",
+          "content": [
+            "Produk hasil pembajakan atau salinan tidak sah dari karya pihak lain.",
+            "Produk yang melanggar hak kekayaan intelektual pihak ketiga, termasuk karya dengan copyright yang tidak dimiliki Seller.",
+            "Konten ilegal berdasarkan hukum Republik Indonesia, termasuk konten pornografi, konten yang membahayakan anak, konten yang mempromosikan kekerasan atau terorisme, dan konten yang melanggar UU ITE.",
+            "File yang mengandung malware, virus, atau kode berbahaya.",
+            "Konten penipuan, klaim palsu, atau yang dirancang untuk menyesatkan Buyer.",
+            "Daftar lengkap konten yang dilarang tersedia di Acceptable Use Policy di fibidy.com/legal/acceptable-use."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Kewajiban Seller.",
+          "content": [
+            "Seller menjamin memiliki hak untuk menjual setiap produk yang diunggah.",
+            "Seller wajib memberikan deskripsi produk yang akurat — judul, deskripsi, dan preview yang merepresentasikan isi file dengan benar. Deskripsi yang menyesatkan dapat berakibat chargeback atau refund yang sah.",
+            "Seller wajib merespon pertanyaan Buyer secara wajar melalui WhatsApp atau kontak lain yang disediakan di profil toko.",
+            "Seller dilarang memanipulasi fitur Discover — termasuk membuat akun palsu untuk membeli produk sendiri, atau meminta transaksi yang tidak wajar demi meningkatkan peringkat."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Kepemilikan dan lisensi konten.",
+          "content": [
+            "Seller mempertahankan seluruh hak kekayaan intelektual atas produk yang diunggah.",
+            "Dengan mengunggah produk, Seller memberikan Fibidy lisensi terbatas, non-eksklusif, bebas royalti, dan dapat dihentikan untuk menyimpan, menampilkan, memproses, dan mendistribusikan produk tersebut semata-mata untuk tujuan mengoperasikan Platform. Lisensi ini berakhir ketika Seller menghapus konten atau menutup akun.",
+            "Platform secara otomatis menghasilkan file preview berisi maksimum 3 halaman pertama dari setiap produk PDF untuk ditampilkan di halaman produk publik. Seller menyetujui pembuatan dan penampilan preview ini sebagai bagian dari lisensi di atas.",
+            "Buyer yang membeli produk memperoleh lisensi personal non-eksklusif untuk penggunaan pribadi. Seller dapat menetapkan ketentuan lisensi lebih spesifik di deskripsi produk."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "KYC dan identitas Seller.",
+          "content": [
+            "Seller wajib menyelesaikan KYC melalui Stripe Connect dengan informasi yang akurat. Detail lengkap di fibidy.com/legal/kyc.",
+            "Data KYC dikumpulkan dan disimpan oleh Stripe. Fibidy tidak memiliki akses ke data KYC Seller dan tidak dapat memverifikasi atau mengubahnya."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Fee platform dan payout.",
+          "content": [
+            "Fibidy memotong application fee sebagai fee platform pada setiap transaksi. Struktur fee bervariasi berdasarkan tier langganan dan sumber transaksi. Detail di fibidy.com/legal/fees.",
+            "Payout diproses Stripe Connect dengan jadwal daily dan delay T+7. Detail lengkap di fibidy.com/legal/payout.",
+            "Seller menyetujui bahwa fee platform dipotong otomatis sebelum saldo masuk ke akun Stripe Connect Seller."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Dispute dan auto-suspend.",
+          "content": [
+            "Platform melacak jumlah chargeback yang diterima Seller. Seller yang menerima 2 atau lebih chargeback akan dikenakan penangguhan akun otomatis (status SUSPENDED).",
+            "Penangguhan otomatis dapat ditinjau ulang setelah review manual oleh tim Fibidy. Seller dapat mengajukan peninjauan dengan mengirim email ke admin@fibidy.com.",
+            "Jika dispute dimenangkan Seller, counter dispute dikurangi satu. Namun penangguhan yang sudah terjadi tidak otomatis dicabut — diperlukan review manual oleh tim Fibidy."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Tier langganan dan Business unlock gate.",
+          "content": [
+            "Platform menyediakan tier FREE, STARTER, dan BUSINESS dengan perbedaan fitur dan fee platform.",
+            "Upgrade ke tier BUSINESS memerlukan track record minimum pada tier STARTER — total penjualan USD $200 atau minimum 20 transaksi.",
+            "Ketentuan Business unlock dapat berubah di masa depan dengan pemberitahuan minimal 30 hari."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Larangan tambahan untuk Seller.",
+          "content": [
+            "Dilarang menggunakan Platform untuk menjual jasa yang tidak dikirim sebagai PDF.",
+            "Dilarang menipu Buyer dengan klaim produk yang tidak sesuai isi file.",
+            "Dilarang mengunggah produk yang sama berulang-ulang dengan perubahan minimal untuk memanipulasi Discover.",
+            "Dilarang membagikan kredensial akun Seller atau mentransfer akun ke pihak lain tanpa persetujuan tertulis dari Fibidy."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "Penangguhan dan terminasi.",
+          "content": [
+            "Fibidy dapat menangguhkan atau menghentikan akun Seller yang melanggar Perjanjian Seller ini, Syarat Layanan, atau hukum yang berlaku.",
+            "Penangguhan dapat menyebabkan produk Seller disembunyikan, checkout baru diblokir, dan payout pending ditahan sampai review selesai.",
+            "Seller yang akunnya di-terminate permanen tetap bertanggung jawab atas seluruh kewajiban yang timbul sebelum terminasi, termasuk chargeback dan sengketa yang belum selesai.",
+            "Dana yang masih di-hold Stripe akan diproses sesuai kebijakan Stripe. Fibidy tidak mengontrol timeline atau hasil pelepasan dana tersebut."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Ganti rugi.",
+          "content": [
+            "Seller setuju membebaskan dan mengganti rugi Fibidy atas setiap tuntutan, kerugian, atau biaya (termasuk biaya hukum yang wajar) yang timbul dari — produk yang diunggah Seller, pelanggaran hak kekayaan intelektual pihak ketiga, pelanggaran hukum yang berlaku, atau sengketa antara Seller dan Buyer."
+          ]
+        }
+      ]
+    },
+    "acceptableUse": {
+      "title": "Acceptable Use Policy",
+      "summary": [
+        "Dilarang konten ilegal, bajakan, malware, dan yang melanggar hak orang lain.",
+        "Dilarang manipulasi Discover, akun palsu, atau penipuan apapun.",
+        "Dilarang scraping, DDoS, atau akses tidak sah ke sistem.",
+        "Konsekuensi: warn → hapus konten → suspend → terminate, sesuai keseriusan.",
+        "Lapor pelanggaran ke admin@fibidy.com dengan subjek \"Report\"."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Tujuan kebijakan.",
+          "content": [
+            "Acceptable Use Policy (AUP) ini menetapkan standar perilaku dan konten yang diizinkan di Platform Fibidy.",
+            "Kebijakan ini berlaku untuk semua Pengguna — Buyer dan Seller — dan mencakup seluruh aktivitas di Platform, termasuk produk yang diunggah, konten profil toko, perilaku transaksi, dan penggunaan teknis Platform.",
+            "Pelanggaran AUP dapat berakibat penghapusan konten, penangguhan akun, terminasi permanen, dan pelaporan ke otoritas yang berwenang sesuai hukum yang berlaku."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Konten yang dilarang di produk.",
+          "content": [
+            "Konten ilegal berdasarkan hukum Republik Indonesia, termasuk pornografi, konten yang membahayakan anak, konten yang mempromosikan kekerasan, terorisme, atau ujaran kebencian, dan konten yang melanggar UU ITE.",
+            "Produk hasil pembajakan atau salinan tidak sah dari karya pihak lain yang memiliki hak cipta.",
+            "Materi yang melanggar hak kekayaan intelektual pihak ketiga, termasuk merek dagang, paten, rahasia dagang, atau karakter berlisensi.",
+            "File yang mengandung malware, virus, trojan, ransomware, keylogger, atau kode berbahaya lainnya.",
+            "Panduan atau instruksi untuk melakukan tindak pidana, termasuk pembuatan senjata, pembuatan narkoba, atau peretasan sistem tanpa izin.",
+            "Data pribadi pihak ketiga yang dikumpulkan atau didistribusikan tanpa persetujuan yang sah.",
+            "Dokumen palsu, ijazah palsu, sertifikat palsu, atau dokumen identitas palsu.",
+            "Klaim medis, keuangan, atau hukum yang menyesatkan tanpa dasar profesional yang sah."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Konten yang dilarang di profil dan toko.",
+          "content": [
+            "Identitas palsu, nama usaha yang menyesatkan, atau mengaku sebagai pihak lain.",
+            "Deskripsi produk yang menyesatkan atau tidak sesuai dengan isi file aktual.",
+            "Klaim yang tidak dapat diverifikasi atau tidak berdasar (misalnya \"jaminan uang kembali 100%\" padahal kebijakan refund Platform berbeda).",
+            "Link atau konten yang mengarahkan Buyer keluar dari Platform untuk transaksi di luar sistem Stripe.",
+            "Konten promosi yang bertentangan dengan hukum perlindungan konsumen."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Perilaku yang dilarang.",
+          "content": [
+            "Manipulasi fitur Discover melalui akun palsu, transaksi fiktif, atau taktik lain untuk meningkatkan peringkat secara tidak sah.",
+            "Membuat akun ganda untuk menghindari pembatasan, penangguhan, atau ban.",
+            "Membeli produk sendiri untuk memanipulasi metrik penjualan atau track record untuk unlock Business tier.",
+            "Menggunakan informasi palsu atau identitas orang lain saat KYC.",
+            "Pelecehan, intimidasi, atau spam terhadap Pengguna lain atau tim Fibidy.",
+            "Pengajuan refund atau chargeback yang tidak berdasar setelah menikmati produk."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Penyalahgunaan teknis.",
+          "content": [
+            "Percobaan akses tidak sah ke akun Pengguna lain, sistem Fibidy, atau sistem pihak ketiga yang terintegrasi.",
+            "Scraping, crawling, atau ekstraksi data Platform secara otomatis tanpa izin tertulis.",
+            "Serangan Denial of Service (DoS/DDoS) atau upaya mengganggu ketersediaan Platform.",
+            "Eksploitasi kerentanan keamanan tanpa melalui proses responsible disclosure ke admin@fibidy.com.",
+            "Bypass rate limiting, mekanisme anti-spam, atau kontrol keamanan lainnya.",
+            "Penggunaan bot, automation, atau alat pihak ketiga yang tidak resmi untuk berinteraksi dengan Platform."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Penyalahgunaan pembayaran.",
+          "content": [
+            "Pencucian uang atau pemrosesan transaksi yang tidak memiliki dasar ekonomi yang sah.",
+            "Penggunaan kartu pembayaran curian atau tidak sah.",
+            "Chargeback fraud — mengajukan chargeback secara sengaja setelah menikmati produk.",
+            "Penghindaran fee platform melalui transaksi di luar Platform dengan pihak yang dikenal melalui Fibidy."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Konsekuensi pelanggaran.",
+          "content": [
+            "Peringatan tertulis untuk pelanggaran ringan atau ketidaksengajaan.",
+            "Penghapusan konten yang melanggar tanpa pemberitahuan sebelumnya.",
+            "Penangguhan akun (SUSPENDED) — produk disembunyikan, checkout diblokir, payout ditahan pending review.",
+            "Terminasi akun permanen untuk pelanggaran berat, pelanggaran berulang, atau aktivitas ilegal.",
+            "Penangguhan fee langganan atau transaksi yang sedang berjalan sesuai kebutuhan investigasi.",
+            "Pelaporan kepada otoritas yang berwenang (kepolisian, Kominfo, OJK, Bea Cukai, dan sebagainya) untuk kasus yang mengharuskan.",
+            "Fibidy memegang diskresi untuk menentukan tingkat respons sesuai keseriusan pelanggaran."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Cara melaporkan pelanggaran.",
+          "content": [
+            "Untuk melaporkan konten atau perilaku yang melanggar AUP, kirim email ke admin@fibidy.com dengan subjek \"Report\".",
+            "Sertakan informasi yang relevan — URL produk atau profil yang dilaporkan, deskripsi pelanggaran, dan bukti pendukung jika ada (screenshot, link, atau dokumen).",
+            "Laporan ditinjau dalam jangka waktu wajar. Pelapor akan diberitahu status laporan jika diminta.",
+            "Untuk laporan pelanggaran hak cipta, gunakan prosedur khusus di Kebijakan Hak Cipta di fibidy.com/legal/copyright."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Proses banding.",
+          "content": [
+            "Pengguna yang akunnya ditangguhkan atau kontennya dihapus dapat mengajukan banding dengan mengirim email ke admin@fibidy.com dalam 30 hari sejak tindakan diambil.",
+            "Banding harus menyertakan alasan mengapa tindakan dianggap tidak tepat, beserta bukti pendukung yang relevan.",
+            "Tim Fibidy akan meninjau banding dalam jangka waktu wajar dan memberikan keputusan final. Keputusan banding bersifat final."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Perubahan kebijakan.",
+          "content": [
+            "Fibidy dapat memperbarui AUP ini sewaktu-waktu untuk merespons perkembangan risiko, perubahan hukum, atau umpan balik dari Pengguna.",
+            "Perubahan material diberitahukan via email minimal 7 hari sebelum berlaku efektif.",
+            "Versi terbaru selalu tersedia di fibidy.com/legal/acceptable-use."
+          ]
+        }
+      ]
+    },
+    "copyright": {
+      "title": "Kebijakan Hak Cipta",
+      "summary": [
+        "Lapor pelanggaran hak cipta via email admin@fibidy.com subjek \"DMCA Takedown\".",
+        "Takedown diproses dalam ~7 hari kerja kalau laporan lengkap.",
+        "Seller yang dituduh bisa ajukan counter-notice dalam 14 hari.",
+        "Pelaporan palsu = pelanggaran serius dengan konsekuensi hukum.",
+        "Pelanggar berulang = akun di-terminate permanen."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Komitmen Fibidy terhadap hak cipta.",
+          "content": [
+            "Fibidy menghormati hak kekayaan intelektual pihak ketiga dan berkomitmen menindak tegas pelanggaran hak cipta di Platform.",
+            "Seller bertanggung jawab penuh memastikan produk yang diunggah tidak melanggar hak cipta pihak lain. Pelanggaran dapat berakibat takedown produk, penangguhan akun, dan terminasi permanen sesuai keseriusan.",
+            "Kebijakan ini menyediakan mekanisme bagi pemegang hak cipta untuk melaporkan pelanggaran dan bagi Seller yang dituduh untuk mengajukan counter-notice."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Cara melaporkan pelanggaran hak cipta.",
+          "content": [
+            "Pemegang hak cipta atau perwakilan yang berwenang dapat melaporkan pelanggaran dengan mengirim email ke admin@fibidy.com dengan subjek \"DMCA Takedown\" atau \"Laporan Hak Cipta\".",
+            "Laporan harus mencakup informasi berikut:",
+            "Identifikasi karya yang diklaim dilanggar — judul karya, deskripsi, dan bukti kepemilikan (sertifikat hak cipta, link ke publikasi asli, atau dokumentasi lain yang relevan).",
+            "Identifikasi konten di Fibidy yang diklaim melanggar — URL halaman produk, nama produk, atau ID produk jika diketahui.",
+            "Informasi kontak pelapor — nama lengkap, alamat, email, dan nomor telepon.",
+            "Pernyataan itikad baik bahwa penggunaan konten yang dilaporkan tidak diizinkan oleh pemegang hak, agennya, atau hukum.",
+            "Pernyataan bahwa informasi dalam laporan akurat dan pelapor berwenang bertindak atas nama pemegang hak cipta.",
+            "Tanda tangan fisik atau elektronik pelapor."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Timeline peninjauan laporan.",
+          "content": [
+            "Laporan ditinjau dalam jangka waktu wajar, umumnya dalam 7 hari kerja sejak diterima.",
+            "Jika laporan lengkap dan memenuhi kriteria, Fibidy akan melakukan takedown sementara — produk disembunyikan dari publik dan download diblokir — sambil menunggu respons dari Seller yang dituduh.",
+            "Pelapor dan Seller akan diberitahu status tindakan via email."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Proses takedown.",
+          "content": [
+            "Setelah laporan dianggap valid secara prima facie, Fibidy menyembunyikan produk yang dituduh dan memberitahu Seller terkait.",
+            "Produk yang sudah dibeli Buyer sebelum takedown tetap dapat diakses Buyer kecuali diminta spesifik oleh pemegang hak cipta untuk diblokir total (misalnya karena pelanggaran hak cipta jelas dan serius).",
+            "Seller yang dituduh memiliki kesempatan mengajukan counter-notice dalam 14 hari."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Counter-notice dari Seller.",
+          "content": [
+            "Seller yang yakin takedown dilakukan secara keliru atau memiliki hak sah atas karya dapat mengajukan counter-notice via email ke admin@fibidy.com dengan subjek \"Counter-Notice\".",
+            "Counter-notice harus mencakup:",
+            "Identifikasi konten yang di-takedown dan lokasinya sebelum takedown.",
+            "Pernyataan di bawah sumpah bahwa Seller yakin secara itikad baik bahwa takedown dilakukan karena kesalahan atau salah identifikasi.",
+            "Bukti hak atas karya — sertifikat hak cipta, lisensi resmi, perjanjian pengalihan hak, atau dokumentasi lain yang relevan.",
+            "Informasi kontak lengkap Seller.",
+            "Jika counter-notice dianggap valid, Fibidy dapat mengaktifkan kembali konten. Jika pelapor original tidak merespons dengan bukti tambahan atau tindakan hukum dalam jangka waktu wajar, konten dipulihkan."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Pelaporan palsu.",
+          "content": [
+            "Pelaporan hak cipta palsu atau menyesatkan merupakan pelanggaran serius yang dapat berakibat konsekuensi hukum.",
+            "Pelapor menyatakan di bawah sumpah bahwa informasi yang diberikan akurat. Fibidy dapat melaporkan pelaporan palsu kepada otoritas yang berwenang dan memblokir akun pelapor dari mengajukan laporan lebih lanjut."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Kebijakan pelanggar berulang.",
+          "content": [
+            "Seller yang berulang kali mengunggah konten yang melanggar hak cipta akan dikenakan terminasi akun permanen.",
+            "Jumlah spesifik pelanggaran yang memicu terminasi ditentukan case-by-case berdasarkan keseriusan, itikad, dan pola perilaku. Umumnya 3 pelanggaran tervalidasi dianggap sebagai pelanggaran berulang.",
+            "Akun yang diterminasi tidak dapat dibuka kembali dan dana pending dapat ditahan sesuai kebijakan Stripe."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Fair use dan pengecualian.",
+          "content": [
+            "Fibidy mengakui adanya pengecualian hak cipta seperti fair use, kutipan yang sah untuk tujuan edukasi atau kritik, karya publik domain, dan karya dengan lisensi terbuka (Creative Commons, MIT, dan sebagainya).",
+            "Seller yang menggunakan pengecualian ini harus siap mendemonstrasikan dasar hukum dari penggunaan tersebut jika dituduh melanggar.",
+            "Fibidy tidak memberikan nasihat hukum. Seller disarankan berkonsultasi dengan profesional hukum untuk kasus yang kompleks."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Yurisdiksi dan hukum yang berlaku.",
+          "content": [
+            "Kebijakan ini tunduk pada hukum Republik Indonesia, termasuk Undang-Undang Nomor 28 Tahun 2014 tentang Hak Cipta.",
+            "Mekanisme takedown dalam kebijakan ini mengadopsi semangat Digital Millennium Copyright Act (DMCA) sebagai praktik terbaik global, disesuaikan dengan konteks hukum Indonesia.",
+            "Sengketa hak cipta yang tidak terselesaikan melalui mekanisme ini dapat dibawa ke pengadilan yang berwenang di wilayah Republik Indonesia."
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "Pertanyaan yang paling sering muncul.",
+      "stillQuestionPrefix": "Masih ada pertanyaan?",
+      "stillQuestionLinkText": "Hubungi kami.",
+      "groups": [
+        {
+          "category": "Tentang Fibidy",
+          "items": [
+            {
+              "question": "Apa itu Fibidy?",
+              "answer": "Fibidy adalah digital marketplace untuk produk PDF. Seller upload file PDF, Buyer beli via Stripe Checkout, file dikirim secara digital setelah pembayaran. Cocok untuk ebook, panduan, template, worksheet, dan karya tulis digital lainnya."
+            },
+            {
+              "question": "Siapa yang mengoperasikan Fibidy?",
+              "answer": "Fibidy dioperasikan secara independen oleh pengelola perseorangan yang berdomisili di Indonesia. Untuk pertanyaan atau kerja sama, hubungi admin@fibidy.com."
+            },
+            {
+              "question": "Apakah Fibidy marketplace atau katalog biasa?",
+              "answer": "Fibidy adalah digital marketplace. Ada fitur Discover tempat produk semua Seller ditampilkan ke Buyer dari seluruh dunia. Buyer bisa checkout langsung lewat Stripe di dalam Platform."
+            },
+            {
+              "question": "Apakah ada iklan di Platform?",
+              "answer": "Tidak ada. Fibidy tidak menampilkan iklan pihak ketiga di Platform."
+            }
+          ]
+        },
+        {
+          "category": "Daftar dan Akun",
+          "items": [
+            {
+              "question": "Bagaimana cara daftar?",
+              "answer": "Buka fibidy.com, klik daftar, masukkan email dan password. Akun default bertipe Buyer dan bisa langsung belanja. Kalau ingin jadi Seller, upgrade akun dan lanjutkan ke proses KYC."
+            },
+            {
+              "question": "Apa bedanya Buyer dan Seller?",
+              "answer": "Buyer — pembeli produk digital. Seller — penjual yang upload dan jual produk PDF. Satu akun bisa berperan jadi dua-duanya; Buyer yang upgrade ke Seller tetap bisa belanja produk Seller lain."
+            },
+            {
+              "question": "Bagaimana cara upgrade dari Buyer ke Seller?",
+              "answer": "Dari dashboard, pilih upgrade ke Seller. Isi nama toko, kategori, dan nomor WhatsApp. Setelah itu lanjut ke proses KYC via Stripe Connect untuk bisa upload produk dan terima payout."
+            }
+          ]
+        },
+        {
+          "category": "Untuk Seller",
+          "items": [
+            {
+              "question": "Kenapa wajib KYC?",
+              "answer": "KYC (Know Your Customer) wajib dilakukan Stripe sebagai payment processor untuk kepatuhan regulasi anti pencucian uang. Tanpa KYC yang selesai, Seller tidak bisa upload produk dan tidak bisa terima payout. Proses dilakukan langsung di Stripe — Fibidy tidak menyimpan data KYC."
+            },
+            {
+              "question": "Berapa lama proses KYC?",
+              "answer": "Sebagian besar selesai instan atau beberapa jam. Kasus yang butuh review manual Stripe bisa beberapa hari kerja. Kalau Stripe minta dokumen tambahan, status akan berpindah ke NEEDS_MORE_INFO dan Seller dapat notifikasi."
+            },
+            {
+              "question": "Format file apa saja yang bisa dijual?",
+              "answer": "Saat ini hanya PDF. Format lain seperti ZIP, EPUB, audio, atau video belum tersedia."
+            },
+            {
+              "question": "Berapa fee platform-nya?",
+              "answer": "FREE tier: 15% Direct, 20% Discover. STARTER: 5% Direct, 20% Discover. BUSINESS: 2% Direct, 20% Discover. Plus processing fee Stripe (~2.9% + $0.30) yang dipotong terpisah oleh Stripe. Detail di /legal/fees."
+            },
+            {
+              "question": "Kapan payout cair?",
+              "answer": "Stripe Connect pakai jadwal daily dengan delay T+7 — dana transaksi tersedia 7 hari setelah transaksi. Setelah itu Stripe transfer ke rekening bank Seller sesuai yang didaftar di Stripe Connect."
+            },
+            {
+              "question": "Kenapa harus bayar dalam USD?",
+              "answer": "Settlement Platform dalam USD. Buyer internasional melihat harga dalam mata uang lokal via Adaptive Pricing Stripe, tapi saldo Seller tercatat dalam USD. Saat payout, Stripe konversi ke mata uang rekening Seller pakai kurs yang berlaku."
+            },
+            {
+              "question": "Apa bedanya Starter dan Business?",
+              "answer": "Starter fee platform 5% Direct. Business fee 2% Direct. Upgrade ke Business butuh track record minimum di Starter — total penjualan USD $200 atau minimum 20 transaksi."
+            }
+          ]
+        },
+        {
+          "category": "Untuk Buyer",
+          "items": [
+            {
+              "question": "Bagaimana cara beli produk?",
+              "answer": "Temukan produk di halaman Discover atau toko Seller, klik beli, checkout via Stripe. Setelah pembayaran sukses, produk otomatis masuk ke Library dan bisa di-download."
+            },
+            {
+              "question": "Bagaimana cara download file yang sudah dibeli?",
+              "answer": "Login ke akunmu, buka halaman Library, klik download pada produk yang sudah dibeli. Setiap klik menghasilkan signed URL sementara yang berlaku 15 menit."
+            },
+            {
+              "question": "Apakah bisa preview produk sebelum beli?",
+              "answer": "Bisa. Sistem otomatis generate preview PDF dari 3 halaman pertama file — preview ini yang ditampilkan di halaman produk publik. Kalau produk lama belum punya preview, halaman akan menunjukkan preview tidak tersedia."
+            },
+            {
+              "question": "Apakah bisa refund?",
+              "answer": "Bisa, dalam 7 hari sejak pembelian. Refund auto-approve kalau file tidak bisa didownload atau file corrupt. Auto-reject kalau file ternyata valid dan accessible. Detail di /legal/refund."
+            },
+            {
+              "question": "Berapa lama dana refund balik?",
+              "answer": "Approval refund instan (auto-evaluation). Setelah Stripe eksekusi refund, dana kembali ke kartu Buyer dalam 5-10 hari kerja tergantung bank penerbit."
+            },
+            {
+              "question": "Kenapa refund saya ditolak?",
+              "answer": "Ada 3 alasan auto-reject: file terbukti valid dan accessible (FILE_ACCESSIBLE_AND_VALID), sudah lewat 7 hari (OUTSIDE_TIME_WINDOW), atau sudah pernah ajukan refund untuk pembelian yang sama (ALREADY_REFUNDED)."
+            }
+          ]
+        },
+        {
+          "category": "Keamanan dan Privasi",
+          "items": [
+            {
+              "question": "Apakah data kartu saya aman?",
+              "answer": "Data kartu tidak pernah masuk ke server Fibidy. Semua pemrosesan dilakukan Stripe yang tersertifikasi PCI-DSS Level 1. Fibidy hanya menerima status transaksi dari Stripe."
+            },
+            {
+              "question": "Apakah Fibidy menyimpan data KYC saya?",
+              "answer": "Tidak. Data KYC (nama, tanggal lahir, alamat, dokumen identitas, rekening bank) disimpan sepenuhnya oleh Stripe. Fibidy hanya menerima status KYC (Active, Pending, Rejected) untuk menentukan apakah Seller bisa berjualan."
+            },
+            {
+              "question": "Kenapa IP dan User-Agent saya dicatat saat download?",
+              "answer": "Untuk menyediakan bukti akses file kepada Stripe jika terjadi chargeback. Ini melindungi Seller dari klaim chargeback yang tidak berdasar. Data disimpan maksimum 365 hari. Detail di /legal/privacy."
+            },
+            {
+              "question": "Bisakah saya hapus akun?",
+              "answer": "Bisa. Hubungi admin@fibidy.com dengan subjek \"Tutup Akun\". Data akan dihapus permanen dalam 30 hari. Sebagian data transaksi dan record KYC tetap dipertahankan sesuai kewajiban hukum dan kebijakan Stripe."
+            }
+          ]
+        },
+        {
+          "category": "Dispute dan Masalah",
+          "items": [
+            {
+              "question": "Apa yang terjadi kalau Buyer ajukan chargeback?",
+              "answer": "Chargeback diproses Stripe. Sistem Fibidy otomatis kumpulkan dan submit evidence ke Stripe — log akses download, deskripsi produk, dan email Buyer. Seller yang menerima 2+ chargeback dikenakan auto-suspend."
+            },
+            {
+              "question": "Seller saya di-suspend, kenapa?",
+              "answer": "Suspend bisa terjadi karena dua dispute/chargeback, pelanggaran Acceptable Use Policy, laporan hak cipta yang valid, atau KYC bermasalah. Seller bisa ajukan banding ke admin@fibidy.com dalam 30 hari."
+            },
+            {
+              "question": "Saya menemukan produk yang saya yakin bajakan, bagaimana lapor?",
+              "answer": "Kirim email ke admin@fibidy.com dengan subjek \"DMCA Takedown\" atau \"Laporan Hak Cipta\". Sertakan bukti kepemilikan karya dan URL produk yang dilaporkan. Detail prosedur di /legal/copyright."
+            }
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "title": "Hubungi Kami",
+      "subtitle": "Ada pertanyaan atau butuh bantuan? Hubungi kami di sini.",
+      "subjectsLabel": "Subject Line untuk Email",
+      "channels": {
+        "email": {
+          "label": "Email",
+          "value": "admin@fibidy.com",
+          "description": "Untuk semua pertanyaan termasuk laporan, data request, dan banding. Respons dalam 1x24 jam kerja."
+        },
+        "instagram": {
+          "label": "Instagram",
+          "value": "@fibidy_com",
+          "description": "Update fitur, tips jualan digital, dan konten platform."
+        },
+        "tiktok": {
+          "label": "TikTok",
+          "value": "@fibidy.com",
+          "description": "Konten singkat seputar jualan produk digital."
+        },
+        "twitter": {
+          "label": "X / Twitter",
+          "value": "@fibidy42581",
+          "description": "Pengumuman platform dan update fitur."
+        }
+      },
+      "subjects": [
+        {
+          "label": "Laporan hak cipta",
+          "subject": "DMCA Takedown"
+        },
+        {
+          "label": "Permintaan data pribadi (UU PDP)",
+          "subject": "Data Request"
+        },
+        {
+          "label": "Banding atas penangguhan akun",
+          "subject": "Banding Akun"
+        },
+        {
+          "label": "Laporan keamanan / celah teknis",
+          "subject": "Security Report"
+        },
+        {
+          "label": "Laporan pelanggaran konten",
+          "subject": "Report"
+        }
+      ]
     }
   }
 }

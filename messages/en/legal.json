@@ -1,45 +1,1461 @@
 {
   "legal": {
-    "nav": {
-      "title": "Legal & Help",
+    "common": {
+      "backToIndex": "Info & Legal",
+      "effectiveSince": "Effective April 2026. Last updated April 2026.",
+      "summaryLabel": "The gist",
+      "questionsLabel": "Questions?",
+      "supportEmail": "admin@fibidy.com",
+      "brandSignature": "Fibidy · Indonesia"
+    },
+    "index": {
+      "backToSettings": "Settings",
+      "title": "Info & Legal",
+      "subtitle": "Complete documentation of Fibidy's policies and operations.",
       "groups": {
-        "support": "Support",
-        "policies": "Policies"
+        "info": "Information",
+        "payment": "Payments & Fees",
+        "seller": "For Sellers",
+        "rights": "Rights & Use",
+        "core": "Core Legal"
       },
       "items": {
-        "contact": {
-          "label": "Contact",
-          "description": "Get in touch with our team"
-        },
         "faq": {
           "label": "FAQ",
           "description": "Frequently asked questions"
         },
+        "contact": {
+          "label": "Contact Us",
+          "description": "Email and social media"
+        },
+        "fees": {
+          "label": "Fee Structure",
+          "description": "Platform fee breakdown by tier"
+        },
+        "payment": {
+          "label": "Payment Policy",
+          "description": "Payment flow via Stripe Connect"
+        },
+        "refund": {
+          "label": "Refund Policy",
+          "description": "7-day window with auto-evaluation"
+        },
+        "kyc": {
+          "label": "KYC Policy",
+          "description": "Identity verification via Stripe Connect"
+        },
+        "payout": {
+          "label": "Payout Policy",
+          "description": "T+7 payout schedule and currency"
+        },
+        "sellerAgreement": {
+          "label": "Seller Agreement",
+          "description": "Terms specific to Sellers"
+        },
+        "acceptableUse": {
+          "label": "Acceptable Use Policy",
+          "description": "Prohibited content and behavior"
+        },
+        "copyright": {
+          "label": "Copyright Policy",
+          "description": "Infringement reports and takedowns"
+        },
         "terms": {
           "label": "Terms of Service",
-          "description": "The rules of using Fibidy"
+          "description": "Platform usage terms"
         },
         "privacy": {
           "label": "Privacy Policy",
           "description": "How we handle your data"
+        },
+        "cookies": {
+          "label": "Cookie Policy",
+          "description": "Session cookies and tracking policy"
         }
       }
     },
-    "contact": {
-      "title": "Contact Us",
-      "lead": "Need help? Reach out through any of the channels below and we'll get back to you."
-    },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "lead": "Find quick answers to the most common questions about Fibidy."
-    },
     "terms": {
       "title": "Terms of Service",
-      "lead": "Last updated: April 2026"
+      "summary": [
+        "Fibidy is a digital marketplace for PDF products. Operated by an individual in Indonesia.",
+        "Fibidy facilitates transactions via Stripe — not a party to the contract between Seller and Buyer.",
+        "A platform fee is automatically deducted on each transaction. Details on the Fee Structure page.",
+        "Automatic 7-day refund if the file can't be downloaded or is corrupt.",
+        "Use of the Platform is subject to Indonesian law."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "About Fibidy.",
+          "content": [
+            "Fibidy is a digital marketplace platform that facilitates transactions of digital products in PDF format between sellers (Sellers) and buyers (Buyers). Fibidy is operated independently by an individual operator based in Indonesia.",
+            "Fibidy provides the technical infrastructure — accounts, online stores, file storage, payment processing via Stripe, and the Discover feature for product discovery. Fibidy is not a party to the sale transaction between Seller and Buyer. The sales contract is formed directly between Seller and Buyer.",
+            "At this time Fibidy only supports digital products in PDF format. Other formats are not available.",
+            "For all official communications regarding these Terms of Service, use admin@fibidy.com."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Definitions.",
+          "content": [
+            "\"Platform\" means the fibidy.com website along with all subdomains and services provided by Fibidy.",
+            "\"User\" means any person who holds an account on the Platform, including Buyers and Sellers.",
+            "\"Buyer\" means a User who purchases digital products through the Platform.",
+            "\"Seller\" means a User who has completed identity verification (KYC) and sells digital products through the Platform.",
+            "\"Digital Product\" means a PDF file uploaded by the Seller for sale to Buyers.",
+            "\"Transaction\" means the purchase of a Digital Product by a Buyer from a Seller through the Platform.",
+            "\"Stripe\" means Stripe, Inc. and its affiliates, the payment processing service used by the Platform."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Acceptance of terms.",
+          "content": [
+            "By registering and using the Platform, you confirm that you have read, understood, and agreed to these Terms of Service along with all related policies, including the Privacy Policy, Refund Policy, and Acceptable Use Policy.",
+            "You confirm that you are at least 17 years old or have legal capacity under the laws of the Republic of Indonesia. If you represent an entity, you confirm that you have authority to bind that entity to these Terms.",
+            "Fibidy may update these Terms of Service from time to time. Material changes will be notified via email at least 7 days before the effective date. Continued use of the Platform after the effective date is considered acceptance of the latest version."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "User accounts.",
+          "content": [
+            "Standard account registration results in the Buyer role by default. Users who want to become Sellers must upgrade and complete the KYC process via Stripe Connect.",
+            "You are fully responsible for the security of your account, including the confidentiality of your password and all activity under your account.",
+            "A single individual or entity may only hold one active account. Creating multiple accounts to circumvent restrictions is a violation and may result in account suspension without refund.",
+            "You must provide accurate and current information at registration, and update it when things change. False or misleading information may result in account suspension.",
+            "Contact admin@fibidy.com immediately if you become aware of any unauthorized access to your account. Fibidy is not liable for losses resulting from your failure to safeguard your credentials."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Fibidy's role as facilitator.",
+          "content": [
+            "Fibidy acts as a technical facilitator and is not a party to the transaction between Buyer and Seller. All sales contracts for Digital Products are formed and apply directly between Seller and Buyer.",
+            "Fibidy does not own, produce, hold inventory of, or warrant the quality, accuracy, merchantability, or fitness for a particular purpose of the Digital Products sold on the Platform.",
+            "Sellers are fully responsible for the Digital Products they sell, including their content, legality, intellectual property, descriptions, pricing, and fulfillment of obligations to Buyers.",
+            "In the event of a dispute between Buyer and Seller, Fibidy may help facilitate communication and provide technical evidence from the system, but is not a party to the dispute and is not responsible for its resolution."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Payments and platform fees.",
+          "content": [
+            "Payments on the Platform are processed by Stripe. Fibidy does not store, receive, or directly process payment card data. All payment processing is subject to Stripe's terms of service.",
+            "The Platform uses the Direct Charges model through Stripe Connect. Buyer payments go directly to the Seller's Stripe Connect account. Fibidy deducts an application fee as the platform fee at the time of transaction.",
+            "The platform fee structure varies based on the Seller's subscription tier and the source of the transaction. Full details are available in the Fee Structure at fibidy.com/legal/fees.",
+            "Stripe charges a separate payment processing fee that is deducted directly from the Seller by Stripe, in addition to Fibidy's platform fee. This amount is set and may be changed by Stripe.",
+            "All transactions on the Platform are settled in USD. International Buyers may see prices in their local currency via Stripe's Adaptive Pricing, but final settlement remains in USD.",
+            "Fibidy may change the platform fee structure with at least 30 days' prior notice to active Sellers via email. Changes are not retroactive — completed transactions keep the fee that was in effect at the time of transaction."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Refunds and disputes.",
+          "content": [
+            "The Platform provides an automatic refund mechanism to protect Buyers from inaccessible or corrupt files. Buyers may request a refund within 7 days of the purchase date.",
+            "Refunds are approved automatically if the system detects that the file cannot be downloaded or is corrupt (cannot be opened as a valid PDF). If approved, funds are returned via Stripe and the Buyer's download access is revoked.",
+            "Refunds are automatically rejected if the file is verifiably valid and accessible, if the request is outside the 7-day window, or if a refund for that transaction has already been requested.",
+            "Full details on refund conditions and process are in the Refund Policy at fibidy.com/legal/refund.",
+            "Buyers may still file a chargeback through their card issuer in accordance with applicable consumer rights. Chargeback disputes are handled by Stripe under their policies. Sellers who receive 2 or more chargebacks may be subject to automatic account suspension."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Seller subscriptions.",
+          "content": [
+            "The Platform offers subscription tiers for Sellers with different features and platform fees. Currently available: Free, Starter, and Business.",
+            "Paid subscriptions are processed by Stripe Billing on a monthly cycle. Payments are non-refundable for the current period — cancellation takes effect at the end of the current period with no pro-rated refund.",
+            "Upgrading to the Business tier requires a minimum sales track record as applicable — USD $200 in total sales or at least 20 transactions on the Starter tier.",
+            "Fibidy reserves the right to change subscription tier features, pricing, or terms with at least 30 days' notice via email."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "KYC obligations for Sellers.",
+          "content": [
+            "To become an active Seller and receive payments, Users must complete identity verification (Know Your Customer / KYC) via Stripe Connect.",
+            "The KYC process is performed directly by Stripe. Fibidy does not store identity data collected during KYC — that data is managed entirely by Stripe under their privacy policy.",
+            "Sellers must provide accurate and complete information to Stripe. False, misleading, or incomplete information may result in KYC rejection, account suspension, or freezing of payout funds.",
+            "Sellers may not upload Digital Products or receive payouts before their KYC status reaches \"Active\" or \"Charges Only\". Full KYC details are in the KYC Policy at fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Content ownership and intellectual property.",
+          "content": [
+            "Sellers retain all intellectual property rights to the Digital Products they upload. Fibidy does not claim ownership of Seller content.",
+            "By uploading a Digital Product, the Seller grants Fibidy a limited, non-exclusive, royalty-free, terminable license to store, display, process, and distribute that Digital Product solely for the purpose of operating the Platform. This license terminates when the Seller removes the content or closes their account.",
+            "Buyers who purchase a Digital Product receive a personal non-exclusive license to use the purchased file for reasonable purposes. Unless otherwise stated by the Seller, Buyers may not resell, redistribute, or publish the Digital Product commercially.",
+            "Sellers warrant that the Digital Products they upload do not infringe the intellectual property, privacy, or other rights of any third party. Infringement of third-party rights is the Seller's sole responsibility.",
+            "Copyright infringement reports may be filed through the procedure in the Copyright Policy at fibidy.com/legal/copyright."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Prohibited content.",
+          "content": [
+            "Users may not upload, sell, or distribute content that violates the laws of the Republic of Indonesia, including but not limited to pornographic content, content that endangers children, content that promotes violence or terrorism, and content that violates the Electronic Information and Transactions Law (UU ITE).",
+            "Pirated products, unauthorized copies of others' work, or content that infringes third-party intellectual property are prohibited.",
+            "Files containing malware, viruses, or other malicious code are prohibited.",
+            "Using the Platform for fraud, money laundering, tax evasion, or other illegal activities is prohibited.",
+            "Full details on prohibited content and behavior are in the Acceptable Use Policy at fibidy.com/legal/acceptable-use.",
+            "Fibidy reserves the right to remove violating content, suspend or terminate violating accounts, and report violations to the relevant authorities in accordance with applicable law."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "Limitation of liability.",
+          "content": [
+            "The Platform is provided \"as is\" without express or implied warranties of fitness for a particular purpose, reliability, uninterrupted availability, or freedom from errors.",
+            "Fibidy is not liable for transactions, product quality, or disputes between Buyers and Sellers. Fibidy also does not guarantee any level of sales, search engine ranking, or any commercial result.",
+            "To the extent permitted by law, Fibidy's total financial liability to a User for all claims arising from or related to the Platform will not exceed the amount the User has paid to Fibidy in the 3 months preceding the claim. For Users on the Free tier, the liability cap is zero.",
+            "Fibidy is not liable for indirect, consequential, or incidental damages, lost profits, lost data, or lost goodwill arising from the use of or inability to use the Platform.",
+            "These limitations of liability apply fully except where limited by applicable law that cannot be waived."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Indemnity.",
+          "content": [
+            "Users agree to release and indemnify Fibidy against any claims, losses, or costs (including reasonable legal fees) arising from a violation of these Terms of Service, violation of applicable law, or infringement of third-party rights by the User.",
+            "This provision applies specifically to Sellers for Digital Products they upload and sell through the Platform."
+          ]
+        },
+        {
+          "number": "14",
+          "title": "Account suspension and termination.",
+          "content": [
+            "Fibidy reserves the right to suspend or terminate a User's account, temporarily or permanently, without prior notice, if the User violates these Terms of Service, violates applicable law, or takes action that endangers the security or integrity of the Platform, other Users, or third parties.",
+            "Sellers who receive 2 or more chargebacks are subject to automatic suspension. Status may be reviewed after manual review by the Fibidy team.",
+            "Users may close their accounts at any time by contacting admin@fibidy.com. Closure is permanent — data is deleted within 30 days in accordance with the Privacy Policy. Active paid subscriptions continue until the end of the period with no pro-rated refund.",
+            "If Fibidy permanently ceases operating the Platform, notice will be given at least 30 days in advance to all active Users via email. Sellers will have the opportunity to download their data and receive payout of settled funds in accordance with Stripe's terms."
+          ]
+        },
+        {
+          "number": "15",
+          "title": "Governing law and dispute resolution.",
+          "content": [
+            "These Terms of Service are governed by and interpreted under the laws of the Republic of Indonesia.",
+            "Any dispute arising from or related to these Terms of Service will first be resolved through good-faith consultation via email to admin@fibidy.com within 30 days of the notice of dispute.",
+            "If consultation does not reach agreement, disputes will be resolved through the competent courts within the Republic of Indonesia in accordance with applicable law."
+          ]
+        },
+        {
+          "number": "16",
+          "title": "Miscellaneous.",
+          "content": [
+            "If any provision of these Terms of Service is held invalid or unenforceable by a competent court, the remaining provisions remain in full effect.",
+            "Fibidy's failure to enforce any provision of these Terms of Service is not a waiver of its right to enforce that provision in the future.",
+            "These Terms of Service constitute the entire agreement between Fibidy and the User regarding use of the Platform, and supersede all prior agreements or arrangements.",
+            "For questions about these Terms of Service, contact admin@fibidy.com."
+          ]
+        }
+      ]
     },
     "privacy": {
       "title": "Privacy Policy",
-      "lead": "Last updated: April 2026"
+      "summary": [
+        "We only collect data needed to operate the Platform. Nothing more.",
+        "Payment card data never touches our servers — everything is processed by Stripe.",
+        "IP and User-Agent are logged on download as chargeback evidence. Kept for 365 days.",
+        "We don't sell your data. Not for ads. Not for third-party marketing.",
+        "You can access, correct, or request deletion of your data anytime via email."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Who is responsible for your data.",
+          "content": [
+            "This Privacy Policy explains how Fibidy collects, uses, stores, and protects the personal data of Users who use the fibidy.com platform along with all subdomains and services.",
+            "Fibidy is operated independently by an individual operator based in Indonesia. In the context of Law No. 27 of 2022 on Personal Data Protection (UU PDP), Fibidy acts as the Personal Data Controller for data collected through the Platform.",
+            "For all questions, requests, or complaints related to personal data, contact admin@fibidy.com."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Data we collect.",
+          "content": [
+            "Account data — At registration we collect email address and password (stored encrypted with bcrypt). For Users who upgrade to Seller, we also collect store name, business category, WhatsApp number, description, and address that you voluntarily provide.",
+            "Store profile data — Sellers may upload logos, product photos, and other content to display their store and digital products.",
+            "Digital product data — PDF files uploaded by Sellers for sale, along with related metadata (file name, size, page count, upload time).",
+            "Transaction data — For each purchase, we record the payment session ID, payment intent ID, amount paid, currency, platform fee, and transaction source (Direct or Discover). Payment card data never reaches Fibidy's servers — all card processing is done by Stripe.",
+            "Download log data — For each product download by a Buyer, we record the IP address, User-Agent, and download time. The purpose is to provide evidence of file access as chargeback evidence. This data is kept for a maximum of 365 days.",
+            "Session data — We use httpOnly session cookies to keep you logged in. Details in the Cookie Policy at fibidy.com/legal/cookies.",
+            "Aggregate usage data — We use Vercel Analytics which collects anonymous visitor statistics, without tracking cookies and without identifying individuals."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Why we collect data.",
+          "content": [
+            "To provide and operate the Platform, including authentication, account management, and service delivery to Sellers and Buyers.",
+            "To process payments and payouts through Stripe.",
+            "To fulfill Seller identity verification (KYC) obligations through Stripe Connect for compliance with anti-money-laundering regulations.",
+            "To provide technical evidence (download logs) for chargeback disputes and protection against unfounded claims.",
+            "To send important notifications about accounts, transactions, service changes, or policy changes.",
+            "To prevent, detect, and handle fraud, security violations, or Terms of Service violations.",
+            "To improve the Platform based on aggregate usage analysis.",
+            "To fulfill legal obligations under the laws of the Republic of Indonesia.",
+            "We do not use your data for third-party advertising, do not sell your data, and do not share it for third-party marketing purposes."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Legal basis for processing.",
+          "content": [
+            "Processing of personal data is performed under one or more of the following legal bases, consistent with Article 20 of UU PDP:",
+            "Consent — you give explicit consent at registration by accepting this Privacy Policy.",
+            "Performance of contract — processing needed to fulfill the Terms of Service and provide services to you.",
+            "Legal obligation — processing needed to meet Fibidy's legal obligations.",
+            "Legitimate interest — processing for reasonable purposes such as Platform security, fraud prevention, and protection of legal rights, to the extent that it does not infringe fundamental User rights."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Third-party data processors.",
+          "content": [
+            "To operate the Platform, we use third-party service providers that act as Data Processors under Fibidy's instructions. Each provider has their own privacy policy governing how they handle data.",
+            "Stripe, Inc. (United States and global affiliates) — processes payments, performs Seller KYC verification, and manages payouts. Stripe receives Seller identity data, transaction data, and Buyer card data. Stripe's privacy policy is available at stripe.com/privacy.",
+            "Supabase, Inc. (United States) — provides the PostgreSQL database infrastructure. All account data, transactions, and product metadata are stored in the database hosted by Supabase.",
+            "Upstash, Inc. (United States) — provides Redis infrastructure for cache, session management, and rate limiting. Data stored is transient and does not contain sensitive data.",
+            "Cloudflare, Inc. (global) — through the R2 service, we store the PDF files of digital products and preview files uploaded by Sellers.",
+            "Cloudinary Ltd. (United States and Israel) — stores image assets such as store logos and feature icons.",
+            "Railway Corp. (United States) — provides backend server hosting infrastructure for Fibidy.",
+            "Vercel, Inc. (United States) — provides frontend web hosting and anonymous analytics for Fibidy.",
+            "Some of the providers above are based outside Indonesia. Cross-border data transfers are performed on legal bases consistent with Article 56 of UU PDP, including your consent and performance of contract."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Digital product data and file security.",
+          "content": [
+            "PDF files uploaded by Sellers are stored encrypted on Cloudflare R2. The internal file key (fileKey) is never exposed to Buyers or the public.",
+            "Buyers only obtain access via a temporary signed URL valid for 15 minutes, generated fresh each time the Buyer clicks the download button.",
+            "For each PDF product, the system automatically generates a preview file containing a maximum of the first 3 pages. The preview file is what appears on the public product page — the original file remains hidden until the Buyer purchases.",
+            "File integrity is verified at upload using the pdf-lib library. Files that are corrupt or cannot be processed are rejected at upload."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Download logs and chargeback evidence.",
+          "content": [
+            "Each time a Buyer downloads a purchased product, the system records the IP address, browser User-Agent, download time, and related product ID.",
+            "Download log data is collected for two specific purposes: to provide file access evidence to Stripe if the Buyer files a chargeback, and to provide download history to Sellers for store operations.",
+            "Download logs are kept for a maximum of 365 days from the download time, then deleted periodically through a cleanup mechanism.",
+            "Recorded IP addresses are considered personal data under UU PDP. We process this data on legitimate interest grounds to protect against unfounded chargeback claims."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Data security.",
+          "content": [
+            "We apply reasonable technical and organizational security measures to protect personal data, including — data transmission over encrypted HTTPS/TLS connections, password hashing with bcrypt cost factor 12, login sessions with httpOnly and secure cookies, token versioning for automatic session invalidation when passwords change, rate limiting against brute-force attacks, and inter-User data isolation at the application and database layers.",
+            "Payments are processed by Stripe, which is certified PCI-DSS Level 1. Payment card data is never stored or processed on Fibidy servers.",
+            "No system can guarantee absolute security. If a security incident materially endangers User personal data, we will notify you as soon as possible after the incident is confirmed, consistent with the data breach notification obligations under UU PDP.",
+            "If you discover a security vulnerability, please report it to admin@fibidy.com with the subject \"Security Report\"."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Data retention.",
+          "content": [
+            "Active account data — retained while the account is actively in use.",
+            "Closed account data — once a closure request is confirmed, account data is permanently deleted within 30 days. After that period the data cannot be recovered.",
+            "Transaction data — retained for legal compliance and financial audit needs for the period required by tax regulations and other related regulations in Indonesia.",
+            "Download log data — retained for a maximum of 365 days, then automatically deleted.",
+            "Stripe webhook data — retained for a maximum of 90 days to support reprocessing if needed, then deleted.",
+            "Data stored by Stripe as a Data Processor is subject to Stripe's retention policies, including the need to maintain transaction records and KYC records in line with applicable financial regulations."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "User rights.",
+          "content": [
+            "Under UU PDP, you have rights as a Personal Data Subject, including:",
+            "Right of access — request a copy of the personal data we hold about you.",
+            "Right to rectification — request correction of inaccurate or incomplete data.",
+            "Right to erasure — request deletion of personal data, taking into account legal obligations that may limit it.",
+            "Right to restrict processing — request restriction of data processing under certain conditions.",
+            "Right to data portability — request a copy of your data in a structured and machine-readable format.",
+            "Right to withdraw consent — withdraw consent for processing you previously gave.",
+            "Right to object and complain — object to specific processing or file a complaint with the relevant authority.",
+            "To exercise these rights, send a request to admin@fibidy.com with the subject \"Data Request\". We will respond within a maximum of 14 business days. Some rights may be limited by legal obligations or Fibidy's legitimate interests."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Data of minors.",
+          "content": [
+            "The Platform is not intended for children under 17 years old. We do not knowingly collect personal data from minors.",
+            "If you become aware or have concerns that a minor has provided personal data to the Platform, please contact admin@fibidy.com and we will delete the data as soon as possible."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "International data transfers.",
+          "content": [
+            "Because some of our Data Processors are based outside Indonesia, your personal data may be processed and stored in jurisdictions outside Indonesia, including the United States.",
+            "Cross-border data transfers are performed with regard to the level of personal data protection in the destination country consistent with Article 56 of UU PDP, and on the basis of your consent and the performance of a contract with you."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Changes to this Privacy Policy.",
+          "content": [
+            "Fibidy may update this Privacy Policy from time to time. Material changes will be notified to registered Users via email at least 7 days before the effective date.",
+            "The latest version is always available at fibidy.com/legal/privacy. The \"last updated\" date at the top of the page shows the current effective version.",
+            "Continued use of the Platform after the effective date is considered acceptance of the latest version."
+          ]
+        },
+        {
+          "number": "14",
+          "title": "Contact.",
+          "content": [
+            "For general questions about this Privacy Policy, contact admin@fibidy.com.",
+            "For Data Subject rights requests (access, correction, deletion, portability, and so on), use the same email with the subject \"Data Request\".",
+            "For security incidents or data breach reports, use the subject \"Security Report\"."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "summary": [
+        "We use cookies as little as possible — just what's needed for login.",
+        "fibidy_auth (7 days) for Buyers/Sellers. fibidy_admin (8 hours) for admins.",
+        "All cookies are HttpOnly and Secure — not accessible from JavaScript.",
+        "No tracking cookies. No Google Analytics, FB Pixel, or ad networks.",
+        "Stripe sets its own cookies on the checkout page for security."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "What cookies are.",
+          "content": [
+            "Cookies are small text files stored by your browser on your device when you visit a website.",
+            "Fibidy uses cookies minimally — only for essential purposes so the Platform can function securely.",
+            "We do not use advertising cookies, do not use third-party cookies, and do not participate in any tracking networks."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Cookies we use.",
+          "content": [
+            "fibidy_auth — Session cookie for Buyer and Seller authentication. Set at login, valid for 7 days, and cleared at logout. Attributes: HttpOnly, Secure, SameSite=None.",
+            "fibidy_admin — Session cookie for Fibidy internal admin authentication. Set at admin login, valid for 8 hours. Attributes: HttpOnly, Secure (in production), SameSite=Lax. This cookie is not set for regular Users.",
+            "Both cookies use the HttpOnly flag, meaning they cannot be accessed by JavaScript in the browser — a security measure to prevent session theft via XSS attacks."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Cookies we do NOT use.",
+          "content": [
+            "Google Analytics — we do not use it.",
+            "Facebook Pixel — we do not use it.",
+            "Advertising cookies from any ad network — we do not use them.",
+            "Cross-site tracking cookies for User profiling — we do not use them.",
+            "The Vercel Analytics we use for aggregate statistics does not use cookies and does not identify individuals."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Third-party cookies from Stripe.",
+          "content": [
+            "When a Buyer proceeds to checkout, the Stripe Checkout page may set its own cookies for security and fraud prevention.",
+            "These Stripe cookies are controlled entirely by Stripe and are subject to Stripe's cookie policy. Fibidy does not control or have access to those cookies.",
+            "Full details are available at stripe.com/cookies-policy."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Managing cookies.",
+          "content": [
+            "Because the cookies we use are essential to Platform function (authentication), disabling them will prevent you from logging in and using the service.",
+            "Most browsers allow you to manage cookies through their settings. You can delete cookies, block cookies from specific sites, or configure your browser to notify you before a cookie is set.",
+            "Details on cookie settings per browser are available on each browser's support site."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Changes to the Cookie Policy.",
+          "content": [
+            "Fibidy may update this Cookie Policy if there are changes to the cookies used.",
+            "If we add a new material cookie (for example if an analytics tool using cookies is added in the future), notice will be given via email at least 7 days before the effective date.",
+            "The latest version is always available at fibidy.com/legal/cookies."
+          ]
+        }
+      ]
+    },
+    "fees": {
+      "title": "Fee Structure",
+      "summary": [
+        "FREE: Direct 15%, Discover 20%.",
+        "STARTER: Direct 5%, Discover 20%.",
+        "BUSINESS: Direct 2%, Discover 20%.",
+        "Plus a separate Stripe processing fee (~2.9% + $0.30).",
+        "All settlements in USD. Buyers see prices auto-converted via Adaptive Pricing."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Platform fee per tier.",
+          "content": [
+            "Fibidy deducts an application fee on each transaction as the platform fee. The fee amount varies based on the Seller's subscription tier and the source of the transaction (Direct or Discover).",
+            "FREE tier — Direct 15%, Discover 20%.",
+            "STARTER tier — Direct 5%, Discover 20%.",
+            "BUSINESS tier — Direct 2%, Discover 20%.",
+            "The platform fee is deducted automatically when the transaction completes via Stripe Connect Direct Charges. The remainder after the platform fee and Stripe processing fee goes to the Seller's Stripe Connect account."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Direct vs Discover.",
+          "content": [
+            "Direct — The Buyer comes directly to the Seller's store via a link shared by the Seller. The fee is lower because the Seller brings their own traffic.",
+            "Discover — The Buyer finds the product through the Fibidy Discover marketplace. The fee is a flat 20% across all tiers because Fibidy brings the traffic.",
+            "Transaction source is determined automatically by the system based on where the Buyer started checkout from."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Stripe processing fee.",
+          "content": [
+            "In addition to the platform fee, Stripe charges a processing fee on each card transaction. The typical rate is 2.9% + $0.30 per transaction, but it may vary based on Buyer location and payment method.",
+            "The Stripe processing fee is deducted directly from the Seller by Stripe — not by Fibidy and not part of the platform fee.",
+            "The latest Stripe pricing details are available at stripe.com/pricing."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Example calculation.",
+          "content": [
+            "Suppose a product price of $10, Seller on the STARTER tier, Direct transaction.",
+            "Fibidy platform fee: $10 × 5% = $0.50.",
+            "Stripe processing fee: $10 × 2.9% + $0.30 = $0.59 (approximate).",
+            "Amount going to the Seller's Stripe Connect account: $10 − $0.50 − $0.59 = $8.91.",
+            "The numbers above are illustrative. Actual amounts may differ based on exchange rate, payment method, and Stripe's pricing at the time of transaction."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Currency settlement.",
+          "content": [
+            "All transactions are settled in USD.",
+            "International Buyers see prices in local currency via Stripe Adaptive Pricing, but settlement remains in USD in the Seller's Stripe Connect account.",
+            "Conversion between the Buyer's currency and USD is performed by Stripe using the exchange rate at the time of the transaction. The exchange rate spread is part of Stripe's pricing, not a Fibidy fee."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Fee snapshot per transaction.",
+          "content": [
+            "The platform fee percentage in effect at the time of a transaction is frozen (snapshot) to that transaction's record.",
+            "If the platform fee changes in the future, completed transactions continue to use the fee that was in effect at the time — not the new fee."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Future fee changes.",
+          "content": [
+            "Fibidy may change the platform fee structure with at least 30 days' notice to active Sellers via email.",
+            "Changes are not retroactive. Transactions that occurred before the effective date continue to use the old fee.",
+            "Sellers may choose to end their subscription or close their account before the effective date if they do not agree to the change."
+          ]
+        }
+      ]
+    },
+    "payment": {
+      "title": "Payment Policy",
+      "summary": [
+        "Payments are processed by Stripe — PCI-DSS Level 1. Card data never enters Fibidy.",
+        "We use the Direct Charges model — payments go directly to the Seller, Fibidy takes the platform fee.",
+        "Settlement is in USD. Local Buyers see local prices via Adaptive Pricing.",
+        "Double-charges are prevented via Redis lock + DB unique constraint.",
+        "Chargebacks are handled by Stripe. Evidence is auto-submitted from download logs."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Stripe as processor.",
+          "content": [
+            "All payments on Fibidy are processed by Stripe, Inc. Stripe is certified PCI-DSS Level 1 — the highest security standard for payment card processing.",
+            "Fibidy does not store, receive, or directly process payment card data. The Buyer's card data is sent directly from the browser to Stripe's servers over an encrypted connection.",
+            "All payment processing is subject to Stripe's terms, including the Stripe Services Agreement and Stripe Restricted Businesses policy."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Accepted payment methods.",
+          "content": [
+            "Credit and debit cards — Visa, Mastercard, American Express, JCB, and local cards supported by Stripe.",
+            "Digital wallets — Apple Pay, Google Pay, and other digital wallets supported by Stripe in the Buyer's region.",
+            "Payment method availability varies by Buyer country. Stripe automatically shows the methods available at checkout."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Direct Charges model.",
+          "content": [
+            "Fibidy uses the Direct Charges model of Stripe Connect. In this model, Buyer payments are processed directly to the Seller's Stripe Connect account, not through Fibidy's account.",
+            "Fibidy deducts an application fee as the platform fee at the same time the transaction is processed. The Seller's balance, after the platform fee and Stripe processing fee, is available for payout on Stripe's schedule.",
+            "This model means the Seller is the merchant of record for the transaction, not Fibidy."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Currency settlement.",
+          "content": [
+            "All transactions are settled in USD. The balance in the Seller's Stripe Connect account is recorded in USD.",
+            "International Buyers may see prices in local currency via Stripe Adaptive Pricing. Conversion to USD is performed by Stripe at the time of transaction using the prevailing rate.",
+            "When paying out to the Seller's bank account, Stripe converts USD to the Seller's account currency using the rate in effect at the time of payout."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Records and audit trail.",
+          "content": [
+            "Each transaction produces a record that includes the Stripe Checkout session ID, payment intent ID, amount paid by the Buyer, presentment currency, settlement currency (USD), platform fee percentage and amount, and transaction source (Direct or Discover).",
+            "This record is stored by Fibidy and is accessible to the Seller via the dashboard for operations and audit purposes.",
+            "More detailed Stripe transaction records are available in the Seller's Stripe Connect dashboard."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Payment failures.",
+          "content": [
+            "If a payment fails due to insufficient funds, a declined card, or other technical issues, the Buyer will be informed by Stripe on the checkout page and can try again with another payment method.",
+            "If a Buyer's payment is pending (asynchronous payment such as a bank transfer), the Buyer does not receive access to the product until the payment is confirmed by Stripe.",
+            "Fibidy does not charge for failed payment attempts."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Double-charge prevention.",
+          "content": [
+            "To protect Buyers from double-charges due to double clicks or network issues, Fibidy applies a temporary lock per Buyer-product pair during checkout.",
+            "If a Buyer tries to start a new checkout before a previous one completes, the system will temporarily block it with a message to wait.",
+            "A database-level unique constraint provides an additional safeguard — a single Buyer cannot purchase the same product twice."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Disputes and chargebacks.",
+          "content": [
+            "Buyers who feel there is an issue with their purchase may file a refund through the Platform within 7 days. Details in the Refund Policy at fibidy.com/legal/refund.",
+            "Buyers may also file a chargeback through their card issuer. Chargebacks are processed by Stripe under their policies and the relevant card network rules.",
+            "When a chargeback is filed, Fibidy's system automatically gathers and submits evidence to Stripe, including product description, Buyer email, and download access logs showing that the Buyer accessed the file.",
+            "Sellers who receive 2 or more chargebacks may be subject to automatic account suspension under the Seller Agreement."
+          ]
+        }
+      ]
+    },
+    "refund": {
+      "title": "Refund Policy",
+      "summary": [
+        "7-day refund window from purchase.",
+        "Auto-approve only if the file can't be downloaded or is corrupt.",
+        "Evaluation is automatic and instant — no manual review queue.",
+        "If approved, Stripe refunds + the Buyer's file access is revoked.",
+        "Funds return in 5-10 business days depending on the bank."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Refund window.",
+          "content": [
+            "Buyers may request a refund within 7 days of the purchase date. Requests after 7 days are automatically rejected with reason OUTSIDE_TIME_WINDOW.",
+            "Each purchase may only be submitted for refund once. A second request for the same purchase is automatically rejected with reason ALREADY_REFUNDED."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Conditions where refund is approved.",
+          "content": [
+            "The system approves a refund automatically only in the following two conditions:",
+            "FILE_NOT_DOWNLOADABLE — The product file cannot be accessed from storage. The system performs a HeadObject check against Cloudflare R2; if the file is missing or inaccessible, the refund is approved.",
+            "FILE_CORRUPT — The product file is corrupt or cannot be processed as a valid PDF. The system downloads the file and attempts to open it with the pdf-lib library; if it fails, the refund is approved.",
+            "The two conditions above are the only approval reasons. Other reasons such as \"changed mind\", \"not as expected\", or \"incomplete\" will not be approved by the system."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Conditions where refund is rejected.",
+          "content": [
+            "FILE_ACCESSIBLE_AND_VALID — The product file passes the HeadObject and pdf-lib checks. This means the file still exists, can still be downloaded, and is still valid as a PDF. The request is rejected.",
+            "OUTSIDE_TIME_WINDOW — The request was filed more than 7 days after the purchase date.",
+            "ALREADY_REFUNDED — A previous refund request has already been filed for the same purchase, regardless of its outcome."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Automated evaluation process.",
+          "content": [
+            "Evaluation is performed synchronously when the Buyer clicks \"Request Refund\". There is no manual review queue.",
+            "Evaluation order: check the 7-day window, check whether it was already filed, check file accessibility via HeadObject, check file integrity via pdf-lib load.",
+            "The evaluation result appears immediately on the Buyer's page after the click. No waiting for team response is needed."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Refund execution via Stripe.",
+          "content": [
+            "When a refund is approved, the system automatically instructs Stripe to process a refund to the Buyer's card using the Stripe Refund API with reverse_transfer and refund_application_fee.",
+            "reverse_transfer means funds are pulled back from the Seller's Stripe Connect account. refund_application_fee means the platform fee previously taken by Fibidy is also returned.",
+            "Once Stripe executes the refund, funds return to the Buyer's card in 5 to 10 business days depending on the card issuer. Fibidy does not control this timeline."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Revocation of file access.",
+          "content": [
+            "When a refund is approved, the Buyer's download access to the refunded file is automatically revoked.",
+            "The Buyer will not be able to download the file after the refund. Download attempts will be denied by the system.",
+            "This is to prevent double-dipping — the Buyer receiving a refund while still keeping access to the file."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Refunds that are not covered.",
+          "content": [
+            "Seller subscription fees (Starter or Business) are not refundable. Subscription cancellation takes effect at the end of the current period with no pro-rated refund.",
+            "Transactions outside the 7-day window — no exceptions.",
+            "Purchases made outside the Fibidy Platform, even if related to the same Seller."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Difference from chargebacks.",
+          "content": [
+            "A refund is an internal Platform mechanism with automatic evaluation based on technical file conditions.",
+            "A chargeback is an external mechanism run by the Buyer's card-issuing bank. Buyers still retain the right to file a chargeback with their bank under applicable consumer rights.",
+            "Chargebacks are processed by Stripe under their policies. Fibidy automatically gathers and submits evidence (download access logs, product description, Buyer email) to Stripe.",
+            "Sellers who receive 2 or more chargebacks may be subject to automatic account suspension under the Seller Agreement."
+          ]
+        }
+      ]
+    },
+    "kyc": {
+      "title": "KYC Policy",
+      "summary": [
+        "Sellers must complete KYC to upload products and receive payouts.",
+        "The process is performed by Stripe, not Fibidy. Fibidy does not store KYC data.",
+        "Most KYCs complete quickly; certain cases require Stripe manual review.",
+        "Statuses tracked: NOT_STARTED, PENDING, NEEDS_MORE_INFO, PAST_DUE, CHARGES_ONLY, ACTIVE, REJECTED.",
+        "False or misleading information = KYC rejection + possible account suspension."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Why KYC is required.",
+          "content": [
+            "Sellers who want to sell digital products on Fibidy and receive payouts must complete identity verification (Know Your Customer / KYC) via Stripe Connect.",
+            "KYC is a requirement from Stripe as the payment processor for compliance with anti-money-laundering (AML) and counter-terrorism financing (CTF) regulations in various jurisdictions.",
+            "Without completed KYC, Sellers cannot upload digital products and cannot receive payouts from transactions."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Fibidy does not store KYC data.",
+          "content": [
+            "The KYC process is performed entirely by Stripe through the Stripe Connect onboarding page. Fibidy does not store, process, or have access to the sensitive identity data collected during KYC.",
+            "Data collected by Stripe typically includes full name, date of birth, address, government-issued identification number, identity documents (national ID or passport), and bank account information for payouts.",
+            "Stripe's privacy policy governing KYC data handling is available at stripe.com/privacy.",
+            "Fibidy only receives the KYC status from Stripe (Active, Pending, Rejected, and so on) to determine whether a Seller can sell. Fibidy does not see the Seller's documents or personal data."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "When KYC must be completed.",
+          "content": [
+            "KYC must be completed before the Seller can upload their first digital product.",
+            "KYC must also be active when payouts are received. If the KYC status changes from Active (for example, becomes Past Due because Stripe requests additional documents), payouts may be temporarily held.",
+            "Sellers can start the KYC process from the Fibidy dashboard with the \"Start Verification\" button, which redirects to the Stripe Connect page."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "KYC statuses.",
+          "content": [
+            "The system tracks several KYC statuses based on responses from Stripe:",
+            "NOT_STARTED — The Seller has not started the KYC process.",
+            "PENDING — Data has been submitted to Stripe and is under review.",
+            "NEEDS_MORE_INFO — Stripe is requesting additional information or documents.",
+            "PAST_DUE — A requirement has passed its deadline. Payouts may be held.",
+            "CHARGES_ONLY — The Seller can receive payments but payouts remain limited.",
+            "ACTIVE — KYC is fully complete. The Seller can sell and receive payouts normally.",
+            "REJECTED — Stripe has rejected the KYC. The Seller cannot sell on the Platform until the issue is resolved."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "KYC timeline.",
+          "content": [
+            "Most KYCs are completed instantly or within a few hours. Cases requiring Stripe manual review may take several business days.",
+            "If Stripe requests additional documents, the status will move to NEEDS_MORE_INFO and the Seller will receive a notification. The Seller must promptly submit the requested documents before the deadline set by Stripe.",
+            "If the deadline is missed, the status moves to PAST_DUE and payouts may be held until the requirement is met."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Seller obligations during KYC.",
+          "content": [
+            "Sellers must provide accurate, complete, and current information to Stripe.",
+            "False, misleading, forged documents or other people's identities will cause Stripe to reject KYC and may result in permanent suspension of the Fibidy account without refund.",
+            "Sellers are responsible for ensuring that the bank account registered for payouts is theirs and still active."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Consequences if KYC is rejected.",
+          "content": [
+            "If Stripe rejects the KYC (status REJECTED), the Seller cannot upload digital products and cannot receive payouts.",
+            "Transaction funds already paid by Buyers remain in the Stripe Connect account and will be refunded to Buyers by Stripe under their policies.",
+            "Sellers whose KYC is rejected can contact Stripe support directly to understand the rejection reason and correct the documents. Fibidy cannot intervene in Stripe's KYC decisions."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Future requirements.",
+          "content": [
+            "Stripe sometimes requests additional information in the future (future requirements) before a certain transaction volume is reached, or due to regulatory changes.",
+            "Sellers will be notified via the Fibidy dashboard and Stripe email when a future requirement needs to be met.",
+            "Ignoring future requirements may cause the KYC account to move to PAST_DUE and hold payouts."
+          ]
+        }
+      ]
+    },
+    "payout": {
+      "title": "Payout Policy",
+      "summary": [
+        "Daily payouts with a T+7 delay via Stripe Connect.",
+        "Balance in USD, converted to the Seller's bank currency at payout.",
+        "Bank account is registered with Stripe, not with Fibidy.",
+        "Disputes/chargebacks and KYC issues may hold payouts.",
+        "Tax obligations are the Seller's responsibility."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Payout schedule.",
+          "content": [
+            "The Platform uses a daily payout schedule with a T+7 delay through Stripe Connect. This means each completed transaction becomes available for payout 7 days after the transaction date.",
+            "Stripe processes payouts every day for balances that have passed the delay period. Funds are transferred to the Seller's bank account as registered with Stripe Connect.",
+            "The T+7 delay provides a buffer for handling chargebacks, disputes, and refunds before funds are released to the Seller."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Payout account.",
+          "content": [
+            "The bank account for payouts is registered by the Seller during the KYC process on Stripe Connect.",
+            "Sellers can update their payout account through the Stripe Connect dashboard. Fibidy does not store or have the ability to change Seller bank account information.",
+            "Sellers are responsible for ensuring the registered account is theirs, still active, and able to receive international transfers if required by the bank."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Currency settlement and conversion.",
+          "content": [
+            "The balance in the Seller's Stripe Connect account is recorded in USD.",
+            "At payout, Stripe converts USD to the Seller's bank account currency using the rate in effect at the time of payout.",
+            "The exchange rate spread is part of Stripe's pricing, not Fibidy's. Payout rate details are visible in the Seller's Stripe Connect dashboard."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Minimum payout.",
+          "content": [
+            "The minimum payout threshold is set by Stripe and varies based on the Seller's country. Stripe only processes a payout once the Seller's balance reaches the minimum threshold.",
+            "If the balance is below the threshold, funds remain in the Stripe Connect account until the balance is sufficient or the Seller triggers a manual payout (if the feature is available for their country)."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Failed payouts.",
+          "content": [
+            "Payouts may fail for several reasons — the bank account is closed, the account number is incorrect, the bank rejects the transfer, or there are technical issues on the bank's side.",
+            "If a payout fails, Stripe will notify the Seller via email and the Stripe Connect dashboard. Funds return to the Stripe Connect account and the Seller must correct the account information before the payout is retried.",
+            "Fibidy does not manage the payout retry process. All handling is performed by Stripe under their policies."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Holds during disputes.",
+          "content": [
+            "When a Buyer files a chargeback through their bank, funds related to that transaction may be held by Stripe during the investigation.",
+            "The hold applies while the dispute is active. If the Seller wins the dispute, funds become available for payout again. If the Seller loses, the funds are debited from the Seller's account.",
+            "During the hold period, the held balance is not included in payout calculations."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Holds during KYC issues.",
+          "content": [
+            "If the Seller's KYC status changes to PAST_DUE or REJECTED, payouts may be held by Stripe until the KYC issue is resolved.",
+            "The Seller will be notified via the Fibidy dashboard and Stripe email when a requirement needs to be met.",
+            "Full KYC status details are in the KYC Policy at fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Taxes and reporting.",
+          "content": [
+            "Sellers are fully responsible for tax obligations on income received from sales on the Platform, in accordance with the tax regulations of the jurisdiction where the Seller is based.",
+            "Fibidy does not withhold Seller income tax and does not provide tax reporting services. Transaction records are available on the Fibidy dashboard and Stripe to help the Seller with their own tax reporting.",
+            "Sellers are encouraged to consult a tax advisor to understand their applicable tax obligations."
+          ]
+        }
+      ]
+    },
+    "sellerAgreement": {
+      "title": "Seller Agreement",
+      "summary": [
+        "Sellers are independent contractors. Not employees, not Fibidy partners.",
+        "PDF products only. Must own the rights, match the description, comply with the law.",
+        "KYC is required via Stripe before upload and payouts are possible.",
+        "The platform fee is auto-deducted on each transaction. Daily T+7 USD payouts.",
+        "2+ chargebacks = auto-suspend. Business tier requires $200 sales or 20 transactions."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Seller status.",
+          "content": [
+            "A Seller is an independent contractor who uses the Fibidy Platform to sell digital products. Sellers are not employees, agents, or partners of Fibidy.",
+            "No employment, partnership, or joint venture relationship is formed between Fibidy and a Seller. The Seller is fully responsible for taxes, business licenses, and other legal obligations related to their selling activity.",
+            "This Seller Agreement applies together with the main Terms of Service at fibidy.com/legal/terms. In case of conflict, the more specific provision controls."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Upgrading from Buyer to Seller.",
+          "content": [
+            "Every Fibidy account is Buyer by default. To become a Seller, the User upgrades through the process available in the dashboard, filling in store information (name, category, WhatsApp, and so on).",
+            "After the upgrade, the User still needs to complete KYC via Stripe Connect before they can upload products and receive payouts. Details at fibidy.com/legal/kyc."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Content that may be sold.",
+          "content": [
+            "The Platform currently supports digital products in PDF format only. Other formats are not available.",
+            "Examples of products that generally fit — ebooks, guides, templates, worksheets, workbooks, recipes, educational materials, research documents, and other digital written works.",
+            "Products must be technically valid — the file must not be corrupt, must have at least 1 page, and must open as a standard PDF."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Prohibited content.",
+          "content": [
+            "Pirated products or unauthorized copies of others' work.",
+            "Products that infringe third-party intellectual property, including copyrighted works the Seller does not own.",
+            "Content illegal under the laws of the Republic of Indonesia, including pornographic content, content that endangers children, content that promotes violence or terrorism, and content that violates UU ITE.",
+            "Files containing malware, viruses, or malicious code.",
+            "Fraudulent content, false claims, or content designed to mislead Buyers.",
+            "A full list of prohibited content is available in the Acceptable Use Policy at fibidy.com/legal/acceptable-use."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Seller obligations.",
+          "content": [
+            "The Seller warrants they have the right to sell each product they upload.",
+            "Sellers must provide accurate product descriptions — titles, descriptions, and previews that truly represent the contents of the file. Misleading descriptions may result in legitimate chargebacks or refunds.",
+            "Sellers must respond reasonably to Buyer inquiries through WhatsApp or other contact provided in the store profile.",
+            "Sellers may not manipulate the Discover feature — including creating fake accounts to buy their own products, or generating unnatural transactions to boost ranking."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Ownership and content license.",
+          "content": [
+            "Sellers retain all intellectual property rights in the products they upload.",
+            "By uploading a product, the Seller grants Fibidy a limited, non-exclusive, royalty-free, terminable license to store, display, process, and distribute that product solely for the purpose of operating the Platform. This license terminates when the Seller removes the content or closes their account.",
+            "The Platform automatically generates a preview file containing a maximum of the first 3 pages of each PDF product for display on the public product page. The Seller consents to the creation and display of this preview as part of the license above.",
+            "Buyers who purchase a product receive a personal non-exclusive license for personal use. Sellers may set more specific license terms in their product description."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "KYC and Seller identity.",
+          "content": [
+            "Sellers must complete KYC via Stripe Connect with accurate information. Full details at fibidy.com/legal/kyc.",
+            "KYC data is collected and stored by Stripe. Fibidy does not have access to Seller KYC data and cannot verify or change it."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Platform fee and payouts.",
+          "content": [
+            "Fibidy deducts an application fee as the platform fee on each transaction. The fee structure varies by subscription tier and transaction source. Details at fibidy.com/legal/fees.",
+            "Payouts are processed by Stripe Connect on a daily schedule with a T+7 delay. Full details at fibidy.com/legal/payout.",
+            "The Seller agrees that the platform fee is deducted automatically before the balance enters the Seller's Stripe Connect account."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Disputes and auto-suspend.",
+          "content": [
+            "The Platform tracks the number of chargebacks received by each Seller. Sellers who receive 2 or more chargebacks are subject to automatic account suspension (status SUSPENDED).",
+            "Automatic suspension may be reviewed after manual review by the Fibidy team. Sellers may request a review by emailing admin@fibidy.com.",
+            "If the Seller wins a dispute, the dispute counter decreases by one. However, an existing suspension is not automatically lifted — manual review by the Fibidy team is required."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Subscription tiers and Business unlock gate.",
+          "content": [
+            "The Platform offers FREE, STARTER, and BUSINESS tiers with different features and platform fees.",
+            "Upgrading to the BUSINESS tier requires a minimum track record on the STARTER tier — USD $200 in total sales or at least 20 transactions.",
+            "The Business unlock terms may change in the future with at least 30 days' notice."
+          ]
+        },
+        {
+          "number": "11",
+          "title": "Additional prohibitions for Sellers.",
+          "content": [
+            "Sellers may not use the Platform to sell services that are not delivered as a PDF.",
+            "Sellers may not deceive Buyers with product claims that do not match the file contents.",
+            "Sellers may not upload the same product repeatedly with minimal changes to manipulate Discover.",
+            "Sellers may not share their Seller account credentials or transfer the account to others without Fibidy's written consent."
+          ]
+        },
+        {
+          "number": "12",
+          "title": "Suspension and termination.",
+          "content": [
+            "Fibidy may suspend or terminate a Seller account that violates this Seller Agreement, the Terms of Service, or applicable law.",
+            "Suspension may result in products being hidden, new checkouts being blocked, and pending payouts being held pending review.",
+            "Sellers whose accounts are permanently terminated remain responsible for all obligations arising before termination, including unresolved chargebacks and disputes.",
+            "Funds still held by Stripe will be processed under Stripe's policies. Fibidy does not control the timeline or outcome of the release of those funds."
+          ]
+        },
+        {
+          "number": "13",
+          "title": "Indemnity.",
+          "content": [
+            "The Seller agrees to release and indemnify Fibidy against any claims, losses, or costs (including reasonable legal fees) arising from — products uploaded by the Seller, infringement of third-party intellectual property, violation of applicable law, or disputes between the Seller and Buyers."
+          ]
+        }
+      ]
+    },
+    "acceptableUse": {
+      "title": "Acceptable Use Policy",
+      "summary": [
+        "No illegal, pirated, malware-laden content, or content that infringes others' rights.",
+        "No Discover manipulation, fake accounts, or fraud of any kind.",
+        "No scraping, DDoS, or unauthorized access to systems.",
+        "Consequences: warn → remove content → suspend → terminate, by severity.",
+        "Report violations to admin@fibidy.com with subject \"Report\"."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Purpose of this policy.",
+          "content": [
+            "This Acceptable Use Policy (AUP) sets out the standards of behavior and content permitted on the Fibidy Platform.",
+            "This policy applies to all Users — Buyers and Sellers — and covers all activity on the Platform, including uploaded products, store profile content, transaction behavior, and technical use of the Platform.",
+            "Violation of the AUP may result in content removal, account suspension, permanent termination, and reporting to the relevant authorities in accordance with applicable law."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Prohibited content in products.",
+          "content": [
+            "Content illegal under the laws of the Republic of Indonesia, including pornography, content that endangers children, content that promotes violence, terrorism, or hate speech, and content that violates UU ITE.",
+            "Pirated products or unauthorized copies of others' copyrighted work.",
+            "Material that infringes third-party intellectual property, including trademarks, patents, trade secrets, or licensed characters.",
+            "Files containing malware, viruses, trojans, ransomware, keyloggers, or other malicious code.",
+            "Guides or instructions for committing crimes, including the manufacture of weapons, the production of drugs, or unauthorized hacking.",
+            "Third-party personal data collected or distributed without valid consent.",
+            "Forged documents, fake diplomas, fake certificates, or fake identification documents.",
+            "Misleading medical, financial, or legal claims without a valid professional basis."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Prohibited content in profiles and stores.",
+          "content": [
+            "False identity, misleading business names, or impersonating others.",
+            "Product descriptions that are misleading or do not match the actual file contents.",
+            "Unverifiable or unfounded claims (for example \"100% money-back guarantee\" when the Platform's refund policy says otherwise).",
+            "Links or content that direct Buyers off the Platform for transactions outside the Stripe system.",
+            "Promotional content that conflicts with consumer protection law."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Prohibited behavior.",
+          "content": [
+            "Manipulating the Discover feature through fake accounts, fictitious transactions, or other tactics to boost ranking unfairly.",
+            "Creating multiple accounts to circumvent restrictions, suspensions, or bans.",
+            "Buying your own products to manipulate sales metrics or track record for Business tier unlock.",
+            "Using false information or someone else's identity during KYC.",
+            "Harassment, intimidation, or spamming other Users or the Fibidy team.",
+            "Filing unfounded refunds or chargebacks after enjoying a product."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Technical misuse.",
+          "content": [
+            "Attempting unauthorized access to other Users' accounts, Fibidy systems, or integrated third-party systems.",
+            "Scraping, crawling, or extracting Platform data automatically without written permission.",
+            "Denial of Service (DoS/DDoS) attacks or attempts to disrupt Platform availability.",
+            "Exploiting security vulnerabilities without going through the responsible disclosure process to admin@fibidy.com.",
+            "Bypassing rate limiting, anti-spam mechanisms, or other security controls.",
+            "Using bots, automation, or unauthorized third-party tools to interact with the Platform."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "Payment misuse.",
+          "content": [
+            "Money laundering or processing transactions without a legitimate economic basis.",
+            "Using stolen or unauthorized payment cards.",
+            "Chargeback fraud — intentionally filing chargebacks after enjoying a product.",
+            "Evading platform fees through off-Platform transactions with parties discovered through Fibidy."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Consequences of violations.",
+          "content": [
+            "Written warnings for minor or inadvertent violations.",
+            "Removal of violating content without prior notice.",
+            "Account suspension (SUSPENDED) — products hidden, checkout blocked, payouts held pending review.",
+            "Permanent account termination for serious violations, repeated violations, or illegal activity.",
+            "Suspension of subscription fees or in-flight transactions as needed for investigation.",
+            "Reporting to the relevant authorities (police, Kominfo, OJK, Customs, and so on) for cases that require it.",
+            "Fibidy retains discretion to determine the level of response based on the severity of the violation."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "How to report violations.",
+          "content": [
+            "To report content or behavior that violates the AUP, send an email to admin@fibidy.com with the subject \"Report\".",
+            "Include relevant information — the URL of the reported product or profile, a description of the violation, and supporting evidence if any (screenshots, links, or documents).",
+            "Reports are reviewed within a reasonable time. Reporters will be informed of the status of their report if requested.",
+            "For copyright infringement reports, use the dedicated procedure in the Copyright Policy at fibidy.com/legal/copyright."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Appeal process.",
+          "content": [
+            "Users whose accounts are suspended or whose content is removed may appeal by sending an email to admin@fibidy.com within 30 days of the action.",
+            "The appeal must include the reason the action is considered inappropriate, along with relevant supporting evidence.",
+            "The Fibidy team will review the appeal within a reasonable time and provide a final decision. The appeal decision is final."
+          ]
+        },
+        {
+          "number": "10",
+          "title": "Changes to this policy.",
+          "content": [
+            "Fibidy may update this AUP from time to time to respond to evolving risk, changes in law, or feedback from Users.",
+            "Material changes will be notified via email at least 7 days before the effective date.",
+            "The latest version is always available at fibidy.com/legal/acceptable-use."
+          ]
+        }
+      ]
+    },
+    "copyright": {
+      "title": "Copyright Policy",
+      "summary": [
+        "Report copyright infringements via admin@fibidy.com with subject \"DMCA Takedown\".",
+        "Takedowns are processed in ~7 business days when the report is complete.",
+        "Accused Sellers may file a counter-notice within 14 days.",
+        "False reports are a serious violation with legal consequences.",
+        "Repeat infringers = permanent account termination."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Fibidy's commitment to copyright.",
+          "content": [
+            "Fibidy respects third-party intellectual property rights and is committed to firmly acting on copyright infringement on the Platform.",
+            "Sellers are fully responsible for ensuring that products they upload do not infringe others' copyrights. Violations may result in product takedowns, account suspension, and permanent termination depending on severity.",
+            "This policy provides a mechanism for copyright holders to report infringements and for accused Sellers to file counter-notices."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "How to report copyright infringement.",
+          "content": [
+            "Copyright holders or their authorized representatives may report infringement by sending an email to admin@fibidy.com with the subject \"DMCA Takedown\" or \"Copyright Report\".",
+            "The report must include the following information:",
+            "Identification of the allegedly infringed work — title, description, and proof of ownership (copyright certificate, link to original publication, or other relevant documentation).",
+            "Identification of the allegedly infringing content on Fibidy — URL of the product page, product name, or product ID if known.",
+            "Reporter contact information — full name, address, email, and phone number.",
+            "A good-faith statement that the use of the reported content is not authorized by the rights holder, its agent, or the law.",
+            "A statement that the information in the report is accurate and that the reporter is authorized to act on behalf of the copyright holder.",
+            "Physical or electronic signature of the reporter."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Report review timeline.",
+          "content": [
+            "Reports are reviewed within a reasonable time, typically within 7 business days of receipt.",
+            "If the report is complete and meets the criteria, Fibidy will perform a temporary takedown — the product is hidden from the public and downloads are blocked — pending response from the accused Seller.",
+            "The reporter and Seller will be notified of the status of the action via email."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Takedown process.",
+          "content": [
+            "After a report is considered valid on its face, Fibidy hides the accused product and notifies the relevant Seller.",
+            "Products already purchased by Buyers before the takedown remain accessible to those Buyers unless specifically requested by the copyright holder to be blocked entirely (for example due to clear and serious copyright infringement).",
+            "The accused Seller has the opportunity to file a counter-notice within 14 days."
+          ]
+        },
+        {
+          "number": "05",
+          "title": "Counter-notice from the Seller.",
+          "content": [
+            "A Seller who believes the takedown was mistaken or who has a legitimate right to the work may file a counter-notice via email to admin@fibidy.com with the subject \"Counter-Notice\".",
+            "The counter-notice must include:",
+            "Identification of the taken-down content and its location before the takedown.",
+            "A statement under oath that the Seller believes in good faith that the takedown was due to a mistake or misidentification.",
+            "Proof of rights to the work — copyright certificate, official license, assignment agreement, or other relevant documentation.",
+            "Full Seller contact information.",
+            "If the counter-notice is considered valid, Fibidy may reinstate the content. If the original reporter does not respond with additional evidence or legal action within a reasonable time, the content is restored."
+          ]
+        },
+        {
+          "number": "06",
+          "title": "False reports.",
+          "content": [
+            "Filing false or misleading copyright reports is a serious violation that may result in legal consequences.",
+            "Reporters state under oath that the information provided is accurate. Fibidy may report false reports to the relevant authorities and block the reporter's account from filing further reports."
+          ]
+        },
+        {
+          "number": "07",
+          "title": "Repeat infringer policy.",
+          "content": [
+            "Sellers who repeatedly upload content that infringes copyright will be subject to permanent account termination.",
+            "The specific number of violations that triggers termination is determined on a case-by-case basis based on severity, intent, and pattern of behavior. Generally, 3 validated violations are considered repeat infringement.",
+            "Terminated accounts cannot be reopened, and pending funds may be held under Stripe's policies."
+          ]
+        },
+        {
+          "number": "08",
+          "title": "Fair use and exceptions.",
+          "content": [
+            "Fibidy recognizes copyright exceptions such as fair use, legitimate quotation for educational or critical purposes, public-domain works, and works under open licenses (Creative Commons, MIT, and so on).",
+            "Sellers relying on these exceptions must be prepared to demonstrate the legal basis for their use if accused of infringement.",
+            "Fibidy does not provide legal advice. Sellers are encouraged to consult a legal professional for complex cases."
+          ]
+        },
+        {
+          "number": "09",
+          "title": "Jurisdiction and applicable law.",
+          "content": [
+            "This policy is governed by the laws of the Republic of Indonesia, including Law No. 28 of 2014 on Copyright.",
+            "The takedown mechanism in this policy adopts the spirit of the Digital Millennium Copyright Act (DMCA) as global best practice, adapted to the Indonesian legal context.",
+            "Copyright disputes that are not resolved through this mechanism may be brought to the competent courts within the Republic of Indonesia."
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "The questions we hear most often.",
+      "stillQuestionPrefix": "Still have questions?",
+      "stillQuestionLinkText": "Contact us.",
+      "groups": [
+        {
+          "category": "About Fibidy",
+          "items": [
+            {
+              "question": "What is Fibidy?",
+              "answer": "Fibidy is a digital marketplace for PDF products. Sellers upload PDF files, Buyers purchase via Stripe Checkout, and files are delivered digitally after payment. Great for ebooks, guides, templates, worksheets, and other digital written works."
+            },
+            {
+              "question": "Who runs Fibidy?",
+              "answer": "Fibidy is operated independently by an individual operator based in Indonesia. For questions or partnerships, contact admin@fibidy.com."
+            },
+            {
+              "question": "Is Fibidy a marketplace or a regular catalog?",
+              "answer": "Fibidy is a digital marketplace. There is a Discover feature where products from all Sellers are shown to Buyers worldwide. Buyers can check out directly via Stripe inside the Platform."
+            },
+            {
+              "question": "Are there ads on the Platform?",
+              "answer": "No. Fibidy does not show third-party ads on the Platform."
+            }
+          ]
+        },
+        {
+          "category": "Signup and Accounts",
+          "items": [
+            {
+              "question": "How do I sign up?",
+              "answer": "Go to fibidy.com, click sign up, enter your email and password. The default account type is Buyer and can shop right away. If you want to sell, upgrade the account and proceed to KYC."
+            },
+            {
+              "question": "What's the difference between Buyer and Seller?",
+              "answer": "Buyer — someone who buys digital products. Seller — someone who uploads and sells PDF products. One account can play both roles; a Buyer who upgrades to Seller can still shop from other Sellers."
+            },
+            {
+              "question": "How do I upgrade from Buyer to Seller?",
+              "answer": "From the dashboard, choose upgrade to Seller. Fill in store name, category, and WhatsApp number. After that, continue to KYC via Stripe Connect to be able to upload products and receive payouts."
+            }
+          ]
+        },
+        {
+          "category": "For Sellers",
+          "items": [
+            {
+              "question": "Why is KYC required?",
+              "answer": "KYC (Know Your Customer) is required by Stripe as the payment processor for compliance with anti-money-laundering regulations. Without completed KYC, Sellers cannot upload products and cannot receive payouts. The process is done directly on Stripe — Fibidy does not store KYC data."
+            },
+            {
+              "question": "How long does KYC take?",
+              "answer": "Most complete instantly or within a few hours. Cases that require Stripe manual review may take a few business days. If Stripe requests additional documents, the status moves to NEEDS_MORE_INFO and the Seller is notified."
+            },
+            {
+              "question": "What file formats can I sell?",
+              "answer": "PDF only, at this time. Other formats such as ZIP, EPUB, audio, or video are not yet available."
+            },
+            {
+              "question": "What's the platform fee?",
+              "answer": "FREE tier: 15% Direct, 20% Discover. STARTER: 5% Direct, 20% Discover. BUSINESS: 2% Direct, 20% Discover. Plus a separate Stripe processing fee (~2.9% + $0.30) deducted by Stripe. Details at /legal/fees."
+            },
+            {
+              "question": "When do payouts arrive?",
+              "answer": "Stripe Connect uses a daily schedule with a T+7 delay — transaction funds are available 7 days after the transaction. After that, Stripe transfers to the Seller's registered bank account."
+            },
+            {
+              "question": "Why do I have to settle in USD?",
+              "answer": "The Platform settles in USD. International Buyers see prices in local currency via Stripe Adaptive Pricing, but the Seller's balance is recorded in USD. At payout, Stripe converts to the Seller's bank account currency using the prevailing rate."
+            },
+            {
+              "question": "What's the difference between Starter and Business?",
+              "answer": "Starter has a 5% Direct platform fee. Business has 2% Direct. Upgrading to Business requires a minimum track record on Starter — USD $200 in total sales or at least 20 transactions."
+            }
+          ]
+        },
+        {
+          "category": "For Buyers",
+          "items": [
+            {
+              "question": "How do I buy a product?",
+              "answer": "Find a product on the Discover page or in a Seller's store, click buy, check out via Stripe. After a successful payment, the product automatically appears in your Library and can be downloaded."
+            },
+            {
+              "question": "How do I download a file I've purchased?",
+              "answer": "Log into your account, open the Library page, click download on a purchased product. Each click generates a temporary signed URL valid for 15 minutes."
+            },
+            {
+              "question": "Can I preview a product before buying?",
+              "answer": "Yes. The system automatically generates a PDF preview from the first 3 pages of the file — this preview is what appears on the public product page. If an older product has no preview, the page will show that a preview is not available."
+            },
+            {
+              "question": "Can I get a refund?",
+              "answer": "Yes, within 7 days of purchase. Refund auto-approves if the file can't be downloaded or is corrupt. Auto-rejects if the file is valid and accessible. Details at /legal/refund."
+            },
+            {
+              "question": "How long until my refund arrives?",
+              "answer": "Refund approval is instant (auto-evaluation). Once Stripe executes the refund, funds return to the Buyer's card in 5-10 business days depending on the issuing bank."
+            },
+            {
+              "question": "Why was my refund rejected?",
+              "answer": "There are 3 auto-reject reasons: the file is verifiably valid and accessible (FILE_ACCESSIBLE_AND_VALID), it's past 7 days (OUTSIDE_TIME_WINDOW), or a refund for the same purchase has already been filed (ALREADY_REFUNDED)."
+            }
+          ]
+        },
+        {
+          "category": "Security and Privacy",
+          "items": [
+            {
+              "question": "Is my card data safe?",
+              "answer": "Card data never enters Fibidy's servers. All processing is done by Stripe, which is certified PCI-DSS Level 1. Fibidy only receives the transaction status from Stripe."
+            },
+            {
+              "question": "Does Fibidy store my KYC data?",
+              "answer": "No. KYC data (name, date of birth, address, identity documents, bank account) is stored entirely by Stripe. Fibidy only receives the KYC status (Active, Pending, Rejected) to determine whether a Seller can sell."
+            },
+            {
+              "question": "Why are my IP and User-Agent logged on download?",
+              "answer": "To provide file access evidence to Stripe in case of a chargeback. This protects Sellers from unfounded chargeback claims. Data is kept for a maximum of 365 days. Details at /legal/privacy."
+            },
+            {
+              "question": "Can I delete my account?",
+              "answer": "Yes. Contact admin@fibidy.com with the subject \"Close Account\". Data will be permanently deleted within 30 days. Some transaction data and KYC records are retained in accordance with legal obligations and Stripe's policies."
+            }
+          ]
+        },
+        {
+          "category": "Disputes and Issues",
+          "items": [
+            {
+              "question": "What happens if a Buyer files a chargeback?",
+              "answer": "Chargebacks are processed by Stripe. Fibidy's system automatically gathers and submits evidence to Stripe — download access logs, product description, and Buyer email. Sellers who receive 2+ chargebacks are subject to auto-suspend."
+            },
+            {
+              "question": "A Seller was suspended, why?",
+              "answer": "Suspension can occur due to two disputes/chargebacks, Acceptable Use Policy violations, valid copyright reports, or KYC issues. The Seller can appeal to admin@fibidy.com within 30 days."
+            },
+            {
+              "question": "I found a product I believe is pirated — how do I report it?",
+              "answer": "Send an email to admin@fibidy.com with the subject \"DMCA Takedown\" or \"Copyright Report\". Include proof of ownership of the work and the URL of the reported product. The full procedure is at /legal/copyright."
+            }
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "Questions or need help? Reach out here.",
+      "subjectsLabel": "Subject Lines for Emails",
+      "channels": {
+        "email": {
+          "label": "Email",
+          "value": "admin@fibidy.com",
+          "description": "For all inquiries, including reports, data requests, and appeals. Response within 1 business day."
+        },
+        "instagram": {
+          "label": "Instagram",
+          "value": "@fibidy_com",
+          "description": "Feature updates, digital-selling tips, and platform content."
+        },
+        "tiktok": {
+          "label": "TikTok",
+          "value": "@fibidy.com",
+          "description": "Short-form content about selling digital products."
+        },
+        "twitter": {
+          "label": "X / Twitter",
+          "value": "@fibidy42581",
+          "description": "Platform announcements and feature updates."
+        }
+      },
+      "subjects": [
+        {
+          "label": "Copyright report",
+          "subject": "DMCA Takedown"
+        },
+        {
+          "label": "Personal data request (UU PDP)",
+          "subject": "Data Request"
+        },
+        {
+          "label": "Appeal against account suspension",
+          "subject": "Account Appeal"
+        },
+        {
+          "label": "Security / technical vulnerability report",
+          "subject": "Security Report"
+        },
+        {
+          "label": "Content violation report",
+          "subject": "Report"
+        }
+      ]
     }
   }
 }

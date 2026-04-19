@@ -3,24 +3,35 @@
 // ==========================================
 // MOBILE NAVBAR
 //
-// EDIT: Role-based navigation
+// Role-based navigation (no group labels).
 //
-// SELLER: Products, Studio, Digital, Library, Settings
-// BUYER:  Library, Start Selling
+// SELLER: Products, Studio, Library, Downloads, Settings
+// BUYER:  Library, Start Selling, Sign Out
 // ==========================================
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { LayoutDashboard, Layout, Settings, History, BookOpen, Store } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Layout,
+  Settings,
+  History,
+  BookOpen,
+  Store,
+  LogOut,
+} from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 import { useAuthStore } from '@/stores/auth-store';
+import { useLogout } from '@/hooks/auth/use-auth';
 import type { LucideIcon } from 'lucide-react';
 
 interface NavItemDef {
-  href: string;
+  href?: string;
   icon: LucideIcon;
   labelKey: string;
+  /** When true, this item triggers a logout action instead of navigation */
+  isSignOut?: boolean;
 }
 
 const sellerNavItems: NavItemDef[] = [
@@ -34,16 +45,19 @@ const sellerNavItems: NavItemDef[] = [
 const buyerNavItems: NavItemDef[] = [
   { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
   { href: '/dashboard/setup-store', icon: Store, labelKey: 'sell' },
+  { icon: LogOut, labelKey: 'signOut', isSignOut: true },
 ];
 
 export function MobileNavbar() {
   const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const tenant = useAuthStore((s) => s.tenant);
+  const { logout } = useLogout();
 
   const navItems = tenant?.role === 'SELLER' ? sellerNavItems : buyerNavItems;
 
-  const isActive = (href: string) => {
+  const isActive = (href?: string) => {
+    if (!href) return false;
     if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
   };
@@ -54,17 +68,38 @@ export function MobileNavbar() {
 
       <div className="relative flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
         {navItems.map((item) => {
+          // Sign out button — action, not navigation
+          if (item.isSignOut) {
+            return (
+              <button
+                key="sign-out"
+                type="button"
+                onClick={() => logout()}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-[50px]',
+                  'text-destructive hover:text-destructive/80',
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{t(item.labelKey)}</span>
+              </button>
+            );
+          }
+
+          // Nav link
           const active = isActive(item.href);
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href!}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-colors min-w-[50px]',
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <item.icon className={cn('h-5 w-5 transition-transform', active && 'scale-110')} />
+              <item.icon
+                className={cn('h-5 w-5 transition-transform', active && 'scale-110')}
+              />
               <span className="text-[10px] font-medium">{t(item.labelKey)}</span>
               {active && (
                 <span className="absolute -bottom-0 w-1 h-1 rounded-full bg-primary" />

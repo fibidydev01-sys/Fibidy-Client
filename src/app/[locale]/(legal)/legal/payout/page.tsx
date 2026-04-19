@@ -6,8 +6,8 @@ import { ArrowLeft } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('legal.privacy');
-  const ti = await getTranslations('legal.index.items.privacy');
+  const t = await getTranslations('legal.payout');
+  const ti = await getTranslations('legal.index.items.payout');
   return {
     title: t('title'),
     description: ti('description'),
@@ -21,7 +21,7 @@ interface Section {
 }
 
 export default function Page() {
-  const t = useTranslations('legal.privacy');
+  const t = useTranslations('legal.payout');
   const tc = useTranslations('legal.common');
 
   // useTranslations returns structured translations via t.raw()
