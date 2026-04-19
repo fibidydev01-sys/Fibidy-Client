@@ -19,20 +19,11 @@
 // 3. New Language row added to Preferences. Opens the new
 //    LanguageSection at /dashboard/settings?section=language.
 //
-// ==========================================
-// IMPORTANT: This file is a REPLACEMENT for the existing client.tsx.
-// If your local file has additional logic (query param sync, guards,
-// analytics hooks, etc.) that isn't reproduced here, merge those back
-// in manually — the parts you need to preserve are the scaffolding
-// around `<section switcher>` and the URL sync.
-//
-// Core edits vs the previous version (grep-friendly):
-//   + import { Languages } from 'lucide-react';
-//   + import { LanguageSection } from '@/components/dashboard/settings/language';
-//   + added 'language' to SettingId
-//   + added `preferences` group to settingsGroups
-//   + moved lightMode/darkMode from `account` to `preferences`
-//   + added `language` to sectionMap
+// [KYC MERGE — 2026-04-19]
+// KycBanner re-added from the previous client.tsx version.
+// Hooks: useKycStatus, useKycReturnHandler
+// Component: KycBanner
+// Rendered at the top of the list view, above the settings groups.
 // ==========================================
 
 import { useState, useEffect, useMemo } from 'react';
@@ -55,7 +46,6 @@ import {
   Languages,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 
 // Section components
 import { HeroSection } from '@/components/dashboard/settings/hero';
@@ -67,6 +57,10 @@ import { LanguageSection } from '@/components/dashboard/settings/language';
 
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
+import { useKycStatus, useKycReturnHandler } from '@/hooks/dashboard/use-products';
+
+// KYC Banner
+import { KycBanner } from '@/components/dashboard/product/kyc-banner';
 
 // ==========================================
 // Types
@@ -107,6 +101,10 @@ export function SettingsClient() {
   const searchParams = useSearchParams();
   const { theme, setTheme } = useTheme();
   const { logout } = useLogout();
+
+  // KYC
+  const { data: kyc } = useKycStatus();
+  const { isPolling } = useKycReturnHandler();
 
   // Active section derived from `?section=...` query param
   const sectionParam = searchParams.get('section') as SettingId | null;
@@ -259,6 +257,16 @@ export function SettingsClient() {
   return (
     <div className="max-w-2xl mx-auto pb-10">
       <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
+
+      {/* KYC Stripe Verification Banner */}
+      <KycBanner
+        kycStatus={kyc?.kycStatus}
+        hasStripeAccount={kyc?.hasStripeAccount}
+        errors={kyc?.errors}
+        hasFutureRequirements={kyc?.hasFutureRequirements}
+        futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
+        isPolling={isPolling}
+      />
 
       <div className="space-y-6">
         {groupOrder.map((groupKey) => {
