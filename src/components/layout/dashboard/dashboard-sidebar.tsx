@@ -9,7 +9,6 @@ import {
   Settings,
   BookOpen,
   Store,
-  LogOut,
   History,
   type LucideIcon,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/stores/auth-store';
-import { useLogout } from '@/hooks/auth/use-auth';
 
 interface NavItem {
   titleKey: string;
@@ -68,7 +66,6 @@ export function DashboardSidebar() {
   const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const tenant = useAuthStore((s) => s.tenant);
-  const { logout } = useLogout();
 
   const navigation = tenant?.role === 'SELLER' ? sellerNavigation : buyerNavigation;
 
@@ -106,9 +103,9 @@ export function DashboardSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          {tenant?.role === 'SELLER' && (
+      {tenant?.role === 'SELLER' && (
+        <SidebarFooter>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
                 <Link href="/dashboard/settings">
@@ -117,15 +114,9 @@ export function DashboardSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )}
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={logout}>
-              <LogOut className="h-5 w-5" />
-              <span>{t('logout')}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+          </SidebarMenu>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
