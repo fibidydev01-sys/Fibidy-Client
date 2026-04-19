@@ -198,7 +198,7 @@ export function SettingsClient() {
             icon: CreditCard,
             labelKey: 'account.subscription.label',
             descriptionKey: 'account.subscription.description',
-            href: '/dashboard/settings/subscription',
+            href: '/dashboard/subscription',
           },
           {
             id: 'password',
