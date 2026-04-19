@@ -29,6 +29,15 @@
       "backToProduct": "Back to Product",
       "browseProducts": "Browse Products",
       "browseOthers": "Browse Other Products"
+    },
+    "contactSellerWhatsappLabels": {
+      "price": "Price",
+      "name": "Name",
+      "question": "Question"
+    },
+        "orderWhatsappLabels": {
+      "name": "Name",
+      "notes": "Notes"
     }
   }
 }

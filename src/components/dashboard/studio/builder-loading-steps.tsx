@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { Check, Loader2 } from 'lucide-react';
 
@@ -23,44 +24,46 @@ interface StepConfig {
   getStatus: (states: LoadingStates) => 'pending' | 'loading' | 'completed';
 }
 
-const STEP_CONFIGS: StepConfig[] = [
-  {
-    id: 'tenant',
-    label: 'Store data',
-    loadingLabel: 'Loading store data...',
-    getStatus: (s) => s.tenantLoading ? 'loading' : 'completed',
-  },
-  {
-    id: 'products',
-    label: 'Products',
-    loadingLabel: 'Fetching product catalog...',
-    getStatus: (s) => {
-      if (s.tenantLoading) return 'pending';
-      return s.productsLoading ? 'loading' : 'completed';
-    },
-  },
-  {
-    id: 'config',
-    label: 'Landing configuration',
-    loadingLabel: 'Loading configuration...',
-    getStatus: (s) => {
-      if (s.tenantLoading) return 'pending';
-      return s.configReady ? 'completed' : 'loading';
-    },
-  },
-  {
-    id: 'ready',
-    label: 'Ready!',
-    loadingLabel: 'Preparing editor...',
-    getStatus: (s) => {
-      if (s.tenantLoading || s.productsLoading || !s.configReady) return 'pending';
-      return 'completed';
-    },
-  },
-];
-
 export function BuilderLoadingSteps({ loadingStates, onComplete, className }: BuilderLoadingStepsProps) {
-  const steps = STEP_CONFIGS.map(config => ({
+  const t = useTranslations('studio.loading');
+
+  const stepConfigs: StepConfig[] = useMemo(() => [
+    {
+      id: 'tenant',
+      label: t('steps.tenant.label'),
+      loadingLabel: t('steps.tenant.loading'),
+      getStatus: (s) => s.tenantLoading ? 'loading' : 'completed',
+    },
+    {
+      id: 'products',
+      label: t('steps.products.label'),
+      loadingLabel: t('steps.products.loading'),
+      getStatus: (s) => {
+        if (s.tenantLoading) return 'pending';
+        return s.productsLoading ? 'loading' : 'completed';
+      },
+    },
+    {
+      id: 'config',
+      label: t('steps.config.label'),
+      loadingLabel: t('steps.config.loading'),
+      getStatus: (s) => {
+        if (s.tenantLoading) return 'pending';
+        return s.configReady ? 'completed' : 'loading';
+      },
+    },
+    {
+      id: 'ready',
+      label: t('steps.ready.label'),
+      loadingLabel: t('steps.ready.loading'),
+      getStatus: (s) => {
+        if (s.tenantLoading || s.productsLoading || !s.configReady) return 'pending';
+        return 'completed';
+      },
+    },
+  ], [t]);
+
+  const steps = stepConfigs.map(config => ({
     ...config,
     status: config.getStatus(loadingStates),
   }));
@@ -86,8 +89,8 @@ export function BuilderLoadingSteps({ loadingStates, onComplete, className }: Bu
     <div className={cn('h-screen flex flex-col items-center justify-center bg-background', className)}>
       <div className="w-full max-w-md px-6 space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Landing Page Builder</h1>
-          <p className="text-muted-foreground text-sm">Preparing your workspace</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
         </div>
 
         <div className="space-y-2">

@@ -5,6 +5,7 @@
 // v5: Display file size in KB instead of MB
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { UploadDropzone } from '@/components/dashboard/product/upload-dropzone';
 import { Button } from '@/components/ui/button';
 import { FileText, ShieldAlert, ArrowRight } from 'lucide-react';
@@ -32,25 +33,6 @@ interface StepUploadProps {
   kycStatus?: KycStatus;
 }
 
-function getKycMessage(kycStatus?: KycStatus): string {
-  switch (kycStatus) {
-    case 'NOT_STARTED':
-      return "You haven't set up Stripe payments yet. Complete verification first to upload products.";
-    case 'PENDING':
-      return 'Verification is being processed by Stripe. Please wait for confirmation before uploading products.';
-    case 'NEEDS_MORE_INFO':
-      return 'Stripe requires additional information. Complete verification to upload products.';
-    case 'PAST_DUE':
-      return 'The verification deadline has passed. Complete it immediately to avoid account deactivation.';
-    case 'CHARGES_ONLY':
-      return 'Your account can accept payments, but payouts are not yet active. Complete verification first.';
-    case 'REJECTED':
-      return 'Verification was rejected by Stripe. Contact support on the Settings page.';
-    default:
-      return 'Complete Stripe verification first to upload and sell products.';
-  }
-}
-
 export function StepUpload({
   storage,
   selectedFile,
@@ -62,7 +44,28 @@ export function StepUpload({
   editFileInfo,
   kycStatus,
 }: StepUploadProps) {
+  const t = useTranslations('dashboard.products.form.upload');
+  const tKyc = useTranslations('dashboard.products.form.upload.kycStates');
   const router = useRouter();
+
+  function getKycMessage(status?: KycStatus): string {
+    switch (status) {
+      case 'NOT_STARTED':
+        return tKyc('NOT_STARTED');
+      case 'PENDING':
+        return tKyc('PENDING');
+      case 'NEEDS_MORE_INFO':
+        return tKyc('NEEDS_MORE_INFO');
+      case 'PAST_DUE':
+        return tKyc('PAST_DUE');
+      case 'CHARGES_ONLY':
+        return tKyc('CHARGES_ONLY');
+      case 'REJECTED':
+        return tKyc('REJECTED');
+      default:
+        return tKyc('fallback');
+    }
+  }
 
   // ── Edit mode ────────────────────────────────────────────────────
   if (isEditing) {
@@ -70,8 +73,7 @@ export function StepUpload({
       <div className="space-y-4">
         <div className="rounded-xl border px-4 py-3 text-sm bg-muted/50 border-border text-muted-foreground">
           <p>
-            <span className="font-semibold">Product file</span> — the file cannot be changed after upload.
-            Delete the product and create a new one if you need to replace the file.
+            {t('editModeNote')}
           </p>
         </div>
 
@@ -84,7 +86,7 @@ export function StepUpload({
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">{editFileInfo.fileName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {editFileInfo.fileType?.toUpperCase() ?? 'FILE'}
+                  {editFileInfo.fileType?.toUpperCase() ?? t('editFileFallback')}
                   {editFileInfo.fileSizeMb ? ` · ${formatFileSizeFromMb(editFileInfo.fileSizeMb)}` : ''}
                 </p>
               </div>
@@ -106,7 +108,7 @@ export function StepUpload({
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                Verification required
+                {t('kycTitle')}
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
                 {getKycMessage(kycStatus)}
@@ -119,14 +121,14 @@ export function StepUpload({
             className="w-full"
             onClick={() => router.push('/dashboard/settings')}
           >
-            Complete Verification in Settings
+            {t('kycCta')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
 
         <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground/40 select-none cursor-not-allowed">
           <FileText className="h-8 w-8" />
-          <p className="text-sm">Upload available after verification is complete</p>
+          <p className="text-sm">{t('kycDropzoneDisabled')}</p>
         </div>
       </div>
     );
@@ -137,14 +139,15 @@ export function StepUpload({
     <div className="space-y-4">
       <div className="rounded-xl border px-4 py-3 text-sm bg-muted/50 border-border text-muted-foreground">
         <p>
-          <span className="font-semibold">Upload digital file —</span>{' '}
           {storage ? (
-            <>
-              {storage.allowedFileTypes.map((t) => t.toUpperCase()).join(', ')} · Max {formatFileSizeFromMb(storage.maxFileSizeMb)} ·{' '}
-              {storage.used.gb}GB / {storage.quota.gb}GB used
-            </>
+            t('dropzoneInfo', {
+              types: storage.allowedFileTypes.map((t) => t.toUpperCase()).join(', '),
+              size: formatFileSizeFromMb(storage.maxFileSizeMb),
+              usedGb: storage.used.gb,
+              totalGb: storage.quota.gb,
+            })
           ) : (
-            'Loading storage info...'
+            t('dropzoneInfoLoading')
           )}
         </p>
       </div>
@@ -164,7 +167,7 @@ export function StepUpload({
       {!storage && (
         <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground">
           <FileText className="h-8 w-8" />
-          <p className="text-sm">Loading storage configuration...</p>
+          <p className="text-sm">{t('dropzoneLoading')}</p>
         </div>
       )}
     </div>

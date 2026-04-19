@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Save, Crown } from 'lucide-react';
@@ -19,6 +20,8 @@ export function BuilderHeader({
   onPublish,
   onFullPreview,
 }: BuilderHeaderProps) {
+  const t = useTranslations('studio.header');
+
   return (
     <div className="fixed top-0 left-0 right-0 z-10 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-4">
 
@@ -31,11 +34,11 @@ export function BuilderHeader({
             onClick={onFullPreview}
             className="h-8 text-xs"
           >
-            Preview
+            {t('preview')}
           </Button>
           {hasUnsavedChanges && (
             <Badge variant="outline" className="text-yellow-600 border-yellow-500 text-xs">
-              Unsaved
+              {t('unsaved')}
             </Badge>
           )}
         </div>
@@ -48,7 +51,7 @@ export function BuilderHeader({
         >
           {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
           <Save className="h-3.5 w-3.5" />
-          {isSaving ? 'Publishing...' : 'Publish'}
+          {isSaving ? t('publishing') : t('publish')}
         </Button>
       </div>
 
@@ -66,11 +69,11 @@ export function BuilderHeader({
             onClick={onFullPreview}
             className="h-8 text-sm"
           >
-            Preview
+            {t('preview')}
           </Button>
           {hasUnsavedChanges && (
             <Badge variant="outline" className="text-yellow-600 border-yellow-500">
-              Unsaved
+              {t('unsaved')}
             </Badge>
           )}
         </div>
@@ -85,7 +88,7 @@ export function BuilderHeader({
           >
             {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
             <Save className="h-3.5 w-3.5" />
-            {isSaving ? 'Publishing...' : 'Publish'}
+            {isSaving ? t('publishing') : t('publish')}
           </Button>
         </div>
 

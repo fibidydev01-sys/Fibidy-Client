@@ -1,6 +1,7 @@
 'use client';
 
 import { lazy, Suspense, ComponentType } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Tenant, PublicTenant } from '@/types/tenant';
 import type { TenantLandingConfig } from '@/types/landing';
 
@@ -27,9 +28,10 @@ interface HeroComponentProps {
  * NO MANUAL IMPORTS! Just add hero201.tsx and it works!
  *
  * 🎯 DATA SOURCE:
- * Priority: tenant fields > landingConfig > defaults
+ * Priority: tenant fields > landingConfig > defaults (dari i18n)
  */
 export function TenantHero({ config, tenant }: TenantHeroProps) {
+  const tSettings = useTranslations('settings.hero');
   const block = config?.block;
   const heroConfig = config;
   const heroConfigSettings = heroConfig?.config;
@@ -37,7 +39,7 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
   const commonProps: HeroComponentProps = {
     title: tenant.heroTitle || heroConfig?.title || tenant.name || '',
     subtitle: tenant.heroSubtitle || heroConfig?.subtitle || tenant.description || '',
-    ctaText: tenant.heroCtaText || heroConfigSettings?.ctaText || 'View Products',
+    ctaText: tenant.heroCtaText || heroConfigSettings?.ctaText || tSettings('ctaDefault'),
     ctaLink: tenant.heroCtaLink || heroConfigSettings?.ctaLink || '/products',
     backgroundImage: tenant.heroBackgroundImage || undefined,
     description: tenant.description || undefined,
@@ -67,9 +69,10 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
 }
 
 function HeroSkeleton() {
+  const t = useTranslations('common.state');
   return (
     <div className="h-screen w-full animate-pulse bg-muted flex items-center justify-center">
-      <div className="text-muted-foreground">Loading...</div>
+      <div className="text-muted-foreground">{t('loading')}</div>
     </div>
   );
 }

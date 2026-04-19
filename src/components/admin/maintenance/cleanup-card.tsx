@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,8 @@ import { toast } from 'sonner';
 const DEFAULT_DAYS = 90;
 
 export function CleanupCard() {
+  const t = useTranslations('admin.maintenance.cleanup');
+  const tToast = useTranslations('toast.admin');
   const [downloadLogDays, setDownloadLogDays] = useState(DEFAULT_DAYS);
   const [webhookEventDays, setWebhookEventDays] = useState(DEFAULT_DAYS);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,11 +61,14 @@ export function CleanupCard() {
       });
 
       setLastResult(result);
-      toast.success('Cleanup successful', {
-        description: `${result.deleted.downloadLogs} download logs + ${result.deleted.webhookEvents} webhook events deleted.`,
+      toast.success(tToast('cleanupSuccess'), {
+        description: tToast('cleanupDetail', {
+          downloadLogs: result.deleted.downloadLogs,
+          webhookEvents: result.deleted.webhookEvents,
+        }),
       });
     } catch (err) {
-      toast.error('Cleanup failed', { description: getErrorMessage(err) });
+      toast.error(tToast('cleanupFailed'), { description: getErrorMessage(err) });
     } finally {
       setIsLoading(false);
     }
@@ -74,12 +80,10 @@ export function CleanupCard() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
-            <CardTitle>Cleanup Logs</CardTitle>
+            <CardTitle>{t('title')}</CardTitle>
           </div>
           <CardDescription>
-            Delete old DownloadLog and WebhookEvent records to prevent DB
-            bloat. Safe to run anytime — historical data required for
-            accounting is not deleted.
+            {t('description')}
           </CardDescription>
         </CardHeader>
 
@@ -88,7 +92,7 @@ export function CleanupCard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="download-days" className="text-xs font-medium">
-                Download Logs (days)
+                {t('downloadLogsLabel')}
               </Label>
               <Input
                 id="download-days"
@@ -102,13 +106,13 @@ export function CleanupCard() {
                 className="h-10"
               />
               <p className="text-[11px] text-muted-foreground">
-                Delete records older than {downloadLogDays} days
+                {t('downloadLogsHelper', { days: downloadLogDays })}
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="webhook-days" className="text-xs font-medium">
-                Webhook Events (days)
+                {t('webhookEventsLabel')}
               </Label>
               <Input
                 id="webhook-days"
@@ -122,7 +126,7 @@ export function CleanupCard() {
                 className="h-10"
               />
               <p className="text-[11px] text-muted-foreground">
-                Delete records older than {webhookEventDays} days
+                {t('webhookEventsHelper', { days: webhookEventDays })}
               </p>
             </div>
           </div>
@@ -132,10 +136,9 @@ export function CleanupCard() {
             <div className="flex gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                <p className="font-medium mb-0.5">This cannot be undone.</p>
+                <p className="font-medium mb-0.5">{t('warningBold')}</p>
                 <p className="text-amber-700 dark:text-amber-400">
-                  Make sure the thresholds are correct before running. Deleted
-                  data cannot be recovered.
+                  {t('warningBody')}
                 </p>
               </div>
             </div>
@@ -151,12 +154,12 @@ export function CleanupCard() {
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Deleting records...
+                {t('runningButton')}
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Run Cleanup
+                {t('runButton')}
               </>
             )}
           </Button>
@@ -174,13 +177,13 @@ export function CleanupCard() {
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-md bg-white/60 dark:bg-black/20 px-3 py-2">
-                    <p className="text-emerald-700 dark:text-emerald-400">Download logs</p>
+                    <p className="text-emerald-700 dark:text-emerald-400">{t('resultDownloadLogs')}</p>
                     <p className="text-lg font-bold text-emerald-800 dark:text-emerald-300">
                       {lastResult.deleted.downloadLogs.toLocaleString('en-US')}
                     </p>
                   </div>
                   <div className="rounded-md bg-white/60 dark:bg-black/20 px-3 py-2">
-                    <p className="text-emerald-700 dark:text-emerald-400">Webhook events</p>
+                    <p className="text-emerald-700 dark:text-emerald-400">{t('resultWebhookEvents')}</p>
                     <p className="text-lg font-bold text-emerald-800 dark:text-emerald-300">
                       {lastResult.deleted.webhookEvents.toLocaleString('en-US')}
                     </p>
@@ -198,43 +201,44 @@ export function CleanupCard() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Run cleanup?
+              {t('confirmDialog.title')}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <p>
-                  The following data will be permanently deleted from the database:
+                  {t('confirmDialog.descIntro')}
                 </p>
                 <ul className="space-y-1 text-sm">
                   <li className="flex items-start gap-2">
                     <span className="text-destructive">•</span>
                     <span>
-                      <strong>DownloadLog</strong> older than{' '}
-                      <strong>{downloadLogDays} days</strong>
+                      <strong>{t('confirmDialog.bullet1Bold')}</strong>{' '}
+                      {t('confirmDialog.bullet1Middle')}{' '}
+                      <strong>{t('confirmDialog.bullet1Suffix', { days: downloadLogDays })}</strong>
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-destructive">•</span>
                     <span>
-                      <strong>WebhookEvent</strong> older than{' '}
-                      <strong>{webhookEventDays} days</strong>
+                      <strong>{t('confirmDialog.bullet2Bold')}</strong>{' '}
+                      {t('confirmDialog.bullet2Middle')}{' '}
+                      <strong>{t('confirmDialog.bullet2Suffix', { days: webhookEventDays })}</strong>
                     </span>
                   </li>
                 </ul>
                 <p className="text-xs text-muted-foreground">
-                  Purchase records, Tenant data, and Subscription history will NOT
-                  be affected.
+                  {t('confirmDialog.footnote')}
                 </p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('confirmDialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Yes, delete
+              {t('confirmDialog.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

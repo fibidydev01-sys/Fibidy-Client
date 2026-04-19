@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Pagination,
   PaginationContent,
@@ -29,6 +30,7 @@ export function ProductPagination({
   totalPages,
   total,
 }: ProductPaginationProps) {
+  const t = useTranslations('common.pagination');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -91,7 +93,7 @@ export function ProductPagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
       <p className="text-sm text-muted-foreground">
-        Showing page {currentPage} of {totalPages} ({total} products)
+        {t('showing', { current: currentPage, total: totalPages, count: total })}
       </p>
 
       <Pagination>

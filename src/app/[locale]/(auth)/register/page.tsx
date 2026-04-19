@@ -1,17 +1,45 @@
+// ==========================================
+// REGISTER PAGE
+// File: src/app/[locale]/(auth)/register/page.tsx
+//
+// [i18n FIX — 2026-04-19]
+// Only the static `metadata` export is replaced with async
+// `generateMetadata` using `auth.metadata.registerTitle` /
+// `auth.metadata.registerDescription`.
+//
+// The page does NOT pass any copy props to <AuthLayout> — the register
+// wizard renders its own multi-step header inside <RegisterForm>, which
+// is a client component with its own `useTranslations()` lookups. So
+// this page stays almost identical to the original; nothing else needs
+// to be resolved here.
+//
+// The skeleton markup is layout-only (no text), so no i18n needed.
+// ==========================================
+
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { AuthLayout } from '@/components/layout/auth/auth-layout';
 import { RegisterForm } from '@/components/auth/register/register';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // ==========================================
-// REGISTER PAGE
+// METADATA
 // ==========================================
 
-export const metadata: Metadata = {
-  title: 'Create your store',
-  description: 'Get your store up and running in minutes',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth.metadata' });
+
+  return {
+    title: t('registerTitle'),
+    description: t('registerDescription'),
+  };
+}
 
 // ==========================================
 // LOADING SKELETON

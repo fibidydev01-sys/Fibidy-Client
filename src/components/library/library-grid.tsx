@@ -5,6 +5,7 @@
 // The <a> tag triggers full page reload + misses Next.js prefetching.
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { LibraryCard } from './library-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Purchase } from '@/types/product';
@@ -15,6 +16,8 @@ interface LibraryGridProps {
 }
 
 export function LibraryGrid({ purchases, isLoading }: LibraryGridProps) {
+  const t = useTranslations('dashboard.library');
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -28,12 +31,12 @@ export function LibraryGrid({ purchases, isLoading }: LibraryGridProps) {
   if (purchases.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        <p>Your library is still empty.</p>
+        <p>{t('empty')}</p>
         <p className="text-sm mt-1">
-          Buy digital products on{' '}
+          {t('emptyCta')}{' '}
           {/* [v3 FIX] was <a href="/discover"> */}
           <Link href="/discover" className="text-primary hover:underline">
-            Discover
+            {t('emptyCtaLink')}
           </Link>
         </p>
       </div>

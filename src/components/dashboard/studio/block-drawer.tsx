@@ -3,17 +3,10 @@
 // ==========================================
 // BLOCK DRAWER
 // File: src/components/dashboard/studio/block-drawer.tsx
-//
-// [TIDUR-NYENYAK v3 FIX]
-// useIsMobile() hook was calling setIsMobile(mq.matches) inside
-// useEffect which triggered a cascading re-render (react-hooks/set-state-in-effect).
-//
-// Fix: lazy-initialize useState with matchMedia().matches so state is
-// correct from the first render. Effect only subscribes to `change`
-// events afterward. SSR-safe via typeof window check.
 // ==========================================
 
 import { useState, useEffect, memo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Drawer,
   DrawerContent,
@@ -43,8 +36,6 @@ interface BlockDrawerProps {
 const MOBILE_QUERY = '(max-width: 768px)';
 
 function useIsMobile(): boolean {
-  // [v3 FIX] Lazy initializer reads matchMedia synchronously on mount.
-  // No setState-in-effect, no flash of wrong initial value.
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia(MOBILE_QUERY).matches;
@@ -67,7 +58,7 @@ export function BlockDrawer(props: BlockDrawerProps) {
 }
 
 // ============================================================================
-// MOBILE — Drawer dari bawah, klik di luar = collapse
+// MOBILE
 // ============================================================================
 
 function MobileDrawer({
@@ -76,6 +67,7 @@ function MobileDrawer({
   onBlockSelect,
   blockVariantLimit = 3,
 }: BlockDrawerProps) {
+  const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(false);
   const blocks = BLOCK_OPTIONS_MAP[section] || [];
 
@@ -87,21 +79,21 @@ function MobileDrawer({
           className="fixed bottom-16 left-4 right-4 z-40 flex flex-col items-center py-3 bg-background rounded-t-[20px] border-t shadow-2xl cursor-pointer select-none"
         >
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-          <p className="text-xs text-muted-foreground mt-1">Open</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('open')}</p>
         </div>
       )}
 
       <Drawer open={open} onOpenChange={setOpen} modal={true}>
         <DrawerContent className="z-[60]">
           <VisuallyHidden.Root>
-            <DrawerTitle>Select {section} block</DrawerTitle>
+            <DrawerTitle>{t('selectBlock', { section })}</DrawerTitle>
           </VisuallyHidden.Root>
           <div
             onClick={() => setOpen(false)}
             className="flex flex-col items-center pt-3 pb-2 cursor-pointer select-none shrink-0"
           >
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            <p className="text-xs text-muted-foreground mt-1">Close</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('close')}</p>
           </div>
           <div className="overflow-y-auto pb-8">
             {blocks.map((block) => (
@@ -121,7 +113,7 @@ function MobileDrawer({
 }
 
 // ============================================================================
-// DESKTOP — Sheet dari kanan dengan collapse/uncollapse + arrow di tengah
+// DESKTOP
 // ============================================================================
 
 function DesktopSheet({
@@ -130,6 +122,7 @@ function DesktopSheet({
   onBlockSelect,
   blockVariantLimit = 3,
 }: BlockDrawerProps) {
+  const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
   const blocks = BLOCK_OPTIONS_MAP[section] || [];
@@ -153,7 +146,7 @@ function DesktopSheet({
             size="sm"
             onClick={handleExpand}
             className="h-auto py-8"
-            title="Open block selector"
+            title={t('openTooltip')}
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -177,10 +170,10 @@ function DesktopSheet({
               variant="ghost"
               className="h-8 px-2 gap-1 -ml-2"
               onClick={handleCollapse}
-              title="Close block selector"
+              title={t('closeTooltip')}
             >
               <ChevronRight className="h-4 w-4" />
-              <SheetTitle className="text-sm font-semibold">Close</SheetTitle>
+              <SheetTitle className="text-sm font-semibold">{t('close')}</SheetTitle>
             </Button>
           </div>
 
@@ -218,6 +211,7 @@ const BlockListItem = memo(function BlockListItem({
   onSelect,
   blockVariantLimit = 3,
 }: BlockListItemProps) {
+  const t = useTranslations('studio.drawer');
   const isPro = isProBlock(block.value, blockVariantLimit);
 
   const handleClick = useCallback(() => {
@@ -244,7 +238,7 @@ const BlockListItem = memo(function BlockListItem({
                            border border-amber-200 dark:border-amber-800
                            rounded-full px-2 py-0.5">
             <Crown className="h-3 w-3" />
-            Pro
+            {t('proBadge')}
           </span>
         )}
         {isSelected && (

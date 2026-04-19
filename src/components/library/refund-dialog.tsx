@@ -13,6 +13,7 @@
 'use client';
 
 import { AlertTriangle, Check, X, Loader2, ShieldAlert } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -34,6 +35,7 @@ interface RefundDialogProps {
 }
 
 export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps) {
+  const t = useTranslations('dashboard.library.refund.dialog');
   const { mutate: requestRefund, isPending } = useRequestRefund();
 
   const handleConfirm = () => {
@@ -50,7 +52,7 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <ShieldAlert className="h-5 w-5 text-amber-500" />
-            Request Refund
+            {t('title')}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4 pt-2">
@@ -65,8 +67,7 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
               {/* Policy */}
               <div className="space-y-3 text-sm">
                 <p className="text-muted-foreground leading-relaxed">
-                  Our system will automatically verify your file and evaluate your request.
-                  This process takes 5-30 seconds.
+                  {t('policyIntro')}
                 </p>
 
                 {/* Approved conditions */}
@@ -74,13 +75,13 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
                   <div className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Approved</span> if the file cannot be downloaded
+                      <span className="font-medium text-foreground">{t('approvedBold')}</span> {t('approvedFileUndownloadable')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Approved</span> if the file is corrupted or unreadable
+                      <span className="font-medium text-foreground">{t('approvedBold')}</span> {t('approvedFileCorrupted')}
                     </span>
                   </div>
                 </div>
@@ -90,19 +91,19 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Not approved</span> for &quot;content doesn&apos;t match expectations&quot;
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedContentMismatch')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Not approved</span> for &quot;I don&apos;t need it anymore&quot;
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedNoLongerNeed')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Not approved</span> for &quot;I bought by accident&quot;
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedAccident')}
                     </span>
                   </div>
                 </div>
@@ -111,8 +112,7 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
                 <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-3 py-2.5">
                   <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                     <AlertTriangle className="inline h-3 w-3 mr-1 -mt-0.5" />
-                    You had access to a preview before purchasing. Refunds are only granted for
-                    technical issues with file delivery, not subjective reasons.
+                    {t('previewReminder')}
                   </p>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t('cancel')}</AlertDialogCancel>
           <Button
             variant="destructive"
             onClick={handleConfirm}
@@ -129,10 +129,10 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Evaluating...
+                {t('evaluating')}
               </>
             ) : (
-              'Request Refund'
+              t('confirm')
             )}
           </Button>
         </AlertDialogFooter>

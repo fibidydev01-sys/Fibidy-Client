@@ -18,6 +18,7 @@ import {
   Download,
   Ban,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -50,6 +51,7 @@ interface LibraryCardProps {
 }
 
 export function LibraryCard({ purchase }: LibraryCardProps) {
+  const t = useTranslations('dashboard.library.card');
   const Icon = FILE_ICONS[purchase.fileType] ?? FileText;
   const { getDownloadUrl } = useDownloadUrl(purchase.purchaseId);
 
@@ -62,8 +64,8 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
 
   const revokedReason =
     purchase.refundRequest?.status === 'APPROVED'
-      ? 'Access revoked because the refund has been approved.'
-      : 'Download access for this product has been revoked.';
+      ? t('accessRevokedReasonRefund')
+      : t('accessRevokedReasonGeneric');
 
   return (
     <div className="border rounded-xl p-4 space-y-3">
@@ -102,7 +104,7 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
                   className="flex-1 justify-center py-1.5 text-destructive border-destructive/30 bg-destructive/5 cursor-help"
                 >
                   <Ban className="h-3.5 w-3.5 mr-1.5" />
-                  Access Revoked
+                  {t('accessRevoked')}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[260px]">
@@ -118,7 +120,7 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
             onClick={getDownloadUrl}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
-            Download
+            {t('download')}
           </Button>
         )}
 

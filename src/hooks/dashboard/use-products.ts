@@ -2,6 +2,7 @@
 
 // ==========================================
 // USE PRODUCTS — Unified
+// File: src/hooks/dashboard/use-products.ts
 //
 // All product hooks here:
 //   - CRUD: useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct
@@ -23,10 +24,18 @@
 // React Query's useIsFetching() which tracks in-flight KYC query
 // globally. Zero local state, zero setState, same public API.
 // useRef guard prevents re-handling on remounts.
+//
+// [i18n FIX — 2026-04-19]
+// Toast success messages wired to `toast.products.*`:
+//   - added    — used in create + upload
+//   - updated  — used in update + update-file
+//   - deleted  — used in delete
+// Toast errors stay as `getErrorMessage(err)` passthrough (backend text).
 // ==========================================
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { productsApi } from '@/lib/api/products';
 import { getErrorMessage } from '@/lib/api/client';
@@ -99,13 +108,14 @@ export function useProductCategories() {
 // ==========================================
 
 export function useCreateProduct() {
+  const tToast = useTranslations('toast.products');
   const queryClient = useQueryClient();
 
   const { mutate: createProduct, isPending: isLoading } = useMutation({
     mutationFn: (data: CreateProductInput) => productsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      toast.success('Product added');
+      toast.success(tToast('added'));
     },
     onError: (err) => {
       toast.error(getErrorMessage(err));
@@ -120,6 +130,7 @@ export function useCreateProduct() {
 // ==========================================
 
 export function useUpdateProduct() {
+  const tToast = useTranslations('toast.products');
   const queryClient = useQueryClient();
 
   const { mutate: updateProduct, isPending: isLoading } = useMutation({
@@ -127,7 +138,7 @@ export function useUpdateProduct() {
       productsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      toast.success('Product updated');
+      toast.success(tToast('updated'));
     },
     onError: (err) => {
       toast.error(getErrorMessage(err));
@@ -142,6 +153,7 @@ export function useUpdateProduct() {
 // ==========================================
 
 export function useUpdateProductFile() {
+  const tToast = useTranslations('toast.products');
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -154,7 +166,7 @@ export function useUpdateProductFile() {
     }) => productsApi.updateFile(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      toast.success('Product updated');
+      toast.success(tToast('updated'));
     },
     onError: (err) => {
       toast.error(getErrorMessage(err));
@@ -169,6 +181,7 @@ export function useUpdateProductFile() {
 // ==========================================
 
 export function useDeleteProduct() {
+  const tToast = useTranslations('toast.products');
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -178,7 +191,7 @@ export function useDeleteProduct() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.products.storage(),
       });
-      toast.success('Product deleted');
+      toast.success(tToast('deleted'));
     },
     onError: (err) => {
       toast.error(getErrorMessage(err));
@@ -285,6 +298,7 @@ export function useStorageUsage() {
 // ==========================================
 
 export function useUploadProduct() {
+  const tToast = useTranslations('toast.products');
   const queryClient = useQueryClient();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -331,7 +345,7 @@ export function useUploadProduct() {
           queryKey: queryKeys.products.storage(),
         });
 
-        toast.success('Product added');
+        toast.success(tToast('added'));
         return result.product;
       } catch (err) {
         toast.error(getErrorMessage(err));
@@ -340,7 +354,7 @@ export function useUploadProduct() {
         setIsUploading(false);
       }
     },
-    [queryClient],
+    [queryClient, tToast],
   );
 
   return { upload, isUploading, uploadProgress };

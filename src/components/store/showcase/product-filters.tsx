@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/shared/use-debounce';
@@ -24,6 +25,7 @@ export function ProductFilters({
   storeSlug,
   className,
 }: ProductFiltersProps) {
+  const t = useTranslations('store.products');
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFirstRender = useRef(true);
@@ -62,7 +64,7 @@ export function ProductFilters({
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
-        placeholder="Search products..."
+        placeholder={t('searchPlaceholder')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="pl-10 pr-8"

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRegisterWizard } from '@/hooks/auth/use-register-wizard';
 import { useRegister } from '@/hooks/auth/use-auth';
@@ -14,13 +15,6 @@ import { StepIndicator } from '@/components/dashboard/shared/step-wizard';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { toast } from 'sonner';
 
-const STEPS = [
-  { title: 'Business Type', desc: 'What kind of business do you run?' },
-  { title: 'Store Details', desc: 'Name, URL & description' },
-  { title: 'Your Account', desc: 'Email, password & WhatsApp' },
-  { title: 'Review', desc: 'Confirm and launch your store' },
-] as const;
-
 function isPasswordStrong(password: string): boolean {
   return (
     password.length >= 8 &&
@@ -31,9 +25,17 @@ function isPasswordStrong(password: string): boolean {
 }
 
 export function RegisterForm() {
+  const t = useTranslations('auth.register');
   const wizard = useRegisterWizard();
   const { register, isLoading, error } = useRegister();
   const [isAgreed, setIsAgreed] = useState(false);
+
+  const STEPS = [
+    { title: t('stepsMeta.businessType.title'), desc: t('stepsMeta.businessType.desc') },
+    { title: t('stepsMeta.storeDetails.title'), desc: t('stepsMeta.storeDetails.desc') },
+    { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
+    { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
+  ] as const;
 
   const isWelcome = wizard.state.currentStep === 1;
   const indicatorStep = wizard.state.currentStep - 2;
@@ -42,41 +44,41 @@ export function RegisterForm() {
     switch (wizard.state.currentStep) {
       case 2:
         if (!wizard.state.category) {
-          toast.error('Please select a business type to continue');
+          toast.error(t('errors.categoryRequired'));
           return false;
         }
         return true;
       case 3:
         if (!wizard.state.name?.trim()) {
-          toast.error('Store name is required');
+          toast.error(t('errors.nameRequired'));
           return false;
         }
         if (!wizard.state.slug?.trim()) {
-          toast.error('Store URL is required');
+          toast.error(t('errors.slugRequired'));
           return false;
         }
         return true;
       case 4:
         if (!wizard.state.email?.trim()) {
-          toast.error('Email address is required');
+          toast.error(t('errors.emailRequired'));
           return false;
         }
         if (!wizard.state.password) {
-          toast.error('Password is required');
+          toast.error(t('errors.passwordRequired'));
           return false;
         }
         if (!isPasswordStrong(wizard.state.password)) {
-          toast.error('Password must meet all requirements');
+          toast.error(t('errors.passwordWeak'));
           return false;
         }
         if (!wizard.state.whatsapp || wizard.state.whatsapp === '62') {
-          toast.error('WhatsApp number is required');
+          toast.error(t('errors.whatsappRequired'));
           return false;
         }
         return true;
       case 5:
         if (!isAgreed) {
-          toast.error('Please agree to the Terms of Service to continue');
+          toast.error(t('errors.agreementRequired'));
           return false;
         }
         return true;
@@ -113,9 +115,9 @@ export function RegisterForm() {
       <div className="w-full max-w-2xl mx-auto">
         <StepWelcome onNext={wizard.nextStep} />
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Already have a store?{' '}
+          {t('alreadyHaveStore')}{' '}
           <Link href="/login" className="text-primary hover:underline font-medium">
-            Sign in
+            {t('signInLink')}
           </Link>
         </p>
       </div>
@@ -171,7 +173,7 @@ export function RegisterForm() {
         <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
           <div className="space-y-1">
             <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-              Step {wizard.state.currentStep - 1} of {STEPS.length}
+              {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
             </p>
             <h2 className="text-2xl font-bold tracking-tight leading-none">
               {STEPS[indicatorStep]?.title}
@@ -195,9 +197,9 @@ export function RegisterForm() {
         </div>
 
         <p className="hidden lg:block text-center text-sm text-muted-foreground mt-4">
-          Already have a store?{' '}
+          {t('alreadyHaveStore')}{' '}
           <Link href="/login" className="text-primary hover:underline font-medium">
-            Sign in
+            {t('signInLink')}
           </Link>
         </p>
       </div>
@@ -215,7 +217,7 @@ export function RegisterForm() {
           </div>
           <div className="text-center space-y-0.5">
             <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
-              Step {wizard.state.currentStep - 1} of {STEPS.length}
+              {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
             </p>
             <h3 className="text-base font-bold tracking-tight">
               {STEPS[indicatorStep]?.title}
@@ -238,8 +240,8 @@ export function RegisterForm() {
         onNext={handleNext}
         onSave={handleSubmit}
         isSaving={isLoading}
-        lastStepLabel={isLoading ? 'Creating...' : 'Create my store'}
-        lastStepSavingLabel="Creating..."
+        lastStepLabel={isLoading ? t('review.submittingButton') : t('review.submitButton')}
+        lastStepSavingLabel={t('review.submittingButton')}
         onLastStep={handleSubmit}
       />
     </div>

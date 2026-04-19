@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowRight, Phone, MapPin, MessageCircle, Mail, Send } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,10 @@ interface TenantContactFormData {
 }
 
 export function TenantContact({ tenant }: { tenant: PublicTenant }) {
+  const t = useTranslations('store.tenantContact');
+  const tForm = useTranslations('store.contactForm');
+  const tHeader = useTranslations('store.header');
+
   const [formData, setFormData] = useState<TenantContactFormData>({
     name: '',
     email: '',
@@ -27,13 +32,18 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
   });
 
   const whatsappLink = tenant.whatsapp
-    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Hi ${tenant.name}, I'm interested in your products.`)}`
+    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: tenant.name }))}`
     : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (tenant.whatsapp) {
-      const message = `Hi ${tenant.name}!\n\nName: ${formData.name}\nEmail: ${formData.email}\nMessage: ${formData.message}`;
+      const message = tForm('whatsappTemplate', {
+        name: tenant.name,
+        senderName: formData.name,
+        senderEmail: formData.email,
+        message: formData.message,
+      });
       window.open(`https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
     }
   };
@@ -47,7 +57,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
       <div className="mb-10 md:mb-14 space-y-3">
         <div className="w-8 h-px bg-foreground" />
         <h2 className="text-[36px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
-          Contact Us
+          {t('heading')}
         </h2>
       </div>
 
@@ -66,7 +76,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               <div className="flex items-center gap-3">
                 <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-green-600 transition-colors" />
                 <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">WhatsApp</p>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('whatsapp')}</p>
                   <p className="text-sm font-medium text-foreground">+{tenant.whatsapp}</p>
                 </div>
               </div>
@@ -82,7 +92,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Phone</p>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('phone')}</p>
                   <p className="text-sm font-medium text-foreground">{tenant.phone}</p>
                 </div>
               </div>
@@ -98,7 +108,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Email</p>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('email')}</p>
                   <p className="text-sm font-medium text-foreground">{tenant.email}</p>
                 </div>
               </div>
@@ -110,7 +120,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
             <div className="flex items-start gap-3 py-4">
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">Address</p>
+                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('address')}</p>
                 <p className="text-sm font-medium text-foreground">{tenant.address}</p>
               </div>
             </div>
@@ -119,33 +129,33 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
           {/* Form (if showForm is active) */}
           {showForm && (
             <form onSubmit={handleSubmit} className="space-y-5 pt-6">
-              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">Send a Message</p>
+              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">{t('sectionEyebrow')}</p>
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-xs font-medium">Name</Label>
+                <Label htmlFor="name" className="text-xs font-medium">{tForm('nameLabel')}</Label>
                 <Input
                   id="name"
-                  placeholder="Your name"
+                  placeholder={tForm('namePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-medium">Email</Label>
+                <Label htmlFor="email" className="text-xs font-medium">{tForm('emailLabel')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@example.com"
+                  placeholder={tForm('emailPlaceholder')}
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="message" className="text-xs font-medium">Message</Label>
+                <Label htmlFor="message" className="text-xs font-medium">{tForm('messageLabel')}</Label>
                 <Textarea
                   id="message"
-                  placeholder="Write your message..."
+                  placeholder={tForm('messagePlaceholder')}
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -154,7 +164,7 @@ export function TenantContact({ tenant }: { tenant: PublicTenant }) {
               </div>
               <Button type="submit" className="w-full gap-2">
                 <Send className="h-4 w-4" />
-                Send via WhatsApp
+                {tForm('sendButton')}
               </Button>
             </form>
           )}

@@ -1,8 +1,13 @@
 // ==========================================
 // PRODUCT GRID — Public Store
-// ✅ Server Component — zero JS bundle
+//
+// Note: Uses 'use client' karena pakai useTranslations.
+// (Sebelumnya server component — sekarang jadi client karena i18n.)
 // ==========================================
 
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { ProductCard } from './product-card';
 import { Empty, EmptyMedia, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Package } from 'lucide-react';
@@ -20,6 +25,8 @@ export function ProductGrid({
   storeSlug,
   columns = 4,
 }: ProductGridProps) {
+  const t = useTranslations('store.products');
+
   if (products.length === 0) {
     return (
       <Empty>
@@ -27,9 +34,9 @@ export function ProductGrid({
           <Package />
         </EmptyMedia>
         <EmptyHeader>
-          <EmptyTitle>No products found</EmptyTitle>
+          <EmptyTitle>{t('empty')}</EmptyTitle>
           <EmptyDescription>
-            Try adjusting your filters or search keywords.
+            {t('emptyHint')}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

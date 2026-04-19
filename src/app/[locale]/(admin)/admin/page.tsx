@@ -2,10 +2,21 @@
 
 // ==========================================
 // ADMIN DASHBOARD PAGE
-// File: src/app/(admin)/admin/page.tsx
+// File: src/app/[locale]/(admin)/admin/page.tsx
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations('admin.dashboard.*')`
+// calls. JSON keys already exist in messages/en/admin.json under
+// `admin.dashboard.title`, `admin.dashboard.subtitle`, and
+// `admin.dashboard.stats.*`.
+//
+// Currency formatter keeps `en-US` / `USD` locale because prices on the
+// platform are tracked in USD regardless of UI language. Revisit in Phase 2
+// if product requirements change.
 // ==========================================
 
 import { Users, CreditCard, TrendingUp, UserCheck, UserX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminStats } from '@/hooks/admin/use-admin';
@@ -52,6 +63,7 @@ function StatCard({ title, value, sub, icon, isLoading }: StatCardProps) {
 // ==========================================
 
 export default function AdminDashboardPage() {
+  const t = useTranslations('admin.dashboard');
   const { stats, isLoading } = useAdminStats();
 
   const formatCurrency = (amount: number) =>
@@ -65,39 +77,41 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Overview of all platform metrics
+          {t('subtitle')}
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Tenants"
+          title={t('stats.totalTenants')}
           value={stats?.totalTenants ?? 0}
-          sub={`+${stats?.newTenantsThisMonth ?? 0} this month`}
+          sub={t('stats.totalTenantsSub', { count: stats?.newTenantsThisMonth ?? 0 })}
           icon={<Users className="h-4 w-4" />}
           isLoading={isLoading}
         />
         <StatCard
-          title="Active Tenants"
+          title={t('stats.activeTenants')}
           value={stats?.activeTenants ?? 0}
-          sub={`${stats?.suspendedTenants ?? 0} suspended`}
+          sub={t('stats.activeTenantsSub', { count: stats?.suspendedTenants ?? 0 })}
           icon={<UserCheck className="h-4 w-4" />}
           isLoading={isLoading}
         />
         <StatCard
-          title="Business Plan"
+          title={t('stats.businessPlan')}
           value={stats?.businessSubscriptions ?? 0}
-          sub="Active subscriptions"
+          sub={t('stats.businessPlanSub')}
           icon={<CreditCard className="h-4 w-4" />}
           isLoading={isLoading}
         />
         <StatCard
-          title="Revenue This Month"
+          title={t('stats.revenueThisMonth')}
           value={stats ? formatCurrency(stats.revenueThisMonth) : '$0'}
-          sub={`Total: ${stats ? formatCurrency(stats.totalRevenue) : '$0'}`}
+          sub={t('stats.revenueThisMonthSub', {
+            total: stats ? formatCurrency(stats.totalRevenue) : '$0',
+          })}
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={isLoading}
         />
@@ -106,16 +120,16 @@ export default function AdminDashboardPage() {
       {/* Second Row */}
       <div className="grid gap-4 sm:grid-cols-2">
         <StatCard
-          title="Suspended Tenants"
+          title={t('stats.suspendedTenants')}
           value={stats?.suspendedTenants ?? 0}
-          sub="Need attention"
+          sub={t('stats.suspendedTenantsSub')}
           icon={<UserX className="h-4 w-4" />}
           isLoading={isLoading}
         />
         <StatCard
-          title="New Tenants This Month"
+          title={t('stats.newTenantsThisMonth')}
           value={stats?.newTenantsThisMonth ?? 0}
-          sub="Latest registrations"
+          sub={t('stats.newTenantsThisMonthSub')}
           icon={<Users className="h-4 w-4" />}
           isLoading={isLoading}
         />

@@ -7,27 +7,14 @@
 // Step 1: File Upload — gated by KYC ACTIVE
 // Step 2: Cover Images (optional, Cloudinary)
 // → Preview & Publish
-//
-// v5: Uses actual subscription tier for image/product limits
-//     Removed hardcoded isBusiness: true
-//
-// [TIDUR-NYENYAK v3 FIX]
-// - Removed unused `updateRegularProduct` destructure (warning line 53)
-// - Removed unused `isPaid` destructure (warning line 56)
-// - Removed `isBisnis` destructure (typecheck ERROR line 56 — property
-//   doesn't exist on SubscriptionPlanInfo; correct name would be
-//   `isBusiness`, but it's unused here either way so just drop it)
-// - Removed `useUpdateProduct` import — no longer needed after dropping
-//   updateRegularProduct
-// - Dropped `isUpdatingRegular` from isSaving expression since the mutation
-//   is no longer wired up in this component
 // ============================================================
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Form } from '@/components/ui/form';
 import {
   useUploadProduct,
@@ -45,7 +32,6 @@ import { StepDetails } from './step-details';
 import { StepUpload } from './step-upload';
 import { StepMedia } from './step-media';
 import { PreviewProduct } from './step-preview';
-import { PRODUCT_STEPS } from './types';
 import type { Product } from '@/types/product';
 
 interface ProductFormProps {
@@ -54,16 +40,26 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, categories = [] }: ProductFormProps) {
+  const t = useTranslations('dashboard.products.form');
+  const tPreview = useTranslations('dashboard.products.form.preview');
   const router = useRouter();
   const isEditing = !!product;
+
+  // i18n-aware steps
+  const steps = useMemo(
+    () => [
+      { id: 0, title: t('steps.details.title'), desc: t('steps.details.desc') },
+      { id: 1, title: t('steps.file.title'), desc: t('steps.file.desc') },
+      { id: 2, title: t('steps.cover.title'), desc: t('steps.cover.desc') },
+    ],
+    [t],
+  );
 
   // Hooks
   const { upload, isUploading, uploadProgress } = useUploadProduct();
   const { updateProduct: updateFileProduct, isLoading: isUpdatingFile } = useUpdateProductFile();
   const { data: storage } = useStorageUsage();
   const { data: kyc } = useKycStatus();
-  // [v3 FIX] Only destructure `tier` — isPaid and isBisnis were unused;
-  // isBisnis never existed on SubscriptionPlanInfo (correct prop is `isBusiness`).
   const { tier } = useSubscriptionPlan();
 
   const isSaving = isUploading || isUpdatingFile;
@@ -74,7 +70,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  // Image limit berdasarkan tier aktual
   const maxImages = getMaxImages(tier);
 
   const form = useForm<ProductFormData>({
@@ -95,7 +90,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
     try {
       if (isEditing) {
-        // ── Edit existing product ────────────────────────────────
         updateFileProduct(
           {
             id: product.id,
@@ -111,7 +105,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           },
         );
       } else if (selectedFile) {
-        // ── New product WITH file → Stripe checkout ──────────────
         const newProduct = await upload(selectedFile, {
           name: data.name,
           description: data.description,
@@ -139,7 +132,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
         router.push('/dashboard/products');
       } else {
-        // ── New product WITHOUT file → Custom/WA product ─────────
         await productsApi.create({
           name: data.name,
           description: data.description,
@@ -237,7 +229,7 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           </div>
 
           <WizardNav
-            steps={PRODUCT_STEPS}
+            steps={steps}
             currentStep={currentStep}
             onPrev={() => setCurrentStep((p) => p - 1)}
             onNext={() => setCurrentStep((p) => p + 1)}
@@ -245,7 +237,7 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
             onSave={handleSave}
             isSaving={isSaving}
             lastStepIcon={Eye}
-            lastStepLabel={isEditing ? 'Review & Save' : 'Review & Publish'}
+            lastStepLabel={isEditing ? tPreview('reviewAndSave') : tPreview('reviewAndPublish')}
             onLastStep={() => setShowPreview(true)}
           />
         </form>

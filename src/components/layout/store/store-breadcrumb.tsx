@@ -15,6 +15,10 @@ import { useStoreUrls } from '@/lib/public/use-store-urls';
 
 // ==========================================
 // STORE BREADCRUMB COMPONENT
+//
+// Breadcrumb items array di-pass dari caller — mereka yang tau
+// label kontekstual untuk setiap page (misal "Products", "Cart", dll).
+// Caller wajib pass label-nya hasil dari t() di page-nya.
 // ==========================================
 
 interface BreadcrumbItemData {
@@ -38,14 +42,14 @@ export function StoreBreadcrumb({
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {/* Home */}
+        {/* Home — uses storeName as label (data-driven, not i18n) */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link href={urls.home}>{storeName}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
-        {/* Dynamic items */}
+        {/* Dynamic items — labels passed in by caller via i18n */}
         {items.map((item, index) => (
           <Fragment key={index}>
             <BreadcrumbSeparator>

@@ -4,6 +4,7 @@
 // v5: Display file size in KB instead of MB
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { FileText } from 'lucide-react';
 import {
   Sheet,
@@ -77,6 +78,7 @@ export function PreviewProduct({
   isEditing,
   selectedFile,
 }: PreviewProductProps) {
+  const t = useTranslations('dashboard.products.form.preview');
   const images = formData.images || [];
   const firstImage = images[0];
 
@@ -91,10 +93,10 @@ export function PreviewProduct({
       >
         <SheetHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <SheetTitle className="text-base font-bold">
-            {isEditing ? 'Review changes' : 'Review & publish'}
+            {isEditing ? t('titleEdit') : t('titleNew')}
           </SheetTitle>
           <SheetDescription className="text-xs">
-            Double-check your listing details before {isEditing ? 'saving' : 'publishing'}.
+            {isEditing ? t('descriptionEdit') : t('descriptionNew')}
           </SheetDescription>
         </SheetHeader>
 
@@ -119,7 +121,7 @@ export function PreviewProduct({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-base font-bold leading-tight truncate mt-0.5">
-                {formData.name || <span className="text-muted-foreground font-normal italic text-sm">No name</span>}
+                {formData.name || <span className="text-muted-foreground font-normal italic text-sm">{t('noName')}</span>}
               </p>
               {formData.category && (
                 <p className="text-xs text-muted-foreground mt-0.5 truncate">{formData.category}</p>
@@ -128,58 +130,64 @@ export function PreviewProduct({
           </div>
 
           {/* Details */}
-          <PreviewSection label="Details">
+          <PreviewSection label={t('sectionDetails')}>
             <div className="rounded-xl border bg-card overflow-hidden px-3 py-1">
-              <PreviewRow label="Name" value={formData.name} missing="Not filled in" />
-              <PreviewRow label="Category" value={formData.category} missing="No category" />
+              <PreviewRow label={t('rowName')} value={formData.name} missing={t('notFilledIn')} />
+              <PreviewRow label={t('rowCategory')} value={formData.category} missing={t('noCategory')} />
               <PreviewRow
-                label="Description"
+                label={t('rowDescription')}
                 value={formData.description ? `${formData.description.slice(0, 60)}${formData.description.length > 60 ? '…' : ''}` : null}
-                missing="No description"
+                missing={t('noDescription')}
               />
             </div>
           </PreviewSection>
 
           {/* File */}
-          <PreviewSection label="Digital File">
+          <PreviewSection label={t('sectionDigitalFile')}>
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
-                label="File"
-                value={selectedFile ? `${selectedFile.name} (${formatFileSizeFromBytes(selectedFile.size)})` : isEditing ? 'File already uploaded' : null}
-                missing="No file yet"
+                label={t('rowFile')}
+                value={
+                  selectedFile
+                    ? t('fileWithSize', { name: selectedFile.name, size: formatFileSizeFromBytes(selectedFile.size) })
+                    : isEditing
+                      ? t('fileUploadedPrefix')
+                      : null
+                }
+                missing={t('noFile')}
                 valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
               />
             </div>
           </PreviewSection>
 
           {/* Cover Images */}
-          <PreviewSection label="Cover Images">
+          <PreviewSection label={t('sectionCoverImages')}>
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
-                label="Photos"
-                value={images.length > 0 ? `${images.length} photos uploaded` : null}
-                missing="No photos (optional)"
+                label={t('rowPhotos')}
+                value={images.length > 0 ? t('photosUploaded', { count: images.length }) : null}
+                missing={t('noPhotos')}
                 valueClass={images.length > 0 ? 'text-emerald-600' : undefined}
               />
             </div>
           </PreviewSection>
 
           {/* Pricing */}
-          <PreviewSection label="Price">
+          <PreviewSection label={t('sectionPrice')}>
             <div className="rounded-xl border bg-card overflow-hidden px-3 py-1">
               <PreviewRow
-                label="Selling price"
+                label={t('rowSellingPrice')}
                 value={formatPrice(formData.price)}
-                missing="Not filled in"
+                missing={t('notFilledIn')}
                 valueClass="text-primary"
               />
               <PreviewRow
-                label="Compare-at price"
+                label={t('rowComparePrice')}
                 value={formatPrice(formData.comparePrice)}
-                missing="—"
+                missing={t('dash')}
               />
               <PreviewRow
-                label="Currency"
+                label={t('rowCurrency')}
                 value="USD"
                 valueClass="text-muted-foreground"
               />
@@ -187,11 +195,11 @@ export function PreviewProduct({
           </PreviewSection>
 
           {/* Status */}
-          <PreviewSection label="Status">
+          <PreviewSection label={t('sectionStatus')}>
             <div className="rounded-xl border bg-card px-3 py-1">
               <PreviewRow
-                label="Visibility"
-                value={formData.isActive ? 'Active' : 'Inactive'}
+                label={t('rowVisibility')}
+                value={formData.isActive ? t('active') : t('inactive')}
                 valueClass={formData.isActive ? 'text-emerald-600' : 'text-muted-foreground'}
               />
             </div>
@@ -200,12 +208,12 @@ export function PreviewProduct({
 
         <SheetFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 flex-row gap-2">
           <Button variant="outline" className="flex-1" onClick={onClose} disabled={isSaving}>
-            Back to edit
+            {t('backToEdit')}
           </Button>
           <Button className="flex-1" onClick={onSave} disabled={isSaving}>
             {isSaving
-              ? (isEditing ? 'Saving...' : 'Publishing...')
-              : (isEditing ? 'Save changes' : 'Publish listing')
+              ? (isEditing ? t('saving') : t('publishing'))
+              : (isEditing ? t('saveChanges') : t('publishListing'))
             }
           </Button>
         </SheetFooter>

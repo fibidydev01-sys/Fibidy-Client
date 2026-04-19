@@ -1,25 +1,43 @@
 'use client';
 
-// discover/client.tsx
+// ==========================================
+// DISCOVER CLIENT — List page
+// File: src/app/[locale]/discover/client.tsx
 //
 // Changes from previous version:
 //   1. discoverApi.getAll() response is now { data, meta } — not an array
 //   2. Added page state for pagination
 //   3. Added Prev/Next navigation
+//
+// [i18n FIX — 2026-04-19]
+// Replaced hardcoded Previous/Next button labels and the pagination
+// counter text with `useTranslations()` lookups. Keys used:
+//   - common.actions.previous / next
+//   - common.pagination.pageShort
+//   - common.pagination.countSuffix
+//
+// The `countSuffix` key renders as "({count} products)" and expects a
+// `count` interpolation — consistent with how the dashboard downloads
+// page uses `downloadsSuffix` (same common.pagination namespace).
+// ==========================================
 
 import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { discoverApi } from '@/lib/api/discover';
 import { queryKeys } from '@/lib/shared/query-keys';
 import { DiscoverGrid } from '@/components/discover/discover-grid';
 import { DiscoverFilters } from '@/components/discover/discover-filters';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 
 const LIMIT = 20;
 
 export function DiscoverClient() {
+  const tActions = useTranslations('common.actions');
+  const tPagination = useTranslations('common.pagination');
+
   const [search, setSearch] = useState('');
   const [fileType, setFileType] = useState('');
   const [page, setPage] = useState(1);
@@ -79,14 +97,14 @@ export function DiscoverClient() {
             disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
+            {tActions('previous')}
           </Button>
 
           <span className="text-sm text-muted-foreground">
-            {page} / {totalPages}
+            {tPagination('pageShort', { current: page, total: totalPages })}
             {meta ? (
               <span className="ml-1">
-                ({meta.total} products)
+                {tPagination('countSuffix', { count: meta.total })}
               </span>
             ) : null}
           </span>
@@ -97,7 +115,7 @@ export function DiscoverClient() {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
           >
-            Next
+            {tActions('next')}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>

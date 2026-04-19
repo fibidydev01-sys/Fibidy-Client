@@ -1,6 +1,15 @@
 /**
  * block-options.ts — Hero only
+ *
+ * NOTE on i18n: The block labels ("Hero N") are intentionally kept as a
+ * static EN fallback in `BLOCK_OPTIONS_MAP` so that non-React code can
+ * import them without needing a translation context. For UI rendering,
+ * prefer `useBlockOptions()` which returns i18n-aware labels via
+ * `studio.blockOptions.hero`.
  */
+
+import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface BlockOption {
   value: string;
@@ -22,6 +31,7 @@ interface LandingConfig {
 // ─── Constants ────────────────────────────────────────────────────────────
 
 const FREE_BLOCK_LIMIT = 3;
+const HERO_COUNT = 25;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -53,17 +63,34 @@ export function hasProBlocks(
 
 // ─── Block generation ─────────────────────────────────────────────────────
 
-const HERO_COUNT = 25;
-
-function generateBlocks(section: string, count: number): BlockOption[] {
+function generateBlocksStatic(section: string, count: number, labelPrefix: string): BlockOption[] {
   return Array.from({ length: count }, (_, i) => ({
     value: `${section}${i + 1}`,
-    label: `Hero ${i + 1}`,
+    label: `${labelPrefix} ${i + 1}`,
   }));
 }
 
-const HERO_BLOCKS = generateBlocks('hero', HERO_COUNT);
+// Legacy static map — EN fallback for non-React imports
+const HERO_BLOCKS_STATIC = generateBlocksStatic('hero', HERO_COUNT, 'Hero');
 
 export const BLOCK_OPTIONS_MAP = {
-  hero: HERO_BLOCKS,
+  hero: HERO_BLOCKS_STATIC,
 } as const;
+
+// ─── i18n-aware hook ──────────────────────────────────────────────────────
+
+/**
+ * Returns a block options map with labels translated via
+ * `studio.blockOptions.hero`. Use this in React components.
+ */
+export function useBlockOptions() {
+  const t = useTranslations('studio.blockOptions');
+
+  return useMemo(() => {
+    const hero: BlockOption[] = Array.from({ length: HERO_COUNT }, (_, i) => ({
+      value: `hero${i + 1}`,
+      label: t('hero', { index: i + 1 }),
+    }));
+    return { hero };
+  }, [t]);
+}

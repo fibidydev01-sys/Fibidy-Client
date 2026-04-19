@@ -5,6 +5,7 @@
 // v5: USD price & compare price fields unified (min, step, visual)
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   FormControl,
   FormDescription,
@@ -41,6 +42,7 @@ interface StepDetailsProps {
 }
 
 export function StepDetails({ form, categories }: StepDetailsProps) {
+  const t = useTranslations('dashboard.products.form.details');
   const watchCategory = form.watch('category');
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
@@ -85,7 +87,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                   id="isActive"
                 />
                 <Label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
-                  Active
+                  {t('activeLabel')}
                 </Label>
               </div>
             </FormItem>
@@ -109,7 +111,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                         !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value || 'Category'}
+                      {field.value || t('categoryPlaceholder')}
                       <span className="ml-2 text-muted-foreground/50 text-xs">▼</span>
                     </Button>
                   </FormControl>
@@ -117,19 +119,19 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                 <PopoverContent className="w-[260px] p-0" align="end">
                   <Command shouldFilter={false}>
                     <CommandInput
-                      placeholder="Search or create category..."
+                      placeholder={t('categorySearchPlaceholder')}
                       value={categorySearch}
                       onValueChange={setCategorySearch}
                     />
                     <CommandList>
                       <CommandEmpty className="py-3 px-4 text-sm text-muted-foreground">
                         {categorySearch
-                          ? <span>No category &quot;{categorySearch}&quot;</span>
-                          : <span>Type to search or create a category</span>
+                          ? <span>{t('categoryNoMatch', { query: categorySearch })}</span>
+                          : <span>{t('categoryHintEmpty')}</span>
                         }
                       </CommandEmpty>
                       {filteredCategories.length > 0 && (
-                        <CommandGroup heading="Category">
+                        <CommandGroup heading={t('categoryHeadingCategory')}>
                           {filteredCategories.map((cat) => (
                             <CommandItem
                               key={cat}
@@ -148,14 +150,14 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                         </CommandGroup>
                       )}
                       {isNewCategory && (
-                        <CommandGroup heading="Create new">
+                        <CommandGroup heading={t('categoryHeadingCreateNew')}>
                           <CommandItem
                             value={`__create__${categorySearch}`}
                             onSelect={handleCreateCategory}
                             className="text-primary font-medium"
                           >
                             <span className="mr-2">+</span>
-                            Create &quot;{categorySearch}&quot;
+                            {t('categoryCreateOption', { query: categorySearch })}
                           </CommandItem>
                         </CommandGroup>
                       )}
@@ -176,11 +178,11 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-semibold">
-                Product name <span className="text-destructive">*</span>
+                {t('nameLabel')} <span className="text-destructive">{t('nameRequired')}</span>
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g. NestJS Learning Ebook, Notion Template"
+                  placeholder={t('namePlaceholder')}
                   className="h-11"
                   {...field}
                 />
@@ -195,17 +197,17 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-semibold">Description</FormLabel>
+              <FormLabel className="text-sm font-semibold">{t('descriptionLabel')}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe the product — contents, page count, key features..."
+                  placeholder={t('descriptionPlaceholder')}
                   rows={4}
                   className="resize-none"
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                A clear description helps buyers purchase with confidence.
+                {t('descriptionHelper')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -222,7 +224,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-semibold">
-                  Price (USD) <span className="text-destructive">*</span>
+                  {t('priceLabel')} <span className="text-destructive">{t('priceRequired')}</span>
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -233,7 +235,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                       type="number"
                       step="0.01"
                       min="0"
-                      placeholder="9.99"
+                      placeholder={t('pricePlaceholder')}
                       className="h-11 pl-8 font-medium tabular-nums"
                       {...field}
                       value={field.value ?? ''}
@@ -241,7 +243,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                     />
                   </div>
                 </FormControl>
-                <FormDescription>Price in USD — buyers pay via Stripe</FormDescription>
+                <FormDescription>{t('priceHelper')}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -252,7 +254,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
             name="comparePrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">Compare-at price</FormLabel>
+                <FormLabel className="text-sm font-semibold">{t('comparePriceLabel')}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground select-none pointer-events-none">
@@ -262,7 +264,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                       type="number"
                       step="0.01"
                       min="0"
-                      placeholder="19.99"
+                      placeholder={t('comparePricePlaceholder')}
                       className="h-11 pl-8 font-medium tabular-nums"
                       {...field}
                       value={field.value ?? ''}
@@ -271,7 +273,7 @@ export function StepDetails({ form, categories }: StepDetailsProps) {
                   </div>
                 </FormControl>
                 <FormDescription>
-                  Original price before discount — shown with strikethrough
+                  {t('comparePriceHelper')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>

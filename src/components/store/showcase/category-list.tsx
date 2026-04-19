@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { productsUrl } from '@/lib/public/store-url';
@@ -16,6 +17,7 @@ export function CategoryList({
   storeSlug,
   currentCategory,
 }: CategoryListProps) {
+  const t = useTranslations('store.products');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -47,7 +49,7 @@ export function CategoryList({
           className="rounded-full"
           onClick={() => handleCategoryClick(null)}
         >
-          All
+          {t('filterAll')}
         </Button>
 
         {categories.map((category) => (

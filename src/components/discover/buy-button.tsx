@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { ShoppingCart, LogIn } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useAuthDialogStore } from '@/stores/auth-dialog-store';
 import type { PublicProduct } from '@/types/product';
@@ -24,6 +25,7 @@ export function BuyButton({
   isLoading,
   onBuy,
 }: BuyButtonProps) {
+  const t = useTranslations('discover.buyButton');
   const { open } = useAuthDialogStore();
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
@@ -32,10 +34,10 @@ export function BuyButton({
       <div className="mt-8 space-y-2">
         <Button className="w-full" size="lg" onClick={open}>
           <LogIn className="mr-2 h-4 w-4" />
-          Sign in to Buy
+          {t('signInToBuy')}
         </Button>
         <p className="text-xs text-center text-muted-foreground">
-          An account is required to continue with the purchase
+          {t('signInHint')}
         </p>
       </div>
     );
@@ -51,8 +53,7 @@ export function BuyButton({
           className="mt-1 h-4 w-4 rounded border-border"
         />
         <span className="text-sm text-muted-foreground leading-relaxed">
-          I understand that all sales are final and digital products cannot
-          be returned once purchased.
+          {t('policyAgreement')}
         </span>
       </label>
 
@@ -64,8 +65,8 @@ export function BuyButton({
       >
         <ShoppingCart className="mr-2 h-4 w-4" />
         {isLoading
-          ? 'Redirecting to Stripe...'
-          : `Buy — $${product.price.toFixed(2)}`}
+          ? t('redirecting')
+          : t('buyNow', { price: product.price.toFixed(2) })}
       </Button>
     </div>
   );

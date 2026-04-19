@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ZoomIn, Package } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -26,6 +27,8 @@ interface ProductGalleryProps {
 }
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
+  const t = useTranslations('store.product.detail');
+  const tGallery = useTranslations('store.product.gallery');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
 
@@ -64,7 +67,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           <>
             <OptimizedImage
               src={currentImage}
-              alt={`${productName} — image ${selectedIndex + 1}`}
+              alt={t('imageAlt', { name: productName, index: selectedIndex + 1 })}
               fill
               crop="fill"
               gravity="auto"
@@ -80,6 +83,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               size="icon"
               className="absolute top-4 right-4 rounded-full shadow-lg"
               onClick={() => setZoomOpen(true)}
+              aria-label={tGallery('zoomButton')}
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -107,7 +111,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
             {hasMultipleImages && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
-                {selectedIndex + 1} / {images.length}
+                {t('imagePosition', { current: selectedIndex + 1, total: images.length })}
               </div>
             )}
           </>
@@ -134,7 +138,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             >
               <OptimizedImage
                 src={image}
-                alt={`${productName} — thumbnail ${index + 1}`}
+                alt={t('thumbAlt', { name: productName, index: index + 1 })}
                 width={80}
                 height={80}
                 crop="fill"
@@ -163,7 +167,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               {currentImage && (
                 <OptimizedImage
                   src={currentImage}
-                  alt={`${productName} — image ${selectedIndex + 1}`}
+                  alt={t('imageAlt', { name: productName, index: selectedIndex + 1 })}
                   fill
                   crop="fit"
                   sizes="90vw"
@@ -197,7 +201,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             {/* Counter */}
             {hasMultipleImages && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white">
-                {selectedIndex + 1} / {images.length}
+                {t('imagePosition', { current: selectedIndex + 1, total: images.length })}
               </div>
             )}
           </div>

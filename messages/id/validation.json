@@ -1,0 +1,49 @@
+{
+  "validation": {
+    "email": {
+      "required": "Email wajib diisi",
+      "invalid": "Masukkan alamat email yang valid"
+    },
+    "password": {
+      "required": "Kata sandi wajib diisi",
+      "empty": "Kata sandi tidak boleh kosong",
+      "minLength": "Kata sandi minimal {min} karakter",
+      "mustContainUppercase": "Kata sandi harus mengandung huruf besar (A-Z)",
+      "mustContainNumber": "Kata sandi harus mengandung angka (0-9)",
+      "mustContainSymbol": "Kata sandi harus mengandung simbol (!@#$%)",
+      "confirmRequired": "Silakan konfirmasi kata sandi baru",
+      "confirmMismatch": "Konfirmasi kata sandi tidak cocok",
+      "mustBeDifferent": "Kata sandi baru harus berbeda dari yang lama",
+      "currentRequired": "Kata sandi saat ini wajib diisi"
+    },
+    "product": {
+      "nameRequired": "Nama produk wajib diisi",
+      "nameMaxLength": "Nama produk maksimal {max} karakter",
+      "descriptionMaxLength": "Deskripsi maksimal {max} karakter",
+      "categoryMaxLength": "Kategori maksimal {max} karakter",
+      "priceNegative": "Harga tidak boleh negatif",
+      "comparePriceNegative": "Harga pembanding tidak boleh negatif"
+    },
+    "store": {
+      "slugTaken": "URL ini sudah dipakai",
+      "slugRequired": "URL toko wajib diisi",
+      "slugInvalid": "URL toko hanya boleh berisi huruf kecil, angka, dan tanda hubung",
+      "nameRequired": "Nama toko wajib diisi",
+      "categoryRequired": "Silakan pilih jenis usaha",
+      "whatsappRequired": "Nomor WhatsApp wajib diisi",
+      "whatsappInvalid": "Masukkan nomor WhatsApp yang valid",
+      "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
+    },
+    "contactForm": {
+      "nameRequired": "Nama wajib diisi",
+      "messageRequired": "Pesan wajib diisi"
+    },
+    "admin": {
+      "emailInvalid": "Format email tidak valid",
+      "passwordMinLength": "Kata sandi minimal 8 karakter"
+    },
+    "forgotPassword": {
+      "emailInvalid": "Masukkan alamat email yang valid"
+    }
+  }
+}

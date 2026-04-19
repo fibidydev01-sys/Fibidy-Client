@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Layout,
@@ -26,44 +27,45 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
 
 interface NavItem {
-  title: string;
+  titleKey: string;
   href: string;
   icon: LucideIcon;
 }
 
 interface NavGroup {
-  title: string;
+  titleKey: string;
   items: NavItem[];
 }
 
 const sellerNavigation: NavGroup[] = [
   {
-    title: 'Main',
+    titleKey: 'main',
     items: [
-      { title: 'Products', href: '/dashboard/products', icon: LayoutDashboard },
-      { title: 'Studio', href: '/dashboard/studio', icon: Layout },
-      { title: 'History', href: '/dashboard/products/downloads', icon: History },
-      { title: 'Library', href: '/dashboard/library', icon: BookOpen },
+      { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard },
+      { titleKey: 'studio', href: '/dashboard/studio', icon: Layout },
+      { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History },
+      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
     ],
   },
 ];
 
 const buyerNavigation: NavGroup[] = [
   {
-    title: 'Main',
+    titleKey: 'main',
     items: [
-      { title: 'Library', href: '/dashboard/library', icon: BookOpen },
+      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
     ],
   },
   {
-    title: 'More',
+    titleKey: 'more',
     items: [
-      { title: 'Start Selling', href: '/dashboard/setup-store', icon: Store },
+      { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
     ],
   },
 ];
 
 export function DashboardSidebar() {
+  const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const tenant = useAuthStore((s) => s.tenant);
   const { logout } = useLogout();
@@ -84,9 +86,9 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col justify-center">
         {navigation.map((group) => (
-          <SidebarGroup key={group.title}>
+          <SidebarGroup key={group.titleKey}>
             {navigation.length > 1 && (
-              <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+              <SidebarGroupLabel>{t(group.titleKey)}</SidebarGroupLabel>
             )}
             <SidebarMenu>
               {group.items.map((item) => (
@@ -94,7 +96,7 @@ export function DashboardSidebar() {
                   <SidebarMenuButton asChild isActive={isActive(item.href)}>
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -111,7 +113,7 @@ export function DashboardSidebar() {
               <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
                 <Link href="/dashboard/settings">
                   <Settings className="h-5 w-5" />
-                  <span>Settings</span>
+                  <span>{t('settings')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -119,7 +121,7 @@ export function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={logout}>
               <LogOut className="h-5 w-5" />
-              <span>Logout</span>
+              <span>{t('logout')}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -1,0 +1,35 @@
+{
+  "og": {
+    "platform": {
+      "brand": "Fibidy",
+      "altText": "Fibidy - Platform Toko Online untuk Kreator Digital",
+      "headlineLine1": "Jual Produk",
+      "headlineLine2": "Digital",
+      "subtitle": "Buat toko, upload file kamu, terima pembayaran via Stripe. Gratis selamanya.",
+      "stats": {
+        "free": "Gratis",
+        "freeSub": "Selamanya",
+        "setup": "5 Menit",
+        "setupSub": "Setup",
+        "payments": "Stripe",
+        "paymentsSub": "Pembayaran"
+      },
+      "url": "fibidy.com"
+    },
+    "store": {
+      "notFound": "Toko Tidak Ditemukan",
+      "error": "Error",
+      "invalidRequest": "Permintaan Tidak Valid",
+      "noImage": "Tidak Ada Gambar",
+      "fallbackDomain": "{slug}.fibidy.com",
+      "rootDomain": "fibidy.com"
+    },
+    "product": {
+      "notFound": "Produk Tidak Ditemukan",
+      "fallbackName": "Produk"
+    },
+    "tenant": {
+      "fallbackName": "Toko"
+    }
+  }
+}

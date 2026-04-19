@@ -4,6 +4,7 @@
 // Digital → USD, Custom/Service → IDR or based on product.currency
 // ==========================================
 
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/shared/format';
@@ -15,6 +16,7 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
+  const t = useTranslations('store.product.info');
   const { isCustomPrice, hasDiscount, discountPercent } = getProductPricing(product);
 
   // Resolve currency:
@@ -44,7 +46,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               <span className="text-lg text-muted-foreground line-through">
                 {formatPrice(product.comparePrice!, currency)}
               </span>
-              <Badge variant="destructive">-{discountPercent}%</Badge>
+              <Badge variant="destructive">{t('discountBadge', { percent: discountPercent })}</Badge>
             </>
           )}
         </div>
@@ -52,7 +54,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {isCustomPrice && (
         <p className="text-lg text-muted-foreground italic">
-          Price: Contact seller
+          {t('priceContactSeller')}
         </p>
       )}
 

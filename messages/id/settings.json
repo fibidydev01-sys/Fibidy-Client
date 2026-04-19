@@ -1,0 +1,249 @@
+{
+  "settings": {
+    "nav": {
+      "hero": "Hero",
+      "about": "Tentang",
+      "contact": "Kontak",
+      "social": "Sosial",
+      "password": "Kata Sandi",
+      "language": "Bahasa"
+    },
+    "hero": {
+      "title": "Hero Section",
+      "stepsMeta": {
+        "identity": {
+          "title": "Identitas Brand",
+          "desc": "Nama, kategori & tombol CTA"
+        },
+        "story": {
+          "title": "Cerita Brand",
+          "desc": "Headline & deskripsi"
+        },
+        "appearance": {
+          "title": "Tampilan",
+          "desc": "Warna, logo & background"
+        }
+      },
+      "identity": {
+        "storeName": "Nama Toko",
+        "storeNamePlaceholder": "contoh: Burger House",
+        "buttonLabel": "Label Tombol",
+        "buttonLabelPlaceholder": "Pesan Sekarang",
+        "buttonLabelCounter": "{current}/{max}",
+        "category": "Kategori",
+        "categoryNotSet": "Belum diatur",
+        "email": "Email",
+        "storeDomain": "Domain Toko",
+        "domainSuffix": "{slug}.fibidy.com"
+      },
+      "story": {
+        "headlineLabel": "Headline",
+        "headlinePlaceholder": "Tulis headline utama toko kamu...",
+        "subheadingLabel": "Subheading",
+        "subheadingPlaceholder": "Satu kalimat yang menangkap nilai utama toko kamu...",
+        "taglineLabel": "Tagline Toko",
+        "taglinePlaceholder": "Tagline unik toko kamu..."
+      },
+      "appearance": {
+        "logoHeading": "Logo",
+        "logoDescription": "Logo toko kamu yang ditampilkan di hero section",
+        "logoUploadLabel": "Upload logo",
+        "logoHelper": "PNG/JPG · 200×200px · Rekomendasi PNG transparan",
+        "bgHeading": "Gambar Latar",
+        "bgDescription": "Gambar cover untuk hero banner toko kamu",
+        "bgUploadLabel": "Upload background",
+        "bgHelper": "Persegi 1:1 · min 1080×1080px · JPG/PNG",
+        "colorHeading": "Warna Brand",
+        "colorDescription": "Warna utama untuk tombol & aksen"
+      },
+      "ctaDefault": "Lihat Produk"
+    },
+    "about": {
+      "title": "About Section",
+      "upgradePrompt": {
+        "title": "Upgrade untuk highlight lebih banyak",
+        "description": "Paket Business memungkinkan kamu punya hingga 7 highlight. Tampilkan lebih banyak keunggulan toko kamu.",
+        "cta": "Upgrade ke Business"
+      },
+      "stepsMeta": {
+        "highlights": {
+          "title": "Highlight",
+          "description": "Tampilkan keunggulan toko kamu"
+        }
+      },
+      "highlightTitlePlaceholder": "Kualitas Premium",
+      "highlightDescriptionPlaceholder": "Deskripsikan highlight ini...",
+      "counter": "{current}/{max}",
+      "slotCount": "{current} / {max} highlight",
+      "upgradeCta": "Upgrade ke Business",
+      "emptySlotLabel": "Slot {index}",
+      "businessBadge": "Business",
+      "validation": {
+        "titleRequired": "Highlight #{index}: Judul wajib diisi",
+        "descriptionRequired": "Highlight #{index}: Deskripsi wajib diisi"
+      }
+    },
+    "contact": {
+      "title": "Contact Section",
+      "stepsMeta": {
+        "info": {
+          "title": "Info Kontak",
+          "desc": "WhatsApp, telepon & alamat"
+        },
+        "location": {
+          "title": "Lokasi & Peta",
+          "desc": "Embed Google Maps untuk toko kamu"
+        },
+        "heading": {
+          "title": "Judul Section",
+          "desc": "Judul & subheading untuk section kontak"
+        }
+      },
+      "info": {
+        "whatsappLabel": "WhatsApp",
+        "whatsappRequired": "*wajib",
+        "whatsappRequiredShort": "*",
+        "whatsappPlaceholder": "89123456789",
+        "whatsappHelperDesktop": "Tanpa 0 atau 62 — contoh",
+        "whatsappHelperMobile": "Tanpa 0 atau 62 — contoh",
+        "whatsappExample": "89123456789",
+        "phoneLabel": "Nomor Telepon",
+        "phoneOptional": "(Opsional)",
+        "phonePlaceholder": "+62 812-3456-7890",
+        "addressLabel": "Alamat Lengkap",
+        "addressPlaceholder": "Jl. Contoh No. 123, Kota...",
+        "tipLabel": "Tips:",
+        "tipBody": "Pastikan nomor WhatsApp kamu aktif — pelanggan akan langsung terhubung saat menekan tombol kontak."
+      },
+      "location": {
+        "urlLabel": "URL Embed Google Maps",
+        "urlPlaceholder": "https://www.google.com/maps/embed?pb=...",
+        "instructionsDesktop": "Buka Google Maps → cari lokasi kamu → klik",
+        "instructionsShareBold": "Share",
+        "instructionsThen": "→",
+        "instructionsEmbedBold": "Embed a map",
+        "instructionsCopy": "→ salin URL dari",
+        "instructionsMobile": "Share → Embed a map → salin URL dari",
+        "showMapLabel": "Tampilkan Peta",
+        "showMapDescDesktop": "Tampilkan embed Google Maps di halaman kontak kamu",
+        "showMapDescMobile": "Google Maps di halaman kontak",
+        "previewHeading": "Preview Peta",
+        "previewEmptyUrl": "Masukkan URL untuk melihat preview",
+        "previewEmptyToggle": "Aktifkan \"Tampilkan Peta\" untuk preview"
+      },
+      "heading": {
+        "titleLabel": "Judul Section",
+        "titlePlaceholder": "Hubungi Kami",
+        "titleHelper": "Judul utama yang ditampilkan di section Kontak",
+        "subheadingLabel": "Subheading Section",
+        "subheadingPlaceholder": "Kami siap membantu",
+        "subheadingHelper": "Kalimat pendukung di bawah judul"
+      }
+    },
+    "social": {
+      "title": "Link Sosial",
+      "stepsMeta": {
+        "links": {
+          "title": "Hubungkan profil sosial kamu"
+        }
+      },
+      "groups": {
+        "socialMedia": "Media Sosial",
+        "messaging": "Pesan",
+        "creative": "Kreatif & Profesional"
+      },
+      "fields": {
+        "instagram": {
+          "label": "Instagram",
+          "placeholder": "https://instagram.com/username"
+        },
+        "facebook": {
+          "label": "Facebook",
+          "placeholder": "https://facebook.com/page"
+        },
+        "tiktok": {
+          "label": "TikTok",
+          "placeholder": "https://tiktok.com/@username"
+        },
+        "youtube": {
+          "label": "YouTube",
+          "placeholder": "https://youtube.com/@channel"
+        },
+        "twitter": {
+          "label": "Twitter / X",
+          "placeholder": "https://twitter.com/username"
+        },
+        "threads": {
+          "label": "Threads",
+          "placeholder": "https://threads.net/@username"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "https://wa.me/628xxxxxxxxxx"
+        },
+        "telegram": {
+          "label": "Telegram",
+          "placeholder": "https://t.me/username"
+        },
+        "pinterest": {
+          "label": "Pinterest",
+          "placeholder": "https://pinterest.com/username"
+        },
+        "behance": {
+          "label": "Behance",
+          "placeholder": "https://behance.net/username"
+        },
+        "dribbble": {
+          "label": "Dribbble",
+          "placeholder": "https://dribbble.com/username"
+        },
+        "vimeo": {
+          "label": "Vimeo",
+          "placeholder": "https://vimeo.com/username"
+        },
+        "linkedin": {
+          "label": "LinkedIn",
+          "placeholder": "https://linkedin.com/company/name"
+        }
+      },
+      "tipLabel": "Tips:",
+      "tipBody": "Link sosial muncul di footer toko kamu. Tambahkan hanya akun yang aktif — sedikit link terkelola lebih baik daripada banyak yang pasif."
+    },
+    "password": {
+      "title": "Ubah Kata Sandi",
+      "subtitle": "Kata sandi baru kamu langsung berlaku. Perangkat lain yang sedang login akan otomatis logout.",
+      "infoAlert": "Setelah mengubah kata sandi, semua sesi di perangkat lain (HP lain, browser lain, laptop kantor, dll) akan otomatis logout. Kamu tetap login di perangkat ini.",
+      "currentLabel": "Kata Sandi Saat Ini",
+      "currentPlaceholder": "••••••••",
+      "newLabel": "Kata Sandi Baru",
+      "newPlaceholder": "Minimal 8 karakter",
+      "newHelper": "Minimal 8 karakter, dengan huruf besar, angka, dan simbol.",
+      "confirmLabel": "Konfirmasi Kata Sandi Baru",
+      "confirmPlaceholder": "Ketik ulang kata sandi baru",
+      "backButton": "Pengaturan",
+      "cancelButton": "Batal",
+      "submitButton": "Ubah Kata Sandi",
+      "submittingButton": "Mengubah...",
+      "loadingHint": "Mengubah kata sandi..."
+    },
+    "language": {
+      "title": "Bahasa",
+      "subtitle": "Pilih bahasa tampilan untuk dashboard dan toko kamu.",
+      "currentLanguage": "Bahasa saat ini",
+      "infoAlert": "Mengganti bahasa langsung memuat ulang halaman. Perubahan hanya berlaku di perangkat ini.",
+      "options": {
+        "en": {
+          "label": "English",
+          "native": "English",
+          "description": "Bahasa Inggris"
+        },
+        "id": {
+          "label": "Indonesian",
+          "native": "Bahasa Indonesia",
+          "description": "Bahasa Indonesia"
+        }
+      },
+      "backButton": "Pengaturan"
+    }
+  }
+}

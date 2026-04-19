@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { AuthLogo } from './auth-logo';
 
 // ==========================================
@@ -28,6 +29,7 @@ export function AuthLayout({
   image,
   imageAlt = 'Auth Image',
 }: AuthLayoutProps) {
+  const t = useTranslations('auth.layout');
 
   // ==========================================
   // 2 KOLOM — jika ada image (login, forgot-password)
@@ -118,7 +120,7 @@ export function AuthLayout({
 
       {/* Footer */}
       <p className="mt-8 text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Fibidy. All rights reserved.
+        {t('copyright', { year: new Date().getFullYear() })}
       </p>
     </div>
   );

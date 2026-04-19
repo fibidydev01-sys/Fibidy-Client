@@ -1,0 +1,84 @@
+{
+  "studio": {
+    "loadingFailed": "Gagal memuat data toko",
+    "header": {
+      "preview": "Preview",
+      "fullPreview": "Preview Penuh",
+      "unsaved": "Belum disimpan",
+      "publish": "Publikasikan",
+      "publishing": "Menerbitkan...",
+      "openLandingPage": "Buka Landing Page"
+    },
+    "drawer": {
+      "open": "Buka",
+      "close": "Tutup",
+      "proBadge": "Pro",
+      "selectBlock": "Pilih block {section}",
+      "openTooltip": "Buka pemilih block",
+      "closeTooltip": "Tutup pemilih block"
+    },
+    "preview": {
+      "heroInactive": "Section \"Hero\" belum aktif",
+      "enableHint": "Aktifkan untuk melihat preview",
+      "enable": "Aktifkan"
+    },
+    "loading": {
+      "title": "Landing Page Builder",
+      "subtitle": "Menyiapkan workspace kamu",
+      "steps": {
+        "tenant": {
+          "label": "Data toko",
+          "loading": "Memuat data toko..."
+        },
+        "products": {
+          "label": "Produk",
+          "loading": "Mengambil katalog produk..."
+        },
+        "config": {
+          "label": "Konfigurasi landing",
+          "loading": "Memuat konfigurasi..."
+        },
+        "ready": {
+          "label": "Siap!",
+          "loading": "Menyiapkan editor..."
+        }
+      }
+    },
+    "errorBoundary": {
+      "title": "Terjadi kesalahan",
+      "description": "Gagal memuat Landing Builder. Silakan coba lagi.",
+      "retry": "Coba Lagi"
+    },
+    "blockOptions": {
+      "hero": "Hero {index}"
+    },
+    "fullPreview": {
+      "ariaTitle": "Preview Halaman Penuh: {name}",
+      "ariaDescription": "Preview landing page penuh untuk {name}",
+      "openLandingPage": "Buka Landing Page"
+    },
+    "livePreview": {
+      "heroInactiveTitle": "Section \"Hero\" belum aktif",
+      "heroInactiveHint": "Aktifkan untuk melihat preview",
+      "heroEnable": "Aktifkan"
+    },
+    "upgradeModal": {
+      "title": "Upgrade untuk publikasikan block Pro",
+      "description": "Kamu memakai desain hero Pro (block 4+). Upgrade ke paket Business untuk mempublikasikan."
+    },
+    "enableHeroModal": {
+      "title": "Aktifkan Hero Section",
+      "description": "Hero section belum aktif. Aktifkan sekarang supaya landing page kamu bisa dilihat pelanggan.",
+      "later": "Nanti",
+      "enableNow": "Aktifkan sekarang"
+    },
+    "unsavedModal": {
+      "title": "Perubahan belum dipublikasikan",
+      "description": "Kamu punya perubahan yang belum dipublikasikan. Publikasikan dulu sebelum keluar supaya perubahan tidak hilang.",
+      "back": "Kembali",
+      "leaveWithout": "Keluar tanpa publikasi",
+      "publishAndLeave": "Publikasikan & keluar",
+      "publishing": "Menerbitkan..."
+    }
+  }
+}

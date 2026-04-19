@@ -19,6 +19,7 @@
 
 import { useState } from 'react';
 import { ShoppingCart, Loader2, LogIn } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { checkoutApi } from '@/lib/api/checkout';
 import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
@@ -40,6 +41,7 @@ export function StripeCheckoutButton({
   currency = 'USD',
   className,
 }: StripeCheckoutButtonProps) {
+  const t = useTranslations('store.checkout.stripe');
   const [isLoading, setIsLoading] = useState(false);
   const isAuthenticated = useIsAuthenticated();
   const isChecked = useAuthChecked();
@@ -65,10 +67,9 @@ export function StripeCheckoutButton({
       // Redis lock is still held. Tell them to wait, don't panic.
       if (err instanceof ApiRequestError && err.isConflict()) {
         toast.warning(
-          'Still processing your previous checkout',
+          t('stillProcessingTitle'),
           {
-            description:
-              'Wait a few seconds and try again. If you were already redirected to Stripe, complete the payment in that tab.',
+            description: t('stillProcessingBody'),
           },
         );
       } else {
@@ -83,7 +84,7 @@ export function StripeCheckoutButton({
     return (
       <Button className={className} disabled size="lg">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading...
+        {t('loading')}
       </Button>
     );
   }
@@ -92,7 +93,7 @@ export function StripeCheckoutButton({
     return (
       <Button className={className} size="lg" onClick={handleCheckout}>
         <LogIn className="mr-2 h-4 w-4" />
-        Sign in to Buy
+        {t('signInToBuy')}
       </Button>
     );
   }
@@ -107,12 +108,12 @@ export function StripeCheckoutButton({
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Redirecting to Stripe...
+          {t('redirecting')}
         </>
       ) : (
         <>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Buy Now — {formatPrice(price, currency)}
+          {t('buyNow', { price: formatPrice(price, currency) })}
         </>
       )}
     </Button>

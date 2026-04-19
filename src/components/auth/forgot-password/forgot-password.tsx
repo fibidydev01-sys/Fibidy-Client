@@ -1,11 +1,22 @@
 'use client';
 
+// ==========================================
+// FORGOT PASSWORD FORM
+//
+// [i18n FIX — 2026-04-19]
+// Zod schema moved INSIDE the component to get access to useTranslations.
+// Previously: hardcoded EN string at module level → would never be
+// translated even after Phase 2 adds new locales.
+// Pattern reference: password.tsx (settings).
+// ==========================================
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,18 +37,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// ==========================================
-// FORGOT PASSWORD FORM
-// ==========================================
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-});
-
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
-
 export function ForgotPasswordForm() {
+  const t = useTranslations('auth.forgotPassword');
+  const tValidation = useTranslations('validation');
   const [showComingSoon, setShowComingSoon] = useState(false);
+
+  const forgotPasswordSchema = z.object({
+    email: z.string().email(tValidation('email.invalid')),
+  });
+
+  type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -63,15 +72,14 @@ export function ForgotPasswordForm() {
                 <Clock className="h-8 w-8 text-amber-500" />
               </div>
             </div>
-            <DialogTitle className="text-center">Coming soon</DialogTitle>
+            <DialogTitle className="text-center">{t('comingSoonDialog.title')}</DialogTitle>
             <DialogDescription className="text-center">
-              Password reset is currently under development. We&apos;ll have
-              it ready soon — stay tuned!
+              {t('comingSoonDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col gap-2 sm:flex-col">
             <Button asChild className="w-full">
-              <Link href="/login">Back to sign in</Link>
+              <Link href="/login">{t('comingSoonDialog.backToLogin')}</Link>
             </Button>
             <Button
               variant="outline"
@@ -79,7 +87,7 @@ export function ForgotPasswordForm() {
               onClick={() => setShowComingSoon(false)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Go back
+              {t('comingSoonDialog.goBack')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -93,8 +101,7 @@ export function ForgotPasswordForm() {
           {/* Info */}
           <Alert>
             <AlertDescription>
-              Enter your registered email and we&apos;ll send you a link to
-              reset your password.
+              {t('infoAlert')}
             </AlertDescription>
           </Alert>
 
@@ -104,11 +111,11 @@ export function ForgotPasswordForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t('emailLabel')}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="gavin@hooli.com"
+                    placeholder={t('emailPlaceholder')}
                     autoComplete="email"
                     {...field}
                   />
@@ -120,14 +127,14 @@ export function ForgotPasswordForm() {
 
           {/* Submit */}
           <Button type="submit" className="w-full">
-            Send reset link
+            {t('submitButton')}
           </Button>
 
           {/* Back to Login */}
           <Button asChild variant="ghost" className="w-full">
             <Link href="/login">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to sign in
+              {t('backToLogin')}
             </Link>
           </Button>
         </form>

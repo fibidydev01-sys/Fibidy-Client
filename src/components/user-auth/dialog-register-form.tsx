@@ -15,6 +15,12 @@
 //
 // No link to /register.
 // Sellers who want to sell from the start already know about /register.
+//
+// [i18n FIX — 2026-04-19]
+// Zod schema moved INSIDE the component to get access to useTranslations.
+// Previously: hardcoded EN strings at module level → would never be
+// translated even after Phase 2 adds new locales.
+// Pattern reference: password.tsx (settings).
 // ==========================================
 
 import { useState } from 'react';
@@ -22,6 +28,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,18 +42,18 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBuyerRegister } from '@/hooks/user/use-buyer-register';
 
-const registerBuyerSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters'),
-});
-
-type RegisterBuyerFormData = z.infer<typeof registerBuyerSchema>;
-
 export function DialogRegisterForm() {
+  const t = useTranslations('auth.buyerDialog.register');
+  const tValidation = useTranslations('validation');
   const [showPassword, setShowPassword] = useState(false);
   const { registerBuyer, isLoading, error } = useBuyerRegister();
+
+  const registerBuyerSchema = z.object({
+    email: z.string().email(tValidation('email.invalid')),
+    password: z.string().min(8, tValidation('password.minLength', { min: 8 })),
+  });
+
+  type RegisterBuyerFormData = z.infer<typeof registerBuyerSchema>;
 
   const form = useForm<RegisterBuyerFormData>({
     resolver: zodResolver(registerBuyerSchema),
@@ -75,11 +82,11 @@ export function DialogRegisterForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('emailLabel')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t('emailPlaceholder')}
                   autoComplete="email"
                   disabled={isLoading}
                   {...field}
@@ -95,12 +102,12 @@ export function DialogRegisterForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('passwordLabel')}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="At least 8 characters"
+                    placeholder={t('passwordPlaceholder')}
                     autoComplete="new-password"
                     disabled={isLoading}
                     {...field}
@@ -129,17 +136,17 @@ export function DialogRegisterForm() {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Signing up...
+              {t('submittingButton')}
             </>
           ) : (
-            'Sign up'
+            t('submitButton')
           )}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
-          By signing up, you agree to our{' '}
+          {t('agreementPrefix')}{' '}
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-            Terms of Service
+            {t('termsLink')}
           </a>
         </p>
 

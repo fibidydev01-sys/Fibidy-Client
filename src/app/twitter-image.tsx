@@ -1,13 +1,44 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
 
+// Direct JSON import — identical pattern to opengraph-image.tsx sibling.
+// Edge runtime can't use next-intl's request-scoped loader, so we import
+// the EN message bundle at compile time. This file is at /twitter-image
+// (root, NOT per-locale) and serves as the default fallback.
+import enOgMessages from '../../messages/en/og.json';
+
 // ==========================================
-// DEFAULT TWITTER IMAGE
+// DEFAULT PLATFORM TWITTER IMAGE
 // Route: /twitter-image
+// File:  src/app/twitter-image.tsx
+//
+// [i18n FIX — 2026-04-19]
+// Identical to opengraph-image.tsx sibling — all hardcoded EN strings
+// moved to `og.platform.*` namespace in messages/en/og.json.
+// Keys used:
+//   - og.platform.altText       (export const alt)
+//   - og.platform.brand         ("Fibidy" wordmark)
+//   - og.platform.headlineLine1 ("Sell Digital")
+//   - og.platform.headlineLine2 ("Products")
+//   - og.platform.subtitle      (tagline under headline)
+//   - og.platform.stats.free    + freeSub     ("Free" / "Forever")
+//   - og.platform.stats.setup   + setupSub    ("5 Min" / "Setup")
+//   - og.platform.stats.payments + paymentsSub ("Stripe" / "Payments")
+//   - og.platform.url           ("fibidy.com")
+//
+// This file and opengraph-image.tsx are intentionally kept in lockstep.
+// If you update copy for one, update both — Twitter and OG share the
+// same visual composition by design (consistent brand experience across
+// platforms).
 // ==========================================
 
 export const runtime = 'edge';
-export const alt = 'Fibidy - Online Store Platform for Digital Creators';
+
+// Load platform messages at module init. Safe in edge runtime because
+// JSON imports resolve at build time.
+const og = enOgMessages.og;
+
+export const alt = og.platform.altText;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const revalidate = 3600;
@@ -93,7 +124,7 @@ export default async function TwitterImage() {
             >
               <img
                 src={logoUrl}
-                alt="Fibidy"
+                alt={og.platform.brand}
                 width={52}
                 height={52}
                 style={{ objectFit: 'contain' }}
@@ -108,7 +139,7 @@ export default async function TwitterImage() {
                 display: 'flex',
               }}
             >
-              Fibidy
+              {og.platform.brand}
             </div>
           </div>
 
@@ -126,9 +157,9 @@ export default async function TwitterImage() {
                 maxWidth: '900px',
               }}
             >
-              Sell Digital
+              {og.platform.headlineLine1}
               <br />
-              Products
+              {og.platform.headlineLine2}
             </div>
             <div
               style={{
@@ -140,7 +171,7 @@ export default async function TwitterImage() {
                 maxWidth: '600px',
               }}
             >
-              Create a store, upload your files, get paid via Stripe. Free forever.
+              {og.platform.subtitle}
             </div>
           </div>
 
@@ -154,12 +185,19 @@ export default async function TwitterImage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
               {[
-                { label: 'Free', sub: 'Forever' },
-                { label: '5 Min', sub: 'Setup' },
-                { label: 'Stripe', sub: 'Payments' },
+                { label: og.platform.stats.free, sub: og.platform.stats.freeSub },
+                { label: og.platform.stats.setup, sub: og.platform.stats.setupSub },
+                { label: og.platform.stats.payments, sub: og.platform.stats.paymentsSub },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: i < 2 ? '32px' : '0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                      paddingRight: i < 2 ? '32px' : '0',
+                    }}
+                  >
                     <div
                       style={{
                         fontSize: '22px',
@@ -208,7 +246,7 @@ export default async function TwitterImage() {
                 display: 'flex',
               }}
             >
-              fibidy.com
+              {og.platform.url}
             </div>
           </div>
         </div>

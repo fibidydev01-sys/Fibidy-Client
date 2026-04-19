@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { DiscoverCard } from './discover-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PublicProduct } from '@/types/product';
@@ -8,12 +9,14 @@ interface DiscoverGridProps {
 }
 
 export function DiscoverGrid({ products, isLoading }: DiscoverGridProps) {
+  const t = useTranslations('discover.list');
+
   if (isLoading) return <DiscoverGridSkeleton />;
 
   if (products.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        No products found.
+        {t('empty')}
       </div>
     );
   }

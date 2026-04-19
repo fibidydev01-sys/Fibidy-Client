@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Drawer } from 'vaul';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ export function FullPreviewDrawer({
   config,
   tenant,
 }: FullPreviewDrawerProps) {
+  const t = useTranslations('studio.fullPreview');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,12 +49,12 @@ export function FullPreviewDrawer({
         >
           <Drawer.Title asChild>
             <VisuallyHidden.Root>
-              Full Page Preview: {tenant.name}
+              {t('ariaTitle', { name: tenant.name })}
             </VisuallyHidden.Root>
           </Drawer.Title>
           <Drawer.Description asChild>
             <VisuallyHidden.Root id="full-preview-drawer-description">
-              Full landing page preview for {tenant.name}
+              {t('ariaDescription', { name: tenant.name })}
             </VisuallyHidden.Root>
           </Drawer.Description>
 
@@ -73,7 +75,7 @@ export function FullPreviewDrawer({
                 rel="noopener noreferrer"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                Open Landing Page
+                {t('openLandingPage')}
               </a>
             </Button>
           </div>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/hooks/shared/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
@@ -11,17 +12,13 @@ import { StepIdentity } from './form/hero/step-identity';
 import { StepStory } from './form/hero/step-story';
 import { StepAppearance } from './form/hero/step-appearance';
 
-const STEPS = [
-  { title: 'Brand Identity', desc: 'Name, category & CTA button' },
-  { title: 'Brand Story', desc: 'Headline & description' },
-  { title: 'Appearance', desc: 'Colors, logo & background' },
-] as const;
-
 interface HeroSectionProps {
   onBack?: () => void;
 }
 
 export function HeroSection({ onBack }: HeroSectionProps) {
+  const t = useTranslations('settings.hero.stepsMeta');
+  const tToast = useTranslations('toast.settings');
   const { tenant, refresh } = useTenant();
   const [isSaving, setIsSaving] = useState(false);
   const [isRemovingLogo, setIsRemovingLogo] = useState(false);
@@ -29,6 +26,15 @@ export function HeroSection({ onBack }: HeroSectionProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<HeroFormData | null>(null);
   const isInitialized = useRef(false);
+
+  const STEPS = useMemo(
+    () => [
+      { title: t('identity.title'), desc: t('identity.desc') },
+      { title: t('story.title'), desc: t('story.desc') },
+      { title: t('appearance.title'), desc: t('appearance.desc') },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (tenant && !isInitialized.current) {
@@ -60,9 +66,9 @@ export function HeroSection({ onBack }: HeroSectionProps) {
       setFormData({ ...formData, logo: '' });
       await tenantsApi.update({ logo: '' });
       await refresh();
-      toast.success('Logo removed successfully');
+      toast.success(tToast('logoRemoved'));
     } catch {
-      toast.error('Failed to remove logo');
+      toast.error(tToast('logoRemoveFailed'));
       setFormData({ ...formData, logo: tenant.logo || '' });
     } finally {
       setIsRemovingLogo(false);
@@ -76,9 +82,9 @@ export function HeroSection({ onBack }: HeroSectionProps) {
       setFormData({ ...formData, heroBackgroundImage: '' });
       await tenantsApi.update({ heroBackgroundImage: '' });
       await refresh();
-      toast.success('Background image removed successfully');
+      toast.success(tToast('heroBgRemoved'));
     } catch {
-      toast.error('Failed to remove background image');
+      toast.error(tToast('heroBgRemoveFailed'));
       setFormData({ ...formData, heroBackgroundImage: tenant.heroBackgroundImage || '' });
     } finally {
       setIsRemovingHeroBg(false);
@@ -107,9 +113,9 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         theme: { primaryColor: formData.primaryColor },
       });
       await refresh();
-      toast.success('Hero section saved successfully');
+      toast.success(tToast('heroSaved'));
     } catch {
-      toast.error('Failed to save hero section');
+      toast.error(tToast('heroFailed'));
     } finally {
       setIsSaving(false);
     }

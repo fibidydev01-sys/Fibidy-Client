@@ -1,0 +1,565 @@
+{
+  "dashboard": {
+    "metadata": {
+      "productsTitle": "Produk",
+      "productsDescription": "Kelola produk digital kamu",
+      "libraryTitle": "Library",
+      "libraryDescription": "Produk digital yang sudah kamu beli",
+      "downloadsTitle": "Riwayat Download",
+      "downloadsDescription": "Riwayat download produk digital",
+      "setupStoreTitle": "Mulai Jualan",
+      "setupStoreDescription": "Siapkan toko kamu dan mulai jual produk digital",
+      "settingsTitle": "Pengaturan",
+      "settingsDescription": "Kelola pengaturan toko kamu"
+    },
+    "nav": {
+      "main": "Utama",
+      "more": "Lainnya",
+      "products": "Produk",
+      "studio": "Studio",
+      "downloads": "Riwayat",
+      "library": "Library",
+      "settings": "Pengaturan",
+      "subscription": "Langganan",
+      "startSelling": "Mulai Jualan",
+      "sell": "Jual",
+      "discover": "Jelajah",
+      "signOut": "Keluar",
+      "logout": "Logout"
+    },
+    "products": {
+      "title": "Produk",
+      "newButton": "Produk baru",
+      "addButton": "Tambah",
+      "empty": "Belum ada produk digital.",
+      "emptyHint": "Klik \"Tambah Produk\" untuk mulai jualan.",
+      "card": {
+        "draft": "Draft",
+        "sold": "{count} terjual",
+        "fileFallback": "FILE",
+        "mainBadge": "★ Utama"
+      },
+      "storage": {
+        "label": "Penyimpanan",
+        "usageFormat": "{used}GB / {total}GB"
+      },
+      "deleteDialog": {
+        "title": "Hapus produk",
+        "confirmationPrefix": "Yakin mau hapus",
+        "confirmationSuffix": "? Aksi ini tidak bisa dibatalkan.",
+        "cancel": "Batal",
+        "confirm": "Hapus",
+        "deleting": "Menghapus..."
+      },
+      "previewDrawer": {
+        "title": "Preview {name}",
+        "titleFallback": "Preview Produk",
+        "descriptionFallback": "Lihat detail untuk {name}",
+        "description": "Deskripsi",
+        "category": "Kategori",
+        "created": "Dibuat",
+        "file": "File",
+        "sales": "Penjualan",
+        "salesCount": "{count} terjual",
+        "deactivate": "Nonaktifkan",
+        "activate": "Aktifkan",
+        "edit": "Edit",
+        "deleteProduct": "Hapus produk",
+        "noImage": "Tidak ada gambar",
+        "cannotDeleteTitle": "Produk dengan transaksi tidak bisa dihapus.",
+        "cannotDeleteBody": "Nonaktifkan produk untuk menyembunyikan dari toko tanpa menghapus riwayat pembelian pembeli."
+      },
+      "form": {
+        "steps": {
+          "details": {
+            "title": "Detail",
+            "desc": "Nama, deskripsi & harga"
+          },
+          "file": {
+            "title": "File",
+            "desc": "Upload file digital"
+          },
+          "cover": {
+            "title": "Cover",
+            "desc": "Gambar cover (opsional)"
+          }
+        },
+        "details": {
+          "activeLabel": "Aktif",
+          "categoryPlaceholder": "Kategori",
+          "categorySearchPlaceholder": "Cari atau buat kategori...",
+          "categoryNoMatch": "Tidak ada kategori \"{query}\"",
+          "categoryHintEmpty": "Ketik untuk cari atau buat kategori",
+          "categoryHeadingCategory": "Kategori",
+          "categoryHeadingCreateNew": "Buat baru",
+          "categoryCreateOption": "Buat \"{query}\"",
+          "nameLabel": "Nama produk",
+          "nameRequired": "*",
+          "namePlaceholder": "contoh: Ebook Belajar NestJS, Template Notion",
+          "descriptionLabel": "Deskripsi",
+          "descriptionPlaceholder": "Deskripsikan produk — isi, jumlah halaman, fitur utama...",
+          "descriptionHelper": "Deskripsi yang jelas membantu pembeli membeli dengan percaya diri.",
+          "priceLabel": "Harga (USD)",
+          "priceRequired": "*",
+          "pricePlaceholder": "9.99",
+          "priceHelper": "Harga dalam USD — pembeli bayar via Stripe",
+          "comparePriceLabel": "Harga pembanding",
+          "comparePricePlaceholder": "19.99",
+          "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan"
+        },
+        "upload": {
+          "editModeNote": "File produk — file tidak bisa diubah setelah diupload. Hapus produk dan buat baru jika perlu ganti file.",
+          "editFileFallback": "FILE",
+          "kycTitle": "Verifikasi dibutuhkan",
+          "kycCta": "Selesaikan Verifikasi di Pengaturan",
+          "kycDropzoneDisabled": "Upload tersedia setelah verifikasi selesai",
+          "dropzoneInfo": "Upload file digital — {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
+          "dropzoneInfoLoading": "Memuat info penyimpanan...",
+          "dropzoneLoading": "Memuat konfigurasi penyimpanan...",
+          "kycStates": {
+            "NOT_STARTED": "Kamu belum setup pembayaran Stripe. Selesaikan verifikasi dulu untuk upload produk.",
+            "PENDING": "Verifikasi sedang diproses oleh Stripe. Tunggu konfirmasi sebelum upload produk.",
+            "NEEDS_MORE_INFO": "Stripe butuh informasi tambahan. Selesaikan verifikasi untuk upload produk.",
+            "PAST_DUE": "Batas waktu verifikasi sudah lewat. Segera selesaikan untuk mencegah akun dinonaktifkan.",
+            "CHARGES_ONLY": "Akun kamu bisa menerima pembayaran, tapi payout belum aktif. Selesaikan verifikasi dulu.",
+            "REJECTED": "Verifikasi ditolak oleh Stripe. Hubungi support di halaman Pengaturan.",
+            "fallback": "Selesaikan verifikasi Stripe dulu untuk upload dan jual produk."
+          }
+        },
+        "media": {
+          "descriptionBusiness": "Upload hingga 5 foto. Foto pertama jadi thumbnail utama.",
+          "descriptionStarter": "Upload hingga 3 foto. Slot 4 & 5 tersedia di paket Business.",
+          "descriptionFree": "Upload hingga 2 foto. Upgrade untuk slot lebih banyak.",
+          "headerPrefix": "Foto produk —",
+          "slotCount": "{current} / {max} foto",
+          "dragReorder": "Geser untuk mengurutkan",
+          "upgradeToStarter": "Upgrade ke Starter",
+          "upgradeToBusiness": "Upgrade ke Business",
+          "tierName": {
+            "starter": "Starter",
+            "business": "Business"
+          },
+          "photoFallback": "Foto {index}",
+          "businessBadge": "Business"
+        },
+        "preview": {
+          "titleNew": "Review & publikasikan",
+          "titleEdit": "Review perubahan",
+          "descriptionNew": "Cek ulang detail listing sebelum dipublikasikan.",
+          "descriptionEdit": "Cek ulang detail listing sebelum disimpan.",
+          "noName": "Tanpa nama",
+          "sectionDetails": "Detail",
+          "sectionDigitalFile": "File Digital",
+          "sectionCoverImages": "Gambar Cover",
+          "sectionPrice": "Harga",
+          "sectionStatus": "Status",
+          "rowName": "Nama",
+          "rowCategory": "Kategori",
+          "rowDescription": "Deskripsi",
+          "rowFile": "File",
+          "rowPhotos": "Foto",
+          "rowSellingPrice": "Harga jual",
+          "rowComparePrice": "Harga pembanding",
+          "rowCurrency": "Mata uang",
+          "rowVisibility": "Visibilitas",
+          "notFilledIn": "Belum diisi",
+          "noCategory": "Tanpa kategori",
+          "noDescription": "Tanpa deskripsi",
+          "noFile": "Belum ada file",
+          "fileUploadedPrefix": "File sudah diupload",
+          "fileWithSize": "{name} ({size})",
+          "noPhotos": "Tanpa foto (opsional)",
+          "photosUploaded": "{count} foto diupload",
+          "dash": "—",
+          "active": "Aktif",
+          "inactive": "Tidak aktif",
+          "backToEdit": "Kembali edit",
+          "saveChanges": "Simpan perubahan",
+          "publishListing": "Publikasikan listing",
+          "saving": "Menyimpan...",
+          "publishing": "Menerbitkan...",
+          "reviewAndSave": "Review & Simpan",
+          "reviewAndPublish": "Review & Publikasikan"
+        },
+        "upload_dropzone": {
+          "dropText": "Drop file di sini atau klik untuk browse",
+          "hint": "{types} · Max {size}"
+        }
+      },
+      "downloads": {
+        "title": "Riwayat Download",
+        "backTooltip": "Kembali",
+        "subtitleCount": "{count} total download",
+        "filterPlaceholder": "Filter berdasarkan produk",
+        "allProducts": "Semua Produk",
+        "empty": "Belum ada riwayat download.",
+        "columns": {
+          "product": "Produk",
+          "buyer": "Pembeli",
+          "time": "Waktu",
+          "ip": "IP"
+        },
+        "dash": "—"
+      }
+    },
+    "library": {
+      "title": "Library",
+      "subtitleCount": "{count} produk dimiliki",
+      "empty": "Library kamu masih kosong.",
+      "emptyCta": "Beli produk digital di",
+      "emptyCtaLink": "Jelajah",
+      "card": {
+        "accessRevoked": "Akses Dicabut",
+        "accessRevokedReasonRefund": "Akses dicabut karena refund disetujui.",
+        "accessRevokedReasonGeneric": "Akses download untuk produk ini sudah dicabut.",
+        "download": "Download"
+      },
+      "refund": {
+        "button": {
+          "refunded": "Di-refund",
+          "rejected": "Refund Ditolak",
+          "processing": "Memproses...",
+          "expired": "Refund Kedaluwarsa",
+          "expiredTooltip": "Masa refund (7 hari) sudah lewat.",
+          "request": "Ajukan Refund",
+          "daysLeft": "(sisa {days}h)"
+        },
+        "rejectReasons": {
+          "FILE_ACCESSIBLE_AND_VALID": "File bisa diakses dan tidak rusak. Refund ditolak sesuai kebijakan.",
+          "OUTSIDE_TIME_WINDOW": "Masa refund (7 hari) sudah lewat.",
+          "ALREADY_REFUNDED": "Pembelian ini sudah di-refund sebelumnya.",
+          "fallback": "Permintaan refund ditolak."
+        },
+        "dialog": {
+          "title": "Ajukan Refund",
+          "policyIntro": "Sistem kami akan otomatis memverifikasi file dan mengevaluasi permintaan kamu. Proses ini memakan 5-30 detik.",
+          "approvedBold": "Disetujui",
+          "approvedFileUndownloadable": "jika file tidak bisa didownload",
+          "approvedFileCorrupted": "jika file rusak atau tidak bisa dibaca",
+          "notApprovedBold": "Tidak disetujui",
+          "rejectedContentMismatch": "untuk alasan \"konten tidak sesuai ekspektasi\"",
+          "rejectedNoLongerNeed": "untuk alasan \"saya tidak membutuhkannya lagi\"",
+          "rejectedAccident": "untuk alasan \"saya beli tidak sengaja\"",
+          "previewReminder": "Kamu sudah punya akses preview sebelum membeli. Refund hanya diberikan untuk masalah teknis pengiriman file, bukan alasan subjektif.",
+          "cancel": "Batal",
+          "confirm": "Ajukan Refund",
+          "evaluating": "Mengevaluasi..."
+        }
+      }
+    },
+    "subscription": {
+      "title": "Langganan",
+      "subtitle": "Kelola paket dan tagihan kamu",
+      "currentPlan": "Paket saat ini",
+      "planSuffix": "Plan",
+      "cancel": "Batalkan langganan",
+      "cancelling": "Membatalkan...",
+      "activeUntil": "Aktif sampai {date} (sisa {days} hari)",
+      "badge": {
+        "active": "Aktif",
+        "pastDue": "Pembayaran Terlambat",
+        "canceled": "Dibatalkan",
+        "free": "Gratis"
+      },
+      "verify": {
+        "verifyingTitle": "Memproses pembayaran...",
+        "verifyingBody": "Tunggu beberapa detik untuk aktivasi langganan. Jangan refresh halaman.",
+        "reconcilingTitle": "Memeriksa status pembayaran di Stripe...",
+        "reconcilingBody": "Biasanya hanya butuh beberapa detik.",
+        "completedTitle": "Langganan aktif!",
+        "completedBody": "Paket kamu sudah di-upgrade. Nikmati fitur barunya! 🎉",
+        "failedTitle": "Verifikasi pembayaran gagal.",
+        "failedBody": "Jika kartu kamu sudah ditagih, pembayaran akan diverifikasi otomatis dalam beberapa menit. Kamu bisa coba lagi atau hubungi support di",
+        "supportEmail": "admin@fibidy.com",
+        "retryButton": "Coba verifikasi lagi"
+      },
+      "overLimit": {
+        "titlePattern": "Limit paket {planName} tercapai",
+        "productsPart": "Produk: {used}/{max}. ",
+        "digitalProductsPart": "Produk digital: {used}/{max}. ",
+        "suffix": "Upgrade untuk menambah kapasitas."
+      },
+      "usage": {
+        "products": "Produk",
+        "digital": "Digital",
+        "storage": "Penyimpanan",
+        "infinity": "∞"
+      },
+      "plans": {
+        "FREE": {
+          "name": "Gratis",
+          "price": "$0",
+          "priceNote": "Gratis selamanya",
+          "features": [
+            "5 produk",
+            "3 produk digital",
+            "Penyimpanan 0.5 GB",
+            "Maks 20 MB per file",
+            "2 foto per produk",
+            "1 template hero"
+          ]
+        },
+        "STARTER": {
+          "name": "Starter",
+          "price": "$5",
+          "priceNote": "/bulan",
+          "features": [
+            "20 produk",
+            "20 produk digital",
+            "Penyimpanan 1 GB",
+            "Maks 50 MB per file",
+            "3 foto per produk",
+            "3 template hero"
+          ]
+        },
+        "BUSINESS": {
+          "name": "Business",
+          "price": "$15",
+          "priceNote": "/bulan",
+          "features": [
+            "50 produk",
+            "50 produk digital",
+            "Penyimpanan 20 GB",
+            "Maks 500 MB per file",
+            "5 foto per produk",
+            "Semua template hero"
+          ]
+        }
+      },
+      "platformFee": {
+        "label": "Biaya platform:",
+        "FREE": "15%",
+        "STARTER": "5%",
+        "BUSINESS": "2%"
+      },
+      "cta": {
+        "currentPlan": "Paket saat ini",
+        "upgradeStarter": "Upgrade ke Starter",
+        "upgradeBusiness": "Upgrade ke Business",
+        "requiresStarterFirst": "Butuh Starter dulu",
+        "notYetQualified": "Belum memenuhi syarat",
+        "downgrade": "Downgrade",
+        "foreverFree": "Gratis selamanya"
+      },
+      "businessUnlock": {
+        "title": "Progress unlock Business",
+        "description": "Penuhi salah satu syarat untuk unlock upgrade paket Business",
+        "totalSales": "Total penjualan",
+        "totalSalesValue": "{amount} / $200",
+        "totalTransactions": "Total transaksi",
+        "totalTransactionsValue": "{count} / 20",
+        "or": "atau"
+      },
+      "cancelDialog": {
+        "title": "Batalkan langganan?",
+        "descriptionPrefix": "Langganan kamu tetap aktif sampai akhir periode tagihan saat ini",
+        "descriptionPeriodSuffix": " ({date})",
+        "descriptionSuffix": ". Setelah itu, akun kamu otomatis turun ke paket Free.",
+        "cancel": "Batal",
+        "confirm": "Ya, batalkan",
+        "canceling": "Membatalkan..."
+      }
+    },
+    "setupStore": {
+      "title": "Mulai Jualan",
+      "subtitle": "Siapkan toko kamu dalam beberapa langkah",
+      "steps": {
+        "category": {
+          "title": "Jenis Usaha",
+          "desc": "Usaha apa yang kamu jalankan?"
+        },
+        "storeInfo": {
+          "title": "Info Toko",
+          "desc": "Nama, URL & deskripsi"
+        },
+        "whatsapp": {
+          "title": "WhatsApp",
+          "desc": "Nomor untuk notifikasi pesanan",
+          "label": "Nomor WhatsApp",
+          "placeholder": "81234567890",
+          "helper": "Dipakai untuk menerima notifikasi pesanan via WhatsApp"
+        },
+        "review": {
+          "title": "Review",
+          "desc": "Konfirmasi dan mulai jualan"
+        }
+      },
+      "stepIndicator": "Langkah {current} dari {total}",
+      "review": {
+        "businessType": "Jenis usaha",
+        "storeInfo": "Info toko",
+        "storeName": "Nama toko",
+        "storeUrl": "URL toko",
+        "storeUrlSuffix": "{slug}.fibidy.com",
+        "description": "Deskripsi",
+        "whatsapp": "WhatsApp",
+        "agreementPrefix": "Dengan membuat toko, kamu menyetujui",
+        "termsLink": "Syarat Layanan",
+        "agreementAnd": "dan",
+        "privacyLink": "Kebijakan Privasi"
+      },
+      "cta": {
+        "submit": "Buat toko saya",
+        "submitting": "Membuat toko..."
+      },
+      "errors": {
+        "categoryRequired": "Silakan pilih jenis usaha",
+        "nameRequired": "Nama toko wajib diisi",
+        "slugRequired": "URL toko wajib diisi",
+        "whatsappRequired": "Nomor WhatsApp wajib diisi",
+        "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
+      }
+    },
+    "settings": {
+      "title": "Pengaturan",
+      "groups": {
+        "store": "Toko",
+        "channels": "Channel",
+        "preferences": "Preferensi",
+        "account": "Akun",
+        "legal": "Legal"
+      },
+      "store": {
+        "bio": {
+          "label": "Bio",
+          "description": "Nama, logo, headline & warna brand"
+        },
+        "featured": {
+          "label": "Unggulan",
+          "description": "Highlight kunci & nilai jual toko"
+        },
+        "contact": {
+          "label": "Kontak",
+          "description": "WhatsApp, alamat & Google Maps"
+        }
+      },
+      "channels": {
+        "social": {
+          "label": "Sosial",
+          "description": "Instagram, TikTok, WhatsApp & lainnya"
+        }
+      },
+      "preferences": {
+        "language": {
+          "label": "Bahasa",
+          "description": "Pilih bahasa tampilan"
+        },
+        "lightMode": {
+          "label": "Mode Terang",
+          "description": "Beralih ke tema terang"
+        },
+        "darkMode": {
+          "label": "Mode Gelap",
+          "description": "Beralih ke tema gelap"
+        }
+      },
+      "account": {
+        "subscription": {
+          "label": "Langganan",
+          "description": "Kelola paket dan tagihan kamu"
+        },
+        "changePassword": {
+          "label": "Ubah Kata Sandi",
+          "description": "Ubah kata sandi & keluar dari perangkat lain"
+        }
+      },
+      "legal": {
+        "aboutFibidy": {
+          "label": "Tentang Fibidy",
+          "description": "FAQ, kontak, syarat, dan privasi"
+        }
+      },
+      "signOut": {
+        "label": "Keluar",
+        "description": "Logout dari akun kamu"
+      }
+    },
+    "onboard": {
+      "refreshing": "Memperbarui link verifikasi..."
+    },
+    "kycBanner": {
+      "label": "Verifikasi Stripe Connect",
+      "loading": "Memuat status verifikasi...",
+      "polling": "Memeriksa status verifikasi...",
+      "states": {
+        "notStartedFresh": "Setup pembayaran untuk mulai jual produk digital.",
+        "notStartedReturning": "Kamu belum selesai setup pembayaran. Lanjutkan dari tempat terakhir.",
+        "pending": "Verifikasi sedang diproses oleh Stripe. Biasanya butuh 1–2 hari kerja.",
+        "needsMoreInfoTitle": "Verifikasi butuh perbaikan:",
+        "needsMoreInfoGeneric": "Stripe butuh informasi tambahan untuk melanjutkan verifikasi akun.",
+        "pastDueHeadline": "URGENT: Batas waktu verifikasi sudah lewat.",
+        "pastDueBody": "Akun kamu terancam dinonaktifkan. Selesaikan verifikasi sekarang.",
+        "chargesOnly": "Akun aktif menerima pembayaran. Payout ke bank belum aktif — selesaikan verifikasi untuk aktifkan payout.",
+        "activeWithFutureReq": "Akun aktif. Stripe punya update persyaratan baru yang perlu diselesaikan",
+        "activeWithFutureReqDeadline": " sebelum {date}",
+        "activeClean": "Akun terverifikasi. Kamu bisa menerima pembayaran dan tarik dana.",
+        "rejected": "Verifikasi akun ditolak oleh Stripe. Hubungi tim support kami untuk bantuan."
+      },
+      "actions": {
+        "setupPayments": "Setup Pembayaran",
+        "continueSetup": "Lanjutkan Setup",
+        "completeDocuments": "Lengkapi Dokumen",
+        "completeNow": "Selesaikan Sekarang",
+        "activatePayouts": "Aktifkan Payout",
+        "viewUpdates": "Lihat Update",
+        "contactSupport": "Hubungi Support",
+        "loading": "Memuat..."
+      }
+    },
+    "pwa": {
+      "android": {
+        "title": "Pasang Fibidy",
+        "subtitle": "Tambahkan ke layar utama",
+        "benefits": {
+          "quickAccess": "Akses cepat"
+        },
+        "dismiss": "Nanti saja",
+        "install": "Pasang"
+      },
+      "ios": {
+        "title": "Pasang Fibidy",
+        "subtitle": "Tambahkan ke Home Screen iOS kamu",
+        "steps": {
+          "one": {
+            "label": "Tekan tombol",
+            "highlight": "Share",
+            "sub": "di toolbar Safari"
+          },
+          "two": {
+            "label": "Pilih",
+            "highlight": "Add to Home Screen",
+            "sub": "dari daftar opsi"
+          },
+          "three": {
+            "label": "Tekan",
+            "highlight": "Add",
+            "sub": "di pojok kanan atas"
+          }
+        },
+        "shareHintPrefix": "Tombol",
+        "shareHintBold": "Share",
+        "shareHintSuffix": "ada di bawah layar (iPhone) atau di atas (iPad)",
+        "close": "Tutup"
+      }
+    },
+    "upgradeModal": {
+      "defaultTitle": "Limit paket tercapai",
+      "defaultDescription": "Upgrade paket untuk unlock limit lebih tinggi dan fitur premium.",
+      "upgradeStarterLabel": "Upgrade ke Starter — $5/bln",
+      "upgradeBusinessLabel": "Upgrade ke Business — $15/bln",
+      "viewAllPlans": "Lihat semua paket",
+      "viewUpgradePlans": "Lihat paket upgrade",
+      "maybeLater": "Mungkin nanti"
+    },
+    "stepWizard": {
+      "stepOf": "Langkah {current} dari {total}"
+    },
+    "wizardNav": {
+      "back": "Kembali",
+      "previous": "Sebelumnya",
+      "next": "Selanjutnya",
+      "save": "Simpan",
+      "saving": "Menyimpan..."
+    }
+  }
+}

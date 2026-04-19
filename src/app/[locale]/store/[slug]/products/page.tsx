@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import type { Product } from '@/types/product';
 import type { PaginatedResponse } from '@/types/api';
 import { productsApi } from '@/lib/api/products';
@@ -9,14 +10,43 @@ import { ProductGrid } from '@/components/store/showcase/product-grid';
 import { ProductPagination } from '@/components/store/showcase/product-pagination';
 import { ProductGridSkeleton } from '@/components/layout/store/store-skeleton';
 
+// ==========================================
+// STORE PRODUCTS LIST PAGE
+// File: src/app/[locale]/store/[slug]/products/page.tsx
+//
+// [i18n FIX — 2026-04-19]
+// Two pieces translated:
+//
+//   - `metadata.title` — was static "All Products". Now resolved via
+//     `store.metadata.productsTitle` in async `generateMetadata`.
+//
+//   - h1 "All Products" inside the page body — now uses
+//     `store.products.title`.
+//
+// The page is a server component, so we `await getTranslations` once at
+// the top of the default export.
+//
+// `ProductFilters`, `CategoryList`, `ProductGrid`, `ProductPagination`
+// are separate components outside this audit scope; they manage their
+// own copy through `useTranslations` internally.
+// ==========================================
+
 interface ProductsPageProps {
   params: Promise<{ locale: string; slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export const metadata: Metadata = {
-  title: 'All Products',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'store.metadata' });
+  return {
+    title: t('productsTitle'),
+  };
+}
 
 async function getProducts(
   slug: string,
@@ -57,8 +87,10 @@ export default async function ProductsPage({
   params,
   searchParams,
 }: ProductsPageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const resolvedSearchParams = await searchParams;
+
+  const t = await getTranslations({ locale, namespace: 'store.products' });
 
   const productsResponse = await getProducts(slug, resolvedSearchParams);
   const { data: products, meta } = productsResponse;
@@ -71,7 +103,7 @@ export default async function ProductsPage({
     <div className="container px-4 py-8">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">All Products</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
       </div>
 
       {/* Search */}

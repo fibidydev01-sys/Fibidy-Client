@@ -15,6 +15,7 @@
 //   REJECTED                    → red error, Contact Support
 //   isPolling                   → loading state after returning from Stripe
 
+import { useTranslations } from 'next-intl';
 import { useInitiateKyc } from '@/hooks/dashboard/use-products';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,9 @@ export function KycBanner({
   futureRequirementsDeadline,
   isPolling,
 }: KycBannerProps) {
+  const t = useTranslations('dashboard.kycBanner');
+  const tStates = useTranslations('dashboard.kycBanner.states');
+  const tActions = useTranslations('dashboard.kycBanner.actions');
   const { initiateKyc, isLoading } = useInitiateKyc();
 
   // ── isPolling — merchant just returned from Stripe ───────────
@@ -54,10 +58,10 @@ export function KycBanner({
     return (
       <Alert>
         <AlertDescription>
-          <Label />
+          <Label text={t('label')} />
           <div className="flex items-center gap-2 mt-1">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-            <span className="text-sm">Checking verification status...</span>
+            <span className="text-sm">{t('polling')}</span>
           </div>
         </AlertDescription>
       </Alert>
@@ -69,9 +73,9 @@ export function KycBanner({
     return (
       <Alert>
         <AlertDescription>
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm mt-1 text-muted-foreground">
-            Loading verification status...
+            {t('loading')}
           </p>
         </AlertDescription>
       </Alert>
@@ -84,18 +88,19 @@ export function KycBanner({
     return (
       <Alert>
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm">
             {isReturning
-              ? "You haven't finished setting up payments. Pick up where you left off."
-              : 'Set up payments to start selling digital products.'}
+              ? tStates('notStartedReturning')
+              : tStates('notStartedFresh')}
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
+            loadingLabel={tActions('loading')}
           >
-            {isReturning ? 'Continue Setup' : 'Set Up Payments'}
+            {isReturning ? tActions('continueSetup') : tActions('setupPayments')}
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -107,10 +112,9 @@ export function KycBanner({
     return (
       <Alert>
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm">
-            Verification in progress with Stripe. This usually takes 1–2
-            business days.
+            {tStates('pending')}
           </p>
         </AlertDescription>
       </Alert>
@@ -122,11 +126,11 @@ export function KycBanner({
     return (
       <Alert variant="destructive">
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           {errors.length > 0 ? (
             <>
               <p className="text-sm font-medium">
-                Verification requires fixes:
+                {tStates('needsMoreInfoTitle')}
               </p>
               <ul className="list-disc list-inside space-y-1">
                 {errors.map((err, i) => (
@@ -138,17 +142,17 @@ export function KycBanner({
             </>
           ) : (
             <p className="text-sm">
-              Stripe needs additional information to continue account
-              verification.
+              {tStates('needsMoreInfoGeneric')}
             </p>
           )}
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
+            loadingLabel={tActions('loading')}
             variant="outline"
           >
-            Complete Documents
+            {tActions('completeDocuments')}
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -160,21 +164,21 @@ export function KycBanner({
     return (
       <Alert variant="destructive">
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm font-semibold">
-            URGENT: The verification deadline has passed.
+            {tStates('pastDueHeadline')}
           </p>
           <p className="text-sm">
-            Your account is at risk of being deactivated soon. Complete
-            verification now.
+            {tStates('pastDueBody')}
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
+            loadingLabel={tActions('loading')}
             variant="outline"
           >
-            Complete Now
+            {tActions('completeNow')}
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -186,17 +190,17 @@ export function KycBanner({
     return (
       <Alert>
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm">
-            Account active for accepting payments. Payouts to your bank are
-            not yet active — complete verification to enable payouts.
+            {tStates('chargesOnly')}
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
             isLoading={isLoading}
+            loadingLabel={tActions('loading')}
           >
-            Activate Payouts
+            {tActions('activatePayouts')}
           </ActionButton>
         </AlertDescription>
       </Alert>
@@ -209,12 +213,11 @@ export function KycBanner({
       return (
         <Alert>
           <AlertDescription className="space-y-2">
-            <Label />
+            <Label text={t('label')} />
             <p className="text-sm">
-              Account active. Stripe has new requirement updates that need
-              to be completed
+              {tStates('activeWithFutureReq')}
               {futureRequirementsDeadline
-                ? ` before ${formatDate(futureRequirementsDeadline)}`
+                ? tStates('activeWithFutureReqDeadline', { date: formatDate(futureRequirementsDeadline) })
                 : ''}
               .
             </p>
@@ -222,9 +225,10 @@ export function KycBanner({
               onClick={() => initiateKyc()}
               disabled={isLoading}
               isLoading={isLoading}
+              loadingLabel={tActions('loading')}
               variant="outline"
             >
-              View Updates
+              {tActions('viewUpdates')}
             </ActionButton>
           </AlertDescription>
         </Alert>
@@ -234,9 +238,9 @@ export function KycBanner({
     return (
       <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
         <AlertDescription>
-          <Label className="text-green-700 dark:text-green-400" />
+          <Label text={t('label')} className="text-green-700 dark:text-green-400" />
           <p className="text-sm text-green-800 dark:text-green-300 mt-1">
-            Account verified. You can accept payments and withdraw funds.
+            {tStates('activeClean')}
           </p>
         </AlertDescription>
       </Alert>
@@ -248,13 +252,12 @@ export function KycBanner({
     return (
       <Alert variant="destructive">
         <AlertDescription className="space-y-2">
-          <Label />
+          <Label text={t('label')} />
           <p className="text-sm">
-            Account verification was rejected by Stripe. Contact our support
-            team for help.
+            {tStates('rejected')}
           </p>
           <Button size="sm" variant="outline" asChild>
-            <a href="mailto:support@fibidy.com">Contact Support</a>
+            <a href="mailto:support@fibidy.com">{tActions('contactSupport')}</a>
           </Button>
         </AlertDescription>
       </Alert>
@@ -266,12 +269,12 @@ export function KycBanner({
 
 // ── Sub-components ────────────────────────────────────────────────
 
-function Label({ className }: { className?: string }) {
+function Label({ text, className }: { text: string; className?: string }) {
   return (
     <p
       className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${className ?? ''}`}
     >
-      Stripe Connect Verification
+      {text}
     </p>
   );
 }
@@ -281,12 +284,14 @@ function ActionButton({
   onClick,
   disabled,
   isLoading,
+  loadingLabel,
   variant = 'default',
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled: boolean;
   isLoading: boolean;
+  loadingLabel: string;
   variant?: 'default' | 'outline';
 }) {
   return (
@@ -300,7 +305,7 @@ function ActionButton({
       {isLoading ? (
         <>
           <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-          Loading...
+          {loadingLabel}
         </>
       ) : (
         children

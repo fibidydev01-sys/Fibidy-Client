@@ -8,14 +8,11 @@
 //
 // Layout ini di-import oleh dashboard layout.
 // Sesuaikan path import di layout lo kalau beda.
-//
-// [TIDUR-NYENYAK v3 FIX] Removed unused imports:
-//   - LayoutDashboard (line 20) — no longer referenced after nav cleanup
-//   - Button (line 24)         — logout uses plain <button>, not Button
 // ==========================================
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Package,
   BookOpen,
@@ -26,7 +23,7 @@ import {
 import { cn } from '@/lib/shared/utils';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: React.ElementType;
   match?: string; // pathname startsWith match
@@ -34,7 +31,7 @@ interface NavItem {
 
 const SELLER_NAV: NavItem[] = [
   {
-    label: 'Products',
+    labelKey: 'products',
     href: '/dashboard/products',
     icon: Package,
     match: '/dashboard/products',
@@ -43,7 +40,7 @@ const SELLER_NAV: NavItem[] = [
 
 const BUYER_NAV: NavItem[] = [
   {
-    label: 'Library',
+    labelKey: 'library',
     href: '/dashboard/library',
     icon: BookOpen,
     match: '/dashboard/library',
@@ -52,12 +49,12 @@ const BUYER_NAV: NavItem[] = [
 
 const COMMON_NAV: NavItem[] = [
   {
-    label: 'Discover',
+    labelKey: 'discover',
     href: '/discover',
     icon: Compass,
   },
   {
-    label: 'Settings',
+    labelKey: 'settings',
     href: '/dashboard/settings',
     icon: Settings,
     match: '/dashboard/settings',
@@ -70,6 +67,7 @@ interface DashboardSidebarNavProps {
 }
 
 export function DashboardSidebarNav({ role = 'SELLER', onLogout }: DashboardSidebarNavProps) {
+  const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
 
   const navItems = [
@@ -97,7 +95,7 @@ export function DashboardSidebarNav({ role = 'SELLER', onLogout }: DashboardSide
             )}
           >
             <item.icon className="h-4 w-4 shrink-0" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         );
       })}
@@ -111,7 +109,7 @@ export function DashboardSidebarNav({ role = 'SELLER', onLogout }: DashboardSide
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            Logout
+            {t('logout')}
           </button>
         </>
       )}

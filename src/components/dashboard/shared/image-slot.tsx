@@ -4,6 +4,7 @@
 // FilledSlot, EmptySlot, LockedSlot — semua square 1:1
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Crown, GripVertical, ImagePlus, Loader2, X } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { cn } from '@/lib/shared/utils';
@@ -40,6 +41,8 @@ interface LockedSlotProps {
 
 // ─── FilledSlot ───────────────────────────────────────────────────────────
 export function FilledSlot({ url, index, onRemove, draggable = false, children }: FilledSlotProps) {
+  const t = useTranslations('common.labels');
+  const tBadge = useTranslations('dashboard.products.card');
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: url,
     disabled: !draggable,
@@ -61,7 +64,7 @@ export function FilledSlot({ url, index, onRemove, draggable = false, children }
       >
         <Image
           src={url}
-          alt={`Photo ${index + 1}`}
+          alt={t('photo', { index: index + 1 })}
           fill
           className="object-cover pointer-events-none"
           sizes="(max-width: 640px) 50vw, 20vw"
@@ -70,7 +73,7 @@ export function FilledSlot({ url, index, onRemove, draggable = false, children }
 
         {/* Badge */}
         <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold">
-          {index === 0 ? '★ Main' : String(index + 1)}
+          {index === 0 ? tBadge('mainBadge') : String(index + 1)}
         </div>
 
         {/* Remove button */}
@@ -115,6 +118,7 @@ export function FilledSlot({ url, index, onRemove, draggable = false, children }
 
 // ─── EmptySlot ────────────────────────────────────────────────────────────
 export function EmptySlot({ index, onClick, isLoading, label, children }: EmptySlotProps) {
+  const t = useTranslations('common.labels');
   return (
     <div className="space-y-2">
       <button
@@ -134,7 +138,7 @@ export function EmptySlot({ index, onClick, isLoading, label, children }: EmptyS
           <>
             <ImagePlus className="h-6 w-6 text-muted-foreground/50" />
             <span className="text-[11px] font-medium text-muted-foreground/60">
-              {label ?? `Photo ${index + 1}`}
+              {label ?? t('photo', { index: index + 1 })}
             </span>
           </>
         )}
@@ -147,6 +151,7 @@ export function EmptySlot({ index, onClick, isLoading, label, children }: EmptyS
 
 // ─── LockedSlot ───────────────────────────────────────────────────────────
 export function LockedSlot({ onClick, children }: LockedSlotProps) {
+  const tBadge = useTranslations('store.product.badge');
   return (
     <div className="space-y-2">
       <button
@@ -164,7 +169,7 @@ export function LockedSlot({ onClick, children }: LockedSlotProps) {
           <Crown className="h-4 w-4 text-amber-500" />
         </div>
         <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-          Business
+          {tBadge('business')}
         </span>
       </button>
 

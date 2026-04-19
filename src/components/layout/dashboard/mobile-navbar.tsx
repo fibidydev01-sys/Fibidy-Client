@@ -11,7 +11,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Layout, Settings, History , BookOpen, Store } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { LayoutDashboard, Layout, Settings, History, BookOpen, Store } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 import { useAuthStore } from '@/stores/auth-store';
 import type { LucideIcon } from 'lucide-react';
@@ -19,23 +20,24 @@ import type { LucideIcon } from 'lucide-react';
 interface NavItemDef {
   href: string;
   icon: LucideIcon;
-  label: string;
+  labelKey: string;
 }
 
 const sellerNavItems: NavItemDef[] = [
-  { href: '/dashboard/products', icon: LayoutDashboard, label: 'Products' },
-  { href: '/dashboard/studio', icon: Layout, label: 'Studio' },
-  { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
-  { href: '/dashboard/products/downloads', icon: History, label: 'History'  },
-  { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+  { href: '/dashboard/products', icon: LayoutDashboard, labelKey: 'products' },
+  { href: '/dashboard/studio', icon: Layout, labelKey: 'studio' },
+  { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
+  { href: '/dashboard/products/downloads', icon: History, labelKey: 'downloads' },
+  { href: '/dashboard/settings', icon: Settings, labelKey: 'settings' },
 ];
 
 const buyerNavItems: NavItemDef[] = [
-  { href: '/dashboard/library', icon: BookOpen, label: 'Library' },
-  { href: '/dashboard/setup-store', icon: Store, label: 'Sell' },
+  { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
+  { href: '/dashboard/setup-store', icon: Store, labelKey: 'sell' },
 ];
 
 export function MobileNavbar() {
+  const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const tenant = useAuthStore((s) => s.tenant);
 
@@ -63,7 +65,7 @@ export function MobileNavbar() {
               )}
             >
               <item.icon className={cn('h-5 w-5 transition-transform', active && 'scale-110')} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium">{t(item.labelKey)}</span>
               {active && (
                 <span className="absolute -bottom-0 w-1 h-1 rounded-full bg-primary" />
               )}

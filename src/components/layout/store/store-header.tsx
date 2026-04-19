@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Menu, Rocket, LayoutDashboard, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader } from '@/components/ui/sheet';
@@ -25,20 +26,21 @@ interface StoreHeaderProps {
 }
 
 export function StoreHeader({ tenant }: StoreHeaderProps) {
+  const t = useTranslations('store.header');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const urls = useStoreUrls(tenant.slug);
 
   const navItems = [
-    { label: 'Home', href: urls.home },
-    { label: 'Featured', href: urls.path('/about') },
-    { label: 'Products', href: urls.products() },
-    { label: 'Contact', href: urls.path('/contact') },
+    { label: t('nav.home'), href: urls.home },
+    { label: t('nav.featured'), href: urls.path('/about') },
+    { label: t('nav.products'), href: urls.products() },
+    { label: t('nav.contact'), href: urls.path('/contact') },
   ];
 
   const contactInfo = [
-    { label: 'WhatsApp', value: tenant.whatsapp, type: 'whatsapp' as const },
-    { label: 'Address', value: tenant.address, type: 'address' as const },
+    { label: t('whatsapp'), value: tenant.whatsapp, type: 'whatsapp' as const },
+    { label: t('address'), value: tenant.address, type: 'address' as const },
   ].filter(item => item.value);
 
   return (
@@ -54,7 +56,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
               <NavigationMenuTrigger
                 className={cn(pathname === urls.home && 'bg-primary/10 text-primary')}
               >
-                Home
+                {t('nav.home')}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
@@ -94,7 +96,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
                     </NavigationMenuLink>
                   </li>
                   <li className="p-3">
-                    <p className="text-xs text-muted-foreground mb-3">Reach us through:</p>
+                    <p className="text-xs text-muted-foreground mb-3">{t('reachUs')}</p>
                     <div className="grid gap-2">
                       {contactInfo.map((info) => (
                         <div key={info.label} className="flex items-start gap-2 p-2 rounded-lg hover:bg-accent transition-colors">
@@ -119,7 +121,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
                     </div>
                     <div className="mt-3 pt-3 border-t">
                       <Link href={urls.path('/contact')} className="text-sm text-primary hover:underline">
-                        View contact page
+                        {t('viewContactPage')}
                       </Link>
                     </div>
                   </li>
@@ -138,7 +140,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
                 )}
               >
                 <Rocket className="h-4 w-4" />
-                Featured
+                {t('nav.featured')}
               </Link>
             </NavigationMenuItem>
 
@@ -153,7 +155,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
                 )}
               >
                 <LayoutDashboard className="h-4 w-4" />
-                Products
+                {t('nav.products')}
               </Link>
             </NavigationMenuItem>
 
@@ -164,9 +166,9 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
         <div className="md:hidden ml-auto">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label={t('menuLabel')}>
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Menu</span>
+                <span className="sr-only">{t('menuLabel')}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[350px]">

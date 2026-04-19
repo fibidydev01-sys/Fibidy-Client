@@ -1,11 +1,38 @@
 // ============================================================================
 // FILE: src/hooks/dashboard/use-landing-config.ts
 // PURPOSE: Custom hook for managing Landing Page configuration
+//
+// [i18n FIX — 2026-04-19]
+// Three categories of change:
+//
+// (1) Toast messages
+//     All hardcoded EN titles + descriptions wired to `toast.landing.*`
+//     via `useTranslations('toast.landing')`.
+//     Validation description uses singular vs plural templates
+//     (validationDetailOne / validationDetailMany) already in JSON.
+//
+// (2) Indonesian leftover
+//     `DEFAULT_LANDING_CONFIG.hero.config.ctaText` was 'Lihat Produk'.
+//     Replaced with 'View Products' — Phase 1 is EN-only and the runtime
+//     display also falls back to `settings.hero.ctaDefault` = "View Products"
+//     when a tenant hasn't customized their hero. Keeping the module-level
+//     default in sync avoids a locale mismatch when a seller hits reset.
+//     NOTE: this value is PERSISTED to the BE landingConfig JSON field —
+//     it's tenant data, not UI copy. Phase 2 can either (a) keep it
+//     stored in English and have the storefront translate at render time,
+//     or (b) move it off the default entirely and let BE seed per locale.
+//
+// (3) Fallback error string
+//     `extractErrorMessages` used to hardcode 'An unknown error occurred'.
+//     Now accepts a `fallback` string param; caller passes a translated
+//     value from `error.generic.unknown`. Keeps the helper pure (no hooks)
+//     while flowing through i18n at the call site.
 // ============================================================================
 
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
 import { tenantsApi } from '@/lib/api/tenants';
@@ -15,6 +42,9 @@ import type { TenantLandingConfig } from '@/types/landing';
 // CONSTANTS
 // ============================================================================
 
+// [i18n FIX] `ctaText` changed from Indonesian 'Lihat Produk' to English
+// 'View Products'. This default is persisted to BE as tenant data when
+// a seller resets their landing page. See file header note (3).
 const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
   enabled: false,
   hero: {
@@ -22,7 +52,7 @@ const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
     title: '',
     subtitle: '',
     config: {
-      ctaText: 'Lihat Produk',
+      ctaText: 'View Products',
       ctaLink: '/products',
     },
   },
@@ -91,13 +121,20 @@ function mergeLandingConfig(
   };
 }
 
-function extractErrorMessages(error: unknown): string[] {
+/**
+ * Extract human-readable error messages from an unknown error.
+ *
+ * [i18n FIX] `fallback` param added — caller passes a translated
+ * "unknown error" string so downstream UI stays locale-aware.
+ * Keeps this helper pure (no hooks) so it can stay at module scope.
+ */
+function extractErrorMessages(error: unknown, fallback: string): string[] {
   if (error instanceof ApiRequestError) {
     const messages = [error.message, ...(error.errors ?? [])].filter(Boolean);
     return [...new Set(messages)];
   }
   if (error instanceof Error) return [error.message];
-  return ['An unknown error occurred'];
+  return [fallback];
 }
 
 // ============================================================================
@@ -109,6 +146,9 @@ export function useLandingConfig({
   onSaveSuccess,
   onValidationError,
 }: UseLandingConfigOptions): UseLandingConfigReturn {
+  const tToast = useTranslations('toast.landing');
+  const tError = useTranslations('error.generic');
+
   const mergedInitial = mergeLandingConfig(initialConfig);
 
   const [config, setConfig] = useState<TenantLandingConfig>(mergedInitial);
@@ -152,7 +192,7 @@ export function useLandingConfig({
       await tenantsApi.update({ landingConfig: { ...config } });
 
       setSavedConfig(deepClone(config));
-      toast.success('Landing page published!');
+      toast.success(tToast('published'));
       onSaveSuccess?.();
       return true;
     } catch (error) {
@@ -161,16 +201,17 @@ export function useLandingConfig({
       }
 
       if (error instanceof ApiRequestError && error.isValidationError()) {
-        const errors = extractErrorMessages(error);
+        const errors = extractErrorMessages(error, tError('unknown'));
         setValidationErrors(errors);
         onValidationError?.(errors);
-        toast.error('Validation failed', {
-          description: errors.length === 1
-            ? errors[0]
-            : `${errors.length} errors found. Please review your settings.`,
+        toast.error(tToast('validationFailed'), {
+          description:
+            errors.length === 1
+              ? tToast('validationDetailOne', { error: errors[0] })
+              : tToast('validationDetailMany', { count: errors.length }),
         });
       } else {
-        toast.error('Failed to save landing page', {
+        toast.error(tToast('saveFailed'), {
           description: getErrorMessage(error),
         });
       }
@@ -179,7 +220,7 @@ export function useLandingConfig({
     } finally {
       setIsSaving(false);
     }
-  }, [config, onSaveSuccess, onValidationError]);
+  }, [config, onSaveSuccess, onValidationError, tToast, tError]);
 
   // --------------------------------------------------------------------------
   // Discard local changes
@@ -187,8 +228,8 @@ export function useLandingConfig({
   const discardChanges = useCallback(() => {
     setConfig(deepClone(savedConfig));
     setValidationErrors([]);
-    toast.info('Changes discarded');
-  }, [savedConfig]);
+    toast.info(tToast('discarded'));
+  }, [savedConfig, tToast]);
 
   // --------------------------------------------------------------------------
   // Reset to defaults
@@ -204,7 +245,7 @@ export function useLandingConfig({
       setConfig(resetConfig);
       setSavedConfig(deepClone(resetConfig));
 
-      toast.success('Landing page reset to defaults');
+      toast.success(tToast('resetSuccess'));
       onSaveSuccess?.();
       return true;
     } catch (error) {
@@ -213,11 +254,11 @@ export function useLandingConfig({
       }
 
       if (error instanceof ApiRequestError && error.isValidationError()) {
-        const errors = extractErrorMessages(error);
+        const errors = extractErrorMessages(error, tError('unknown'));
         setValidationErrors(errors);
-        toast.error('Failed to reset landing page', { description: errors[0] });
+        toast.error(tToast('resetFailed'), { description: errors[0] });
       } else {
-        toast.error('Failed to reset landing page', {
+        toast.error(tToast('resetFailed'), {
           description: getErrorMessage(error),
         });
       }
@@ -226,7 +267,7 @@ export function useLandingConfig({
     } finally {
       setIsSaving(false);
     }
-  }, [onSaveSuccess]);
+  }, [onSaveSuccess, tToast, tError]);
 
   // --------------------------------------------------------------------------
   // Return

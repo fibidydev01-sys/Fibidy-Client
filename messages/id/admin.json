@@ -1,0 +1,166 @@
+{
+  "admin": {
+    "metadata": {
+      "layoutTemplate": "%s | Admin - Fibidy",
+      "layoutDefault": "Admin - Fibidy"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "tenants": "Tenant",
+      "logs": "Log Audit",
+      "maintenance": "Maintenance",
+      "menu": "Menu",
+      "lightMode": "Mode terang",
+      "darkMode": "Mode gelap",
+      "signOut": "Keluar"
+    },
+    "guard": {
+      "verifyingSession": "Memverifikasi sesi..."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Ringkasan semua metrik platform",
+      "stats": {
+        "totalTenants": "Total Tenant",
+        "totalTenantsSub": "+{count} bulan ini",
+        "activeTenants": "Tenant Aktif",
+        "activeTenantsSub": "{count} disuspend",
+        "suspendedTenants": "Tenant Disuspend",
+        "suspendedTenantsSub": "Perlu perhatian",
+        "businessPlan": "Paket Business",
+        "businessPlanSub": "Langganan aktif",
+        "revenueThisMonth": "Pendapatan Bulan Ini",
+        "revenueThisMonthSub": "Total: {total}",
+        "newTenantsThisMonth": "Tenant Baru Bulan Ini",
+        "newTenantsThisMonthSub": "Pendaftaran terbaru"
+      }
+    },
+    "tenants": {
+      "title": "Tenant",
+      "subtitleLoading": "Memuat...",
+      "subtitleCount": "{count} tenant terdaftar",
+      "searchPlaceholder": "Cari nama, email, atau slug...",
+      "statusFilter": {
+        "placeholder": "Status",
+        "all": "Semua status",
+        "active": "Aktif",
+        "suspended": "Disuspend",
+        "inactive": "Tidak aktif"
+      },
+      "columns": {
+        "store": "Toko",
+        "email": "Email",
+        "plan": "Paket",
+        "status": "Status",
+        "products": "Produk",
+        "joined": "Bergabung"
+      },
+      "empty": "Tidak ada tenant ditemukan",
+      "dash": "—",
+      "actions": {
+        "view": "Lihat",
+        "suspend": "Suspend",
+        "unsuspend": "Batalkan Suspend",
+        "viewStore": "Lihat Toko"
+      },
+      "detail": {
+        "notFound": "Tenant tidak ditemukan",
+        "sections": {
+          "storeInformation": "Informasi Toko",
+          "subscription": "Langganan",
+          "paymentHistory": "Riwayat Pembayaran"
+        },
+        "fields": {
+          "email": "Email",
+          "category": "Kategori",
+          "whatsapp": "WhatsApp",
+          "phone": "Telepon",
+          "totalProducts": "Total Produk",
+          "joined": "Bergabung",
+          "updated": "Diperbarui",
+          "plan": "Paket",
+          "status": "Status",
+          "activeUntil": "Aktif Sampai",
+          "price": "Harga",
+          "free": "Gratis"
+        },
+        "noSubscription": "Belum ada langganan",
+        "suspendDialog": {
+          "title": "Suspend Tenant?",
+          "descriptionPrefix": "Tenant",
+          "descriptionSuffix": "tidak akan bisa login setelah di-suspend.",
+          "reasonLabel": "Alasan suspend",
+          "reasonPlaceholder": "Masukkan alasan suspend...",
+          "cancel": "Batal",
+          "confirm": "Ya, suspend"
+        },
+        "unsuspendDialog": {
+          "title": "Batalkan Suspend Tenant?",
+          "descriptionPrefix": "Tenant",
+          "descriptionSuffix": "akan diaktifkan kembali.",
+          "cancel": "Batal",
+          "confirm": "Ya, aktifkan"
+        }
+      }
+    },
+    "logs": {
+      "title": "Log Audit",
+      "subtitleLoading": "Memuat...",
+      "subtitleCount": "{count} log tercatat",
+      "filters": {
+        "actionPlaceholder": "Filter aksi",
+        "allActions": "Semua aksi",
+        "fromPlaceholder": "Dari tanggal",
+        "toPlaceholder": "Sampai tanggal",
+        "reset": "Reset"
+      },
+      "actions": {
+        "SUSPEND_TENANT": "Suspend Tenant",
+        "UNSUSPEND_TENANT": "Batalkan Suspend Tenant",
+        "EXTEND_SUBSCRIPTION": "Perpanjang Langganan",
+        "CHANGE_PLAN": "Ubah Paket",
+        "CREATE_REDEEM_CODES": "Buat Kode Redeem",
+        "DELETE_REDEEM_CODE": "Hapus Kode Redeem"
+      },
+      "columns": {
+        "time": "Waktu",
+        "action": "Aksi",
+        "targetId": "ID Target",
+        "details": "Detail"
+      },
+      "empty": "Tidak ada log ditemukan",
+      "dash": "—"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "subtitle": "Alat untuk menjaga database dan platform tetap sehat",
+      "cleanup": {
+        "title": "Bersihkan Log",
+        "description": "Hapus data DownloadLog dan WebhookEvent lama untuk mencegah pembengkakan database. Aman dijalankan kapan saja — data historis yang dibutuhkan untuk akuntansi tidak akan dihapus.",
+        "downloadLogsLabel": "Log Download (hari)",
+        "downloadLogsHelper": "Hapus data lebih lama dari {days} hari",
+        "webhookEventsLabel": "Webhook Event (hari)",
+        "webhookEventsHelper": "Hapus data lebih lama dari {days} hari",
+        "warningBold": "Aksi ini tidak bisa dibatalkan.",
+        "warningBody": "Pastikan threshold sudah benar sebelum menjalankan. Data yang dihapus tidak bisa dipulihkan.",
+        "runButton": "Jalankan Cleanup",
+        "runningButton": "Menghapus data...",
+        "resultDownloadLogs": "Log download",
+        "resultWebhookEvents": "Webhook event",
+        "confirmDialog": {
+          "title": "Jalankan cleanup?",
+          "descIntro": "Data berikut akan dihapus permanen dari database:",
+          "bullet1Bold": "DownloadLog",
+          "bullet1Middle": "lebih lama dari",
+          "bullet1Suffix": "{days} hari",
+          "bullet2Bold": "WebhookEvent",
+          "bullet2Middle": "lebih lama dari",
+          "bullet2Suffix": "{days} hari",
+          "footnote": "Data Purchase, Tenant, dan riwayat Subscription TIDAK akan terpengaruh.",
+          "cancel": "Batal",
+          "confirm": "Ya, hapus"
+        }
+      }
+    }
+  }
+}

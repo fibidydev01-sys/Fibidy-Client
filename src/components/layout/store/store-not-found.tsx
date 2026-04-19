@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Store } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 // ==========================================
@@ -11,6 +12,9 @@ interface StoreNotFoundProps {
 }
 
 export function StoreNotFound({ slug }: StoreNotFoundProps) {
+  const t = useTranslations('store.notFound');
+  const tCommon = useTranslations('common.breadcrumb');
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="text-center max-w-md">
@@ -20,21 +24,16 @@ export function StoreNotFound({ slug }: StoreNotFoundProps) {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold mb-2">Store Not Found</h1>
+        <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
 
         <p className="text-muted-foreground mb-6">
-          {slug ? (
-            <>
-              The store <span className="font-medium">&quot;{slug}&quot;</span> does not
-              exist or is no longer active.
-            </>
-          ) : (
-            'The store you are looking for does not exist or is no longer active.'
-          )}
+          {slug
+            ? t('descriptionWithSlug', { slug })
+            : t('descriptionGeneric')}
         </p>
 
         <Button asChild variant="outline">
-          <Link href="/">Back to Home</Link>
+          <Link href="/">{tCommon('backToHome')}</Link>
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 // ==========================================
 // CONTACT SELLER BUTTON — v3
+// File: src/components/store/checkout/contact-seller-button.tsx
 //
 // Repurposed from WhatsAppOrderButton.
 // Purpose: pre-sales contact channel via WhatsApp.
@@ -10,18 +11,53 @@
 // Used in:
 //   - Discover detail page (alongside Buy button)
 //   - Can also be used in store product detail
+//
+// [i18n FIX — 2026-04-19]
+// Previously the WhatsApp template parts (`Price:`, `Name:`, `Question:`)
+// were hardcoded English labels built in JS:
+//
+//   const pricePart = price
+//     ? `\nPrice: ${currency === 'USD' ? '$' : currency}${price.toFixed(2)}`
+//     : '';
+//   const namePart = name ? `\nName: ${name}` : '';
+//   const questionPart = question ? `\nQuestion: ${question}` : '';
+//
+// Those labels would never translate even after adding a new locale —
+// the outer `contactSellerWhatsappTemplate` key was translatable, but the
+// inner field labels leaked through as English.
+//
+// Fix: read the labels from a dedicated namespace
+// `store.checkout.contactSellerWhatsappLabels.{price,name,question}` and
+// interpolate them into the `{pricePart}/{namePart}/{questionPart}` slots.
+//
+// Also use `formatPrice()` from `lib/shared/format.ts` for the price part
+// so currency formatting is consistent with the rest of the app (instead
+// of the ad-hoc `$X.XX` formatting).
+//
+// REQUIRED JSON additIONS (messages/en/checkout.json):
+//
+//   "checkout": {
+//     ...
+//     "contactSellerWhatsappLabels": {
+//       "price": "Price",
+//       "name": "Name",
+//       "question": "Question"
+//     },
+//     ...
+//   }
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
 import { Drawer } from 'vaul';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { MessageCircle, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/shared/utils';
-import { generateWhatsAppLink } from '@/lib/shared/format';
+import { generateWhatsAppLink, formatPrice } from '@/lib/shared/format';
 
 interface ContactSellerButtonProps {
   productName: string;
@@ -46,6 +82,9 @@ export function ContactSellerButton({
   size = 'default',
   children,
 }: ContactSellerButtonProps) {
+  const t = useTranslations('store.checkout');
+  const tLabels = useTranslations('store.checkout.contactSellerWhatsappLabels');
+  const tDialog = useTranslations('store.checkout.contactSellerDialog');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [question, setQuestion] = useState('');
@@ -54,18 +93,23 @@ export function ContactSellerButton({
   const handleSend = async () => {
     setIsSubmitting(true);
 
-    const priceText = price
-      ? `\nPrice: ${currency === 'USD' ? '$' : currency}${price.toFixed(2)}`
+    // Build template parts with translated labels.
+    // `store.checkout.contactSellerWhatsappTemplate` uses slots
+    // `{pricePart}`, `{namePart}`, `{questionPart}` so the outer
+    // structure stays under translator control.
+    const pricePart = price
+      ? `\n${tLabels('price')}: ${formatPrice(price, currency)}`
       : '';
+    const namePart = name ? `\n${tLabels('name')}: ${name}` : '';
+    const questionPart = question ? `\n${tLabels('question')}: ${question}` : '';
 
-    const message = `Hi ${sellerName},
-
-I'm interested in your product:
-
-*${productName}*${priceText}
-${name ? `\nName: ${name}` : ''}${question ? `\nQuestion: ${question}` : ''}
-
-Thank you! 🙏`;
+    const message = t('contactSellerWhatsappTemplate', {
+      name: sellerName,
+      product: productName,
+      pricePart,
+      namePart,
+      questionPart,
+    });
 
     const link = generateWhatsAppLink(sellerWhatsapp, message);
     window.open(link, '_blank');
@@ -86,7 +130,7 @@ Thank you! 🙏`;
           {children || (
             <>
               <MessageCircle className="mr-2 h-4 w-4" />
-              Contact Seller
+              {t('contactSeller')}
             </>
           )}
         </Button>
@@ -104,11 +148,13 @@ Thank you! 🙏`;
           aria-describedby="contact-seller-drawer-description"
         >
           <Drawer.Title asChild>
-            <VisuallyHidden.Root>Contact {sellerName}</VisuallyHidden.Root>
+            <VisuallyHidden.Root>
+              {tDialog('title')} — {sellerName}
+            </VisuallyHidden.Root>
           </Drawer.Title>
           <Drawer.Description asChild>
             <VisuallyHidden.Root id="contact-seller-drawer-description">
-              Send a message to {sellerName} about {productName}
+              {tDialog('subtitlePrefix', { name: sellerName })} {productName}
             </VisuallyHidden.Root>
           </Drawer.Description>
 
@@ -120,9 +166,9 @@ Thank you! 🙏`;
           {/* Header */}
           <div className="px-6 pb-3 border-b shrink-0">
             <div className="max-w-2xl mx-auto w-full">
-              <h3 className="font-semibold text-lg">Contact Seller</h3>
+              <h3 className="font-semibold text-lg">{tDialog('title')}</h3>
               <p className="text-sm text-muted-foreground">
-                Ask {sellerName} about {productName}
+                {tDialog('subtitlePrefix', { name: sellerName })} {productName}
               </p>
             </div>
           </div>
@@ -130,19 +176,19 @@ Thank you! 🙏`;
           {/* Body */}
           <div className="max-w-2xl mx-auto w-full px-6 py-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="contact-name">Name (optional)</Label>
+              <Label htmlFor="contact-name">{tDialog('nameLabel')}</Label>
               <Input
                 id="contact-name"
-                placeholder="Your name"
+                placeholder={tDialog('namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-question">Question (optional)</Label>
+              <Label htmlFor="contact-question">{tDialog('questionLabel')}</Label>
               <Textarea
                 id="contact-question"
-                placeholder="Any questions about this product..."
+                placeholder={tDialog('questionPlaceholder')}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 rows={2}
@@ -154,7 +200,7 @@ Thank you! 🙏`;
           <div className="border-t px-6 py-4 shrink-0">
             <div className="max-w-2xl mx-auto w-full flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setOpen(false)}>
-                Cancel
+                {tDialog('cancel')}
               </Button>
               <Button className="flex-1" onClick={handleSend} disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -162,7 +208,7 @@ Thank you! 🙏`;
                 ) : (
                   <MessageCircle className="mr-2 h-4 w-4" />
                 )}
-                Send via WhatsApp
+                {tDialog('send')}
               </Button>
             </div>
           </div>

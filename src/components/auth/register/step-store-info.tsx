@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ interface StepStoreInfoProps {
 // ==========================================
 
 export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreInfoProps) {
+  const t = useTranslations('auth.register.storeInfo');
   const [localName, setLocalName] = useState(name);
   const [localSlug, setLocalSlug] = useState(slug);
   const [localDescription, setLocalDescription] = useState(description);
@@ -74,17 +76,17 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
       {/* Store Name */}
       <div className="space-y-1.5">
         <Label htmlFor="store-name" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          Store name
+          {t('nameLabel')}
         </Label>
         <Input
           id="store-name"
-          placeholder="e.g. Burger House"
+          placeholder={t('namePlaceholder')}
           value={localName}
           onChange={(e) => handleNameChange(e.target.value)}
           className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
         />
         <p className="text-xs text-muted-foreground">
-          Shown on your store homepage and listings
+          {t('nameHelper')}
         </p>
       </div>
 
@@ -93,12 +95,12 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
       {/* Store URL */}
       <div className="space-y-1.5">
         <Label htmlFor="store-slug" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          Store URL
+          {t('slugLabel')}
         </Label>
         <div className="relative">
           <Input
             id="store-slug"
-            placeholder="burger-house"
+            placeholder={t('slugPlaceholder')}
             value={localSlug}
             onChange={(e) => handleSlugChange(e.target.value)}
             className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
@@ -117,10 +119,10 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
         </div>
         <p className="text-xs text-muted-foreground flex items-center gap-1">
           <Info className="h-3 w-3" />
-          {localSlug || 'your-store'}.fibidy.com
+          {t('slugSuffix', { slug: localSlug || t('slugDefault') })}
         </p>
         {isAvailable === false && (
-          <p className="text-xs text-destructive">This URL is already taken</p>
+          <p className="text-xs text-destructive">{t('slugTaken')}</p>
         )}
       </div>
 
@@ -129,12 +131,12 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
       {/* Description */}
       <div className="space-y-1.5">
         <Label htmlFor="store-desc" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          Description{' '}
-          <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+          {t('descriptionLabel')}{' '}
+          <span className="normal-case font-normal text-muted-foreground/70">{t('descriptionOptional')}</span>
         </Label>
         <Textarea
           id="store-desc"
-          placeholder="Tell customers what your store is about..."
+          placeholder={t('descriptionPlaceholder')}
           rows={3}
           value={localDescription}
           onChange={(e) => handleDescriptionChange(e.target.value)}
@@ -142,8 +144,10 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
           className="resize-none text-sm placeholder:text-muted-foreground/50"
         />
         <div className="flex justify-between text-[11px] text-muted-foreground">
-          <span>Shown in your store profile &amp; search results</span>
-          <span className="font-mono tabular-nums">{localDescription.length}/500</span>
+          <span>{t('descriptionHelper')}</span>
+          <span className="font-mono tabular-nums">
+            {t('descriptionCount', { current: localDescription.length, max: 500 })}
+          </span>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
 // ==========================================
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import Link from 'next/link';
 import { Package, FileText } from 'lucide-react';
@@ -21,6 +22,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, storeSlug }: ProductCardProps) {
+  const t = useTranslations('store.product.badge');
+  const tInfo = useTranslations('store.product.info');
+  const tCommon = useTranslations('common.productType');
   const { hasDiscount, discountPercent, isCustomPrice } = getProductPricing(product);
 
   // ── Adaptive: detect product type from fileKey ─────────────────
@@ -70,7 +74,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
           {hasDiscount && (
             <div className="absolute top-2 left-2">
               <Badge variant="destructive" className="text-xs px-1.5 py-0">
-                -{discountPercent}%
+                {tInfo('discountBadge', { percent: discountPercent })}
               </Badge>
             </div>
           )}
@@ -79,11 +83,11 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
           <div className="absolute top-2 right-2">
             {isDigital ? (
               <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600 text-white">
-                Digital
+                {t('digital')}
               </Badge>
             ) : (
               <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-background/80">
-                Custom
+                {t('custom')}
               </Badge>
             )}
           </div>
@@ -115,7 +119,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
           {isCustomPrice && (
             <p className="mt-1.5 text-xs text-muted-foreground italic">
-              Contact seller
+              {tCommon('contactSeller')}
             </p>
           )}
         </div>

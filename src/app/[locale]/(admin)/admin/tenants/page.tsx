@@ -2,12 +2,24 @@
 
 // ==========================================
 // ADMIN TENANTS PAGE
-// File: src/app/(admin)/admin/tenants/page.tsx
+// File: src/app/[locale]/(admin)/admin/tenants/page.tsx
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `admin.tenants.*` for page-specific copy
+//   - `common.pagination.*` for Prev/Next/Page labels
+//
+// Status values (ACTIVE/INACTIVE/SUSPENDED) on the badge are enum values
+// coming from the backend — those are intentionally left untranslated
+// so they match BE logs and audit trails exactly. Only the filter-dropdown
+// option labels are translated (since those are user-facing copy).
 // ==========================================
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { Search, ExternalLink } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,6 +64,9 @@ function StatusBadge({ status }: { status: string }) {
 // ==========================================
 
 export default function AdminTenantsPage() {
+  const t = useTranslations('admin.tenants');
+  const tPagination = useTranslations('common.pagination');
+
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -71,9 +86,11 @@ export default function AdminTenantsPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Tenants</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">
-          {result ? `${result.total} tenants registered` : 'Loading...'}
+          {result
+            ? t('subtitleCount', { count: result.total })
+            : t('subtitleLoading')}
         </p>
       </div>
 
@@ -82,7 +99,7 @@ export default function AdminTenantsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search name, email, or slug..."
+            placeholder={t('searchPlaceholder')}
             className="pl-9"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -93,13 +110,13 @@ export default function AdminTenantsPage() {
           onValueChange={(v) => { setStatus(v === 'ALL' ? '' : v); setPage(1); }}
         >
           <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t('statusFilter.placeholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All statuses</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="SUSPENDED">Suspended</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
+            <SelectItem value="ALL">{t('statusFilter.all')}</SelectItem>
+            <SelectItem value="ACTIVE">{t('statusFilter.active')}</SelectItem>
+            <SelectItem value="SUSPENDED">{t('statusFilter.suspended')}</SelectItem>
+            <SelectItem value="INACTIVE">{t('statusFilter.inactive')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -109,12 +126,12 @@ export default function AdminTenantsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Store</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Plan</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Products</TableHead>
-              <TableHead>Joined</TableHead>
+              <TableHead>{t('columns.store')}</TableHead>
+              <TableHead>{t('columns.email')}</TableHead>
+              <TableHead>{t('columns.plan')}</TableHead>
+              <TableHead>{t('columns.status')}</TableHead>
+              <TableHead>{t('columns.products')}</TableHead>
+              <TableHead>{t('columns.joined')}</TableHead>
               <TableHead className="w-16" />
             </TableRow>
           </TableHeader>
@@ -130,7 +147,7 @@ export default function AdminTenantsPage() {
             ) : result?.data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  No tenants found
+                  {t('empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -149,7 +166,7 @@ export default function AdminTenantsPage() {
                         {tenant.subscription.plan}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">{t('dash')}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -177,7 +194,7 @@ export default function AdminTenantsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
+            {tPagination('page', { current: page, total: totalPages })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -186,7 +203,7 @@ export default function AdminTenantsPage() {
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
             >
-              Prev
+              {tPagination('prev')}
             </Button>
             <Button
               variant="outline"
@@ -194,7 +211,7 @@ export default function AdminTenantsPage() {
               disabled={page === totalPages}
               onClick={() => setPage(p => p + 1)}
             >
-              Next
+              {tPagination('next')}
             </Button>
           </div>
         </div>

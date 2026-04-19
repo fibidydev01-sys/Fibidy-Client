@@ -1,0 +1,43 @@
+{
+  "checkout": {
+    "metadata": {
+      "successTitle": "Pembelian Berhasil — Fibidy",
+      "successDescription": "Produk digital kamu sekarang tersedia di Library",
+      "cancelTitle": "Pembelian Dibatalkan — Fibidy"
+    },
+    "success": {
+      "verifying": {
+        "title": "Memproses Pembayaran...",
+        "body": "Pembayaran kamu sedang dikonfirmasi. Biasanya hanya butuh beberapa detik."
+      },
+      "completed": {
+        "title": "Pembelian Berhasil!",
+        "productBodyWithName": "<strong>{name}</strong> sekarang tersedia di Library kamu.",
+        "productBodyFallback": "Produk kamu sekarang tersedia di Library."
+      },
+      "timeout": {
+        "title": "Pembayaran Diterima!",
+        "body": "Produk kamu akan muncul di Library sebentar lagi. Silakan cek Library kamu."
+      },
+      "policyNotice": "Semua penjualan bersifat final. Produk digital tidak bisa dikembalikan setelah dibeli.",
+      "openLibrary": "Buka Library",
+      "browseOthers": "Lihat Produk Lainnya"
+    },
+    "cancel": {
+      "title": "Pembelian Dibatalkan",
+      "body": "Tidak ada pembayaran yang diproses. Kamu bisa kembali kapan saja.",
+      "backToProduct": "Kembali ke Produk",
+      "browseProducts": "Lihat Produk",
+      "browseOthers": "Lihat Produk Lainnya"
+    },
+    "contactSellerWhatsappLabels": {
+      "price": "Harga",
+      "name": "Nama",
+      "question": "Pertanyaan"
+    },
+    "orderWhatsappLabels": {
+      "name": "Nama",
+      "notes": "Catatan"
+    }
+  }
+}

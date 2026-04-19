@@ -11,6 +11,7 @@
 //   - "Order via WhatsApp" only
 // ==========================================
 
+import { useTranslations } from 'next-intl';
 import { WhatsAppOrderButton } from '../checkout/whatsapp-order-button';
 import { StripeCheckoutButton } from '../checkout/stripe-checkout-button';
 import type { Product } from '@/types/product';
@@ -22,6 +23,8 @@ interface ProductActionsProps {
 }
 
 export function ProductActions({ product, tenant }: ProductActionsProps) {
+  const t = useTranslations('store.product.detail');
+  const tCheckout = useTranslations('store.checkout');
   const isDigital = !!product.fileKey;
   const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
 
@@ -42,7 +45,7 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">or</span>
+            <span className="text-xs text-muted-foreground">{t('actionsDivider')}</span>
             <div className="flex-1 border-t border-border" />
           </div>
 
@@ -52,7 +55,7 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
             tenant={tenant}
             className="w-full"
             variant="outline"
-            customLabel="Ask Seller via WhatsApp"
+            customLabel={tCheckout('askSellerWhatsapp')}
           />
         </div>
       ) : (
@@ -67,7 +70,7 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
       {/* Description */}
       {product.description && (
         <div className="space-y-1">
-          <p className="text-sm font-semibold">Product description</p>
+          <p className="text-sm font-semibold">{t('descriptionHeading')}</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {product.description}
           </p>

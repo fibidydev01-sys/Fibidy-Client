@@ -2,6 +2,7 @@
 
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { useCloudinaryUpload } from '@/hooks/shared/use-cloudinary-upload';
 import { EmptySlot } from '@/components/dashboard/shared/image-slot';
@@ -106,6 +107,8 @@ export function StepAppearance({
   onRemoveLogo,
   isRemovingLogo,
 }: StepAppearanceProps) {
+  const t = useTranslations('settings.hero.appearance');
+
   const { isUploading: isUploadingLogo, openWidget: openLogoWidget } = useCloudinaryUpload({
     folder: 'fibidy/logos',
     maxFiles: 1,
@@ -125,10 +128,10 @@ export function StepAppearance({
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            Logo
+            {t('logoHeading')}
           </p>
           <p className="text-xs text-muted-foreground">
-            Your store logo shown on the hero section
+            {t('logoDescription')}
           </p>
         </div>
         {formData.logo ? (
@@ -140,13 +143,13 @@ export function StepAppearance({
         ) : (
           <EmptySlot
             index={0}
-            label="Upload logo"
+            label={t('logoUploadLabel')}
             onClick={() => openLogoWidget(1)}
             isLoading={isUploadingLogo}
           />
         )}
         <p className="text-[11px] text-muted-foreground">
-          PNG/JPG · 200×200px · Transparent PNG recommended
+          {t('logoHelper')}
         </p>
       </div>
 
@@ -154,10 +157,10 @@ export function StepAppearance({
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            Background Image
+            {t('bgHeading')}
           </p>
           <p className="text-xs text-muted-foreground">
-            Cover image for your store&#39;s hero banner
+            {t('bgDescription')}
           </p>
         </div>
         {formData.heroBackgroundImage ? (
@@ -169,13 +172,13 @@ export function StepAppearance({
         ) : (
           <EmptySlot
             index={0}
-            label="Upload background"
+            label={t('bgUploadLabel')}
             onClick={() => openHeroBgWidget(1)}
             isLoading={isUploadingHeroBg}
           />
         )}
         <p className="text-[11px] text-muted-foreground">
-          Square 1:1 · min 1080×1080px · JPG/PNG
+          {t('bgHelper')}
         </p>
       </div>
 
@@ -183,10 +186,10 @@ export function StepAppearance({
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            Brand Color
+            {t('colorHeading')}
           </p>
           <p className="text-xs text-muted-foreground">
-            Primary color for buttons &amp; accents
+            {t('colorDescription')}
           </p>
         </div>
         <ColorPicker

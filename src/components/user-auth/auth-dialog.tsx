@@ -19,6 +19,7 @@
 //   - Any fields other than email + password
 // ==========================================
 
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -32,25 +33,26 @@ import { DialogLoginForm } from './dialog-login-form';
 import { DialogRegisterForm } from './dialog-register-form';
 
 export function AuthDialog() {
+  const t = useTranslations('auth.buyerDialog');
   const { isOpen, close } = useAuthDialogStore();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) close(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Sign in or Sign up</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Sign in to your account or create a new one to buy products.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="login">
           <TabsList className="w-full">
             <TabsTrigger value="login" className="flex-1">
-              Sign in
+              {t('signInTab')}
             </TabsTrigger>
             <TabsTrigger value="register" className="flex-1">
-              Sign up
+              {t('signUpTab')}
             </TabsTrigger>
           </TabsList>
 

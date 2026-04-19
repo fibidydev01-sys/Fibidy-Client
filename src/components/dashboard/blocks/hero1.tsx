@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,8 @@ export function Hero1({
   storeName,
   eyebrow,
 }: Hero1Props) {
+  const t = useTranslations('common.state');
+
   return (
     <section className="relative min-h-screen overflow-hidden bg-background flex flex-col">
 
@@ -63,7 +66,7 @@ export function Hero1({
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
                     <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium">
-                      No Image
+                      {t('noImage')}
                     </span>
                   </div>
                 )}

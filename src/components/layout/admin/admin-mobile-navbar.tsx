@@ -4,6 +4,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Users,
@@ -26,14 +27,15 @@ import { useAdminLogout } from '@/hooks/admin/use-admin';
 import { useDarkMode } from '@/hooks/shared/use-dark-mode';
 
 const navItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/tenants', icon: Users, label: 'Tenants' },
-  { href: '/admin/logs', icon: ScrollText, label: 'Audit Logs' },
+  { href: '/admin', icon: LayoutDashboard, labelKey: 'dashboard' },
+  { href: '/admin/tenants', icon: Users, labelKey: 'tenants' },
+  { href: '/admin/logs', icon: ScrollText, labelKey: 'logs' },
   // [FIX #6] New route
-  { href: '/admin/maintenance', icon: Wrench, label: 'Maintenance' },
+  { href: '/admin/maintenance', icon: Wrench, labelKey: 'maintenance' },
 ];
 
 export function AdminMobileNavbar() {
+  const t = useTranslations('admin.nav');
   const pathname = usePathname();
   const { logout } = useAdminLogout();
   const { isDark, toggleDarkMode } = useDarkMode();
@@ -60,6 +62,7 @@ export function AdminMobileNavbar() {
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground',
               )}
+              aria-label={t(item.labelKey)}
             >
               <item.icon
                 className={cn(
@@ -81,6 +84,7 @@ export function AdminMobileNavbar() {
                 'flex items-center justify-center px-2 py-2 rounded-lg transition-colors min-w-[50px]',
                 'text-muted-foreground hover:text-foreground',
               )}
+              aria-label={t('menu')}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -95,19 +99,19 @@ export function AdminMobileNavbar() {
               {isDark ? (
                 <>
                   <Sun className="mr-3 h-5 w-5" />
-                  Light mode
+                  {t('lightMode')}
                 </>
               ) : (
                 <>
                   <Moon className="mr-3 h-5 w-5" />
-                  Dark mode
+                  {t('darkMode')}
                 </>
               )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-destructive">
               <LogOut className="mr-3 h-5 w-5" />
-              Sign out
+              {t('signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

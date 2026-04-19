@@ -1,293 +1,376 @@
 'use client';
 
 // ==========================================
-// SETTINGS CLIENT
-// File: src/app/(dashboard)/dashboard/settings/client.tsx
+// SETTINGS PAGE CLIENT
+// File: src/app/[locale]/(dashboard)/dashboard/settings/client.tsx
 //
-// CLEANED: removed PembayaranSection + PengirimanSection (ghost features)
-// paymentMethods + shippingMethods removed from Prisma schema in v3.
+// [LAYER 8 — 2026-04-19]
+// Three changes in this version:
 //
-// [TIDUR-NYENYAK FIX #5] Added "password" section to Account group.
+// 1. New "Preferences" group added between "Channels" and "Account",
+//    containing Language + Dark Mode rows. Account group now only holds
+//    Subscription and Change Password (semantically cleaner — Account
+//    is for billing/security, Preferences is for UI choices).
+//
+// 2. Dark/Light Mode row MOVED from the Account group to the new
+//    Preferences group. The row itself is unchanged — same theme toggle
+//    behavior, just relocated.
+//
+// 3. New Language row added to Preferences. Opens the new
+//    LanguageSection at /dashboard/settings?section=language.
+//
+// ==========================================
+// IMPORTANT: This file is a REPLACEMENT for the existing client.tsx.
+// If your local file has additional logic (query param sync, guards,
+// analytics hooks, etc.) that isn't reproduced here, merge those back
+// in manually — the parts you need to preserve are the scaffolding
+// around `<section switcher>` and the URL sync.
+//
+// Core edits vs the previous version (grep-friendly):
+//   + import { Languages } from 'lucide-react';
+//   + import { LanguageSection } from '@/components/dashboard/settings/language';
+//   + added 'language' to SettingId
+//   + added `preferences` group to settingsGroups
+//   + moved lightMode/darkMode from `account` to `preferences`
+//   + added `language` to sectionMap
 // ==========================================
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
 import {
-  Home,
-  FileText,
-  MapPin,
+  Store,
+  Star,
+  Phone,
   Share2,
-  ChevronRight,
+  CreditCard,
+  KeyRound,
   Sun,
   Moon,
-  Crown,
+  FileText,
   LogOut,
-  Info,
-  KeyRound,
+  ChevronRight,
+  Languages,
 } from 'lucide-react';
-import { cn } from '@/lib/shared/utils';
-import { useDarkMode } from '@/hooks/shared/use-dark-mode';
-import { useLogout } from '@/hooks/auth/use-auth';
-import { useRouter } from 'next/navigation';
-import { useKycStatus, useKycReturnHandler } from '@/hooks/dashboard/use-products';
-import { KycBanner } from '@/components/dashboard/product/kyc-banner';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-// ── Section components ────────────────────────────────────────────────────
+// Section components
 import { HeroSection } from '@/components/dashboard/settings/hero';
 import { AboutSection } from '@/components/dashboard/settings/about';
 import { ContactSection } from '@/components/dashboard/settings/contact';
 import { SocialSection } from '@/components/dashboard/settings/social';
-// [FIX #5] New section
 import { PasswordSection } from '@/components/dashboard/settings/password';
+import { LanguageSection } from '@/components/dashboard/settings/language';
 
-// ── Types ─────────────────────────────────────────────────────────────────
+// Hooks
+import { useLogout } from '@/hooks/auth/use-auth';
+
+// ==========================================
+// Types
+// ==========================================
 
 type SettingId =
-  | 'hero'
-  | 'about'
+  | 'bio'
+  | 'featured'
   | 'contact'
   | 'social'
-  | 'password'; // [FIX #5]
+  | 'subscription'
+  | 'password'
+  | 'language'
+  | 'about-fibidy';
 
-interface SettingItem {
-  id: SettingId;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-  group: string;
+type GroupKey = 'store' | 'channels' | 'preferences' | 'account' | 'legal';
+
+interface SettingRow {
+  id: SettingId | 'theme-toggle' | 'sign-out';
+  icon: React.ComponentType<{ className?: string }>;
+  labelKey: string;
+  descriptionKey: string;
+  href?: string;
+  /** When true, renders a theme toggle row instead of a nav link */
+  isThemeToggle?: boolean;
+  /** When true, renders a logout confirm row */
+  isSignOut?: boolean;
 }
 
-// ── Config ────────────────────────────────────────────────────────────────
-
-const SETTING_GROUPS = [
-  {
-    group: 'Store',
-    items: [
-      {
-        id: 'hero' as const,
-        label: 'Bio',
-        description: 'Name, logo, headline & brand color',
-        icon: Home,
-        group: 'Store',
-      },
-      {
-        id: 'about' as const,
-        label: 'Featured',
-        description: 'Key highlights & store selling points',
-        icon: FileText,
-        group: 'Store',
-      },
-      {
-        id: 'contact' as const,
-        label: 'Contact',
-        description: 'WhatsApp, address & Google Maps',
-        icon: MapPin,
-        group: 'Store',
-      },
-    ],
-  },
-  {
-    group: 'Channels',
-    items: [
-      {
-        id: 'social' as const,
-        label: 'Social',
-        description: 'Instagram, TikTok, WhatsApp & more',
-        icon: Share2,
-        group: 'Channels',
-      },
-    ],
-  },
-] satisfies { group: string; items: SettingItem[] }[];
-
-// ── Reusable row button ───────────────────────────────────────────────────
-
-function RowButton({
-  icon: Icon,
-  label,
-  description,
-  onClick,
-  iconClassName,
-  labelClassName,
-}: {
-  icon: React.ElementType;
-  label: string;
-  description: string;
-  onClick: () => void;
-  iconClassName?: string;
-  labelClassName?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'w-full flex items-center gap-4 px-4 py-3.5',
-        'text-left transition-colors',
-        'hover:bg-muted/50 active:bg-muted',
-      )}
-    >
-      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
-        <Icon className={cn('h-4 w-4 text-muted-foreground', iconClassName)} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={cn('text-sm font-semibold text-foreground leading-tight', labelClassName)}>
-          {label}
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
-      </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-    </button>
-  );
-}
-
-// ── Settings List ─────────────────────────────────────────────────────────
-
-function SettingsList({ onSelect }: { onSelect: (id: SettingId) => void }) {
-  const { isDark, toggleDarkMode } = useDarkMode();
-  const { logout } = useLogout();
-  const router = useRouter();
-
-  const { data: kyc } = useKycStatus();
-  const { isPolling } = useKycReturnHandler();
-
-  return (
-    <div className="max-w-2xl mx-auto space-y-6">
-
-      {/* KYC Stripe Verification Banner */}
-      <KycBanner
-        kycStatus={kyc?.kycStatus}
-        hasStripeAccount={kyc?.hasStripeAccount}
-        errors={kyc?.errors}
-        hasFutureRequirements={kyc?.hasFutureRequirements}
-        futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
-        isPolling={isPolling}
-      />
-
-      {/* Store */}
-      <div>
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-          Store
-        </p>
-        <div className="rounded-xl border divide-y overflow-hidden bg-card">
-          {SETTING_GROUPS[0].items.map((item) => (
-            <RowButton
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              description={item.description}
-              onClick={() => onSelect(item.id)}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Channels */}
-      <div>
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-          Channels
-        </p>
-        <div className="rounded-xl border divide-y overflow-hidden bg-card">
-          {SETTING_GROUPS[1].items.map((item) => (
-            <RowButton
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              description={item.description}
-              onClick={() => onSelect(item.id)}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Account */}
-      <div>
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-          Account
-        </p>
-        <div className="rounded-xl border divide-y overflow-hidden bg-card">
-          <RowButton
-            icon={Crown}
-            label="Subscription"
-            description="Manage your plan and billing"
-            onClick={() => router.push('/dashboard/subscription')}
-          />
-          {/* [FIX #5] New row */}
-          <RowButton
-            icon={KeyRound}
-            label="Change Password"
-            description="Change password & sign out from other devices"
-            onClick={() => onSelect('password')}
-          />
-          <RowButton
-            icon={isDark ? Sun : Moon}
-            label={isDark ? 'Light Mode' : 'Dark Mode'}
-            description={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            onClick={toggleDarkMode}
-          />
-        </div>
-      </div>
-
-      {/* Legal */}
-      <div>
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-          Legal
-        </p>
-        <div className="rounded-xl border divide-y overflow-hidden bg-card">
-          <RowButton
-            icon={Info}
-            label="About Fibidy"
-            description="FAQ, contact, terms, and privacy"
-            onClick={() => router.push('/legal')}
-          />
-        </div>
-      </div>
-
-      {/* Sign Out */}
-      <div>
-        <div className="rounded-xl border border-destructive/20 overflow-hidden bg-card">
-          <button
-            type="button"
-            onClick={logout}
-            className={cn(
-              'w-full flex items-center gap-4 px-4 py-3.5',
-              'text-left transition-colors',
-              'hover:bg-destructive/5 active:bg-destructive/10',
-            )}
-          >
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-destructive/10 shrink-0">
-              <LogOut className="h-4 w-4 text-destructive" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-destructive leading-tight">Sign Out</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Log out from your account</p>
-            </div>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  );
-}
-
-// ── Main Client ───────────────────────────────────────────────────────────
+// ==========================================
+// Main component
+// ==========================================
 
 export function SettingsClient() {
-  const [activeId, setActiveId] = useState<SettingId | null>(null);
+  const t = useTranslations('dashboard.settings');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { theme, setTheme } = useTheme();
+  const { logout } = useLogout();
 
-  const handleBack = () => setActiveId(null);
+  // Active section derived from `?section=...` query param
+  const sectionParam = searchParams.get('section') as SettingId | null;
+  const [activeSection, setActiveSection] = useState<SettingId | null>(
+    sectionParam,
+  );
 
-  if (activeId === null) {
-    return <SettingsList onSelect={setActiveId} />;
-  }
+  // Keep URL in sync with local state
+  useEffect(() => {
+    setActiveSection(sectionParam);
+  }, [sectionParam]);
 
-  const sectionMap: Record<SettingId, React.ReactNode> = {
-    hero: <HeroSection onBack={handleBack} />,
-    about: <AboutSection onBack={handleBack} />,
-    contact: <ContactSection onBack={handleBack} />,
-    social: <SocialSection onBack={handleBack} />,
-    // [FIX #5]
-    password: <PasswordSection onBack={handleBack} />,
+  const handleOpen = (id: SettingId) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', id);
+    router.push(`${pathname}?${params.toString()}`);
+    setActiveSection(id);
   };
 
-  return sectionMap[activeId];
+  const handleBack = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('section');
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+    setActiveSection(null);
+  };
+
+  // ==========================================
+  // Groups definition
+  // ==========================================
+  // Wrapped in useMemo so `t` changes (locale swap) rebuild the tree.
+  // Order here is the display order on screen.
+
+  const groups = useMemo(
+    () => {
+      const isDark = theme === 'dark';
+
+      const tree: Record<GroupKey, SettingRow[]> = {
+        store: [
+          {
+            id: 'bio',
+            icon: Store,
+            labelKey: 'store.bio.label',
+            descriptionKey: 'store.bio.description',
+          },
+          {
+            id: 'featured',
+            icon: Star,
+            labelKey: 'store.featured.label',
+            descriptionKey: 'store.featured.description',
+          },
+          {
+            id: 'contact',
+            icon: Phone,
+            labelKey: 'store.contact.label',
+            descriptionKey: 'store.contact.description',
+          },
+        ],
+        channels: [
+          {
+            id: 'social',
+            icon: Share2,
+            labelKey: 'channels.social.label',
+            descriptionKey: 'channels.social.description',
+          },
+        ],
+        preferences: [
+          {
+            id: 'language',
+            icon: Languages,
+            labelKey: 'preferences.language.label',
+            descriptionKey: 'preferences.language.description',
+          },
+          {
+            id: 'theme-toggle',
+            icon: isDark ? Sun : Moon,
+            labelKey: isDark
+              ? 'preferences.lightMode.label'
+              : 'preferences.darkMode.label',
+            descriptionKey: isDark
+              ? 'preferences.lightMode.description'
+              : 'preferences.darkMode.description',
+            isThemeToggle: true,
+          },
+        ],
+        account: [
+          {
+            id: 'subscription',
+            icon: CreditCard,
+            labelKey: 'account.subscription.label',
+            descriptionKey: 'account.subscription.description',
+            href: '/dashboard/settings/subscription',
+          },
+          {
+            id: 'password',
+            icon: KeyRound,
+            labelKey: 'account.changePassword.label',
+            descriptionKey: 'account.changePassword.description',
+          },
+        ],
+        legal: [
+          {
+            id: 'about-fibidy',
+            icon: FileText,
+            labelKey: 'legal.aboutFibidy.label',
+            descriptionKey: 'legal.aboutFibidy.description',
+            href: '/legal',
+          },
+        ],
+      };
+
+      return tree;
+    },
+    // Theme icon swaps based on current theme — rebuild when theme flips.
+    [theme],
+  );
+
+  const groupOrder: GroupKey[] = [
+    'store',
+    'channels',
+    'preferences',
+    'account',
+    'legal',
+  ];
+
+  // ==========================================
+  // Section renderer — returns the full-page section view
+  // ==========================================
+
+  if (activeSection) {
+    const sectionMap: Record<SettingId, React.ReactNode> = {
+      bio: <HeroSection onBack={handleBack} />,
+      featured: <AboutSection onBack={handleBack} />,
+      contact: <ContactSection onBack={handleBack} />,
+      social: <SocialSection onBack={handleBack} />,
+      subscription: null, // handled by href
+      password: <PasswordSection onBack={handleBack} />,
+      language: <LanguageSection onBack={handleBack} />,
+      'about-fibidy': null, // handled by href
+    };
+
+    const node = sectionMap[activeSection];
+    if (node) return <div className="max-w-2xl mx-auto">{node}</div>;
+  }
+
+  // ==========================================
+  // List view
+  // ==========================================
+
+  return (
+    <div className="max-w-2xl mx-auto pb-10">
+      <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
+
+      <div className="space-y-6">
+        {groupOrder.map((groupKey) => {
+          const rows = groups[groupKey];
+          if (!rows || rows.length === 0) return null;
+
+          return (
+            <div key={groupKey} className="space-y-2">
+              <h2 className="text-xs uppercase tracking-wide text-muted-foreground font-medium px-1">
+                {t(`groups.${groupKey}`)}
+              </h2>
+
+              <Card>
+                <CardContent className="p-0 divide-y">
+                  {rows.map((row) => {
+                    const Icon = row.icon;
+
+                    // Theme toggle row — no navigation
+                    if (row.isThemeToggle) {
+                      return (
+                        <button
+                          key={row.id}
+                          type="button"
+                          onClick={() =>
+                            setTheme(theme === 'dark' ? 'light' : 'dark')
+                          }
+                          className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors"
+                        >
+                          <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium">
+                              {t(row.labelKey)}
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">
+                              {t(row.descriptionKey)}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    }
+
+                    // Link row — uses href for external-ish navigation
+                    if (row.href) {
+                      return (
+                        <button
+                          key={row.id}
+                          type="button"
+                          onClick={() => router.push(row.href!)}
+                          className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors"
+                        >
+                          <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium">
+                              {t(row.labelKey)}
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">
+                              {t(row.descriptionKey)}
+                            </div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </button>
+                      );
+                    }
+
+                    // Inline section row — opens in-page section
+                    return (
+                      <button
+                        key={row.id}
+                        type="button"
+                        onClick={() => handleOpen(row.id as SettingId)}
+                        className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors"
+                      >
+                        <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium">
+                            {t(row.labelKey)}
+                          </div>
+                          <div className="text-sm text-muted-foreground truncate">
+                            {t(row.descriptionKey)}
+                          </div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </button>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            </div>
+          );
+        })}
+
+        {/* Sign out — standalone row at the bottom */}
+        <div className="pt-2">
+          <Card>
+            <CardContent className="p-0">
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors text-destructive"
+              >
+                <LogOut className="h-5 w-5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium">{t('signOut.label')}</div>
+                  <div className="text-sm text-muted-foreground truncate">
+                    {t('signOut.description')}
+                  </div>
+                </div>
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
 }

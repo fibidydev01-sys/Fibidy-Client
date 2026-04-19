@@ -1,15 +1,65 @@
 import { ImageResponse } from 'next/og';
-import { getApiUrl, optimizeImageUrl, createFallbackImage, getInitials } from '@/components/dashboard/shared/og-image';
+import {
+  getApiUrl,
+  optimizeImageUrl,
+  createFallbackImage,
+  getInitials,
+} from '@/components/dashboard/shared/og-image';
+
+// Direct JSON import — see notes in the store-level OG sibling file
+// for why this isn't `getTranslations()`. Edge runtime requires a
+// compile-time message map.
+import enOgMessages from '../../../../../../../messages/en/og.json';
 
 // ==========================================
 // PRODUCT OPEN GRAPH IMAGE
-// Route: /store/[slug]/products/[id]/opengraph-image
+// Route: /{locale}/store/[slug]/products/[id]/opengraph-image
+// File:  src/app/[locale]/store/[slug]/products/[id]/opengraph-image.tsx
+//
+// [i18n FIX — 2026-04-19]
+// Unlike the store-level OG sibling file, this file was already 100%
+// English in the previous version (no Indonesian strings leaking in),
+// so this patch is purely about moving the EN strings from the code
+// into `og.json`. Zero copy changes — only the source of truth moves.
+//
+// Strings extracted:
+//   - og.store.invalidRequest  ("Invalid Request")
+//   - og.store.notFound        ("Store Not Found")
+//   - og.product.notFound      ("Product Not Found")
+//   - og.product.fallbackName  ("Product")
+//   - og.tenant.fallbackName   ("Store")
+//   - og.store.noImage         ("No Image")
+//   - og.store.fallbackDomain  ("{slug}.fibidy.com" — interpolates {slug})
+//   - og.store.rootDomain      ("fibidy.com")
+//   - og.store.error           ("Error")
+//
+// The i18n loader pattern (`getOgMessages(locale)`) mirrors the store
+// OG sibling. Keeps the two files parallel for future maintenance.
 // ==========================================
 
 export const runtime = 'edge';
 export const alt = 'Product';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+// ──────────────────────────────────────────
+// i18n message loader (edge-runtime safe)
+// ──────────────────────────────────────────
+
+const OG_MESSAGES = {
+  en: enOgMessages.og,
+  // Phase 2: import id JSON and add `id: idOgMessages.og` here.
+} as const;
+
+type SupportedLocale = keyof typeof OG_MESSAGES;
+
+function getOgMessages(locale: string) {
+  return OG_MESSAGES[locale as SupportedLocale] ?? OG_MESSAGES.en;
+}
+
+// ──────────────────────────────────────────
+// Props + data fetching
+// ──────────────────────────────────────────
 
 interface Props {
   params: Promise<{ locale: string; slug: string; id: string }>;
@@ -39,7 +89,7 @@ async function getProduct(id: string): Promise<OgProduct | null> {
     });
     clearTimeout(timeoutId);
     if (!res.ok) return null;
-    return await res.json() as OgProduct;
+    return (await res.json()) as OgProduct;
   } catch {
     return null;
   }
@@ -56,26 +106,32 @@ async function getTenant(slug: string): Promise<OgTenant | null> {
     });
     clearTimeout(timeoutId);
     if (!res.ok) return null;
-    return await res.json() as OgTenant;
+    return (await res.json()) as OgTenant;
   } catch {
     return null;
   }
 }
 
+// ──────────────────────────────────────────
+// Image renderer
+// ──────────────────────────────────────────
+
 export default async function ProductOgImage({ params }: Props) {
   try {
-    const { slug, id } = await params;
-    if (!slug || !id) return createFallbackImage('Invalid Request');
+    const { locale, slug, id } = await params;
+    const og = getOgMessages(locale);
+
+    if (!slug || !id) return createFallbackImage(og.store.invalidRequest);
 
     const [tenant, product] = await Promise.all([getTenant(slug), getProduct(id)]);
-    if (!tenant) return createFallbackImage('Store Not Found');
-    if (!product) return createFallbackImage('Product Not Found');
+    if (!tenant) return createFallbackImage(og.store.notFound);
+    if (!product) return createFallbackImage(og.product.notFound);
 
-    const productName = product.name || 'Product';
+    const productName = product.name || og.product.fallbackName;
     const productPrice = product.price || 0;
     const productCategory = product.category || null;
     const comparePrice = product.comparePrice || null;
-    const tenantName = tenant.name || 'Store';
+    const tenantName = tenant.name || og.tenant.fallbackName;
 
     const hasDiscount = comparePrice && comparePrice > productPrice;
     const discountPercent = hasDiscount
@@ -90,6 +146,7 @@ export default async function ProductOgImage({ params }: Props) {
         ?? null;
 
     const productImage = optimizeImageUrl(rawImageUrl);
+    const domainLabel = og.store.fallbackDomain.replace('{slug}', slug);
 
     return new ImageResponse(
       (
@@ -127,7 +184,7 @@ export default async function ProductOgImage({ params }: Props) {
                   display: 'flex',
                 }}
               >
-                No Image
+                {og.store.noImage}
               </div>
             )}
 
@@ -307,7 +364,7 @@ export default async function ProductOgImage({ params }: Props) {
                         display: 'flex',
                       }}
                     >
-                      {slug}.fibidy.com
+                      {domainLabel}
                     </div>
                   </div>
                 </div>
@@ -321,18 +378,19 @@ export default async function ProductOgImage({ params }: Props) {
                     display: 'flex',
                   }}
                 >
-                  fibidy.com
+                  {og.store.rootDomain}
                 </div>
               </div>
             </div>
           </div>
         </div>
       ),
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630 },
     );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[OG] Error:', message);
-    return createFallbackImage('Error');
+    // Fallback to EN message if `params`/`og` aren't resolved at throw time.
+    return createFallbackImage(OG_MESSAGES.en.store.error);
   }
 }

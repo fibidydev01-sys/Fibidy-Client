@@ -135,7 +135,11 @@
           "dragReorder": "Drag to reorder",
           "upgradeToStarter": "Upgrade to Starter",
           "upgradeToBusiness": "Upgrade to Business",
-          "photoFallback": "Foto {index}",
+          "tierName": {
+            "starter": "Starter",
+            "business": "Business"
+          },
+          "photoFallback": "Photo {index}",
           "businessBadge": "Business"
         },
         "preview": {
@@ -411,6 +415,7 @@
       "groups": {
         "store": "Store",
         "channels": "Channels",
+        "preferences": "Preferences",
         "account": "Account",
         "legal": "Legal"
       },
@@ -434,14 +439,10 @@
           "description": "Instagram, TikTok, WhatsApp & more"
         }
       },
-      "account": {
-        "subscription": {
-          "label": "Subscription",
-          "description": "Manage your plan and billing"
-        },
-        "changePassword": {
-          "label": "Change Password",
-          "description": "Change password & sign out from other devices"
+      "preferences": {
+        "language": {
+          "label": "Language",
+          "description": "Choose your display language"
         },
         "lightMode": {
           "label": "Light Mode",
@@ -450,6 +451,16 @@
         "darkMode": {
           "label": "Dark Mode",
           "description": "Switch to dark theme"
+        }
+      },
+      "account": {
+        "subscription": {
+          "label": "Subscription",
+          "description": "Manage your plan and billing"
+        },
+        "changePassword": {
+          "label": "Change Password",
+          "description": "Change password & sign out from other devices"
         }
       },
       "legal": {

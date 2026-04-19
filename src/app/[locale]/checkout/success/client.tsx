@@ -1,8 +1,9 @@
-// src/app/checkout/success/client.tsx
+// src/app/[locale]/checkout/success/client.tsx
 'use client';
 
 // ==========================================
 // CHECKOUT SUCCESS — POLLING FLOW
+// File: src/app/[locale]/checkout/success/client.tsx
 //
 // Problem:
 //   Stripe redirects buyer here BEFORE the webhook fires.
@@ -20,17 +21,42 @@
 // `useRef<number>(Date.now())` broke react-hooks/purity because
 // Date.now() is an impure function called during render.
 // Fix: init ref to null, set actual timestamp inside effect.
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations('checkout.success')`.
+//
+// One key — `completed.productBodyWithName` — contains literal `<strong>`
+// tags in the JSON value:
+//
+//   "productBodyWithName": "<strong>{name}</strong> is now available in your Library."
+//
+// To render `<strong>` as a real React element (not literal text), we
+// call `t.rich()` instead of plain `t()`, and pass a tag renderer:
+//
+//   t.rich('completed.productBodyWithName', {
+//     name: purchase.productName,
+//     strong: (chunks) => <strong>{chunks}</strong>,
+//   })
+//
+// This is the idiomatic next-intl pattern for inline markup. The JSON
+// stays copy-first and translator-friendly — the translator writes
+// `<strong>NAMA</strong> sekarang tersedia di Library Anda.` for the
+// Indonesian locale, and no code changes are needed.
+//
+// Price/currency lines stay passthrough — those are data values, not
+// UI copy.
 // ==========================================
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, BookOpen, Info, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { checkoutApi } from '@/lib/api/checkout';
 import type { VerifySessionResponse } from '@/lib/api/checkout';
 import { queryKeys } from '@/lib/shared/query-keys';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, BookOpen, Info, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60000;
@@ -38,6 +64,8 @@ const POLL_TIMEOUT_MS = 60000;
 type PageState = 'verifying' | 'completed' | 'timeout' | 'no_session';
 
 export function CheckoutSuccessClient() {
+  const t = useTranslations('checkout.success');
+
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const queryClient = useQueryClient();
@@ -112,11 +140,8 @@ export function CheckoutSuccessClient() {
             </div>
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold">Processing Payment...</h1>
-            <p className="text-muted-foreground">
-              Your payment is being confirmed. This usually takes just a few
-              seconds.
-            </p>
+            <h1 className="text-2xl font-bold">{t('verifying.title')}</h1>
+            <p className="text-muted-foreground">{t('verifying.body')}</p>
           </div>
         </div>
       </div>
@@ -135,15 +160,23 @@ export function CheckoutSuccessClient() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold">Purchase Successful!</h1>
+            <h1 className="text-2xl font-bold">{t('completed.title')}</h1>
             {purchase ? (
               <p className="text-muted-foreground">
-                <strong>{purchase.productName}</strong> is now available in
-                your Library.
+                {/*
+                  [i18n FIX] `completed.productBodyWithName` contains literal
+                  <strong> tags in JSON. Use t.rich() to render them as
+                  React elements. The `strong` key name in the render map
+                  must match the tag name in JSON.
+                */}
+                {t.rich('completed.productBodyWithName', {
+                  name: purchase.productName,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </p>
             ) : (
               <p className="text-muted-foreground">
-                Your product is now available in your Library.
+                {t('completed.productBodyFallback')}
               </p>
             )}
           </div>
@@ -159,20 +192,19 @@ export function CheckoutSuccessClient() {
           <div className="bg-muted/50 rounded-lg p-4">
             <p className="text-sm text-muted-foreground">
               <Info className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
-              All sales are final. Digital products cannot be returned once
-              purchased.
+              {t('policyNotice')}
             </p>
           </div>
 
           <Button asChild size="lg" className="w-full">
             <Link href="/dashboard/library">
               <BookOpen className="mr-2 h-4 w-4" />
-              Open Library
+              {t('openLibrary')}
             </Link>
           </Button>
 
           <Button variant="ghost" asChild className="w-full">
-            <Link href="/discover">Browse Other Products</Link>
+            <Link href="/discover">{t('browseOthers')}</Link>
           </Button>
         </div>
       </div>
@@ -190,30 +222,26 @@ export function CheckoutSuccessClient() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Payment Received!</h1>
-          <p className="text-muted-foreground">
-            Your product will appear in your Library shortly. Please check
-            your Library.
-          </p>
+          <h1 className="text-2xl font-bold">{t('timeout.title')}</h1>
+          <p className="text-muted-foreground">{t('timeout.body')}</p>
         </div>
 
         <div className="bg-muted/50 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">
             <Info className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
-            All sales are final. Digital products cannot be returned once
-            purchased.
+            {t('policyNotice')}
           </p>
         </div>
 
         <Button asChild size="lg" className="w-full">
           <Link href="/dashboard/library">
             <BookOpen className="mr-2 h-4 w-4" />
-            Open Library
+            {t('openLibrary')}
           </Link>
         </Button>
 
         <Button variant="ghost" asChild className="w-full">
-          <Link href="/discover">Browse Other Products</Link>
+          <Link href="/discover">{t('browseOthers')}</Link>
         </Button>
       </div>
     </div>

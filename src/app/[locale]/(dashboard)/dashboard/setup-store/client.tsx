@@ -2,6 +2,7 @@
 
 // ==========================================
 // SETUP STORE CLIENT
+// File: src/app/[locale]/(dashboard)/dashboard/setup-store/client.tsx
 //
 // Wizard upgrade BUYER → SELLER.
 // Reuse step components from register wizard:
@@ -18,9 +19,20 @@
 //   4. Step 4: Review + submit
 //   5. PATCH /tenants/upgrade-to-seller
 //   6. Redirect /dashboard/products
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `dashboard.setupStore.*` for wizard copy, steps, review, CTAs, errors
+//   - `common.labels.dash` for "—" fallback
+//
+// The STEPS array is built with `useMemo` (same pattern as register.tsx)
+// so the titles/descriptions translate at render time and the reference
+// stays stable between renders.
 // ==========================================
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,16 +49,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Store, Edit2 } from 'lucide-react';
 
-const STEPS = [
-  { title: 'Business Type', desc: 'What kind of business do you run?' },
-  { title: 'Store Info', desc: 'Name, URL & description' },
-  { title: 'WhatsApp', desc: 'Number for order notifications' },
-  { title: 'Review', desc: 'Confirm and start selling' },
-] as const;
-
-const TOTAL_STEPS = STEPS.length;
-
 export function SetupStoreClient() {
+  const t = useTranslations('dashboard.setupStore');
+  const tCommon = useTranslations('common.labels');
+
   const tenant = useAuthStore((s) => s.tenant);
   const router = useRouter();
   const { upgrade, isLoading, error } = useUpgradeToSeller();
@@ -59,6 +65,18 @@ export function SetupStoreClient() {
   const [whatsapp, setWhatsapp] = useState('62');
   const [isAgreed, setIsAgreed] = useState(false);
 
+  // i18n-aware steps — stable reference between renders via useMemo
+  const STEPS = useMemo(
+    () => [
+      { title: t('steps.category.title'), desc: t('steps.category.desc') },
+      { title: t('steps.storeInfo.title'), desc: t('steps.storeInfo.desc') },
+      { title: t('steps.whatsapp.title'), desc: t('steps.whatsapp.desc') },
+      { title: t('steps.review.title'), desc: t('steps.review.desc') },
+    ] as const,
+    [t],
+  );
+  const TOTAL_STEPS = STEPS.length;
+
   // Guard: sellers don't need setup
   if (tenant?.role === 'SELLER') {
     router.replace('/dashboard/products');
@@ -68,17 +86,17 @@ export function SetupStoreClient() {
   const validateStep = (): boolean => {
     switch (currentStep) {
       case 1:
-        if (!category) { toast.error('Please select a business type'); return false; }
+        if (!category) { toast.error(t('errors.categoryRequired')); return false; }
         return true;
       case 2:
-        if (!name.trim()) { toast.error('Store name is required'); return false; }
-        if (!slug.trim()) { toast.error('Store URL is required'); return false; }
+        if (!name.trim()) { toast.error(t('errors.nameRequired')); return false; }
+        if (!slug.trim()) { toast.error(t('errors.slugRequired')); return false; }
         return true;
       case 3:
-        if (!whatsapp || whatsapp === '62') { toast.error('WhatsApp number is required'); return false; }
+        if (!whatsapp || whatsapp === '62') { toast.error(t('errors.whatsappRequired')); return false; }
         return true;
       case 4:
-        if (!isAgreed) { toast.error('Please agree to the Terms of Service to continue'); return false; }
+        if (!isAgreed) { toast.error(t('errors.agreementRequired')); return false; }
         return true;
       default:
         return true;
@@ -120,10 +138,8 @@ export function SetupStoreClient() {
           <Store className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Start Selling</h1>
-          <p className="text-sm text-muted-foreground">
-            Set up your store in a few steps
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -137,7 +153,7 @@ export function SetupStoreClient() {
       <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
         <div className="space-y-1">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            Step {currentStep} of {TOTAL_STEPS}
+            {t('stepIndicator', { current: currentStep, total: TOTAL_STEPS })}
           </p>
           <h2 className="text-xl font-bold tracking-tight leading-none">
             {STEPS[stepIndicatorIndex]?.title}
@@ -188,7 +204,7 @@ export function SetupStoreClient() {
                 htmlFor="setup-whatsapp"
                 className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
               >
-                WhatsApp Number
+                {t('steps.whatsapp.label')}
               </Label>
               <div className="flex">
                 <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-sm text-muted-foreground h-11">
@@ -197,14 +213,14 @@ export function SetupStoreClient() {
                 <Input
                   id="setup-whatsapp"
                   type="tel"
-                  placeholder="81234567890"
+                  placeholder={t('steps.whatsapp.placeholder')}
                   className="rounded-l-none h-11 text-sm placeholder:text-muted-foreground/50"
                   value={whatsapp.replace(/^62/, '')}
                   onChange={(e) => handleWhatsappChange(e.target.value)}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Used to receive order notifications via WhatsApp
+                {t('steps.whatsapp.helper')}
               </p>
             </div>
           </div>
@@ -213,32 +229,32 @@ export function SetupStoreClient() {
         {/* Step 4: Review */}
         {currentStep === 4 && (
           <div className="space-y-3 max-w-md">
-            <ReviewCard label="Business type" onEdit={() => setCurrentStep(1)}>
-              <p className="text-sm font-medium">{category || '—'}</p>
+            <ReviewCard label={t('review.businessType')} onEdit={() => setCurrentStep(1)}>
+              <p className="text-sm font-medium">{category || tCommon('dash')}</p>
             </ReviewCard>
 
-            <ReviewCard label="Store info" onEdit={() => setCurrentStep(2)}>
+            <ReviewCard label={t('review.storeInfo')} onEdit={() => setCurrentStep(2)}>
               <div className="space-y-1.5">
                 <div>
-                  <p className="text-xs text-muted-foreground">Store name</p>
-                  <p className="text-sm font-medium">{name || '—'}</p>
+                  <p className="text-xs text-muted-foreground">{t('review.storeName')}</p>
+                  <p className="text-sm font-medium">{name || tCommon('dash')}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Store URL</p>
+                  <p className="text-xs text-muted-foreground">{t('review.storeUrl')}</p>
                   <p className="text-sm font-medium text-primary">
-                    {slug || '—'}.fibidy.com
+                    {t('review.storeUrlSuffix', { slug: slug || tCommon('dash') })}
                   </p>
                 </div>
                 {description && (
                   <div>
-                    <p className="text-xs text-muted-foreground">Description</p>
+                    <p className="text-xs text-muted-foreground">{t('review.description')}</p>
                     <p className="text-sm">{description}</p>
                   </div>
                 )}
               </div>
             </ReviewCard>
 
-            <ReviewCard label="WhatsApp" onEdit={() => setCurrentStep(3)}>
+            <ReviewCard label={t('review.whatsapp')} onEdit={() => setCurrentStep(3)}>
               <p className="text-sm font-medium">+{whatsapp}</p>
             </ReviewCard>
 
@@ -254,7 +270,7 @@ export function SetupStoreClient() {
                 htmlFor="setup-agreement"
                 className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
               >
-                By creating your store, you agree to our{' '}
+                {t('review.agreementPrefix')}{' '}
                 <a
                   href="/terms"
                   target="_blank"
@@ -262,9 +278,9 @@ export function SetupStoreClient() {
                   className="text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  Terms of Service
+                  {t('review.termsLink')}
                 </a>
-                {' '}and{' '}
+                {' '}{t('review.agreementAnd')}{' '}
                 <a
                   href="/privacy"
                   target="_blank"
@@ -272,7 +288,7 @@ export function SetupStoreClient() {
                   className="text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  Privacy Policy
+                  {t('review.privacyLink')}
                 </a>
                 .
               </label>
@@ -289,8 +305,8 @@ export function SetupStoreClient() {
         onNext={handleNext}
         onSave={handleSubmit}
         isSaving={isLoading}
-        lastStepLabel={isLoading ? 'Creating store...' : 'Create my store'}
-        lastStepSavingLabel="Creating store..."
+        lastStepLabel={isLoading ? t('cta.submitting') : t('cta.submit')}
+        lastStepSavingLabel={t('cta.submitting')}
         onLastStep={handleSubmit}
       />
     </div>

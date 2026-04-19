@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks/shared/use-debounce';
@@ -21,6 +22,7 @@ export function DiscoverFilters({
   onSearchChange,
   onFileTypeChange,
 }: DiscoverFiltersProps) {
+  const t = useTranslations('discover.list');
   const [localSearch, setLocalSearch] = useState(search);
   const debounced = useDebounce(localSearch, 400);
 
@@ -33,7 +35,7 @@ export function DiscoverFilters({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search digital products..."
+          placeholder={t('searchPlaceholder')}
           className="pl-10 pr-8"
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
@@ -55,7 +57,7 @@ export function DiscoverFilters({
           className="rounded-full"
           onClick={() => onFileTypeChange('')}
         >
-          All
+          {t('filterAll')}
         </Button>
         {FILE_TYPES.map((type) => (
           <Button

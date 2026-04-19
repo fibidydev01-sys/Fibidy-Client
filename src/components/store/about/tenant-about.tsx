@@ -1,5 +1,13 @@
 'use client';
 
+// ==========================================
+// TENANT ABOUT
+//
+// Note: tidak ada user-facing strings yang perlu di-wire.
+// Semua konten (title, description, icon) berasal dari data tenant.
+// Component ini murni data-driven — i18n tidak diperlukan.
+// ==========================================
+
 import Image from 'next/image';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
@@ -10,11 +18,6 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { FeatureItem } from '@/types/tenant';
-
-// ==========================================
-// TENANT ABOUT
-// FIX: features: any[] → FeatureItem[]
-// ==========================================
 
 export function TenantAbout({ features = [] }: { features: FeatureItem[] }) {
   const validFeatures = features.filter(

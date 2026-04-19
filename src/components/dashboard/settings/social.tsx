@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTenant } from '@/hooks/shared/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
@@ -30,6 +31,7 @@ interface SocialSectionProps {
 }
 
 export function SocialSection({ onBack }: SocialSectionProps) {
+  const tToast = useTranslations('toast.settings');
   const { tenant, refresh } = useTenant();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -53,9 +55,9 @@ export function SocialSection({ onBack }: SocialSectionProps) {
     try {
       await tenantsApi.update({ socialLinks: formData.socialLinks });
       await refresh();
-      toast.success('Social links saved successfully');
+      toast.success(tToast('socialSaved'));
     } catch {
-      toast.error('Failed to save social links');
+      toast.error(tToast('socialFailed'));
     } finally {
       setIsSaving(false);
     }

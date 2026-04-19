@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -17,6 +18,7 @@ import { loginSchema, type LoginFormData } from '@/lib/shared/validations';
 // ==========================================
 
 export function LoginForm() {
+  const t = useTranslations('auth.login');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useLogin();
 
@@ -52,11 +54,11 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('emailLabel')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="gavin@hooli.com"
+                  placeholder={t('emailPlaceholder')}
                   autoComplete="email"
                   disabled={isLoading}
                   {...field}
@@ -74,19 +76,19 @@ export function LoginForm() {
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t('passwordLabel')}</FormLabel>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-primary hover:underline"
                 >
-                  Forgot password?
+                  {t('forgotPasswordLink')}
                 </Link>
               </div>
               <FormControl>
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                     autoComplete="current-password"
                     disabled={isLoading}
                     {...field}
@@ -116,18 +118,18 @@ export function LoginForm() {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Signing in...
+              {t('submittingButton')}
             </>
           ) : (
-            'Sign in'
+            t('submitButton')
           )}
         </Button>
 
         {/* Register Link */}
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
+          {t('noAccountPrompt')}{' '}
           <Link href="/register" className="text-primary hover:underline font-medium">
-            Create a free account
+            {t('createAccountLink')}
           </Link>
         </p>
       </form>

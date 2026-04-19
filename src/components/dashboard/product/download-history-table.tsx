@@ -1,6 +1,7 @@
 'use client';
 
 import { FileText, Music, Video, Image, Archive } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { DownloadLogEntry } from '@/types/product';
 
@@ -28,6 +29,8 @@ function formatDate(iso: string): string {
 }
 
 export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTableProps) {
+  const t = useTranslations('dashboard.products.downloads');
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -41,7 +44,7 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
   if (logs.length === 0) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        <p>No download history yet.</p>
+        <p>{t('empty')}</p>
       </div>
     );
   }
@@ -50,10 +53,10 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
     <div className="border rounded-xl overflow-hidden">
       {/* Header — hidden on mobile */}
       <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-4 py-3 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-        <div className="col-span-4">Product</div>
-        <div className="col-span-3">Buyer</div>
-        <div className="col-span-3">Time</div>
-        <div className="col-span-2">IP</div>
+        <div className="col-span-4">{t('columns.product')}</div>
+        <div className="col-span-3">{t('columns.buyer')}</div>
+        <div className="col-span-3">{t('columns.time')}</div>
+        <div className="col-span-2">{t('columns.ip')}</div>
       </div>
 
       {/* Rows */}
@@ -81,7 +84,7 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
 
               {/* Buyer */}
               <div className="col-span-3 min-w-0">
-                <p className="text-sm truncate">{log.buyerName || '—'}</p>
+                <p className="text-sm truncate">{log.buyerName || t('dash')}</p>
                 <p className="text-xs text-muted-foreground truncate">{log.buyerEmail}</p>
               </div>
 
@@ -95,7 +98,7 @@ export function DownloadHistoryTable({ logs, isLoading }: DownloadHistoryTablePr
               {/* IP */}
               <div className="col-span-2">
                 <p className="text-xs text-muted-foreground font-mono">
-                  {log.ipAddress ?? '—'}
+                  {log.ipAddress ?? t('dash')}
                 </p>
               </div>
             </div>

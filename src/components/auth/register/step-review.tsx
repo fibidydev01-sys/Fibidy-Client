@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,6 +31,7 @@ interface StepReviewProps {
 // ==========================================
 
 export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps) {
+  const t = useTranslations('auth.register.review');
   const categoryConfig = data.category ? getCategoryConfig(data.category) : null;
   const [isAgreed, setIsAgreed] = useState(false);
 
@@ -42,9 +44,9 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
     <div className="space-y-3 max-w-md">
 
       {/* Business Type */}
-      <ReviewCard label="Business type" onEdit={() => onEdit(2)}>
+      <ReviewCard label={t('businessType')} onEdit={() => onEdit(2)}>
         <p className="text-sm font-medium">
-          {categoryConfig?.label ?? data.category ?? '—'}
+          {categoryConfig?.label ?? data.category ?? t('dash')}
         </p>
         {categoryConfig?.description && (
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -55,24 +57,24 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
 
       {/* Store Info */}
       <ReviewCard
-        label="Store info"
+        label={t('storeInfo')}
         icon={<Store className="h-3.5 w-3.5 text-muted-foreground" />}
         onEdit={() => onEdit(3)}
       >
         <div className="space-y-1.5">
           <div>
-            <p className="text-xs text-muted-foreground">Store name</p>
-            <p className="text-sm font-medium">{data.name || '—'}</p>
+            <p className="text-xs text-muted-foreground">{t('storeName')}</p>
+            <p className="text-sm font-medium">{data.name || t('dash')}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Store URL</p>
+            <p className="text-xs text-muted-foreground">{t('storeUrl')}</p>
             <p className="text-sm font-medium text-primary">
-              {data.slug || '—'}.fibidy.com
+              {t('storeUrlSuffix', { slug: data.slug || t('dash') })}
             </p>
           </div>
           {data.description && (
             <div>
-              <p className="text-xs text-muted-foreground">Description</p>
+              <p className="text-xs text-muted-foreground">{t('description')}</p>
               <p className="text-sm">{data.description}</p>
             </div>
           )}
@@ -81,14 +83,14 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
 
       {/* Account */}
       <ReviewCard
-        label="Account"
+        label={t('account')}
         icon={<Mail className="h-3.5 w-3.5 text-muted-foreground" />}
         onEdit={() => onEdit(4)}
       >
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            <p className="text-sm">{data.email || '—'}</p>
+            <p className="text-sm">{data.email || t('dash')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -96,7 +98,7 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
           </div>
           <div className="flex items-center gap-2">
             <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            <p className="text-sm">+{data.whatsapp || '—'}</p>
+            <p className="text-sm">+{data.whatsapp || t('dash')}</p>
           </div>
         </div>
       </ReviewCard>
@@ -113,7 +115,7 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
           htmlFor="agreement"
           className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
         >
-          By creating your store, you agree to our{' '}
+          {t('agreementPrefix')}{' '}
           <a
             href="/terms"
             target="_blank"
@@ -121,9 +123,9 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
             className="text-primary hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            Terms of Service
+            {t('termsLink')}
           </a>
-          {' '}and{' '}
+          {' '}{t('agreementAnd')}{' '}
           <a
             href="/privacy"
             target="_blank"
@@ -131,7 +133,7 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
             className="text-primary hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            Privacy Policy
+            {t('privacyLink')}
           </a>.
         </label>
       </div>

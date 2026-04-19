@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 // ==========================================
@@ -16,27 +17,30 @@ interface StepWelcomeProps {
 // ==========================================
 
 export function StepWelcome({ onNext }: StepWelcomeProps) {
+  const t = useTranslations('auth.register.welcome');
+
+  const steps = [
+    { step: '01', label: t('steps.one') },
+    { step: '02', label: t('steps.two') },
+    { step: '03', label: t('steps.three') },
+  ];
+
   return (
     <div className="flex flex-col items-center text-center space-y-8 py-8">
 
       {/* Heading */}
       <div className="space-y-3 max-w-sm">
         <h1 className="text-3xl font-bold tracking-tight">
-          Set up your online store
+          {t('title')}
         </h1>
         <p className="text-muted-foreground leading-relaxed">
-          Get your store up and running in minutes. Manage products, orders,
-          and customers — all in one place.
+          {t('description')}
         </p>
       </div>
 
       {/* Preview langkah-langkah */}
       <div className="w-full max-w-xs space-y-2 text-left">
-        {[
-          { step: '01', label: 'Choose your business type' },
-          { step: '02', label: 'Name your store' },
-          { step: '03', label: 'Create your account' },
-        ].map(({ step, label }) => (
+        {steps.map(({ step, label }) => (
           <div
             key={step}
             className="flex items-center gap-3 px-3 py-2.5 rounded-md bg-muted/50"
@@ -56,7 +60,7 @@ export function StepWelcome({ onNext }: StepWelcomeProps) {
         onClick={onNext}
         className="w-full max-w-xs group"
       >
-        Get started
+        {t('cta')}
         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
       </Button>
 

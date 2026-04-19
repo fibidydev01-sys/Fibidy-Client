@@ -2,6 +2,7 @@
 
 // ==========================================
 // SUBSCRIPTION PAGE — Stripe Billing
+// File: src/app/[locale]/(dashboard)/dashboard/subscription/page.tsx
 //
 // Tiers: FREE → STARTER → BUSINESS
 // Flow:  Click Subscribe → Stripe Checkout → webhook → active
@@ -14,11 +15,52 @@
 //   3. On 'completed' → refetch plan, show success
 //   4. On 60s timeout → call POST /subscription/reconcile as fallback
 //   5. If reconcile also fails → ask user to contact support
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys used:
+//   - `dashboard.subscription.*` for page-level copy
+//   - `dashboard.subscription.plans.{FREE,STARTER,BUSINESS}.{name, priceNote, features}`
+//   - `dashboard.subscription.verify.*` for the Stripe-return banner states
+//   - `dashboard.subscription.overLimit.*` for the limit-reached warning card
+//   - `dashboard.subscription.badge.*` for the subscription-status badge
+//   - `dashboard.subscription.usage.*` for the products/digital/storage usage tiles
+//   - `dashboard.subscription.cta.*` for plan-card buttons
+//   - `dashboard.subscription.businessUnlock.*` for the qualification progress
+//   - `dashboard.subscription.cancelDialog.*` for the cancel confirmation
+//   - `dashboard.subscription.platformFee.*` for the fee-per-tier note
+//   - `toast.subscription.*` for all toast messages
+//
+// PLAN_CONFIG is now built inside the component via `useMemo` so that plan
+// names, price notes, and feature lists translate on re-render. Features
+// arrays are pulled out with `t.raw()` to keep them as proper string[].
+// The per-tier numeric configs (icons) stay static outside the component.
+//
+// [i18n PATCH — 2026-04-19 (same session)]
+// Two keys the first draft referenced did not actually exist in the JSON,
+// so this file was patched in place after the JSON was cross-checked:
+//
+//   1. `dashboard.subscription.planCardTitle` — DOES NOT EXIST.
+//      Originally used `t('planCardTitle', { name })` expecting "Free Plan"
+//      etc. Replaced with inline concatenation: `{plan.name} {t('planSuffix')}`
+//      which leverages the existing `dashboard.subscription.planSuffix` = "Plan".
+//      Translators localize the word "Plan" once; the plan name comes from
+//      the plans.{tier}.name key.
+//
+//   2. `dashboard.subscription.verify.failedBodyPrefix` / `failedBodySuffix` —
+//      DO NOT EXIST. JSON has a single `verify.failedBody` that already reads
+//      "If your card has already been charged, … contact support at" — ending
+//      right before the email link. Replaced the split-string pattern with
+//      a single `{failedBody}` followed inline by the `<a>{supportEmail}</a>`
+//      link and a terminating period. If translators need to reorder the
+//      email link inside the sentence in a new locale, that becomes a
+//      JSON-level rewrite later.
 // ==========================================
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Rocket,
   Crown,
@@ -62,61 +104,29 @@ import {
 import { getErrorMessage } from '@/lib/api/client';
 
 // ==========================================
-// PLAN CONFIG — must match BE plan-limits.ts
+// PLAN CONFIG — icons + prices only (static, identifier-grade)
+// Prices are dollar amounts tracked in USD on the platform regardless
+// of UI language, so they stay outside i18n. Icons are React refs.
+// All user-facing copy (names, priceNote, features) is translated.
 // ==========================================
 
-const PLAN_CONFIG: Record<
+const PLAN_STATIC: Record<
   SubscriptionTier,
   {
-    name: string;
     price: string;
-    priceNote: string;
     icon: typeof Rocket;
-    features: string[];
   }
 > = {
-  FREE: {
-    name: 'Free',
-    price: '$0',
-    priceNote: 'Forever free',
-    icon: Rocket,
-    features: [
-      '5 products',
-      '3 digital products',
-      '0.5 GB storage',
-      'Max 20 MB per file',
-      '2 photos per product',
-      '1 hero template',
-    ],
-  },
-  STARTER: {
-    name: 'Starter',
-    price: '$5',
-    priceNote: '/month',
-    icon: Zap,
-    features: [
-      '20 products',
-      '20 digital products',
-      '1 GB storage',
-      'Max 50 MB per file',
-      '3 photos per product',
-      '3 hero templates',
-    ],
-  },
-  BUSINESS: {
-    name: 'Business',
-    price: '$15',
-    priceNote: '/month',
-    icon: Crown,
-    features: [
-      '50 products',
-      '50 digital products',
-      '20 GB storage',
-      'Max 500 MB per file',
-      '5 photos per product',
-      'All hero templates',
-    ],
-  },
+  FREE: { price: '$0', icon: Rocket },
+  STARTER: { price: '$5', icon: Zap },
+  BUSINESS: { price: '$15', icon: Crown },
+};
+
+// Platform fee per tier — data, not copy
+const PLATFORM_FEE: Record<SubscriptionTier, string> = {
+  FREE: '15%',
+  STARTER: '5%',
+  BUSINESS: '2%',
 };
 
 // ==========================================
@@ -150,6 +160,9 @@ function getDaysRemaining(dateStr: string): number {
 // ==========================================
 
 export default function SubscriptionPage() {
+  const t = useTranslations('dashboard.subscription');
+  const tToast = useTranslations('toast.subscription');
+
   const searchParams = useSearchParams();
   const [planInfo, setPlanInfo] = useState<SubscriptionInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -161,6 +174,47 @@ export default function SubscriptionPage() {
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartRef = useRef<number>(0);
+
+  // ── Build plan config with i18n-aware copy ──────────────────
+  const PLAN_CONFIG = useMemo(
+    () =>
+      ({
+        FREE: {
+          name: t('plans.FREE.name'),
+          price: PLAN_STATIC.FREE.price,
+          priceNote: t('plans.FREE.priceNote'),
+          icon: PLAN_STATIC.FREE.icon,
+          features: t.raw('plans.FREE.features') as string[],
+        },
+        STARTER: {
+          name: t('plans.STARTER.name'),
+          price: PLAN_STATIC.STARTER.price,
+          priceNote: t('plans.STARTER.priceNote'),
+          icon: PLAN_STATIC.STARTER.icon,
+          features: t.raw('plans.STARTER.features') as string[],
+        },
+        BUSINESS: {
+          name: t('plans.BUSINESS.name'),
+          price: PLAN_STATIC.BUSINESS.price,
+          priceNote: t('plans.BUSINESS.priceNote'),
+          icon: PLAN_STATIC.BUSINESS.icon,
+          features: t.raw('plans.BUSINESS.features') as string[],
+        },
+      }) satisfies Record<
+        SubscriptionTier,
+        {
+          name: string;
+          price: string;
+          priceNote: string;
+          icon: typeof Rocket;
+          features: string[];
+        }
+      >,
+    [t],
+  );
+
+  // Marker for "forever free" so we know not to append the priceNote twice
+  const freeForeverNote = t('plans.FREE.priceNote');
 
   // ── Fetch data ──────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -194,22 +248,21 @@ export default function SubscriptionPage() {
       if (result.reconciled && result.tier !== 'FREE') {
         setVerifyState('completed');
         await fetchData();
-        toast.success('Subscription active!', {
-          description: `Your plan is now ${result.tier}.`,
+        toast.success(tToast('reconcileSuccess'), {
+          description: tToast('reconcileSuccessDetail', { tier: result.tier }),
         });
       } else {
         // Reconcile says still FREE → webhook never processed, payment might have failed
         setVerifyState('failed');
-        toast.error('Verification failed', {
-          description:
-            'Please try again or contact support if you have already been charged.',
+        toast.error(tToast('verificationFailed'), {
+          description: tToast('verificationFailedDetail'),
         });
       }
     } catch (err) {
       setVerifyState('failed');
-      toast.error('Reconcile failed', { description: getErrorMessage(err) });
+      toast.error(tToast('reconcileFailed'), { description: getErrorMessage(err) });
     }
-  }, [fetchData]);
+  }, [fetchData, tToast]);
 
   // ── [FIX #3] Handle return from Stripe Checkout with polling ─
   useEffect(() => {
@@ -217,7 +270,7 @@ export default function SubscriptionPage() {
     const sessionId = searchParams.get('session_id');
 
     if (status === 'canceled') {
-      toast.info('Payment canceled.');
+      toast.info(tToast('paymentCanceled'));
       window.history.replaceState({}, '', '/dashboard/subscription');
       return;
     }
@@ -243,10 +296,10 @@ export default function SubscriptionPage() {
           stopPolling();
           setVerifyState('completed');
           await fetchData();
-          toast.success('Payment successful!', {
+          toast.success(tToast('paymentSuccess'), {
             description: result.subscription
-              ? `Your plan is now ${result.subscription.tier}.`
-              : 'Your subscription is active.',
+              ? tToast('paymentSuccessDetail', { tier: result.subscription.tier })
+              : tToast('paymentSuccessGeneric'),
           });
           // Clean URL after success
           window.history.replaceState({}, '', '/dashboard/subscription');
@@ -262,7 +315,7 @@ export default function SubscriptionPage() {
     pollIntervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
 
     return stopPolling;
-  }, [searchParams, fetchData, runReconcile, stopPolling]);
+  }, [searchParams, fetchData, runReconcile, stopPolling, tToast]);
 
   // ── Handlers ────────────────────────────────────────────────
   const handleCheckout = async (tier: 'STARTER' | 'BUSINESS') => {
@@ -300,8 +353,8 @@ export default function SubscriptionPage() {
     return (
       <div className="space-y-6 max-w-3xl mx-auto">
         <div>
-          <h1 className="text-2xl font-bold">Subscription</h1>
-          <p className="text-muted-foreground">Manage your plan and billing</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -326,12 +379,13 @@ export default function SubscriptionPage() {
 
   const currentPlan = PLAN_CONFIG[tier];
   const PlanIcon = currentPlan.icon;
+  const isFreeForever = currentPlan.priceNote === freeForeverNote;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Subscription</h1>
-        <p className="text-muted-foreground">Manage your plan and billing</p>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {/* ── [FIX #3] Verify Banner ─────────────────────────── */}
@@ -339,8 +393,8 @@ export default function SubscriptionPage() {
         <Alert>
           <Loader2 className="h-4 w-4 animate-spin" />
           <AlertDescription>
-            <strong>Processing payment...</strong> Please wait a few seconds
-            for your subscription to activate. Do not refresh the page.
+            <strong>{t('verify.verifyingTitle')}</strong>{' '}
+            {t('verify.verifyingBody')}
           </AlertDescription>
         </Alert>
       )}
@@ -349,8 +403,8 @@ export default function SubscriptionPage() {
         <Alert>
           <Loader2 className="h-4 w-4 animate-spin" />
           <AlertDescription>
-            <strong>Checking payment status with Stripe...</strong> This
-            usually takes just a few seconds.
+            <strong>{t('verify.reconcilingTitle')}</strong>{' '}
+            {t('verify.reconcilingBody')}
           </AlertDescription>
         </Alert>
       )}
@@ -359,8 +413,8 @@ export default function SubscriptionPage() {
         <Alert className="border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <AlertDescription className="text-emerald-800 dark:text-emerald-300">
-            <strong>Subscription active!</strong> Your plan has been upgraded.
-            Enjoy your new features! 🎉
+            <strong>{t('verify.completedTitle')}</strong>{' '}
+            {t('verify.completedBody')}
           </AlertDescription>
         </Alert>
       )}
@@ -370,11 +424,10 @@ export default function SubscriptionPage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="space-y-2">
             <div>
-              <strong>Payment verification failed.</strong> If your card has
-              already been charged, the payment will be verified automatically
-              within a few minutes. You can try again or contact support at{' '}
-              <a href="mailto:admin@fibidy.com" className="underline font-medium">
-                admin@fibidy.com
+              <strong>{t('verify.failedTitle')}</strong>{' '}
+              {t('verify.failedBody')}{' '}
+              <a href={`mailto:${t('verify.supportEmail')}`} className="underline font-medium">
+                {t('verify.supportEmail')}
               </a>
               .
             </div>
@@ -384,7 +437,7 @@ export default function SubscriptionPage() {
               onClick={handleManualRetry}
               className="mt-2"
             >
-              Retry verification
+              {t('verify.retryButton')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -398,14 +451,20 @@ export default function SubscriptionPage() {
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="font-medium text-sm">
-                  {currentPlan.name} plan limit reached
+                  {t('overLimit.titlePattern', { planName: currentPlan.name })}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {isAtLimit?.products &&
-                    `Products: ${usage.products}/${limits?.maxProducts}. `}
+                    t('overLimit.productsPart', {
+                      used: usage.products,
+                      max: limits?.maxProducts ?? 0,
+                    })}
                   {isAtLimit?.digitalProducts &&
-                    `Digital products: ${usage.digitalProducts}/${limits?.maxDigitalProducts}. `}
-                  Upgrade to increase capacity.
+                    t('overLimit.digitalProductsPart', {
+                      used: usage.digitalProducts,
+                      max: limits?.maxDigitalProducts ?? 0,
+                    })}
+                  {t('overLimit.suffix')}
                 </p>
               </div>
             </div>
@@ -420,10 +479,10 @@ export default function SubscriptionPage() {
             <div className="flex items-center gap-3">
               <PlanIcon className="h-6 w-6 text-primary" />
               <div>
-                <CardTitle>{currentPlan.name} Plan</CardTitle>
+                <CardTitle>{currentPlan.name} {t('planSuffix')}</CardTitle>
                 <CardDescription>
                   {currentPlan.price}
-                  {currentPlan.priceNote !== 'Forever free'
+                  {!isFreeForever
                     ? currentPlan.priceNote
                     : ` — ${currentPlan.priceNote}`}
                 </CardDescription>
@@ -439,12 +498,12 @@ export default function SubscriptionPage() {
               }
             >
               {status === 'ACTIVE'
-                ? 'Active'
+                ? t('badge.active')
                 : status === 'PAST_DUE'
-                  ? 'Payment Past Due'
+                  ? t('badge.pastDue')
                   : status === 'CANCELED'
-                    ? 'Canceled'
-                    : 'Free'}
+                    ? t('badge.canceled')
+                    : t('badge.free')}
             </Badge>
           </div>
         </CardHeader>
@@ -453,29 +512,29 @@ export default function SubscriptionPage() {
           {limits && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="rounded-lg border p-3">
-                <p className="text-xs text-muted-foreground">Products</p>
+                <p className="text-xs text-muted-foreground">{t('usage.products')}</p>
                 <p className="text-lg font-bold">
                   {usage.products}
                   <span className="text-sm font-normal text-muted-foreground">
                     {' / '}
-                    {limits.maxProducts >= 999 ? '∞' : limits.maxProducts}
+                    {limits.maxProducts >= 999 ? t('usage.infinity') : limits.maxProducts}
                   </span>
                 </p>
               </div>
               <div className="rounded-lg border p-3">
-                <p className="text-xs text-muted-foreground">Digital</p>
+                <p className="text-xs text-muted-foreground">{t('usage.digital')}</p>
                 <p className="text-lg font-bold">
                   {usage.digitalProducts}
                   <span className="text-sm font-normal text-muted-foreground">
                     {' / '}
                     {limits.maxDigitalProducts >= 999
-                      ? '∞'
+                      ? t('usage.infinity')
                       : limits.maxDigitalProducts}
                   </span>
                 </p>
               </div>
               <div className="rounded-lg border p-3">
-                <p className="text-xs text-muted-foreground">Storage</p>
+                <p className="text-xs text-muted-foreground">{t('usage.storage')}</p>
                 <p className="text-lg font-bold">
                   {(usage.storageMb / 1024).toFixed(2)}
                   <span className="text-sm font-normal text-muted-foreground">
@@ -488,11 +547,11 @@ export default function SubscriptionPage() {
           )}
 
           {/* Period countdown */}
-          {tier !== 'FREE' && periodEnd && (
+          {tier !== 'FREE' && periodEnd && daysRemaining !== null && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>
-                Active until {formatDate(periodEnd)} ({daysRemaining} days left)
+                {t('activeUntil', { date: formatDate(periodEnd), days: daysRemaining })}
               </span>
             </div>
           )}
@@ -505,7 +564,7 @@ export default function SubscriptionPage() {
               className="text-muted-foreground"
               onClick={() => setCancelDialogOpen(true)}
             >
-              Cancel subscription
+              {t('cancel')}
             </Button>
           )}
         </CardContent>
@@ -538,6 +597,8 @@ export default function SubscriptionPage() {
           const businessNeedStarter =
             planTier === 'BUSINESS' && tier === 'FREE';
 
+          const planIsFreeForever = config.priceNote === freeForeverNote;
+
           return (
             <Card
               key={planTier}
@@ -551,11 +612,13 @@ export default function SubscriptionPage() {
                 <div className="mt-2">
                   <span className="text-2xl font-bold">{config.price}</span>
                   <span className="text-sm text-muted-foreground">
-                    {config.priceNote !== 'Forever free' ? config.priceNote : ''}
+                    {!planIsFreeForever ? config.priceNote : ''}
                   </span>
                 </div>
                 {planTier === 'FREE' && (
-                  <p className="text-xs text-muted-foreground">Forever free</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('plans.FREE.priceNote')}
+                  </p>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
@@ -571,13 +634,9 @@ export default function SubscriptionPage() {
 
                 <div className="rounded-lg bg-muted/50 px-3 py-2">
                   <p className="text-xs text-muted-foreground">
-                    Platform fee:{' '}
+                    {t('platformFee.label')}{' '}
                     <span className="font-semibold text-foreground">
-                      {planTier === 'FREE'
-                        ? '15%'
-                        : planTier === 'STARTER'
-                          ? '5%'
-                          : '2%'}
+                      {PLATFORM_FEE[planTier]}
                     </span>
                   </p>
                 </div>
@@ -585,7 +644,7 @@ export default function SubscriptionPage() {
                 {isCurrent && (
                   <Button className="w-full" disabled>
                     <ShieldCheck className="h-4 w-4 mr-2" />
-                    Current plan
+                    {t('cta.currentPlan')}
                   </Button>
                 )}
 
@@ -600,7 +659,7 @@ export default function SubscriptionPage() {
                     ) : (
                       <Zap className="h-4 w-4 mr-2" />
                     )}
-                    Upgrade to Starter
+                    {t('cta.upgradeStarter')}
                   </Button>
                 )}
 
@@ -618,26 +677,26 @@ export default function SubscriptionPage() {
                       ) : (
                         <Crown className="h-4 w-4 mr-2" />
                       )}
-                      Upgrade to Business
+                      {t('cta.upgradeBusiness')}
                     </Button>
                   )}
 
                 {businessNeedStarter && (
                   <Button className="w-full" variant="outline" disabled>
-                    Requires Starter first
+                    {t('cta.requiresStarterFirst')}
                   </Button>
                 )}
 
                 {businessLocked && (
                   <Button className="w-full" variant="outline" disabled>
-                    Not yet qualified
+                    {t('cta.notYetQualified')}
                   </Button>
                 )}
 
                 {isDowngrade && (
                   <Button className="w-full" variant="ghost" disabled>
                     <X className="h-4 w-4 mr-2" />
-                    Downgrade
+                    {t('cta.downgrade')}
                   </Button>
                 )}
               </CardContent>
@@ -652,18 +711,22 @@ export default function SubscriptionPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp className="h-5 w-5" />
-              Business unlock progress
+              {t('businessUnlock.title')}
             </CardTitle>
             <CardDescription>
-              Meet one of the requirements to unlock Business plan upgrade
+              {t('businessUnlock.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total sales</span>
+                <span className="text-muted-foreground">
+                  {t('businessUnlock.totalSales')}
+                </span>
                 <span className="font-medium">
-                  ${salesTrack.totalAmount.toFixed(2)} / $200
+                  {t('businessUnlock.totalSalesValue', {
+                    amount: salesTrack.totalAmount.toFixed(2),
+                  })}
                 </span>
               </div>
               <Progress
@@ -674,14 +737,22 @@ export default function SubscriptionPage() {
 
             <div className="flex items-center gap-3">
               <div className="flex-1 border-t border-border" />
-              <span className="text-xs text-muted-foreground">or</span>
+              <span className="text-xs text-muted-foreground">
+                {t('businessUnlock.or')}
+              </span>
               <div className="flex-1 border-t border-border" />
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total transactions</span>
-                <span className="font-medium">{salesTrack.totalCount} / 20</span>
+                <span className="text-muted-foreground">
+                  {t('businessUnlock.totalTransactions')}
+                </span>
+                <span className="font-medium">
+                  {t('businessUnlock.totalTransactionsValue', {
+                    count: salesTrack.totalCount,
+                  })}
+                </span>
               </div>
               <Progress
                 value={Math.min(100, (salesTrack.totalCount / 20) * 100)}
@@ -698,17 +769,20 @@ export default function SubscriptionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Cancel subscription?
+              {t('cancelDialog.title')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Your subscription will remain active until the end of the current
-              billing period
-              {periodEnd && ` (${formatDate(periodEnd)})`}. After that, your
-              account will automatically downgrade to Free plan.
+              {t('cancelDialog.descriptionPrefix')}
+              {periodEnd && t('cancelDialog.descriptionPeriodSuffix', {
+                date: formatDate(periodEnd),
+              })}
+              {t('cancelDialog.descriptionSuffix')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isCanceling}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isCanceling}>
+              {t('cancelDialog.cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancel}
               disabled={isCanceling}
@@ -717,10 +791,10 @@ export default function SubscriptionPage() {
               {isCanceling ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Canceling...
+                  {t('cancelDialog.canceling')}
                 </>
               ) : (
-                'Yes, cancel'
+                t('cancelDialog.confirm')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { PublicTenant } from '@/types/tenant';
@@ -111,10 +112,11 @@ interface StoreFooterProps {
 // ==========================================
 
 export function StoreFooter({ tenant }: StoreFooterProps) {
+  const t = useTranslations('store.footer');
   const currentYear = new Date().getFullYear();
 
   const whatsappLink = tenant.whatsapp
-    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(`Hi ${tenant.name}, I'm interested in your products.`)}`
+    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: tenant.name }))}`
     : null;
 
   const hasSocial = SOCIAL_CONFIG.some(
@@ -133,15 +135,15 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
 
         <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
-          {/* LEFT — Contact Directly */}
+          {/* LEFT — Direct Contact */}
           {whatsappLink && (
             <div className="border-2 border-foreground rounded-2xl p-8 md:p-10 flex flex-col gap-6">
               <div className="space-y-2">
                 <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
-                  Contact Directly
+                  {t('directContact.eyebrow')}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Quick response via WhatsApp. We&apos;re ready to help with your questions.
+                  {t('directContact.description')}
                 </p>
               </div>
               <a
@@ -151,7 +153,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
                 className="group inline-flex items-center gap-3 text-sm font-medium text-foreground hover:text-foreground/60 transition-colors duration-200"
               >
                 <span className="border-b border-foreground/30 group-hover:border-transparent transition-colors duration-200 pb-px">
-                  Chat via WhatsApp
+                  {t('directContact.cta')}
                 </span>
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-foreground/20 transition-all duration-200 group-hover:bg-foreground group-hover:border-foreground group-hover:text-background">
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -164,7 +166,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
           {hasSocial && (
             <div className="border border-border rounded-2xl p-6 md:p-8">
               <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-4">
-                Social Media
+                {t('socialTitle')}
               </p>
               <ScrollArea className="h-52">
                 <div className="space-y-0">
@@ -197,7 +199,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
         <Separator className="my-8" />
 
         <div className="text-center text-sm text-muted-foreground">
-          <p>© {currentYear} {tenant.name}. All rights reserved.</p>
+          <p>{t('copyright', { year: currentYear, name: tenant.name })}</p>
         </div>
 
       </div>

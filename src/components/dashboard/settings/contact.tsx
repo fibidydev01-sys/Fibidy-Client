@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/hooks/shared/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
@@ -10,22 +11,27 @@ import { StepContactInfo } from './form/contact/step-contact-info';
 import { StepLocation } from './form/contact/step-location';
 import { StepSectionHeading } from './form/contact/step-section-heading';
 
-const STEPS = [
-  { title: 'Contact Info', desc: 'WhatsApp, phone & address' },
-  { title: 'Location & Map', desc: 'Google Maps embed for your store' },
-  { title: 'Section Heading', desc: 'Title & subheading for contact section' },
-] as const;
-
 interface ContactSectionProps {
   onBack?: () => void;
 }
 
 export function ContactSection({ onBack }: ContactSectionProps) {
+  const t = useTranslations('settings.contact.stepsMeta');
+  const tToast = useTranslations('toast.settings');
   const { tenant, refresh } = useTenant();
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<ContactFormData | null>(null);
   const isInitialized = useRef(false);
+
+  const STEPS = useMemo(
+    () => [
+      { title: t('info.title'), desc: t('info.desc') },
+      { title: t('location.title'), desc: t('location.desc') },
+      { title: t('heading.title'), desc: t('heading.desc') },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     if (tenant && !isInitialized.current) {
@@ -62,9 +68,9 @@ export function ContactSection({ onBack }: ContactSectionProps) {
         address: formData.address || undefined,
       });
       await refresh();
-      toast.success('Contact section saved successfully');
+      toast.success(tToast('contactSaved'));
     } catch {
-      toast.error('Failed to save contact section');
+      toast.error(tToast('contactFailed'));
     } finally {
       setIsSaving(false);
     }

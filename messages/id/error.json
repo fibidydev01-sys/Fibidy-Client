@@ -1,0 +1,47 @@
+{
+  "error": {
+    "boundary": {
+      "title": "Terjadi kesalahan",
+      "description": "Error tak terduga. Silakan coba lagi.",
+      "retry": "Coba lagi",
+      "reload": "Muat ulang halaman",
+      "goHome": "Ke beranda"
+    },
+    "notFound": {
+      "title": "Halaman tidak ditemukan",
+      "description": "Halaman yang kamu cari tidak ada atau sudah dipindahkan.",
+      "goHome": "Kembali ke beranda",
+      "goBack": "Kembali"
+    },
+    "network": {
+      "title": "Masalah koneksi",
+      "description": "Kami tidak bisa menjangkau server. Cek koneksi kamu lalu coba lagi.",
+      "retry": "Coba lagi",
+      "timeout": "Permintaan timeout — silakan coba lagi sebentar",
+      "offline": "Kamu terlihat sedang offline"
+    },
+    "unauthorized": {
+      "title": "Sesi berakhir",
+      "description": "Silakan masuk lagi untuk melanjutkan.",
+      "signIn": "Masuk"
+    },
+    "forbidden": {
+      "title": "Akses ditolak",
+      "description": "Kamu tidak punya izin untuk melihat halaman ini."
+    },
+    "server": {
+      "title": "Error server",
+      "description": "Ada yang salah di sisi kami. Sedang kami cek.",
+      "tryAgainLater": "Coba lagi beberapa menit"
+    },
+    "validation": {
+      "title": "Input tidak valid",
+      "description": "Silakan cek kembali field yang ditandai lalu coba lagi."
+    },
+    "generic": {
+      "unknown": "Terjadi error yang tidak diketahui",
+      "contactSupport": "Jika masalah ini terus berlanjut, hubungi support di {email}",
+      "anErrorOccurred": "Terjadi error"
+    }
+  }
+}

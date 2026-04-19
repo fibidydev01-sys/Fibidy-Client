@@ -1,13 +1,45 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
 
+// Direct JSON import — same rationale as store/product OG siblings.
+// Edge runtime doesn't go through next-intl's request-scoped message
+// loader, so we import the EN message bundle at compile time.
+//
+// This file is at /opengraph-image (root, NOT per-locale), so it's the
+// default fallback when someone shares www.fibidy.com without a locale
+// path. We always render the EN variant here — if you want per-locale
+// platform OG, move this file into src/app/[locale]/opengraph-image.tsx.
+import enOgMessages from '../../messages/en/og.json';
+
 // ==========================================
 // DEFAULT PLATFORM OPEN GRAPH IMAGE
 // Route: /opengraph-image
+// File:  src/app/opengraph-image.tsx
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings moved to `messages/en/og.json` under the
+// `og.platform.*` namespace. Keys used:
+//   - og.platform.altText       (export const alt)
+//   - og.platform.brand         ("Fibidy" wordmark)
+//   - og.platform.headlineLine1 ("Sell Digital")
+//   - og.platform.headlineLine2 ("Products")
+//   - og.platform.subtitle      (tagline under headline)
+//   - og.platform.stats.free    + freeSub     ("Free" / "Forever")
+//   - og.platform.stats.setup   + setupSub    ("5 Min" / "Setup")
+//   - og.platform.stats.payments + paymentsSub ("Stripe" / "Payments")
+//   - og.platform.url           ("fibidy.com")
+//
+// Everything else — gradient colors, layout dimensions, font weights —
+// stays as literal values because those are design decisions, not copy.
 // ==========================================
 
 export const runtime = 'edge';
-export const alt = 'Fibidy - Online Store Platform for Digital Creators';
+
+// Load platform messages at module init. Safe in edge runtime because
+// JSON imports resolve at build time.
+const og = enOgMessages.og;
+
+export const alt = og.platform.altText;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const revalidate = 3600;
@@ -93,7 +125,7 @@ export default async function OgImage() {
             >
               <img
                 src={logoUrl}
-                alt="Fibidy"
+                alt={og.platform.brand}
                 width={52}
                 height={52}
                 style={{ objectFit: 'contain' }}
@@ -108,7 +140,7 @@ export default async function OgImage() {
                 display: 'flex',
               }}
             >
-              Fibidy
+              {og.platform.brand}
             </div>
           </div>
 
@@ -126,9 +158,9 @@ export default async function OgImage() {
                 maxWidth: '900px',
               }}
             >
-              Sell Digital
+              {og.platform.headlineLine1}
               <br />
-              Products
+              {og.platform.headlineLine2}
             </div>
             <div
               style={{
@@ -140,7 +172,7 @@ export default async function OgImage() {
                 maxWidth: '600px',
               }}
             >
-              Create a store, upload your files, get paid via Stripe. Free forever.
+              {og.platform.subtitle}
             </div>
           </div>
 
@@ -154,12 +186,19 @@ export default async function OgImage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
               {[
-                { label: 'Free', sub: 'Forever' },
-                { label: '5 Min', sub: 'Setup' },
-                { label: 'Stripe', sub: 'Payments' },
+                { label: og.platform.stats.free, sub: og.platform.stats.freeSub },
+                { label: og.platform.stats.setup, sub: og.platform.stats.setupSub },
+                { label: og.platform.stats.payments, sub: og.platform.stats.paymentsSub },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: i < 2 ? '32px' : '0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                      paddingRight: i < 2 ? '32px' : '0',
+                    }}
+                  >
                     <div
                       style={{
                         fontSize: '22px',
@@ -208,7 +247,7 @@ export default async function OgImage() {
                 display: 'flex',
               }}
             >
-              fibidy.com
+              {og.platform.url}
             </div>
           </div>
         </div>

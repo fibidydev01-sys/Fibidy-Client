@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ProductCard } from '@/components/store/showcase/product-card';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
 import type { TenantLandingConfig } from '@/types/landing';
@@ -23,6 +24,8 @@ export function TenantProducts({
   storeSlug,
   tenant,
 }: TenantProductsProps) {
+  const t = useTranslations('store.tenantProducts');
+  const tProducts = useTranslations('store.products');
   const limit = config?.config?.limit || 8;
   const showViewAll = config?.config?.showViewAll ?? true;
 
@@ -41,7 +44,7 @@ export function TenantProducts({
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border
                           text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
             <span className="w-1 h-1 rounded-full bg-foreground/40 inline-block" />
-            Collection
+            {t('collectionBadge')}
           </div>
 
           {tenant.contactTitle && (
@@ -82,7 +85,7 @@ export function TenantProducts({
             className="group/cta inline-flex items-center gap-2.5 text-sm font-medium
                        text-foreground hover:text-foreground/70 transition-colors duration-200"
           >
-            View All Products
+            {tProducts('viewAll')}
             <span className="inline-flex items-center justify-center w-7 h-7 rounded-full
                              border border-foreground/20 group-hover/cta:border-foreground/50
                              group-hover/cta:bg-foreground group-hover/cta:text-background

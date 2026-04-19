@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Crown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/shared/utils';
@@ -30,6 +31,7 @@ export function StepHighlights({
   isBusiness = false,
   onUpgrade,
 }: StepHighlightsProps) {
+  const t = useTranslations('settings.about');
   const itemsRef = useRef<FeatureItem[]>([]);
   const maxSlots = isBusiness ? TOTAL_SLOTS : FREE_SLOTS;
   const items = formData.aboutFeatures;
@@ -87,7 +89,7 @@ export function StepHighlights({
               {/* Title */}
               <div className="relative">
                 <Input
-                  placeholder="Premium Quality"
+                  placeholder={t('highlightTitlePlaceholder')}
                   value={item.title || ''}
                   onChange={(e) => handleTitleChange(i, e.target.value)}
                   className="h-9 text-sm font-semibold pr-10 placeholder:font-normal placeholder:text-muted-foreground/50"
@@ -98,14 +100,14 @@ export function StepHighlights({
                     ? 'text-amber-500 font-semibold'
                     : 'text-muted-foreground/40'
                 )}>
-                  {(item.title || '').length}/{MAX_TITLE}
+                  {t('counter', { current: (item.title || '').length, max: MAX_TITLE })}
                 </span>
               </div>
 
               {/* Description */}
               <div className="relative">
                 <Textarea
-                  placeholder="Describe this highlight..."
+                  placeholder={t('highlightDescriptionPlaceholder')}
                   value={item.description || ''}
                   onChange={(e) => {
                     if (e.target.value.length <= MAX_DESC)
@@ -120,7 +122,7 @@ export function StepHighlights({
                     ? 'text-amber-500 font-semibold'
                     : 'text-muted-foreground/40'
                 )}>
-                  {(item.description || '').length}/{MAX_DESC}
+                  {t('counter', { current: (item.description || '').length, max: MAX_DESC })}
                 </span>
               </div>
             </FilledSlot>
@@ -140,7 +142,7 @@ export function StepHighlights({
           <EmptySlot
             key={`empty-${i}`}
             index={i}
-            label={`Slot ${i + 1}`}
+            label={t('emptySlotLabel', { index: i + 1 })}
             onClick={handleOpen}
             isLoading={isUploading && i === items.length}
           >
@@ -151,7 +153,7 @@ export function StepHighlights({
       })}
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="tabular-nums">{items.length} / {maxSlots} highlights</span>
+        <span className="tabular-nums">{t('slotCount', { current: items.length, max: maxSlots })}</span>
         {!isBusiness && (
           <button
             type="button"
@@ -159,7 +161,7 @@ export function StepHighlights({
             className="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline"
           >
             <Crown className="h-3 w-3" />
-            Upgrade to Business
+            {t('upgradeCta')}
           </button>
         )}
       </div>

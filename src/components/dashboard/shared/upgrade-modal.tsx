@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Crown, AlertTriangle, Zap, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -36,12 +37,17 @@ interface UpgradeModalProps {
 export function UpgradeModal({
   open,
   onOpenChange,
-  title = 'Plan limit reached',
-  description = 'Upgrade your plan to unlock higher limits and premium features.',
+  title,
+  description,
   currentTier = 'FREE',
 }: UpgradeModalProps) {
+  const t = useTranslations('dashboard.upgradeModal');
   const router = useRouter();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  // i18n defaults — caller can override via props
+  const resolvedTitle = title ?? t('defaultTitle');
+  const resolvedDescription = description ?? t('defaultDescription');
 
   const handleDirectCheckout = async (tier: 'STARTER' | 'BUSINESS') => {
     setCheckoutLoading(true);
@@ -66,8 +72,8 @@ export function UpgradeModal({
         null;
 
   const upgradeLabel =
-    upgradeTier === 'STARTER' ? 'Upgrade to Starter — $5/mo' :
-      upgradeTier === 'BUSINESS' ? 'Upgrade to Business — $15/mo' :
+    upgradeTier === 'STARTER' ? t('upgradeStarterLabel') :
+      upgradeTier === 'BUSINESS' ? t('upgradeBusinessLabel') :
         null;
 
   const UpgradeIcon = upgradeTier === 'BUSINESS' ? Crown : Zap;
@@ -79,9 +85,9 @@ export function UpgradeModal({
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <AlertTriangle className="h-6 w-6 text-primary" />
           </div>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{resolvedTitle}</DialogTitle>
           <DialogDescription className="pt-1">
-            {description}
+            {resolvedDescription}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-col">
@@ -107,7 +113,7 @@ export function UpgradeModal({
             className="w-full"
             onClick={handleViewPlans}
           >
-            {upgradeTier ? 'View all plans' : 'View upgrade plans'}
+            {upgradeTier ? t('viewAllPlans') : t('viewUpgradePlans')}
           </Button>
 
           <Button
@@ -115,7 +121,7 @@ export function UpgradeModal({
             className="w-full"
             onClick={() => onOpenChange(false)}
           >
-            Maybe later
+            {t('maybeLater')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -2,7 +2,7 @@
 
 // ==========================================
 // ADMIN TENANT DETAIL PAGE
-// File: src/app/(admin)/admin/tenants/[id]/page.tsx
+// File: src/app/[locale]/(admin)/admin/tenants/[id]/page.tsx
 //
 // CLEANED: removed approve subscription flow
 // (backend endpoint deleted in Batch 1)
@@ -10,6 +10,41 @@
 //          approve AlertDialog, adminApi import, CheckCircle icon
 //
 // [TIDUR-NYENYAK v3 FIX] Removed unused `toast` import (line 41 warning)
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `admin.tenants.detail.*` for page copy, sections, fields, dialogs
+//   - `admin.tenants.actions.*` for suspend/unsuspend/view-store buttons
+//   - `admin.tenants.dash` for "—" fallback
+//
+// The dialog description sentences are split into `*Prefix` + `<strong>name</strong>`
+// + `*Suffix` pattern so translators can reorder clauses around the bolded
+// tenant name as the target language demands.
+//
+// Dates use `en-US` locale explicitly — matches what BE logs and admin-side
+// tooling expect. Revisit if admin UI ever gets its own locale toggle.
+//
+// [i18n FIX — 2026-04-19, PART 2]
+// Two consistency fixes following cross-file review against the sibling
+// list page (admin/tenants/page.tsx):
+//
+// 1. Raw enum passthrough for `tenant.status`, `subscription.plan`,
+//    `subscription.status`, and `payment.paymentStatus` is INTENTIONAL —
+//    these are backend enum values that must match BE logs and audit
+//    trails 1:1 for grep-ability. Same rationale as the list page. The
+//    list page already had a comment explaining this; the detail page
+//    did not, so downstream reviewers could reasonably think it was an
+//    oversight. Added parallel comment blocks below at each passthrough
+//    site.
+//
+// 2. `payment.paymentStatus` arrives as lowercase ("paid", "pending",
+//    "failed") while `tenant.status` and `subscription.status` arrive as
+//    uppercase ("ACTIVE", "SUSPENDED"). Rendered next to each other
+//    without normalization, this looks visually inconsistent. Added
+//    `className="capitalize"` to the payment badge so all status badges
+//    share a common casing profile ("Paid", "Pending") while preserving
+//    the raw enum underneath for copy/grep.
 // ==========================================
 
 import { useState } from 'react';
@@ -21,6 +56,7 @@ import {
   ShieldCheck,
   Loader2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,8 +76,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useAdminTenantDetail, useSuspendTenant } from '@/hooks/admin/use-admin';
-// [v3 FIX] Removed unused import:
-// import { toast } from '@/lib/providers/root-provider';
 
 // ==========================================
 // INFO ROW
@@ -54,10 +88,11 @@ function InfoRow({
   label: string;
   value?: string | number | null;
 }) {
+  const t = useTranslations('admin.tenants');
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium">{value ?? '—'}</span>
+      <span className="text-sm font-medium">{value ?? t('dash')}</span>
     </div>
   );
 }
@@ -67,6 +102,10 @@ function InfoRow({
 // ==========================================
 
 export default function AdminTenantDetailPage() {
+  const t = useTranslations('admin.tenants');
+  const tDetail = useTranslations('admin.tenants.detail');
+  const tActions = useTranslations('admin.tenants.actions');
+
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -103,7 +142,7 @@ export default function AdminTenantDetailPage() {
   if (!tenant) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Tenant not found
+        {tDetail('notFound')}
       </div>
     );
   }
@@ -120,6 +159,10 @@ export default function AdminTenantDetailPage() {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">{tenant.name}</h1>
+            {/*
+              [i18n] Raw enum passthrough intentional — matches the list page
+              convention. See header comment at top of file for rationale.
+            */}
             <Badge variant={isSuspended ? 'destructive' : 'default'}>
               {tenant.status}
             </Badge>
@@ -136,7 +179,7 @@ export default function AdminTenantDetailPage() {
               rel="noopener noreferrer"
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              View Store
+              {tActions('viewStore')}
             </a>
           </Button>
 
@@ -149,20 +192,26 @@ export default function AdminTenantDetailPage() {
                   ) : (
                     <ShieldCheck className="mr-2 h-4 w-4" />
                   )}
-                  Unsuspend
+                  {tActions('unsuspend')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Unsuspend Tenant?</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {tDetail('unsuspendDialog.title')}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Tenant <strong>{tenant.name}</strong> will be reactivated.
+                    {tDetail('unsuspendDialog.descriptionPrefix')}{' '}
+                    <strong>{tenant.name}</strong>{' '}
+                    {tDetail('unsuspendDialog.descriptionSuffix')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>
+                    {tDetail('unsuspendDialog.cancel')}
+                  </AlertDialogCancel>
                   <AlertDialogAction onClick={handleUnsuspend}>
-                    Yes, reactivate
+                    {tDetail('unsuspendDialog.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -176,25 +225,28 @@ export default function AdminTenantDetailPage() {
                   ) : (
                     <ShieldOff className="mr-2 h-4 w-4" />
                   )}
-                  Suspend
+                  {tActions('suspend')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Suspend Tenant?</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {tDetail('suspendDialog.title')}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Tenant <strong>{tenant.name}</strong> will not be able to log
-                    in after being suspended.
+                    {tDetail('suspendDialog.descriptionPrefix')}{' '}
+                    <strong>{tenant.name}</strong>{' '}
+                    {tDetail('suspendDialog.descriptionSuffix')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <div className="px-6 pb-2">
                   <Label htmlFor="reason" className="text-sm">
-                    Suspend reason{' '}
+                    {tDetail('suspendDialog.reasonLabel')}{' '}
                     <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     id="reason"
-                    placeholder="Enter suspend reason..."
+                    placeholder={tDetail('suspendDialog.reasonPlaceholder')}
                     className="mt-1.5"
                     value={suspendReason}
                     onChange={(e) => setSuspendReason(e.target.value)}
@@ -202,14 +254,14 @@ export default function AdminTenantDetailPage() {
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setSuspendReason('')}>
-                    Cancel
+                    {tDetail('suspendDialog.cancel')}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleSuspend}
                     disabled={!suspendReason.trim()}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Yes, suspend
+                    {tDetail('suspendDialog.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -223,16 +275,21 @@ export default function AdminTenantDetailPage() {
         {/* Tenant Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Store Information</CardTitle>
+            <CardTitle className="text-base">
+              {tDetail('sections.storeInformation')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <InfoRow label="Email" value={tenant.email} />
-            <InfoRow label="Category" value={tenant.category} />
-            <InfoRow label="WhatsApp" value={tenant.whatsapp} />
-            <InfoRow label="Phone" value={tenant.phone} />
-            <InfoRow label="Total Products" value={tenant._count.products} />
+            <InfoRow label={tDetail('fields.email')} value={tenant.email} />
+            <InfoRow label={tDetail('fields.category')} value={tenant.category} />
+            <InfoRow label={tDetail('fields.whatsapp')} value={tenant.whatsapp} />
+            <InfoRow label={tDetail('fields.phone')} value={tenant.phone} />
             <InfoRow
-              label="Joined"
+              label={tDetail('fields.totalProducts')}
+              value={tenant._count.products}
+            />
+            <InfoRow
+              label={tDetail('fields.joined')}
               value={new Date(tenant.createdAt).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'long',
@@ -240,7 +297,7 @@ export default function AdminTenantDetailPage() {
               })}
             />
             <InfoRow
-              label="Updated"
+              label={tDetail('fields.updated')}
               value={new Date(tenant.updatedAt).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'long',
@@ -253,16 +310,30 @@ export default function AdminTenantDetailPage() {
         {/* Subscription Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Subscription</CardTitle>
+            <CardTitle className="text-base">
+              {tDetail('sections.subscription')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {tenant.subscription ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <InfoRow label="Plan" value={tenant.subscription.plan} />
-                  <InfoRow label="Status" value={tenant.subscription.status} />
+                  {/*
+                    [i18n] Raw enum passthrough intentional for
+                    `subscription.plan` and `subscription.status`. Matches the
+                    list page convention and keeps BE logs/audit trail
+                    consistent.
+                  */}
                   <InfoRow
-                    label="Active Until"
+                    label={tDetail('fields.plan')}
+                    value={tenant.subscription.plan}
+                  />
+                  <InfoRow
+                    label={tDetail('fields.status')}
+                    value={tenant.subscription.status}
+                  />
+                  <InfoRow
+                    label={tDetail('fields.activeUntil')}
                     value={
                       tenant.subscription.currentPeriodEnd
                         ? new Date(
@@ -272,10 +343,10 @@ export default function AdminTenantDetailPage() {
                     }
                   />
                   <InfoRow
-                    label="Price"
+                    label={tDetail('fields.price')}
                     value={
                       tenant.subscription.priceAmount === 0
-                        ? 'Free'
+                        ? tDetail('fields.free')
                         : `$${tenant.subscription.priceAmount.toLocaleString('en-US')}`
                     }
                   />
@@ -287,7 +358,7 @@ export default function AdminTenantDetailPage() {
                     <Separator />
                     <div>
                       <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Payment History
+                        {tDetail('sections.paymentHistory')}
                       </p>
                       <div className="space-y-2">
                         {tenant.subscription.payments.map((p) => (
@@ -303,13 +374,23 @@ export default function AdminTenantDetailPage() {
                             <span>
                               ${p.amount.toLocaleString('en-US')}
                             </span>
+                            {/*
+                              [i18n] Raw enum passthrough intentional, but
+                              `paymentStatus` arrives lowercase ("paid",
+                              "pending", "failed") from BE while sibling status
+                              badges come in uppercase ("ACTIVE", "SUSPENDED").
+                              Without normalization the two look visually
+                              mismatched in the UI. `capitalize` CSS harmonizes
+                              the display casing ("Paid", "Pending") while
+                              preserving the raw enum for copy/grep.
+                            */}
                             <Badge
                               variant={
                                 p.paymentStatus === 'paid'
                                   ? 'default'
                                   : 'outline'
                               }
-                              className="text-xs"
+                              className="text-xs capitalize"
                             >
                               {p.paymentStatus}
                             </Badge>
@@ -322,7 +403,7 @@ export default function AdminTenantDetailPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No subscription yet
+                {tDetail('noSubscription')}
               </p>
             )}
           </CardContent>

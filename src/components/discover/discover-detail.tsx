@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { User, ShoppingBag } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { PublicProduct } from '@/types/product';
@@ -10,6 +11,8 @@ interface DiscoverDetailProps {
 }
 
 export function DiscoverDetail({ product, pageCount }: DiscoverDetailProps) {
+  const t = useTranslations('discover.detail');
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -40,11 +43,11 @@ export function DiscoverDetail({ product, pageCount }: DiscoverDetailProps) {
           {product.totalSales != null && (
             <>
               <ShoppingBag className="inline h-3.5 w-3.5 mr-0.5 -mt-0.5" />
-              {product.totalSales} sold
+              {t('sold', { count: product.totalSales })}
             </>
           )}
           {product.totalSales != null && pageCount != null && ' · '}
-          {pageCount != null && `${pageCount} pages`}
+          {pageCount != null && t('pages', { count: pageCount })}
         </span>
       </div>
 
@@ -53,7 +56,7 @@ export function DiscoverDetail({ product, pageCount }: DiscoverDetailProps) {
       {product.description && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            Description
+            {t('descriptionHeading')}
           </h2>
           <p className="text-sm leading-relaxed whitespace-pre-line">
             {product.description}

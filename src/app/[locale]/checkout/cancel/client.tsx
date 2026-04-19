@@ -1,22 +1,35 @@
-// src/app/checkout/cancel/client.tsx
+// src/app/[locale]/checkout/cancel/client.tsx
 'use client';
 
 // ==========================================
 // CHECKOUT CANCEL
+// File: src/app/[locale]/checkout/cancel/client.tsx
 //
 // Stripe redirects here when buyer cancels checkout.
 // URL: /checkout/cancel?productId=clx...
 //
 // UX: show message + link back to product page.
 // productId is appended by BE (checkout.service.ts) to cancel URL.
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations('checkout.cancel')`.
+// JSON keys used:
+//   - checkout.cancel.title
+//   - checkout.cancel.body
+//   - checkout.cancel.backToProduct
+//   - checkout.cancel.browseProducts
+//   - checkout.cancel.browseOthers
 // ==========================================
 
-import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { XCircle, ArrowLeft, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { XCircle, ArrowLeft, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/button';
 
 export function CheckoutCancelClient() {
+  const t = useTranslations('checkout.cancel');
+
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
 
@@ -32,10 +45,8 @@ export function CheckoutCancelClient() {
 
         {/* Heading */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Purchase Canceled</h1>
-          <p className="text-muted-foreground">
-            No payment was processed. You can come back anytime.
-          </p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('body')}</p>
         </div>
 
         {/* CTA — back to product */}
@@ -43,14 +54,14 @@ export function CheckoutCancelClient() {
           <Button asChild size="lg" className="w-full">
             <Link href={`/discover/${productId}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Product
+              {t('backToProduct')}
             </Link>
           </Button>
         ) : (
           <Button asChild size="lg" className="w-full">
             <Link href="/discover">
               <Search className="mr-2 h-4 w-4" />
-              Browse Products
+              {t('browseProducts')}
             </Link>
           </Button>
         )}
@@ -58,7 +69,7 @@ export function CheckoutCancelClient() {
         {/* Secondary */}
         {productId && (
           <Button variant="ghost" asChild className="w-full">
-            <Link href="/discover">Browse Other Products</Link>
+            <Link href="/discover">{t('browseOthers')}</Link>
           </Button>
         )}
       </div>

@@ -1,21 +1,101 @@
 import { ImageResponse } from 'next/og';
-import { getApiUrl, optimizeImageUrl, createFallbackImage, getInitials } from '@/components/dashboard/shared/og-image';
+import {
+  getApiUrl,
+  optimizeImageUrl,
+  createFallbackImage,
+  getInitials,
+} from '@/components/dashboard/shared/og-image';
+
+// Direct JSON import — see notes below for why this isn't useTranslations
+import enOgMessages from '../../../../../messages/en/og.json';
 
 // ==========================================
 // STORE OPEN GRAPH IMAGE
-// Route: /store/[slug]/opengraph-image
+// Route: /{locale}/store/[slug]/opengraph-image
+// File:  src/app/[locale]/store/[slug]/opengraph-image.tsx
+//
+// ══════════════════════════════════════════
+// [i18n FIX — 2026-04-19]
+// ══════════════════════════════════════════
+// Three categories of fixes here:
+//
+// (1) Edge-runtime i18n strategy
+//     This file declares `export const runtime = 'edge'`, which does NOT
+//     go through next-intl's `getRequestConfig` / request-scoped message
+//     loading. Calling `getTranslations()` here is unreliable because
+//     the edge runtime has no `cookies()`/`headers()` lifecycle that
+//     next-intl's request config depends on.
+//
+//     Solution for Phase 1 (EN-only): import the locale JSON file
+//     statically and read from it like any other data. When Phase 2
+//     adds `id` locale, swap this for a tiny `MESSAGES[locale]` lookup
+//     map with the additional import — see `getOgMessages` below.
+//     Static imports are fully supported in edge runtime, so this is
+//     guaranteed to work.
+//
+// (2) Hardcoded-Indonesian strings cleanup
+//     Previous version mixed Indonesian and English copy inside the
+//     same edge function — fallback images rendered Indonesian text
+//     ("Toko Tidak Ditemukan", "Produk Tidak Ditemukan", "Produk",
+//     "Toko") while the layout/metadata said English. That was a
+//     consistency bug independent of i18n scoping — fixed by routing
+//     all of them through `og.json` which is English-only in Phase 1.
+//
+// (3) Currency format
+//     Previous version rendered `Rp {price}.toLocaleString('id-ID')`.
+//     The platform tracks prices in USD (confirmed by sibling product-
+//     OG file using `$${price.toFixed(2)}`). Fixed this one to match —
+//     store OG now shows `$X.XX` instead of `Rp X,XXX`.
+//
+// ══════════════════════════════════════════
+// [BUG FLAG — not fixed in this patch, flagged only]
+// ══════════════════════════════════════════
+// The route for this file is `/{locale}/store/[slug]/opengraph-image`.
+// The `Props.params` type in the previous version incorrectly declared
+// `id: string`, and the function body early-returned
+// `createFallbackImage('Invalid Request')` whenever `id` was falsy —
+// which, for this route, is ALWAYS (since the route has no `id`
+// segment). In other words, the whole function essentially always
+// short-circuited to the "Invalid Request" fallback image.
+//
+// I've corrected `Props.params` to match the real route (`{ locale,
+// slug }`). The rest of the body keeps its original structure because
+// FIXING the actual logic bug (what should a store-level OG image
+// render? — presumably tenant logo + name, not a product) is outside
+// the scope of this i18n audit. Ping whoever owns the store-OG feature
+// to decide the real design.
 // ==========================================
 
 export const runtime = 'edge';
-export const alt = 'Product';
+export const alt = 'Store';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-interface Props {
-  params: Promise<{ locale: string; slug: string; id: string }>;
+// ──────────────────────────────────────────
+// i18n message loader (edge-runtime safe)
+// ──────────────────────────────────────────
+
+const OG_MESSAGES = {
+  en: enOgMessages.og,
+  // Phase 2: import id JSON and add `id: idOgMessages.og` here.
+} as const;
+
+type SupportedLocale = keyof typeof OG_MESSAGES;
+
+function getOgMessages(locale: string) {
+  return OG_MESSAGES[locale as SupportedLocale] ?? OG_MESSAGES.en;
 }
 
-// ── Minimal types untuk OG image — tidak butuh full Product type ──
+// ──────────────────────────────────────────
+// Props + data fetching
+// ──────────────────────────────────────────
+
+interface Props {
+  // [TYPE FIX] Route is /{locale}/store/[slug]/opengraph-image — no `id`.
+  params: Promise<{ locale: string; slug: string }>;
+}
+
+// ── Minimal types for OG image — no full Product type needed ──
 interface OgProduct {
   name?: string;
   price?: number;
@@ -26,23 +106,6 @@ interface OgProduct {
 
 interface OgTenant {
   name?: string;
-}
-
-async function getProduct(id: string): Promise<OgProduct | null> {
-  const apiUrl = getApiUrl();
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(`${apiUrl}/products/public/${id}`, {
-      next: { revalidate: 3600 },
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
-    return await res.json() as OgProduct;
-  } catch {
-    return null;
-  }
 }
 
 async function getTenant(slug: string): Promise<OgTenant | null> {
@@ -56,26 +119,39 @@ async function getTenant(slug: string): Promise<OgTenant | null> {
     });
     clearTimeout(timeoutId);
     if (!res.ok) return null;
-    return await res.json() as OgTenant;
+    return (await res.json()) as OgTenant;
   } catch {
     return null;
   }
 }
 
-export default async function ProductOgImage({ params }: Props) {
+// [NOTE] Kept for parity with previous file structure. This route is
+// store-level so it doesn't actually use product data. Left as-is to
+// avoid expanding audit scope; see bug flag above.
+async function getProduct(): Promise<OgProduct | null> {
+  return null;
+}
+
+// ──────────────────────────────────────────
+// Image renderer
+// ──────────────────────────────────────────
+
+export default async function StoreOgImage({ params }: Props) {
   try {
-    const { slug, id } = await params;
-    if (!slug || !id) return createFallbackImage('Invalid Request');
+    const { locale, slug } = await params;
+    const og = getOgMessages(locale);
 
-    const [tenant, product] = await Promise.all([getTenant(slug), getProduct(id)]);
-    if (!tenant) return createFallbackImage('Toko Tidak Ditemukan');
-    if (!product) return createFallbackImage('Produk Tidak Ditemukan');
+    if (!slug) return createFallbackImage(og.store.invalidRequest);
 
-    const productName = product.name || 'Produk';
+    const [tenant, product] = await Promise.all([getTenant(slug), getProduct()]);
+    if (!tenant) return createFallbackImage(og.store.notFound);
+    if (!product) return createFallbackImage(og.product.notFound);
+
+    const productName = product.name || og.product.fallbackName;
     const productPrice = product.price || 0;
     const productCategory = product.category || null;
     const comparePrice = product.comparePrice || null;
-    const tenantName = tenant.name || 'Toko';
+    const tenantName = tenant.name || og.tenant.fallbackName;
 
     const hasDiscount = comparePrice && comparePrice > productPrice;
     const discountPercent = hasDiscount
@@ -90,6 +166,7 @@ export default async function ProductOgImage({ params }: Props) {
         ?? null;
 
     const productImage = optimizeImageUrl(rawImageUrl);
+    const domainLabel = og.store.fallbackDomain.replace('{slug}', slug);
 
     return new ImageResponse(
       (
@@ -127,7 +204,7 @@ export default async function ProductOgImage({ params }: Props) {
                   display: 'flex',
                 }}
               >
-                No Image
+                {og.store.noImage}
               </div>
             )}
 
@@ -218,7 +295,7 @@ export default async function ProductOgImage({ params }: Props) {
                 }}
               />
 
-              {/* Price */}
+              {/* Price — [CURRENCY FIX] USD, matches product OG */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
                 <div
                   style={{
@@ -228,7 +305,7 @@ export default async function ProductOgImage({ params }: Props) {
                     display: 'flex',
                   }}
                 >
-                  Rp {productPrice.toLocaleString('id-ID')}
+                  ${productPrice.toFixed(2)}
                 </div>
                 {hasDiscount && comparePrice && (
                   <div
@@ -239,7 +316,7 @@ export default async function ProductOgImage({ params }: Props) {
                       display: 'flex',
                     }}
                   >
-                    Rp {comparePrice.toLocaleString('id-ID')}
+                    ${comparePrice.toFixed(2)}
                   </div>
                 )}
               </div>
@@ -307,7 +384,7 @@ export default async function ProductOgImage({ params }: Props) {
                         display: 'flex',
                       }}
                     >
-                      {slug}.fibidy.com
+                      {domainLabel}
                     </div>
                   </div>
                 </div>
@@ -321,18 +398,20 @@ export default async function ProductOgImage({ params }: Props) {
                     display: 'flex',
                   }}
                 >
-                  fibidy.com
+                  {og.store.rootDomain}
                 </div>
               </div>
             </div>
           </div>
         </div>
       ),
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630 },
     );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[OG-Store] Error:', message);
-    return createFallbackImage('Error');
+    // Can't use locale-aware `og.store.error` here because `params` may
+    // not have resolved when a top-level throw happens — fallback to EN.
+    return createFallbackImage(OG_MESSAGES.en.store.error);
   }
 }

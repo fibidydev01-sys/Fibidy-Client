@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Check,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -38,6 +39,7 @@ export function SocialShare({
   variant = 'dropdown',
   className = '',
 }: SocialShareProps) {
+  const t = useTranslations('store.socialShare');
   const [copied, setCopied] = useState(false);
 
   // Encode for URLs
@@ -59,10 +61,10 @@ export function SocialShare({
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      toast.success('Link copied successfully!');
+      toast.success(t('toast.copySuccess'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Failed to copy link');
+      toast.error(t('toast.copyFailed'));
     }
   };
 
@@ -99,7 +101,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('facebook')}
-          title="Share to Facebook"
+          title={t('titles.facebook')}
           className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
         >
           <Facebook className="h-4 w-4" />
@@ -108,7 +110,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('twitter')}
-          title="Share to Twitter"
+          title={t('titles.twitter')}
           className="hover:bg-sky-50 hover:text-sky-500 hover:border-sky-200"
         >
           <Twitter className="h-4 w-4" />
@@ -117,7 +119,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('linkedin')}
-          title="Share to LinkedIn"
+          title={t('titles.linkedin')}
           className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
         >
           <Linkedin className="h-4 w-4" />
@@ -126,7 +128,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={() => handleShare('whatsapp')}
-          title="Share to WhatsApp"
+          title={t('titles.whatsapp')}
           className="hover:bg-green-50 hover:text-green-600 hover:border-green-200"
         >
           <MessageCircle className="h-4 w-4" />
@@ -135,7 +137,7 @@ export function SocialShare({
           variant="outline"
           size="icon"
           onClick={handleCopyLink}
-          title="Copy Link"
+          title={t('titles.copyLink')}
         >
           {copied ? (
             <Check className="h-4 w-4 text-green-600" />
@@ -153,25 +155,25 @@ export function SocialShare({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className={className}>
           <Share2 className="h-4 w-4 mr-2" />
-          Share
+          {t('trigger')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem onClick={() => handleShare('facebook')}>
           <Facebook className="h-4 w-4 mr-2 text-blue-600" />
-          Facebook
+          {t('facebook')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('twitter')}>
           <Twitter className="h-4 w-4 mr-2 text-sky-500" />
-          Twitter
+          {t('twitter')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('linkedin')}>
           <Linkedin className="h-4 w-4 mr-2 text-blue-700" />
-          LinkedIn
+          {t('linkedin')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
           <MessageCircle className="h-4 w-4 mr-2 text-green-600" />
-          WhatsApp
+          {t('whatsapp')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           {copied ? (
@@ -179,12 +181,12 @@ export function SocialShare({
           ) : (
             <Link2 className="h-4 w-4 mr-2" />
           )}
-          {copied ? 'Copied!' : 'Copy Link'}
+          {copied ? t('copiedLink') : t('copyLink')}
         </DropdownMenuItem>
         {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
           <DropdownMenuItem onClick={handleNativeShare}>
             <Share2 className="h-4 w-4 mr-2" />
-            Share...
+            {t('nativeShare')}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

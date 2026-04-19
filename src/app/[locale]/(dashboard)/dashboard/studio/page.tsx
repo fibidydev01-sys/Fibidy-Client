@@ -2,17 +2,27 @@
 
 // ==========================================
 // LANDING BUILDER PAGE
-// File: src/app/(dashboard)/dashboard/studio/page.tsx
+// File: src/app/[locale]/(dashboard)/dashboard/studio/page.tsx
 //
 // [TIDUR-NYENYAK TYPECHECK FIX]
 // `TenantLandingConfig.hero.enabled` is `boolean | undefined` (optional),
 // but `hasProBlocks()` expects `LandingConfig` with `hero.enabled: boolean`
 // (required). Fix: normalize config via local helper that coerces
 // `enabled` to a concrete boolean before passing through.
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `studio.loadingFailed` for the "Failed to load store data" fallback
+//   - `studio.upgradeModal.{title, description}` for the Pro-blocks modal
+//   - `studio.enableHeroModal.{title, description, later, enableNow}` for the auto-prompt
+//   - `studio.unsavedModal.{title, description, back, leaveWithout, publishAndLeave, publishing}`
+//     for the navigate-away modal
 // ==========================================
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { LivePreview } from '@/components/dashboard/studio/live-preview';
 import { LandingErrorBoundary } from '@/components/dashboard/studio/landing-error-boundary';
 import { BlockDrawer } from '@/components/dashboard/studio/block-drawer';
@@ -64,6 +74,11 @@ function normalizeLandingConfig(
 }
 
 export default function LandingBuilderPage() {
+  const t = useTranslations('studio');
+  const tUpgrade = useTranslations('studio.upgradeModal');
+  const tEnable = useTranslations('studio.enableHeroModal');
+  const tUnsaved = useTranslations('studio.unsavedModal');
+
   const { tenant, refresh } = useTenant();
   const router = useRouter();
 
@@ -226,7 +241,7 @@ export default function LandingBuilderPage() {
   if (!tenant) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Failed to load store data</p>
+        <p className="text-muted-foreground">{t('loadingFailed')}</p>
       </div>
     );
   }
@@ -268,23 +283,23 @@ export default function LandingBuilderPage() {
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
-        title="Upgrade to publish Pro blocks"
-        description="You're using a Pro hero design (block 4+). Upgrade to Business plan to publish."
+        title={tUpgrade('title')}
+        description={tUpgrade('description')}
       />
 
       {/* ── ENABLE MODAL ── */}
       <AlertDialog open={enableModalOpen} onOpenChange={setEnableModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enable Hero Section</AlertDialogTitle>
+            <AlertDialogTitle>{tEnable('title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The hero section is not active yet. Enable it now so your landing page is visible to customers.
+              {tEnable('description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Later</AlertDialogCancel>
+            <AlertDialogCancel>{tEnable('later')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleEnableHero}>
-              Enable now
+              {tEnable('enableNow')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -294,18 +309,18 @@ export default function LandingBuilderPage() {
       <AlertDialog open={unsavedModalOpen} onOpenChange={setUnsavedModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Unpublished changes</AlertDialogTitle>
+            <AlertDialogTitle>{tUnsaved('title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unpublished changes. Publish first before leaving so your changes are not lost.
+              {tUnsaved('description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel>Back</AlertDialogCancel>
+            <AlertDialogCancel>{tUnsaved('back')}</AlertDialogCancel>
             <Button variant="outline" onClick={handleLeaveAnyway}>
-              Leave without publishing
+              {tUnsaved('leaveWithout')}
             </Button>
             <AlertDialogAction onClick={handlePublishAndLeave} disabled={isSaving}>
-              {isSaving ? 'Publishing...' : 'Publish & leave'}
+              {isSaving ? tUnsaved('publishing') : tUnsaved('publishAndLeave')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

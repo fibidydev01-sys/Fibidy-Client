@@ -1,8 +1,36 @@
 'use client';
 
+// ==========================================
+// USE ADMIN
+// File: src/hooks/admin/use-admin.ts
+//
+// [i18n FIX — 2026-04-19]
+// All toast TITLES wired to `toast.admin.*` JSON namespace via
+// `useTranslations('toast.admin')`. Backend-sourced description bodies
+// (`res.message`, `getErrorMessage(err)`) stay as passthrough because:
+//
+//   1. They come from the server response in whatever language the
+//      backend is configured for (currently EN, matching Phase 1).
+//   2. Backend error strings aren't translation keys — they're free-form
+//      human messages like "Tenant X has been suspended successfully."
+//   3. Once BE starts emitting error codes (Phase 2 concern), we can
+//      swap `getErrorMessage(err)` → `getErrorMessage(err, tRoot)` to
+//      resolve `error.*` keys.
+//
+// JSON keys used (toast.admin):
+//   - loginSuccess + loginSuccessDetail ({name})
+//   - loginFailed
+//   - logoutSuccess
+//   - tenantSuspended
+//   - tenantReactivated
+//   - suspendFailed
+//   - unsuspendFailed
+// ==========================================
+
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { useAdminStore } from '@/stores/admin-store';
 import { adminApi } from '@/lib/api/admin';
 import { getErrorMessage } from '@/lib/api/client';
@@ -39,6 +67,7 @@ export function useAdminAuthCheck() {
 // ==========================================
 
 export function useAdminLogin() {
+  const tToast = useTranslations('toast.admin');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setAdmin, setChecked } = useAdminStore();
@@ -52,19 +81,24 @@ export function useAdminLogin() {
         const response = await adminApi.login(email, password);
         setAdmin(response.admin);
         setChecked(true);
-        toast.success('Login successful', `Welcome, ${response.admin.name ?? response.admin.email}`);
+        toast.success(
+          tToast('loginSuccess'),
+          tToast('loginSuccessDetail', {
+            name: response.admin.name ?? response.admin.email,
+          }),
+        );
         router.push('/admin');
         return response;
       } catch (err) {
         const message = getErrorMessage(err);
         setError(message);
-        toast.error('Login failed', message);
+        toast.error(tToast('loginFailed'), message);
         throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    [setAdmin, setChecked, router],
+    [setAdmin, setChecked, router, tToast],
   );
 
   return { login, isLoading, error };
@@ -75,6 +109,7 @@ export function useAdminLogin() {
 // ==========================================
 
 export function useAdminLogout() {
+  const tToast = useTranslations('toast.admin');
   const { reset } = useAdminStore();
   const router = useRouter();
 
@@ -85,9 +120,9 @@ export function useAdminLogout() {
       // Ignore error
     }
     reset();
-    toast.success('Logged out');
+    toast.success(tToast('logoutSuccess'));
     router.push('/admin/login');
-  }, [reset, router]);
+  }, [reset, router, tToast]);
 
   return { logout };
 }
@@ -162,28 +197,29 @@ export function useAdminTenantDetail(id: string) {
 // ==========================================
 
 export function useSuspendTenant() {
+  const tToast = useTranslations('toast.admin');
   const queryClient = useQueryClient();
 
   const { mutateAsync: suspend, isPending: isLoading } = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       adminApi.suspendTenant(id, reason),
     onSuccess: (res) => {
-      toast.success('Tenant suspended', res.message);
+      toast.success(tToast('tenantSuspended'), res.message);
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
     },
     onError: (err) => {
-      toast.error('Failed to suspend', getErrorMessage(err));
+      toast.error(tToast('suspendFailed'), getErrorMessage(err));
     },
   });
 
   const { mutateAsync: unsuspend } = useMutation({
     mutationFn: (id: string) => adminApi.unsuspendTenant(id),
     onSuccess: (res) => {
-      toast.success('Tenant reactivated', res.message);
+      toast.success(tToast('tenantReactivated'), res.message);
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
     },
     onError: (err) => {
-      toast.error('Failed to unsuspend', getErrorMessage(err));
+      toast.error(tToast('unsuspendFailed'), getErrorMessage(err));
     },
   });
 

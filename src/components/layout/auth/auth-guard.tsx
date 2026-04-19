@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuthHydrated, useIsAuthenticated, useAuthChecked, useAuthStore } from '@/stores/auth-store';
 import { authApi } from '@/lib/api/auth';
 
@@ -52,6 +53,7 @@ export function AuthGuard({
   requireAuth = true,
   redirectTo = '/login',
 }: AuthGuardProps) {
+  const t = useTranslations('auth.guard');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -74,11 +76,11 @@ export function AuthGuard({
   }, [isHydrated, isChecked, isAuthenticated, requireAuth, redirectTo, pathname, router]);
 
   if (!isHydrated || !isChecked) {
-    return <LoadingScreen message="Checking authentication..." />;
+    return <LoadingScreen message={t('checkingAuth')} subtitle={t('pleaseWait')} />;
   }
 
   if (requireAuth && !isAuthenticated) {
-    return <LoadingScreen message="Redirecting..." />;
+    return <LoadingScreen message={t('redirecting')} subtitle={t('pleaseWait')} />;
   }
 
   return <>{children}</>;
@@ -97,6 +99,7 @@ export function GuestGuard({
   children,
   redirectTo = '/dashboard',
 }: GuestGuardProps) {
+  const t = useTranslations('auth.guard');
   const router = useRouter();
 
   const isHydrated = useAuthHydrated();
@@ -121,7 +124,7 @@ export function GuestGuard({
   }
 
   if (isAuthenticated) {
-    return <LoadingScreen message="You're already signed in..." />;
+    return <LoadingScreen message={t('alreadySignedIn')} subtitle={t('pleaseWait')} />;
   }
 
   return <>{children}</>;
@@ -131,7 +134,7 @@ export function GuestGuard({
 // LOADING SCREEN
 // ==========================================
 
-function LoadingScreen({ message }: { message: string }) {
+function LoadingScreen({ message, subtitle }: { message: string; subtitle: string }) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="flex flex-col items-center gap-6">
@@ -142,7 +145,7 @@ function LoadingScreen({ message }: { message: string }) {
         </div>
         <div className="text-center space-y-2">
           <p className="text-sm font-medium text-foreground">{message}</p>
-          <p className="text-xs text-muted-foreground">Please wait a moment</p>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
         </div>
       </div>
     </div>

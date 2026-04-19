@@ -1,0 +1,178 @@
+{
+  "store": {
+    "metadata": {
+      "notFoundTitle": "Toko Tidak Ditemukan",
+      "notFoundDescription": "Toko yang kamu cari tidak ada atau sudah tidak aktif.",
+      "productNotFoundTitle": "Produk Tidak Ditemukan",
+      "productNotFoundDescription": "Produk yang kamu cari tidak ditemukan.",
+      "aboutTitle": "Tentang Kami | {tenant}",
+      "contactTitle": "Kontak | {tenant}",
+      "productsTitle": "Semua Produk",
+      "notFound": "Tidak Ditemukan"
+    },
+    "header": {
+      "nav": {
+        "home": "Beranda",
+        "featured": "Unggulan",
+        "products": "Produk",
+        "contact": "Kontak"
+      },
+      "menuLabel": "Menu",
+      "reachUs": "Hubungi kami lewat:",
+      "whatsapp": "WhatsApp",
+      "phone": "Telepon",
+      "email": "Email",
+      "address": "Alamat",
+      "viewContactPage": "Lihat halaman kontak"
+    },
+    "footer": {
+      "directContact": {
+        "eyebrow": "Kontak Langsung",
+        "description": "Respons WhatsApp cepat. Kami siap membantu pertanyaan kamu.",
+        "cta": "Chat via WhatsApp"
+      },
+      "socialTitle": "Media Sosial",
+      "whatsappTemplate": "Halo {name}, saya tertarik dengan produk kamu.",
+      "copyright": "© {year} {name}. Hak cipta dilindungi."
+    },
+    "products": {
+      "title": "Semua Produk",
+      "collectionEyebrow": "Koleksi",
+      "viewAll": "Lihat Semua Produk",
+      "empty": "Tidak ada produk ditemukan",
+      "emptyHint": "Coba ubah filter atau kata kunci pencarian.",
+      "searchPlaceholder": "Cari produk...",
+      "filterAll": "Semua",
+      "featuredTitle": "Produk Unggulan",
+      "relatedTitle": "Produk terkait",
+      "breadcrumb": "Produk",
+      "showing": "Menampilkan halaman {current} dari {total} ({total} produk)",
+      "showingLabel": "Menampilkan halaman {current} dari {total} ({count} produk)"
+    },
+    "product": {
+      "detail": {
+        "shareLabel": "Bagikan produk ini:",
+        "buyFallbackDescription": "Beli {name} di {tenant}",
+        "imageAlt": "{name} — gambar {index}",
+        "thumbAlt": "{name} — thumbnail {index}",
+        "descriptionHeading": "Deskripsi produk",
+        "actionsDivider": "atau",
+        "imagePosition": "{current} / {total}"
+      },
+      "gallery": {
+        "noImage": "Tidak Ada Gambar",
+        "zoomButton": "Zoom"
+      },
+      "badge": {
+        "digital": "Digital",
+        "custom": "Custom",
+        "main": "★ Utama",
+        "business": "Business"
+      },
+      "info": {
+        "priceContactSeller": "Harga: Hubungi penjual",
+        "discountBadge": "-{percent}%"
+      },
+      "notFound": {
+        "title": "Produk Tidak Ditemukan",
+        "description": "Produk ini tidak ditemukan atau sudah tidak tersedia.",
+        "backToStore": "Kembali ke Toko"
+      }
+    },
+    "notFound": {
+      "title": "Toko Tidak Ditemukan",
+      "descriptionWithSlug": "Toko \"{slug}\" tidak ada atau sudah tidak aktif.",
+      "descriptionGeneric": "Toko yang kamu cari tidak ada atau sudah tidak aktif.",
+      "backHome": "Kembali ke Beranda"
+    },
+    "landingNotConfigured": {
+      "title": "Landing page belum dikonfigurasi",
+      "description": "Aktifkan section di Dashboard > Landing Builder."
+    },
+    "contactForm": {
+      "sectionTitle": "Kirim Pesan",
+      "nameLabel": "Nama",
+      "namePlaceholder": "Nama kamu",
+      "emailLabel": "Email",
+      "emailPlaceholder": "email@contoh.com",
+      "messageLabel": "Pesan",
+      "messagePlaceholder": "Tulis pesan kamu...",
+      "sendButton": "Kirim via WhatsApp",
+      "whatsappTemplate": "Halo {name}!\n\nNama: {senderName}\nEmail: {senderEmail}\nPesan: {message}"
+    },
+    "tenantContact": {
+      "heading": "Hubungi Kami",
+      "whatsappTemplate": "Halo {name}, saya tertarik dengan produk kamu.",
+      "sectionEyebrow": "Kirim Pesan"
+    },
+    "tenantProducts": {
+      "collectionBadge": "Koleksi"
+    },
+    "checkout": {
+      "contactSeller": "Hubungi Penjual",
+      "contactSellerDialog": {
+        "title": "Hubungi Penjual",
+        "subtitlePrefix": "Tanyakan ke {name} tentang",
+        "nameLabel": "Nama (opsional)",
+        "namePlaceholder": "Nama kamu",
+        "questionLabel": "Pertanyaan (opsional)",
+        "questionPlaceholder": "Pertanyaan apa pun tentang produk ini...",
+        "cancel": "Batal",
+        "send": "Kirim via WhatsApp"
+      },
+      "contactSellerWhatsappTemplate": "Halo {name},\n\nSaya tertarik dengan produk kamu:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nTerima kasih! 🙏",
+      "askSellerWhatsapp": "Tanya Penjual via WhatsApp",
+      "orderWhatsapp": "Pesan via WhatsApp",
+      "orderDialog": {
+        "titleGeneric": "Pesan via WhatsApp",
+        "titleAskSeller": "Tanya Penjual via WhatsApp",
+        "subtitleOrder": "Lengkapi detail pesanan untuk dikirim ke {name}",
+        "subtitleAsk": "Tanyakan ke {name} tentang \"{product}\"",
+        "nameLabel": "Nama (opsional)",
+        "namePlaceholder": "Nama kamu",
+        "notesLabel": "Catatan (opsional)",
+        "notesLabelAsk": "Pertanyaan (opsional)",
+        "notesPlaceholder": "Catatan tambahan...",
+        "notesPlaceholderAsk": "Tulis pertanyaan kamu di sini...",
+        "cancel": "Batal",
+        "send": "Kirim via WhatsApp"
+      },
+      "orderWhatsappTemplate": "Halo {name},\n\nSaya ingin pesan:\n\n*{product}*\n{namePart}{notesPart}\n\nMohon konfirmasi ketersediaan.\nTerima kasih! 🙏",
+      "stripe": {
+        "signInToBuy": "Masuk untuk Membeli",
+        "buyNow": "Beli Sekarang — {price}",
+        "loading": "Memuat...",
+        "redirecting": "Mengalihkan ke Stripe...",
+        "stillProcessingTitle": "Masih memproses checkout sebelumnya",
+        "stillProcessingBody": "Tunggu beberapa detik lalu coba lagi. Jika kamu sudah diarahkan ke Stripe, selesaikan pembayaran di tab tersebut."
+      }
+    },
+    "productList": {
+      "suffix": "Produk {tenant}"
+    },
+    "breadcrumb": {
+      "products": "Produk"
+    },
+    "socialShare": {
+      "trigger": "Bagikan",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "whatsapp": "WhatsApp",
+      "copyLink": "Salin Link",
+      "copiedLink": "Tersalin!",
+      "nativeShare": "Bagikan...",
+      "titles": {
+        "facebook": "Bagikan ke Facebook",
+        "twitter": "Bagikan ke Twitter",
+        "linkedin": "Bagikan ke LinkedIn",
+        "whatsapp": "Bagikan ke WhatsApp",
+        "copyLink": "Salin Link"
+      },
+      "toast": {
+        "copySuccess": "Link berhasil disalin!",
+        "copyFailed": "Gagal menyalin link"
+      }
+    }
+  }
+}

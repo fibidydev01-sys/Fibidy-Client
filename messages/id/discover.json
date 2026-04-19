@@ -1,0 +1,55 @@
+{
+  "discover": {
+    "metadata": {
+      "listTitle": "Jelajahi Produk Digital",
+      "listDescription": "Lihat produk digital dari semua kreator di Fibidy",
+      "layoutTemplate": "%s | Jelajah — Fibidy",
+      "layoutDefault": "Jelajahi Produk Digital — Fibidy",
+      "detailNotFound": "Produk Tidak Ditemukan",
+      "detailFallbackDescription": "Beli {name} di Fibidy"
+    },
+    "header": {
+      "title": "Jelajah"
+    },
+    "list": {
+      "title": "Jelajah",
+      "searchPlaceholder": "Cari produk digital...",
+      "filterAll": "Semua",
+      "empty": "Tidak ada produk ditemukan."
+    },
+    "detail": {
+      "previewHeading": "Preview",
+      "previewNotAvailable": "Preview tidak tersedia",
+      "descriptionHeading": "Deskripsi",
+      "pages": "{count} halaman",
+      "sold": "{count} terjual",
+      "policyNotice": {
+        "boldPrefix": "Semua penjualan bersifat final.",
+        "body": "Produk digital tidak bisa dikembalikan setelah dibeli. Silakan review preview di atas sebelum membeli."
+      },
+      "contactHint": "Ada pertanyaan? Hubungi penjual langsung via WhatsApp sebelum membeli."
+    },
+    "buyButton": {
+      "signInToBuy": "Masuk untuk Membeli",
+      "signInHint": "Akun dibutuhkan untuk melanjutkan pembelian",
+      "buyNow": "Beli — ${price}",
+      "redirecting": "Mengalihkan ke Stripe...",
+      "policyAgreement": "Saya mengerti bahwa semua penjualan bersifat final dan produk digital tidak bisa dikembalikan setelah dibeli."
+    },
+    "pdfPreview": {
+      "loading": "Memuat preview...",
+      "error": "Preview tidak bisa dimuat. URL mungkin sudah kedaluwarsa.",
+      "reload": "Muat ulang",
+      "pageRange": "Preview menampilkan {shown} dari {total} halaman.",
+      "buyHint": "Beli untuk akses semua halaman."
+    },
+    "notFound": {
+      "title": "Produk Tidak Ditemukan",
+      "description": "Produk ini tidak tersedia atau sudah dihapus.",
+      "backButton": "Kembali ke Jelajah"
+    },
+    "error": {
+      "retryButton": "Coba Lagi"
+    }
+  }
+}

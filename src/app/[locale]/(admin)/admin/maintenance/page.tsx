@@ -2,17 +2,26 @@
 
 // ==========================================
 // ADMIN MAINTENANCE PAGE
-// File: src/app/(admin)/admin/maintenance/page.tsx
+// File: src/app/[locale]/(admin)/admin/maintenance/page.tsx
 //
 // [TIDUR-NYENYAK FIX #6] Admin maintenance tools.
 // Currently houses: Cleanup Logs card.
 // Future: can add more maintenance utilities here.
+//
+// [i18n FIX — 2026-04-19]
+// Hardcoded title + subtitle replaced with `admin.maintenance.title`
+// and `admin.maintenance.subtitle`. The `CleanupCard` sub-component
+// already uses its own i18n namespace (`admin.maintenance.cleanup.*`)
+// and `toast.admin.*`, so no changes needed there.
 // ==========================================
 
 import { Wrench } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { CleanupCard } from '@/components/admin/maintenance/cleanup-card';
 
 export default function AdminMaintenancePage() {
+  const t = useTranslations('admin.maintenance');
+
   return (
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
@@ -21,9 +30,9 @@ export default function AdminMaintenancePage() {
           <Wrench className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Maintenance</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Tools to keep the database and platform healthy
+            {t('subtitle')}
           </p>
         </div>
       </div>

@@ -7,6 +7,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useUpdateProductFile, useDeleteProduct } from '@/hooks/dashboard/use-products';
 import { ProductGridCard, ProductGridCardSkeleton } from './product-grid-card';
 import { ProductPreviewDrawer } from './product-preview-drawer';
@@ -18,6 +19,7 @@ interface ProductsGridProps {
 }
 
 export function ProductsGrid({ products }: ProductsGridProps) {
+  const t = useTranslations('dashboard.products');
   const router = useRouter();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -60,9 +62,9 @@ export function ProductsGrid({ products }: ProductsGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No digital products yet.</p>
+        <p className="text-muted-foreground">{t('empty')}</p>
         <p className="text-sm text-muted-foreground mt-1">
-          Click &quot;Add Product&quot; to start selling.
+          {t('emptyHint')}
         </p>
       </div>
     );

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Package, FileText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '@/types/product';
 
@@ -38,6 +39,8 @@ interface ProductGridCardProps {
 }
 
 export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
+  const t = useTranslations('dashboard.products.card');
+
   // Selalu cek images[0] dulu — berlaku untuk semua tipe produk
   const imageUrl = product.images?.[0] ?? null;
   const isDigital = !!product.fileKey;
@@ -65,7 +68,7 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
               <>
                 <FileText className="h-10 w-10 text-muted-foreground/40" />
                 <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase">
-                  {product.fileType ?? 'FILE'}
+                  {product.fileType ?? t('fileFallback')}
                 </span>
               </>
             ) : (
@@ -78,7 +81,7 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
         {!product.isActive && (
           <div className="absolute top-2 left-2">
             <span className="bg-yellow-500/90 text-white text-xs px-2 py-0.5 rounded">
-              Draft
+              {t('draft')}
             </span>
           </div>
         )}
@@ -111,7 +114,7 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
           </span>
           {salesCount > 0 && (
             <span className="text-[10px] text-muted-foreground">
-              {salesCount} sold
+              {t('sold', { count: salesCount })}
             </span>
           )}
         </div>

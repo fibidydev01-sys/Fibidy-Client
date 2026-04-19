@@ -2,7 +2,19 @@
 
 // ==========================================
 // ADMIN LOGIN CLIENT
-// File: src/app/admin/login/client.tsx
+// File: src/app/[locale]/admin/login/client.tsx
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `auth.adminLogin.*` for page copy + form labels
+//   - `validation.admin.*` for Zod error messages
+//
+// Zod schema MOVED inside the component to get access to `tValidation`
+// (same pattern as `settings/password.tsx` and `auth/forgot-password.tsx`).
+// A module-level schema can't call `useTranslations()` because hooks only
+// work inside components, so the old hardcoded EN validation messages
+// would have leaked through even after Phase 2 adds more locales.
 // ==========================================
 
 import { useState } from 'react';
@@ -10,6 +22,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,16 +37,22 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AdminGuestGuard } from '@/components/layout/admin/admin-guard';
 import { useAdminLogin } from '@/hooks/admin/use-admin';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
 function AdminLoginForm() {
+  const t = useTranslations('auth.adminLogin');
+  const tValidation = useTranslations('validation.admin');
+
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useAdminLogin();
+
+  // [i18n FIX] Schema built inside the component so Zod messages can
+  // reference the live translation function. Do NOT hoist this to module
+  // scope — you'd lose i18n access.
+  const loginSchema = z.object({
+    email: z.string().email(tValidation('emailInvalid')),
+    password: z.string().min(8, tValidation('passwordMinLength')),
+  });
+
+  type LoginFormData = z.infer<typeof loginSchema>;
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -56,9 +75,9 @@ function AdminLoginForm() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold">Fibidy Admin</h1>
+          <h1 className="text-2xl font-bold">{t('brandTitle')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to admin panel
+            {t('subtitle')}
           </p>
         </div>
 
@@ -77,11 +96,11 @@ function AdminLoginForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('emailLabel')}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="admin@fibidy.com"
+                        placeholder={t('emailPlaceholder')}
                         autoComplete="email"
                         disabled={isLoading}
                         {...field}
@@ -97,12 +116,12 @@ function AdminLoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('passwordLabel')}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
+                          placeholder={t('passwordPlaceholder')}
                           autoComplete="current-password"
                           disabled={isLoading}
                           {...field}
@@ -131,10 +150,10 @@ function AdminLoginForm() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    {t('submittingButton')}
                   </>
                 ) : (
-                  'Sign in'
+                  t('submitButton')
                 )}
               </Button>
             </form>
@@ -142,7 +161,7 @@ function AdminLoginForm() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Restricted access. Authorized personnel only.
+          {t('footerNote')}
         </p>
       </div>
     </div>

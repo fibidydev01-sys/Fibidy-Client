@@ -3,6 +3,15 @@ import { FileText, Music, Video, Image, Archive } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { PublicProduct } from '@/types/product';
 
+// ==========================================
+// DISCOVER CARD
+//
+// Note: tidak ada user-facing strings yang perlu di-wire.
+// File type (PDF/MP3/etc) murni data dari backend, bukan i18n.
+// Price format pakai $ (USD) — currency akan di-handle universal.
+// Seller name & product name & description = data dari DB.
+// ==========================================
+
 const FILE_ICONS: Record<string, React.ElementType> = {
   pdf: FileText, epub: FileText,
   mp3: Music, wav: Music,

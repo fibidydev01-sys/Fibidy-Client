@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useTenant } from '@/hooks/shared/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
@@ -15,6 +16,8 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ onBack }: AboutSectionProps) {
+  const t = useTranslations('settings.about');
+  const tToast = useTranslations('toast.settings');
   const { tenant, refresh } = useTenant();
   const { isBusiness } = useSubscriptionPlan();
   const [isSaving, setIsSaving] = useState(false);
@@ -44,13 +47,12 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     if (features.length === 0) return true;
     for (let i = 0; i < features.length; i++) {
       const f = features[i];
-      const num = `#${i + 1}`;
       if (!f.title?.trim()) {
-        toast.error(`Highlight ${num}: Title is required`);
+        toast.error(t('validation.titleRequired', { index: i + 1 }));
         return false;
       }
       if (!f.description?.trim()) {
-        toast.error(`Highlight ${num}: Description is required`);
+        toast.error(t('validation.descriptionRequired', { index: i + 1 }));
         return false;
       }
     }
@@ -63,9 +65,9 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     try {
       await tenantsApi.update({ aboutFeatures: formData.aboutFeatures });
       await refresh();
-      toast.success('Highlights saved successfully');
+      toast.success(tToast('aboutSaved'));
     } catch {
-      toast.error('Failed to save highlights');
+      toast.error(tToast('aboutFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -79,8 +81,8 @@ export function AboutSection({ onBack }: AboutSectionProps) {
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
-        title="Upgrade for more highlights"
-        description="Business Plan allows up to 7 highlights. Show more of your store's features."
+        title={t('upgradePrompt.title')}
+        description={t('upgradePrompt.description')}
       />
 
       <div className="flex-1 pb-20">

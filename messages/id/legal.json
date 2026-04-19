@@ -1,0 +1,45 @@
+{
+  "legal": {
+    "nav": {
+      "title": "Legal & Bantuan",
+      "groups": {
+        "support": "Bantuan",
+        "policies": "Kebijakan"
+      },
+      "items": {
+        "contact": {
+          "label": "Kontak",
+          "description": "Hubungi tim kami"
+        },
+        "faq": {
+          "label": "FAQ",
+          "description": "Pertanyaan yang sering ditanya"
+        },
+        "terms": {
+          "label": "Syarat Layanan",
+          "description": "Aturan penggunaan Fibidy"
+        },
+        "privacy": {
+          "label": "Kebijakan Privasi",
+          "description": "Cara kami mengelola data kamu"
+        }
+      }
+    },
+    "contact": {
+      "title": "Hubungi Kami",
+      "lead": "Butuh bantuan? Hubungi kami lewat channel di bawah ini dan kami akan segera membalas."
+    },
+    "faq": {
+      "title": "Pertanyaan yang Sering Ditanya",
+      "lead": "Temukan jawaban cepat untuk pertanyaan umum seputar Fibidy."
+    },
+    "terms": {
+      "title": "Syarat Layanan",
+      "lead": "Terakhir diperbarui: April 2026"
+    },
+    "privacy": {
+      "title": "Kebijakan Privasi",
+      "lead": "Terakhir diperbarui: April 2026"
+    }
+  }
+}

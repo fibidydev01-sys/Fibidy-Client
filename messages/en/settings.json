@@ -5,7 +5,8 @@
       "about": "About",
       "contact": "Contact",
       "social": "Social",
-      "password": "Password"
+      "password": "Password",
+      "language": "Language"
     },
     "hero": {
       "title": "Hero Section",
@@ -224,6 +225,25 @@
       "submitButton": "Change Password",
       "submittingButton": "Changing...",
       "loadingHint": "Changing password..."
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Choose your display language for the dashboard and your store.",
+      "currentLanguage": "Current language",
+      "infoAlert": "Switching language reloads the page immediately. The change only applies to this device.",
+      "options": {
+        "en": {
+          "label": "English",
+          "native": "English",
+          "description": "English"
+        },
+        "id": {
+          "label": "Indonesian",
+          "native": "Bahasa Indonesia",
+          "description": "Indonesian"
+        }
+      },
+      "backButton": "Settings"
     }
   }
 }

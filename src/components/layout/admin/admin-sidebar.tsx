@@ -4,6 +4,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Users,
@@ -35,20 +36,21 @@ import { useAdminLogout } from '@/hooks/admin/use-admin';
 import { useDarkMode } from '@/hooks/shared/use-dark-mode';
 
 interface NavItem {
-  title: string;
+  titleKey: string;
   href: string;
   icon: LucideIcon;
 }
 
 const navigation: NavItem[] = [
-  { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { title: 'Tenants', href: '/admin/tenants', icon: Users },
-  { title: 'Audit Logs', href: '/admin/logs', icon: ScrollText },
+  { titleKey: 'dashboard', href: '/admin', icon: LayoutDashboard },
+  { titleKey: 'tenants', href: '/admin/tenants', icon: Users },
+  { titleKey: 'logs', href: '/admin/logs', icon: ScrollText },
   // [FIX #6] New route
-  { title: 'Maintenance', href: '/admin/maintenance', icon: Wrench },
+  { titleKey: 'maintenance', href: '/admin/maintenance', icon: Wrench },
 ];
 
 export function AdminSidebar() {
+  const t = useTranslations('admin.nav');
   const pathname = usePathname();
   const { logout } = useAdminLogout();
   const { isDark, toggleDarkMode } = useDarkMode();
@@ -70,7 +72,7 @@ export function AdminSidebar() {
                   <SidebarMenuButton asChild isActive={active}>
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -87,7 +89,7 @@ export function AdminSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                   <Menu className="h-5 w-5" />
-                  <span>Menu</span>
+                  <span>{t('menu')}</span>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -100,19 +102,19 @@ export function AdminSidebar() {
                   {isDark ? (
                     <>
                       <Sun className="mr-3 h-5 w-5" />
-                      Light mode
+                      {t('lightMode')}
                     </>
                   ) : (
                     <>
                       <Moon className="mr-3 h-5 w-5" />
-                      Dark mode
+                      {t('darkMode')}
                     </>
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-destructive">
                   <LogOut className="mr-3 h-5 w-5" />
-                  Sign out
+                  {t('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

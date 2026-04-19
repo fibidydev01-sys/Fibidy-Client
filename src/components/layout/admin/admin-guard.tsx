@@ -12,6 +12,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   useIsAdminAuthenticated,
   useAdminChecked,
@@ -24,6 +25,7 @@ interface AdminGuardProps {
 }
 
 export function AdminGuard({ children }: AdminGuardProps) {
+  const t = useTranslations('admin.guard');
   const router = useRouter();
   const isAuthenticated = useIsAdminAuthenticated();
   const isChecked = useAdminChecked();
@@ -45,7 +47,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Verifying session...</p>
+          <p className="text-sm text-muted-foreground">{t('verifyingSession')}</p>
         </div>
       </div>
     );

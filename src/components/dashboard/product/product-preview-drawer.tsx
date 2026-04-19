@@ -3,14 +3,23 @@
 // [TIDUR-NYENYAK FIX #9] Q3=A treatment:
 // When product has purchases (salesCount > 0):
 //   - HIDE "Delete product" button entirely
-//   - Replace with info hint: "Products with transactions cannot be deleted.
-//                              Deactivate to hide from the store."
+//   - Replace with info hint
 //   - "Deactivate" button still works as normal (top action row)
+//
+// [i18n FIX — 2026-04-19]
+// Replaced hardcoded fallback string `'FILE'` in the digital-product
+// icon fallback block with a proper i18n key from `common.productType`.
+// Previously: `{product.fileType?.toUpperCase() ?? 'FILE'}` would always
+// render the English word "FILE" regardless of locale. Now uses
+// `tProductType('fileFallback')` so it stays consistent with the rest
+// of the product-type labels ("Digital", "Custom", etc.) and gets
+// translated once new locales are added in Phase 2.
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Drawer } from 'vaul';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { useTranslations } from 'next-intl';
 import {
   Tag,
   Calendar,
@@ -54,6 +63,10 @@ function DrawerInner({
   onDelete,
   onToggleActive,
 }: DrawerInnerProps) {
+  const t = useTranslations('dashboard.products.previewDrawer');
+  // [i18n FIX] For the "FILE" fallback label when fileType is null.
+  const tProductType = useTranslations('common.productType');
+
   const [isHeaderSticky, setIsHeaderSticky] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -97,20 +110,18 @@ function DrawerInner({
   const salesCount = product._count?.purchases ?? 0;
 
   // [FIX #9] Delete is blocked if product has purchases.
-  // Backend returns 400 with clear message, but we also hide the
-  // button proactively so user doesn't have to discover the error.
   const canDelete = salesCount === 0;
 
   return (
     <>
       <Drawer.Title asChild>
         <VisuallyHidden.Root>
-          {product.name ? `Preview ${product.name}` : 'Product Preview'}
+          {product.name ? t('title', { name: product.name }) : t('titleFallback')}
         </VisuallyHidden.Root>
       </Drawer.Title>
       <Drawer.Description asChild>
         <VisuallyHidden.Root id="drawer-description">
-          {product.description || `View details for ${product.name || ''}`}
+          {product.description || t('descriptionFallback', { name: product.name || '' })}
         </VisuallyHidden.Root>
       </Drawer.Description>
 
@@ -153,13 +164,13 @@ function DrawerInner({
                     <>
                       <FileText className="h-16 w-16 text-muted-foreground/30" />
                       <Badge variant="outline" className="text-xs">
-                        {product.fileType?.toUpperCase() ?? 'FILE'}
+                        {product.fileType?.toUpperCase() ?? tProductType('fileFallback')}
                       </Badge>
                     </>
                   ) : (
                     <>
                       <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground">No image</p>
+                      <p className="text-sm text-muted-foreground">{t('noImage')}</p>
                     </>
                   )}
                 </div>
@@ -214,7 +225,7 @@ function DrawerInner({
           {product.description && (
             <div className="mb-6">
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                Description
+                {t('description')}
               </h3>
               <p className="text-sm leading-relaxed">{product.description}</p>
             </div>
@@ -226,7 +237,7 @@ function DrawerInner({
               <div className="flex items-start gap-3">
                 <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Category</p>
+                  <p className="text-xs text-muted-foreground">{t('category')}</p>
                   <p className="text-sm font-medium">{product.category}</p>
                 </div>
               </div>
@@ -235,7 +246,7 @@ function DrawerInner({
             <div className="flex items-start gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
-                <p className="text-xs text-muted-foreground">Created</p>
+                <p className="text-xs text-muted-foreground">{t('created')}</p>
                 <p className="text-sm font-medium">
                   {formatDateShort(product.createdAt)}
                 </p>
@@ -246,7 +257,7 @@ function DrawerInner({
               <div className="flex items-start gap-3">
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-xs text-muted-foreground">File</p>
+                  <p className="text-xs text-muted-foreground">{t('file')}</p>
                   <p className="text-sm font-medium">
                     {product.fileType.toUpperCase()}
                     {product.fileSizeMb
@@ -261,8 +272,8 @@ function DrawerInner({
               <div className="flex items-start gap-3">
                 <Download className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Sales</p>
-                  <p className="text-sm font-medium">{salesCount} sold</p>
+                  <p className="text-xs text-muted-foreground">{t('sales')}</p>
+                  <p className="text-sm font-medium">{t('salesCount', { count: salesCount })}</p>
                 </div>
               </div>
             )}
@@ -281,12 +292,12 @@ function DrawerInner({
                 {product.isActive ? (
                   <>
                     <EyeOff className="h-4 w-4 mr-2" />
-                    Deactivate
+                    {t('deactivate')}
                   </>
                 ) : (
                   <>
                     <Eye className="h-4 w-4 mr-2" />
-                    Activate
+                    {t('activate')}
                   </>
                 )}
               </Button>
@@ -298,7 +309,7 @@ function DrawerInner({
                 onClick={handleEdit}
               >
                 <Edit className="h-4 w-4 mr-2" />
-                Edit
+                {t('edit')}
               </Button>
             )}
           </div>
@@ -311,7 +322,7 @@ function DrawerInner({
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete product
+              {t('deleteProduct')}
             </Button>
           )}
 
@@ -322,11 +333,10 @@ function DrawerInner({
                 <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                   <p className="font-medium mb-0.5">
-                    Products with transactions cannot be deleted.
+                    {t('cannotDeleteTitle')}
                   </p>
                   <p className="text-amber-700 dark:text-amber-400">
-                    Deactivate the product to hide it from the store without
-                    removing buyers&apos; purchase history.
+                    {t('cannotDeleteBody')}
                   </p>
                 </div>
               </div>

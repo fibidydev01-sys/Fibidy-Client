@@ -1,6 +1,7 @@
 'use client';
 
 import { EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { TenantHero } from '@/components/dashboard/blocks/block';
 import type { TenantLandingConfig } from '@/types/landing';
@@ -13,6 +14,7 @@ interface LivePreviewProps {
 }
 
 export function LivePreview({ config, tenant, onEnableHero }: LivePreviewProps) {
+  const t = useTranslations('studio.livePreview');
   const heroEnabled = config?.hero?.enabled === true;
 
   return (
@@ -25,10 +27,10 @@ export function LivePreview({ config, tenant, onEnableHero }: LivePreviewProps) 
             <EyeOff className="h-8 w-8 text-muted-foreground/50" />
           </div>
           <p className="text-muted-foreground font-medium">
-            &quot;Hero&quot; section is not active
+            {t('heroInactiveTitle')}
           </p>
           <p className="text-sm text-muted-foreground/70 mt-1">
-            Enable it to see a preview
+            {t('heroInactiveHint')}
           </p>
           {onEnableHero && (
             <Button
@@ -36,7 +38,7 @@ export function LivePreview({ config, tenant, onEnableHero }: LivePreviewProps) 
               size="sm"
               onClick={onEnableHero}
             >
-              Enable
+              {t('heroEnable')}
             </Button>
           )}
         </div>

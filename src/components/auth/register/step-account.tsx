@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -23,37 +24,37 @@ interface StepAccountProps {
 // ==========================================
 
 interface PasswordRule {
-  label: string;
+  labelKey: 'minLength' | 'uppercase' | 'number' | 'symbol';
   test: (pw: string) => boolean;
 }
 
 const PASSWORD_RULES: PasswordRule[] = [
-  { label: 'At least 8 characters', test: (pw) => pw.length >= 8 },
-  { label: 'One uppercase letter (A–Z)', test: (pw) => /[A-Z]/.test(pw) },
-  { label: 'One number (0–9)', test: (pw) => /[0-9]/.test(pw) },
-  { label: 'One symbol (e.g. !@#$%)', test: (pw) => /[^A-Za-z0-9]/.test(pw) },
+  { labelKey: 'minLength', test: (pw) => pw.length >= 8 },
+  { labelKey: 'uppercase', test: (pw) => /[A-Z]/.test(pw) },
+  { labelKey: 'number', test: (pw) => /[0-9]/.test(pw) },
+  { labelKey: 'symbol', test: (pw) => /[^A-Za-z0-9]/.test(pw) },
 ];
 
 type StrengthLevel = 0 | 1 | 2 | 3 | 4;
 
 interface StrengthInfo {
   level: StrengthLevel;
-  label: string;
+  labelKey: '' | 'weak' | 'fair' | 'good' | 'strong';
   color: string;
   textColor: string;
 }
 
 function getStrength(password: string): StrengthInfo {
   if (!password) {
-    return { level: 0, label: '', color: 'bg-border', textColor: 'text-muted-foreground' };
+    return { level: 0, labelKey: '', color: 'bg-border', textColor: 'text-muted-foreground' };
   }
 
   const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
 
-  if (passed <= 1) return { level: 1, label: 'Weak', color: 'bg-red-500', textColor: 'text-red-500' };
-  if (passed === 2) return { level: 2, label: 'Fair', color: 'bg-orange-400', textColor: 'text-orange-400' };
-  if (passed === 3) return { level: 3, label: 'Good', color: 'bg-yellow-400', textColor: 'text-yellow-500' };
-  return { level: 4, label: 'Strong', color: 'bg-green-500', textColor: 'text-green-600' };
+  if (passed <= 1) return { level: 1, labelKey: 'weak', color: 'bg-red-500', textColor: 'text-red-500' };
+  if (passed === 2) return { level: 2, labelKey: 'fair', color: 'bg-orange-400', textColor: 'text-orange-400' };
+  if (passed === 3) return { level: 3, labelKey: 'good', color: 'bg-yellow-400', textColor: 'text-yellow-500' };
+  return { level: 4, labelKey: 'strong', color: 'bg-green-500', textColor: 'text-green-600' };
 }
 
 // ==========================================
@@ -61,6 +62,7 @@ function getStrength(password: string): StrengthInfo {
 // ==========================================
 
 function PasswordStrength({ password }: { password: string }) {
+  const t = useTranslations('auth.register.account');
   const strength = useMemo(() => getStrength(password), [password]);
   const rules = useMemo(() =>
     PASSWORD_RULES.map((r) => ({ ...r, passed: r.test(password) })),
@@ -84,9 +86,9 @@ function PasswordStrength({ password }: { password: string }) {
               />
             ))}
           </div>
-          {strength.label && (
+          {strength.labelKey && (
             <p className={cn('text-[11px] font-semibold tracking-wide', strength.textColor)}>
-              {strength.label}
+              {t(`strength.${strength.labelKey}`)}
             </p>
           )}
         </div>
@@ -95,7 +97,7 @@ function PasswordStrength({ password }: { password: string }) {
       {/* Rules checklist — selalu tampil */}
       <div className="space-y-1">
         {rules.map((rule) => (
-          <div key={rule.label} className="flex items-center gap-2">
+          <div key={rule.labelKey} className="flex items-center gap-2">
             <span className={cn(
               'flex items-center justify-center w-3.5 h-3.5 rounded-full shrink-0 transition-colors',
               rule.passed ? 'bg-green-500' : 'bg-border'
@@ -109,7 +111,7 @@ function PasswordStrength({ password }: { password: string }) {
               'text-xs transition-colors',
               rule.passed ? 'text-foreground' : 'text-muted-foreground'
             )}>
-              {rule.label}
+              {t(`passwordRules.${rule.labelKey}`)}
             </span>
           </div>
         ))}
@@ -124,6 +126,7 @@ function PasswordStrength({ password }: { password: string }) {
 // ==========================================
 
 export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccountProps) {
+  const t = useTranslations('auth.register.account');
   const [localEmail, setLocalEmail] = useState(email);
   const [localPassword, setLocalPassword] = useState(password);
   const [localWhatsapp, setLocalWhatsapp] = useState(whatsapp);
@@ -144,18 +147,18 @@ export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccount
       {/* Email */}
       <div className="space-y-1.5">
         <Label htmlFor="acc-email" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          Email address
+          {t('emailLabel')}
         </Label>
         <Input
           id="acc-email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('emailPlaceholder')}
           autoComplete="email"
           value={localEmail}
           onChange={(e) => { setLocalEmail(e.target.value); onUpdate({ email: e.target.value }); }}
           className="h-11 text-sm placeholder:text-muted-foreground/50"
         />
-        <p className="text-xs text-muted-foreground">Used to sign in to your store dashboard</p>
+        <p className="text-xs text-muted-foreground">{t('emailHelper')}</p>
       </div>
 
       <div className="border-t" />
@@ -163,13 +166,13 @@ export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccount
       {/* Password */}
       <div className="space-y-1.5">
         <Label htmlFor="acc-password" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          Password
+          {t('passwordLabel')}
         </Label>
         <div className="relative">
           <Input
             id="acc-password"
             type={showPassword ? 'text' : 'password'}
-            placeholder="Create a strong password"
+            placeholder={t('passwordPlaceholder')}
             autoComplete="new-password"
             value={localPassword}
             onChange={(e) => { setLocalPassword(e.target.value); onUpdate({ password: e.target.value }); }}
@@ -198,7 +201,7 @@ export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccount
       {/* WhatsApp */}
       <div className="space-y-1.5">
         <Label htmlFor="acc-whatsapp" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          WhatsApp number
+          {t('whatsappLabel')}
         </Label>
         <div className="flex">
           <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-sm text-muted-foreground h-11">
@@ -207,14 +210,14 @@ export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccount
           <Input
             id="acc-whatsapp"
             type="tel"
-            placeholder="81234567890"
+            placeholder={t('whatsappPlaceholder')}
             className="rounded-l-none h-11 text-sm placeholder:text-muted-foreground/50"
             value={localWhatsapp.replace(/^62/, '')}
             onChange={(e) => handleWhatsappChange(e.target.value)}
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Used to receive order notifications via WhatsApp
+          {t('whatsappHelper')}
         </p>
       </div>
 

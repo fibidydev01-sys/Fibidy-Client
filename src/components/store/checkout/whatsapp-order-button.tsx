@@ -2,15 +2,41 @@
 
 // ==========================================
 // WHATSAPP ORDER BUTTON
+// File: src/components/store/checkout/whatsapp-order-button.tsx
+//
 // v3: added customLabel prop
 //   - Default: "Order via WhatsApp" (Custom/Service)
 //   - Custom: "Ask Seller via WhatsApp" (Digital — pre-sales)
+//
+// [i18n FIX — 2026-04-19]
+// Previously the WhatsApp template parts (`Name:`, `Notes:`) were
+// hardcoded English labels built in JS:
+//
+//   const namePart = name ? `\nName: ${name}` : '';
+//   const notesPart = notes ? `\nNotes: ${notes}` : '';
+//
+// Those labels would never translate even after adding a new locale.
+// Fix: read the labels from a dedicated namespace
+// `store.checkout.orderWhatsappLabels.{name,notes}` and interpolate
+// them into the `{namePart}/{notesPart}` slots.
+//
+// REQUIRED JSON ADDITIONS (messages/en/checkout.json):
+//
+//   "checkout": {
+//     ...
+//     "orderWhatsappLabels": {
+//       "name": "Name",
+//       "notes": "Notes"
+//     },
+//     ...
+//   }
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
 import { Drawer } from 'vaul';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { MessageCircle, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,23 +66,42 @@ export function WhatsAppOrderButton({
   children,
   customLabel,
 }: WhatsAppOrderButtonProps) {
+  const t = useTranslations('store.checkout');
+  const tLabels = useTranslations('store.checkout.orderWhatsappLabels');
+  const tDialog = useTranslations('store.checkout.orderDialog');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Mode detection
+  const isAskSeller = !!customLabel;
+
+  // Resolved labels — custom mode (askSeller) vs default (order)
+  const buttonLabel = customLabel ?? t('orderWhatsapp');
+  const dialogTitle = isAskSeller ? tDialog('titleAskSeller') : tDialog('titleGeneric');
+  const dialogSubtitle = isAskSeller
+    ? tDialog('subtitleAsk', { name: tenant.name, product: product.name })
+    : tDialog('subtitleOrder', { name: tenant.name });
+  const notesLabel = isAskSeller ? tDialog('notesLabelAsk') : tDialog('notesLabel');
+  const notesPlaceholder = isAskSeller ? tDialog('notesPlaceholderAsk') : tDialog('notesPlaceholder');
+
   const handleOrder = async () => {
     setIsSubmitting(true);
 
-    const message = `Hi ${tenant.name},
+    // Build template parts with translated labels.
+    // `store.checkout.orderWhatsappTemplate` uses slots
+    // `{namePart}`, `{notesPart}` so the outer structure stays under
+    // translator control.
+    const namePart = name ? `\n${tLabels('name')}: ${name}` : '';
+    const notesPart = notes ? `\n${tLabels('notes')}: ${notes}` : '';
 
-I'd like to order:
-
-*${product.name}*
-${name ? `\nName: ${name}` : ''}${notes ? `\nNotes: ${notes}` : ''}
-
-Please confirm availability.
-Thank you! 🙏`;
+    const message = t('orderWhatsappTemplate', {
+      name: tenant.name,
+      product: product.name,
+      namePart,
+      notesPart,
+    });
 
     const link = generateWhatsAppLink(tenant.whatsapp || '', message);
     window.open(link, '_blank');
@@ -66,8 +111,6 @@ Thank you! 🙏`;
     setOpen(false);
     setIsSubmitting(false);
   };
-
-  const buttonLabel = customLabel ?? 'Order via WhatsApp';
 
   return (
     <Drawer.Root open={open} onOpenChange={setOpen}>
@@ -94,11 +137,11 @@ Thank you! 🙏`;
           aria-describedby="wa-order-drawer-description"
         >
           <Drawer.Title asChild>
-            <VisuallyHidden.Root>Order {product.name}</VisuallyHidden.Root>
+            <VisuallyHidden.Root>{dialogTitle} — {product.name}</VisuallyHidden.Root>
           </Drawer.Title>
           <Drawer.Description asChild>
             <VisuallyHidden.Root id="wa-order-drawer-description">
-              Complete your order details to send to {tenant.name}
+              {dialogSubtitle}
             </VisuallyHidden.Root>
           </Drawer.Description>
 
@@ -110,12 +153,9 @@ Thank you! 🙏`;
           {/* Header */}
           <div className="px-6 pb-3 border-b shrink-0">
             <div className="max-w-2xl mx-auto w-full">
-              <h3 className="font-semibold text-lg">{buttonLabel}</h3>
+              <h3 className="font-semibold text-lg">{dialogTitle}</h3>
               <p className="text-sm text-muted-foreground">
-                {customLabel
-                  ? `Ask ${tenant.name} about "${product.name}"`
-                  : `Complete your order details to send to ${tenant.name}`
-                }
+                {dialogSubtitle}
               </p>
             </div>
           </div>
@@ -123,25 +163,19 @@ Thank you! 🙏`;
           {/* Body */}
           <div className="max-w-2xl mx-auto w-full px-6 py-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="order-name">Name (optional)</Label>
+              <Label htmlFor="order-name">{tDialog('nameLabel')}</Label>
               <Input
                 id="order-name"
-                placeholder="Your name"
+                placeholder={tDialog('namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="order-notes">
-                {customLabel ? 'Question (optional)' : 'Notes (optional)'}
-              </Label>
+              <Label htmlFor="order-notes">{notesLabel}</Label>
               <Textarea
                 id="order-notes"
-                placeholder={
-                  customLabel
-                    ? 'Write your question here...'
-                    : 'Any additional notes...'
-                }
+                placeholder={notesPlaceholder}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
@@ -153,7 +187,7 @@ Thank you! 🙏`;
           <div className="border-t px-6 py-4 shrink-0">
             <div className="max-w-2xl mx-auto w-full flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setOpen(false)}>
-                Cancel
+                {tDialog('cancel')}
               </Button>
               <Button className="flex-1" onClick={handleOrder} disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -161,7 +195,7 @@ Thank you! 🙏`;
                 ) : (
                   <MessageCircle className="mr-2 h-4 w-4" />
                 )}
-                Send via WhatsApp
+                {tDialog('send')}
               </Button>
             </div>
           </div>

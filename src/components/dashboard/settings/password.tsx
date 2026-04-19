@@ -3,12 +3,6 @@
 // ==========================================
 // PASSWORD SECTION
 // File: src/components/dashboard/settings/password.tsx
-//
-// [TIDUR-NYENYAK FIX #5] Password change form.
-// - Calls PATCH /tenants/me/password
-// - Backend rotates tokenVersion + sets fresh cookie on current device
-// - Other logged-in devices get 401 on next request (force logout)
-// - Current device stays logged in (cookie already refreshed)
 // ==========================================
 
 import { useState } from 'react';
@@ -16,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2, ShieldCheck, Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,33 +30,8 @@ import { toast } from 'sonner';
 import { ChevronLeft } from 'lucide-react';
 
 // ==========================================
-// VALIDATION
-// ==========================================
-
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: z
-      .string()
-      .min(8, 'New password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must include an uppercase letter (A-Z)')
-      .regex(/[0-9]/, 'Password must include a number (0-9)')
-      .regex(/[^A-Za-z0-9]/, 'Password must include a symbol (!@#$%)'),
-    confirmPassword: z.string().min(1, 'Please confirm your new password'),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Password confirmation does not match',
-    path: ['confirmPassword'],
-  })
-  .refine((data) => data.currentPassword !== data.newPassword, {
-    message: 'New password must be different from the current password',
-    path: ['newPassword'],
-  });
-
-type PasswordFormData = z.infer<typeof passwordSchema>;
-
-// ==========================================
-// COMPONENT
+// VALIDATION — uses validation.password.* keys
+// We build the schema inside the component to get access to t()
 // ==========================================
 
 interface PasswordSectionProps {
@@ -69,12 +39,37 @@ interface PasswordSectionProps {
 }
 
 export function PasswordSection({ onBack }: PasswordSectionProps) {
+  const t = useTranslations('settings.password');
+  const tValidation = useTranslations('validation.password');
+  const tToast = useTranslations('toast.auth');
   const { refresh } = useTenant();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const passwordSchema = z
+    .object({
+      currentPassword: z.string().min(1, tValidation('currentRequired')),
+      newPassword: z
+        .string()
+        .min(8, tValidation('minLength', { min: 8 }))
+        .regex(/[A-Z]/, tValidation('mustContainUppercase'))
+        .regex(/[0-9]/, tValidation('mustContainNumber'))
+        .regex(/[^A-Za-z0-9]/, tValidation('mustContainSymbol')),
+      confirmPassword: z.string().min(1, tValidation('confirmRequired')),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: tValidation('confirmMismatch'),
+      path: ['confirmPassword'],
+    })
+    .refine((data) => data.currentPassword !== data.newPassword, {
+      message: tValidation('mustBeDifferent'),
+      path: ['newPassword'],
+    });
+
+  type PasswordFormData = z.infer<typeof passwordSchema>;
 
   const form = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
@@ -99,23 +94,18 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
         newPassword: data.newPassword,
       });
 
-      // Refresh tenant state (cookie already rotated by server)
       await refresh();
 
-      toast.success('Password changed successfully', {
-        description:
-          'Other signed-in devices will be logged out and must sign in again.',
+      toast.success(tToast('passwordChangedSuccess'), {
+        description: tToast('passwordChangedDetail'),
       });
 
-      // Reset form
       form.reset();
-
-      // Return to settings list
       onBack?.();
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
-      toast.error('Failed to change password', { description: message });
+      toast.error(tToast('passwordChangedFailed'), { description: message });
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +121,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Settings
+          {t('backButton')}
         </button>
       )}
 
@@ -139,11 +129,10 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-bold">Change Password</h2>
+          <h2 className="text-lg font-bold">{t('title')}</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Your new password takes effect immediately. Other signed-in devices
-          will be logged out automatically.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -151,9 +140,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription className="text-xs leading-relaxed">
-          After changing your password, all sessions on other devices
-          (other phones, other browsers, work laptop, etc.) will be logged
-          out automatically. You stay signed in on this device.
+          {t('infoAlert')}
         </AlertDescription>
       </Alert>
 
@@ -180,13 +167,13 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-                  Current Password
+                  {t('currentLabel')}
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showCurrent ? 'text' : 'password'}
-                      placeholder="••••••••"
+                      placeholder={t('currentPlaceholder')}
                       autoComplete="current-password"
                       disabled={isLoading}
                       className="h-11 text-sm"
@@ -219,13 +206,13 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-                  New Password
+                  {t('newLabel')}
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showNew ? 'text' : 'password'}
-                      placeholder="At least 8 characters"
+                      placeholder={t('newPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
                       className="h-11 text-sm"
@@ -247,7 +234,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
                   </div>
                 </FormControl>
                 <FormDescription className="text-xs">
-                  At least 8 characters, with an uppercase letter, a number, and a symbol.
+                  {t('newHelper')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -261,13 +248,13 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-                  Confirm New Password
+                  {t('confirmLabel')}
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showConfirm ? 'text' : 'password'}
-                      placeholder="Re-type your new password"
+                      placeholder={t('confirmPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
                       className="h-11 text-sm"
@@ -296,7 +283,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
           {isLoading && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Changing password...
+              {t('loadingHint')}
             </div>
           )}
 
@@ -310,7 +297,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
                 disabled={isLoading}
                 className="flex-1"
               >
-                Cancel
+                {t('cancelButton')}
               </Button>
             )}
             <Button
@@ -321,10 +308,10 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Changing...
+                  {t('submittingButton')}
                 </>
               ) : (
-                'Change Password'
+                t('submitButton')
               )}
             </Button>
           </div>

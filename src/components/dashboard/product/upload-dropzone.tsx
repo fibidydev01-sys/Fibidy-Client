@@ -7,6 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { Upload, File, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { Progress } from '@/components/ui/progress';
 import { formatFileSizeFromBytes, formatFileSizeFromMb } from '@/lib/shared/format';
@@ -30,6 +31,7 @@ export function UploadDropzone({
   selectedFile,
   onClear,
 }: UploadDropzoneProps) {
+  const t = useTranslations('dashboard.products.form.upload_dropzone');
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDrop = useCallback(
@@ -83,9 +85,12 @@ export function UploadDropzone({
     >
       <Upload className="h-8 w-8 text-muted-foreground" />
       <div className="text-center">
-        <p className="text-sm font-medium">Drop file here or click to browse</p>
+        <p className="text-sm font-medium">{t('dropText')}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          {allowedFileTypes.join(', ').toUpperCase()} · Max {formatFileSizeFromMb(maxFileSizeMb)}
+          {t('hint', {
+            types: allowedFileTypes.join(', ').toUpperCase(),
+            size: formatFileSizeFromMb(maxFileSizeMb),
+          })}
         </p>
       </div>
       <input

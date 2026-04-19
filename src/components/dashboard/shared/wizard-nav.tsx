@@ -13,9 +13,14 @@
 //
 // Dipakai di: hero, contact, payment, shipping,
 //             social, about, product form, register
+//
+// i18n: Default labels (Save/Saving/Back/Previous/Next) di-resolve dari
+//       common.actions.* via useTranslations. Caller bisa override via
+//       props (saveLabel, savingLabel, lastStepLabel, dst).
 // ==========================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { StepDots } from '@/components/dashboard/shared/step-wizard';
 import { cn } from '@/lib/shared/utils';
@@ -51,8 +56,8 @@ interface WizardNavProps {
 export function WizardNav({
   onSave,
   isSaving = false,
-  saveLabel = 'Save',
-  savingLabel = 'Saving...',
+  saveLabel,
+  savingLabel,
   onBack,
   steps,
   currentStep = 0,
@@ -63,13 +68,19 @@ export function WizardNav({
   lastStepSavingLabel,
   onLastStep,
 }: WizardNavProps) {
+  const t = useTranslations('common.actions');
+
+  // i18n defaults — caller can still override via props
+  const resolvedSaveLabel = saveLabel ?? t('save');
+  const resolvedSavingLabel = savingLabel ?? t('saving');
+
   const hasSteps = steps !== undefined && steps.length > 0;
   const isLastStep = hasSteps ? currentStep === steps.length - 1 : true;
   const isFirstStep = currentStep === 0;
 
   const LastStepIcon = lastStepIcon ?? Save;
-  const resolvedLastLabel = lastStepLabel ?? saveLabel;
-  const resolvedLastSavingLabel = lastStepSavingLabel ?? savingLabel;
+  const resolvedLastLabel = lastStepLabel ?? resolvedSaveLabel;
+  const resolvedLastSavingLabel = lastStepSavingLabel ?? resolvedSavingLabel;
   const handleLastStep = onLastStep ?? onSave;
 
   // Prev button logic:
@@ -103,7 +114,7 @@ export function WizardNav({
               className="gap-1.5 min-w-[130px] h-9 text-sm"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-              Back
+              {t('back')}
             </Button>
           ) : (
             <div />
@@ -115,7 +126,7 @@ export function WizardNav({
             className="gap-1.5 h-9 text-sm min-w-[130px]"
           >
             <Save className="h-3.5 w-3.5" />
-            {isSaving ? savingLabel : saveLabel}
+            {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
           </Button>
         </div>
 
@@ -140,7 +151,7 @@ export function WizardNav({
               disabled={isSaving}
               className="h-9 px-4 text-xs font-medium"
             >
-              {isSaving ? savingLabel : saveLabel}
+              {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
             </Button>
           </div>
         </div>
@@ -165,7 +176,7 @@ export function WizardNav({
           )}
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          {isFirstStep ? 'Back' : 'Previous'}
+          {isFirstStep ? t('back') : t('previous')}
         </Button>
 
         <StepDots steps={steps} currentStep={currentStep} />
@@ -184,7 +195,7 @@ export function WizardNav({
             onClick={onNext}
             className="gap-1.5 min-w-[130px] h-9 text-sm"
           >
-            Next
+            {t('next')}
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         )}

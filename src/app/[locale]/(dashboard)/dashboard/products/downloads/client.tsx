@@ -1,6 +1,21 @@
 'use client';
 
+// ==========================================
+// DOWNLOAD HISTORY CLIENT
+// File: src/app/[locale]/(dashboard)/dashboard/products/downloads/client.tsx
+//
+// [i18n FIX — 2026-04-19]
+// All hardcoded EN strings replaced with `useTranslations()` calls.
+// JSON keys under:
+//   - `dashboard.products.downloads.*` for page copy, filter, empty, columns
+//   - `common.actions.*` for Previous/Next button labels
+//   - `common.pagination.*` for `pageShort` and `downloadsSuffix`
+// ==========================================
+
 import { useState } from 'react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useDownloadHistory, useProductsFlat } from '@/hooks/dashboard/use-products';
 import { DownloadHistoryTable } from '@/components/dashboard/product/download-history-table';
 import { Button } from '@/components/ui/button';
@@ -11,12 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 
 const LIMIT = 20;
 
 export function DownloadHistoryClient() {
+  const t = useTranslations('dashboard.products.downloads');
+  const tActions = useTranslations('common.actions');
+  const tPagination = useTranslations('common.pagination');
+
   const [productId, setProductId] = useState('');
   const [page, setPage] = useState(1);
 
@@ -40,15 +57,15 @@ export function DownloadHistoryClient() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild aria-label={t('backTooltip')}>
           <Link href="/dashboard/products">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Download History</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {meta?.total ?? 0} total downloads
+            {t('subtitleCount', { count: meta?.total ?? 0 })}
           </p>
         </div>
       </div>
@@ -57,10 +74,10 @@ export function DownloadHistoryClient() {
       <div className="flex items-center gap-3">
         <Select value={productId || 'all'} onValueChange={handleProductChange}>
           <SelectTrigger className="w-64">
-            <SelectValue placeholder="Filter by product" />
+            <SelectValue placeholder={t('filterPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Products</SelectItem>
+            <SelectItem value="all">{t('allProducts')}</SelectItem>
             {products?.map((p) => (
               <SelectItem key={p.id} value={p.id}>
                 {p.name}
@@ -83,12 +100,16 @@ export function DownloadHistoryClient() {
             disabled={page <= 1}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
+            {tActions('previous')}
           </Button>
 
           <span className="text-sm text-muted-foreground">
-            {page} / {totalPages}
-            {meta ? <span className="ml-1">({meta.total} downloads)</span> : null}
+            {tPagination('pageShort', { current: page, total: totalPages })}
+            {meta ? (
+              <span className="ml-1">
+                {tPagination('downloadsSuffix', { count: meta.total })}
+              </span>
+            ) : null}
           </span>
 
           <Button
@@ -97,7 +118,7 @@ export function DownloadHistoryClient() {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
           >
-            Next
+            {tActions('next')}
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>

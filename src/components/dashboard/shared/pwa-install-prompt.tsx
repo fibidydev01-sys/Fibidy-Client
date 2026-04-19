@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, Share, Plus, Download, Smartphone } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { usePwaInstall } from '@/hooks/shared/use-pwa-install';
 
@@ -24,6 +25,7 @@ function AndroidBanner({
   onInstall: () => void;
   onDismiss: () => void;
 }) {
+  const t = useTranslations('dashboard.pwa.android');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -63,10 +65,10 @@ function AndroidBanner({
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground leading-tight">
-                  Install Fibidy
+                  {t('title')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Add to your home screen
+                  {t('subtitle')}
                 </p>
               </div>
             </div>
@@ -74,7 +76,7 @@ function AndroidBanner({
               type="button"
               onClick={handleDismiss}
               className="p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground"
-              aria-label="Dismiss"
+              aria-label={t('dismiss')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -83,7 +85,7 @@ function AndroidBanner({
           {/* Benefits */}
           <div className="flex items-center gap-4 mb-4 px-1">
             {[
-              'Quick access',
+              t('benefits.quickAccess'),
             ].map((benefit) => (
               <div key={benefit} className="flex items-center gap-1">
                 <div className="w-1 h-1 rounded-full bg-primary" />
@@ -99,7 +101,7 @@ function AndroidBanner({
               onClick={handleDismiss}
               className="flex-1 h-10 rounded-lg border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
-              Not now
+              {t('dismiss')}
             </button>
             <button
               type="button"
@@ -107,7 +109,7 @@ function AndroidBanner({
               className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
             >
               <Download className="h-4 w-4" />
-              Install
+              {t('install')}
             </button>
           </div>
 
@@ -122,6 +124,7 @@ function AndroidBanner({
 // ==========================================
 
 function IosModal({ onDismiss }: { onDismiss: () => void }) {
+  const t = useTranslations('dashboard.pwa.ios');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -137,21 +140,21 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
   const steps = [
     {
       icon: Share,
-      label: 'Tap the',
-      highlight: 'Share',
-      sub: 'button in the Safari toolbar',
+      label: t('steps.one.label'),
+      highlight: t('steps.one.highlight'),
+      sub: t('steps.one.sub'),
     },
     {
       icon: Plus,
-      label: 'Select',
-      highlight: 'Add to Home Screen',
-      sub: 'from the options list',
+      label: t('steps.two.label'),
+      highlight: t('steps.two.highlight'),
+      sub: t('steps.two.sub'),
     },
     {
       icon: Smartphone,
-      label: 'Tap',
-      highlight: 'Add',
-      sub: 'in the top right corner',
+      label: t('steps.three.label'),
+      highlight: t('steps.three.highlight'),
+      sub: t('steps.three.sub'),
     },
   ];
 
@@ -187,9 +190,9 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
                 <Smartphone className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-base font-semibold text-foreground">Install Fibidy</p>
+                <p className="text-base font-semibold text-foreground">{t('title')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Add to your iOS Home Screen
+                  {t('subtitle')}
                 </p>
               </div>
             </div>
@@ -197,6 +200,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
               type="button"
               onClick={handleDismiss}
               className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+              aria-label={t('close')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -244,8 +248,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           <div className="flex items-center gap-2 rounded-xl bg-muted/50 border border-border/60 px-4 py-3 mb-4">
             <Share className="h-4 w-4 text-primary shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              The <span className="font-semibold text-foreground">Share</span> button is at the
-              bottom of the screen (iPhone) or at the top (iPad)
+              {t('shareHintPrefix')} <span className="font-semibold text-foreground">{t('shareHintBold')}</span> {t('shareHintSuffix')}
             </p>
           </div>
 
@@ -255,7 +258,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
             onClick={handleDismiss}
             className="w-full h-11 rounded-xl border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
-            Close
+            {t('close')}
           </button>
 
         </div>

@@ -11,6 +11,12 @@
 //
 // No redirect — user stays on the product page.
 // Same pattern as LoginForm in /login, but without redirect.
+//
+// [i18n FIX — 2026-04-19]
+// Zod schema moved INSIDE the component to get access to useTranslations.
+// Previously: hardcoded EN strings at module level → would never be
+// translated even after Phase 2 adds new locales.
+// Pattern reference: password.tsx (settings).
 // ==========================================
 
 import { useState } from 'react';
@@ -18,6 +24,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,19 +42,22 @@ import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
 import { toast } from 'sonner';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password cannot be empty'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
 export function DialogLoginForm() {
+  const t = useTranslations('auth.buyerDialog.login');
+  const tValidation = useTranslations('validation');
+  const tToast = useTranslations('toast.auth');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setTenant, setChecked } = useAuthStore();
   const { close } = useAuthDialogStore();
+
+  const loginSchema = z.object({
+    email: z.string().email(tValidation('email.invalid')),
+    password: z.string().min(1, tValidation('password.empty')),
+  });
+
+  type LoginFormData = z.infer<typeof loginSchema>;
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -64,7 +74,7 @@ export function DialogLoginForm() {
       setTenant(response.tenant);
       setChecked(true);
 
-      toast.success('Signed in successfully!');
+      toast.success(tToast('dialogLoginSuccess'));
 
       // Close dialog — stay on product page
       close();
@@ -90,11 +100,11 @@ export function DialogLoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('emailLabel')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t('emailPlaceholder')}
                   autoComplete="email"
                   disabled={isLoading}
                   {...field}
@@ -110,12 +120,12 @@ export function DialogLoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('passwordLabel')}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                     autoComplete="current-password"
                     disabled={isLoading}
                     {...field}
@@ -144,10 +154,10 @@ export function DialogLoginForm() {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Signing in...
+              {t('submittingButton')}
             </>
           ) : (
-            'Sign in'
+            t('submitButton')
           )}
         </Button>
       </form>

@@ -1,0 +1,92 @@
+{
+  "common": {
+    "actions": {
+      "save": "Simpan",
+      "saving": "Menyimpan...",
+      "cancel": "Batal",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "previous": "Sebelumnya",
+      "edit": "Edit",
+      "delete": "Hapus",
+      "confirm": "Konfirmasi",
+      "continue": "Lanjutkan",
+      "retry": "Coba lagi",
+      "close": "Tutup",
+      "open": "Buka",
+      "upload": "Upload",
+      "download": "Unduh",
+      "search": "Cari",
+      "filter": "Filter",
+      "reset": "Reset",
+      "submit": "Kirim",
+      "signIn": "Masuk",
+      "signOut": "Keluar",
+      "signUp": "Daftar",
+      "tryAgain": "Coba lagi",
+      "viewAll": "Lihat semua",
+      "or": "atau"
+    },
+    "state": {
+      "loading": "Memuat...",
+      "notFound": "Tidak ditemukan",
+      "empty": "Belum ada apa-apa di sini",
+      "error": "Terjadi kesalahan",
+      "success": "Berhasil",
+      "comingSoon": "Segera hadir",
+      "noImage": "Tidak Ada Gambar",
+      "noResults": "Tidak ada hasil"
+    },
+    "labels": {
+      "optional": "Opsional",
+      "required": "Wajib",
+      "photo": "Foto {index}",
+      "dash": "—",
+      "file": "File"
+    },
+    "pagination": {
+      "page": "Halaman {current} dari {total}",
+      "pageShort": "{current} / {total}",
+      "prev": "Sebelumnya",
+      "next": "Selanjutnya",
+      "showing": "Menampilkan halaman {current} dari {total} ({count} produk)",
+      "countSuffix": "({count} produk)",
+      "downloadsSuffix": "({count} unduhan)"
+    },
+    "breadcrumb": {
+      "home": "Beranda",
+      "products": "Produk",
+      "backToStore": "Kembali ke Toko",
+      "backToHome": "Kembali ke Beranda"
+    },
+    "categories": {
+      "groups": {
+        "FOOD_DRINK": "Makanan & Minuman",
+        "HEALTH_BEAUTY": "Kesehatan & Kecantikan",
+        "RETAIL": "Retail",
+        "HOME_SERVICES": "Jasa Rumah Tangga",
+        "AUTOMOTIVE": "Otomotif",
+        "LIFESTYLE_ENTERTAINMENT": "Gaya Hidup & Hiburan",
+        "PROFESSIONAL_SERVICES": "Jasa Profesional"
+      }
+    },
+    "pwa": {
+      "androidTitle": "Pasang Fibidy di ponselmu",
+      "iosTitle": "Tambahkan Fibidy ke layar utama"
+    },
+    "time": {
+      "daysLeft": "sisa {days} hari",
+      "daysLeftShort": "(sisa {days}h)"
+    },
+    "productType": {
+      "digital": "Digital",
+      "custom": "Custom",
+      "fileFallback": "FILE",
+      "contactSeller": "Hubungi penjual"
+    },
+    "price": {
+      "discountBadge": "-{percent}%",
+      "currencyUsd": "USD"
+    }
+  }
+}

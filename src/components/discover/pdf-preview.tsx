@@ -20,6 +20,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
 
@@ -63,6 +64,7 @@ export function PdfPreview({
   pageCount,
   onRefresh,
 }: PdfPreviewProps) {
+  const t = useTranslations('discover.pdfPreview');
   const [numPages, setNumPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +100,7 @@ export function PdfPreview({
         }
       } catch {
         if (!cancelled) {
-          setError('Preview could not be loaded. The URL may have expired.');
+          setError(t('error'));
           setLoading(false);
         }
       }
@@ -108,7 +110,7 @@ export function PdfPreview({
     return () => {
       cancelled = true;
     };
-  }, [previewUrl]);
+  }, [previewUrl, t]);
 
   // Render function passed to each PdfPage
   const renderPage = useCallback(
@@ -141,7 +143,7 @@ export function PdfPreview({
       <div className="flex items-center justify-center h-64 bg-muted/30 rounded-lg">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Loading preview...</span>
+          <span className="text-sm">{t('loading')}</span>
         </div>
       </div>
     );
@@ -155,7 +157,7 @@ export function PdfPreview({
         {onRefresh && (
           <Button variant="outline" size="sm" onClick={onRefresh}>
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            Reload
+            {t('reload')}
           </Button>
         )}
       </div>
@@ -178,10 +180,10 @@ export function PdfPreview({
       {pageCount != null && pageCount > pagesToRender && (
         <div className="text-center py-4 bg-muted/30 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            Preview shows {pagesToRender} of {pageCount} pages.
+            {t('pageRange', { shown: pagesToRender, total: pageCount })}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Buy to access all pages.
+            {t('buyHint')}
           </p>
         </div>
       )}
