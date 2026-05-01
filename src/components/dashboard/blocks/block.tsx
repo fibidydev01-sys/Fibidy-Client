@@ -55,7 +55,7 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
     import(`./hero${blockNumber}`)
       .then((mod) => ({ default: mod[`Hero${blockNumber}`] as ComponentType<HeroComponentProps> }))
       .catch(() =>
-        import('./hero1').then((mod) => ({
+        import('./Hero1').then((mod) => ({
           default: mod.Hero1 as ComponentType<HeroComponentProps>,
         }))
       )
