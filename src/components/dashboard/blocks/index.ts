@@ -1,38 +1,42 @@
 /**
- * Hero variants barrel export.
+ * Hero blocks barrel — single source of truth.
  *
- * Add a new hero:
- *   1. Drop `heroN.tsx` di folder ini, export `HeroN` (kapital).
- *   2. Tambah satu baris export di sini.
- *   3. Naikkan HERO_COUNT di block-options.ts.
+ * 🎯 Cara nambah hero baru:
+ *   1. Bikin file `hero26.tsx` dengan `export function Hero26(...)`.
+ *   2. Tambah satu baris di sini: `export * from './hero26';`
+ *   3. Naikkan `HERO_COUNT` di `block-options.ts` jadi 26.
+ *   4. Done. Webpack happy, prod happy, kamu happy.
  *
- * Trade-off: semua 25 hero ke-bundle bareng, no code-splitting per variant.
- * Untuk text+layout-only components ini ~50-150KB total, worth-it untuk
- * reliability dan zero dynamic-import gotcha.
+ * Kenapa barrel file dan bukan dynamic import dengan template string?
+ *   - Static analyzable: webpack/turbopack tau persis komponen mana yang ada.
+ *   - Tidak case-sensitive bug: file tidak ketemu = build error, bukan
+ *     runtime silent failure di prod (Linux Vercel).
+ *   - Tree-shakable: cuma yang dipakai yang masuk bundle final.
+ *   - Editor-friendly: autocomplete + go-to-definition jalan.
  */
 
-export { Hero1 } from './hero1';
-export { Hero2 } from './hero2';
-export { Hero3 } from './hero3';
-export { Hero4 } from './hero4';
-export { Hero5 } from './hero5';
-export { Hero6 } from './hero6';
-export { Hero7 } from './hero7';
-export { Hero8 } from './hero8';
-export { Hero9 } from './hero9';
-export { Hero10 } from './hero10';
-export { Hero11 } from './hero11';
-export { Hero12 } from './hero12';
-export { Hero13 } from './hero13';
-export { Hero14 } from './hero14';
-export { Hero15 } from './hero15';
-export { Hero16 } from './hero16';
-export { Hero17 } from './hero17';
-export { Hero18 } from './hero18';
-export { Hero19 } from './hero19';
-export { Hero20 } from './hero20';
-export { Hero21 } from './hero21';
-export { Hero22 } from './hero22';
-export { Hero23 } from './hero23';
-export { Hero24 } from './hero24';
-export { Hero25 } from './hero25';
+export * from './hero1';
+export * from './hero2';
+export * from './hero3';
+export * from './hero4';
+export * from './hero5';
+export * from './hero6';
+export * from './hero7';
+export * from './hero8';
+export * from './hero9';
+export * from './hero10';
+export * from './hero11';
+export * from './hero12';
+export * from './hero13';
+export * from './hero14';
+export * from './hero15';
+export * from './hero16';
+export * from './hero17';
+export * from './hero18';
+export * from './hero19';
+export * from './hero20';
+export * from './hero21';
+export * from './hero22';
+export * from './hero23';
+export * from './hero24';
+export * from './hero25';

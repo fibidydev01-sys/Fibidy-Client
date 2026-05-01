@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
 import { CldImage } from 'next-cloudinary';
 
@@ -28,6 +29,7 @@ interface OptimizedImageProps {
   fill?: boolean;
   sizes?: string;
   className?: string;
+  style?: CSSProperties;          // ← NEW: dipakai untuk filter/transform/dll di hero variants
   crop?: 'fill' | 'fit' | 'thumb' | 'scale' | 'limit';
   gravity?: 'auto' | 'face' | 'faces' | 'center';
   priority?: boolean;
@@ -44,6 +46,7 @@ export function OptimizedImage({
   fill = false,
   sizes,
   className,
+  style,                          // ← NEW
   crop = 'fill',
   gravity = 'auto',
   priority = false,
@@ -70,6 +73,7 @@ export function OptimizedImage({
         crop={crop}
         gravity={gravity}
         className={className}
+        style={style}            // ← NEW: forward ke CldImage
         {...(priority ? { loading: 'eager' as const, fetchPriority: 'high' as const } : {})}
         {...(loading ? { loading } : {})}
         {...(fetchPriority ? { fetchPriority } : {})}
@@ -86,6 +90,7 @@ export function OptimizedImage({
       fill={fill}
       sizes={sizes}
       className={className}
+      style={style}              // ← NEW: forward ke next/image
       placeholder="blur"
       blurDataURL={BLUR_DATA_URL}
       {...(priority ? { priority: true } : {})}
