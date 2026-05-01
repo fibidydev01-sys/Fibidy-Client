@@ -2,11 +2,17 @@
 
 // ==========================================
 // MOBILE NAVBAR
+// File: src/components/layout/dashboard/mobile-navbar.tsx
 //
 // Role-based navigation (no group labels).
 //
-// SELLER: Products, Studio, Library, Downloads, Settings
-// BUYER:  Library, Start Selling, Sign Out
+// [PHASE 3] Digital nav items are now conditional on
+// FEATURES.digitalProducts.
+//
+// SELLER (digital ON):  Products, Studio, Library, Downloads, Settings
+// SELLER (digital OFF): Products, Studio, Settings
+// BUYER  (digital ON):  Library, Start Selling, Sign Out
+// BUYER  (digital OFF): Start Selling, Sign Out
 // ==========================================
 
 import Link from 'next/link';
@@ -24,6 +30,7 @@ import {
 import { cn } from '@/lib/shared/utils';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
+import { FEATURES } from '@/lib/config/features';
 import type { LucideIcon } from 'lucide-react';
 
 interface NavItemDef {
@@ -34,19 +41,35 @@ interface NavItemDef {
   isSignOut?: boolean;
 }
 
+// ── SELLER mobile nav ──
 const sellerNavItems: NavItemDef[] = [
   { href: '/dashboard/products', icon: LayoutDashboard, labelKey: 'products' },
   { href: '/dashboard/studio', icon: Layout, labelKey: 'studio' },
-  { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
-  { href: '/dashboard/products/downloads', icon: History, labelKey: 'downloads' },
+  ...(FEATURES.digitalProducts
+    ? [
+        { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
+        {
+          href: '/dashboard/products/downloads',
+          icon: History,
+          labelKey: 'downloads',
+        },
+      ]
+    : []),
   { href: '/dashboard/settings', icon: Settings, labelKey: 'settings' },
 ];
 
-const buyerNavItems: NavItemDef[] = [
-  { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
-  { href: '/dashboard/setup-store', icon: Store, labelKey: 'sell' },
-  { icon: LogOut, labelKey: 'signOut', isSignOut: true },
-];
+// ── BUYER mobile nav ──
+const buyerNavItems: NavItemDef[] = FEATURES.digitalProducts
+  ? [
+      { href: '/dashboard/library', icon: BookOpen, labelKey: 'library' },
+      { href: '/dashboard/setup-store', icon: Store, labelKey: 'sell' },
+      { icon: LogOut, labelKey: 'signOut', isSignOut: true },
+    ]
+  : [
+      // Digital off — BUYER lands on setup-store; no Library link.
+      { href: '/dashboard/setup-store', icon: Store, labelKey: 'sell' },
+      { icon: LogOut, labelKey: 'signOut', isSignOut: true },
+    ];
 
 export function MobileNavbar() {
   const t = useTranslations('dashboard.nav');

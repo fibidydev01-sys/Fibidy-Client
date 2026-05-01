@@ -31,6 +31,18 @@
 //   - updated  — used in update + update-file
 //   - deleted  — used in delete
 // Toast errors stay as `getErrorMessage(err)` passthrough (backend text).
+//
+// [PHASE 3 — DIGITAL PRODUCTS FLAG]
+// All digital-only hooks are now gated via React Query's `enabled` option:
+//   - useKycStatus
+//   - useStorageUsage
+//   - useDownloadHistory
+//   - useKycReturnHandler (early-return on flag off — effect skips)
+//
+// When flag is off:
+//   - data === undefined (no fetch fires)
+//   - no 503 noise in DevTools Network tab
+//   - components downstream early-return null
 // ==========================================
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -40,6 +52,7 @@ import { toast } from 'sonner';
 import { productsApi } from '@/lib/api/products';
 import { getErrorMessage } from '@/lib/api/client';
 import { queryKeys } from '@/lib/shared/query-keys';
+import { FEATURES } from '@/lib/config/features';
 import type {
   ProductQueryParams,
   CreateProductInput,
@@ -203,12 +216,16 @@ export function useDeleteProduct() {
 
 // ==========================================
 // KYC
+//
+// [PHASE 3] Skip fetch when digital-products feature flag off.
+// Without this, the query fires → backend returns 503 → console noise.
 // ==========================================
 
 export function useKycStatus() {
   return useQuery({
     queryKey: queryKeys.products.kyc(),
     queryFn: () => productsApi.getKycStatus(),
+    enabled: FEATURES.digitalProducts,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
@@ -249,7 +266,9 @@ export function useInitiateKyc() {
 // returns > 0 → `isPolling` is true. Zero local state, zero setState,
 // same external API.
 //
-// Bonus: Uses a useRef guard to prevent re-firing on remounts/re-renders.
+// [PHASE 3] When flag is off, the effect early-returns and `isPolling`
+// is permanently false. KYC query is gated by useKycStatus's `enabled`,
+// so invalidation here is also a no-op.
 // ==========================================
 
 export function useKycReturnHandler() {
@@ -262,6 +281,9 @@ export function useKycReturnHandler() {
   const isPolling = fetchingCount > 0;
 
   useEffect(() => {
+    // [PHASE 3] Skip entirely when feature is off
+    if (!FEATURES.digitalProducts) return;
+
     if (typeof window === 'undefined') return;
     if (hasHandledRef.current) return;
 
@@ -282,12 +304,15 @@ export function useKycReturnHandler() {
 
 // ==========================================
 // STORAGE
+//
+// [PHASE 3] Skip fetch when digital-products feature flag off.
 // ==========================================
 
 export function useStorageUsage() {
   return useQuery({
     queryKey: queryKeys.products.storage(),
     queryFn: () => productsApi.getStorageUsage(),
+    enabled: FEATURES.digitalProducts,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
@@ -362,6 +387,8 @@ export function useUploadProduct() {
 
 // ==========================================
 // DOWNLOAD HISTORY
+//
+// [PHASE 3] Skip fetch when digital-products feature flag off.
 // ==========================================
 
 export function useDownloadHistory(params?: {
@@ -372,6 +399,7 @@ export function useDownloadHistory(params?: {
   return useQuery({
     queryKey: queryKeys.products.downloads(params),
     queryFn: () => productsApi.getDownloadHistory(params),
+    enabled: FEATURES.digitalProducts,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });

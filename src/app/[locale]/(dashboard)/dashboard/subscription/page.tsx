@@ -1,27 +1,43 @@
 'use client';
 
 // ==========================================
-// SUBSCRIPTION PAGE — Stripe Billing
+// SUBSCRIPTION PAGE
 // File: src/app/[locale]/(dashboard)/dashboard/subscription/page.tsx
 //
 // Tiers: FREE → STARTER → BUSINESS
-// Flow:  Click Subscribe → Stripe Checkout → webhook → active
-// Cancel: cancel_at_period_end → stays active until period end
+//
+// Backend is provider-agnostic (Phase 3 — LemonSqueezy migration):
+//   - Stripe Checkout (legacy / future)
+//   - LemonSqueezy Checkout (active for Indonesia payouts)
+//
+// Flow:
+//   1. Click Subscribe → POST /subscription/checkout?tier=X → checkoutUrl
+//   2. window.location.href = checkoutUrl
+//   3. After payment, provider redirects back to /dashboard/subscription
+//      - Stripe: ?status=success&session_id={CHECKOUT_SESSION_ID}
+//      - LS:     ?status=success           (NO sessionId)
+//   4. Poll GET /subscription/verify[?sessionId=xxx] every 2s
+//   5. On 'completed' → refetch plan, show success
+//   6. On 60s timeout:
+//      - Stripe path: call POST /subscription/reconcile as fallback
+//      - LS path:     show "verification failed" + retry button
+//
+// Cancel: cancel-at-period-end → user retains access until ends_at
 // Business: STARTER + ($200 sales OR 20 transactions)
 //
-// [TIDUR-NYENYAK FIX #3] Success return flow is now:
-//   1. Detect ?status=success&session_id=xxx in URL
-//   2. Poll GET /subscription/verify?sessionId=xxx every 2s
-//   3. On 'completed' → refetch plan, show success
-//   4. On 60s timeout → call POST /subscription/reconcile as fallback
-//   5. If reconcile also fails → ask user to contact support
+// [PHASE 3 — DIGITAL PRODUCTS FLAG]
+//   - Polling no longer requires sessionId (LS-compatible)
+//   - Reconcile / retry button visible only for Stripe-provider subs
+//   - Digital usage tile + storage tile hidden when FEATURES.digitalProducts off
+//   - Tier comparison splits features (physical) + digitalFeatures (with badge)
+//   - When digital off, digitalFeatures rendered dimmed with "Coming Soon" badge
 //
-// [i18n FIX — 2026-04-19]
-// All hardcoded EN strings replaced with `useTranslations()` calls.
+// [i18n]
 // JSON keys used:
 //   - `dashboard.subscription.*` for page-level copy
-//   - `dashboard.subscription.plans.{FREE,STARTER,BUSINESS}.{name, priceNote, features}`
-//   - `dashboard.subscription.verify.*` for the Stripe-return banner states
+//   - `dashboard.subscription.plans.{FREE,STARTER,BUSINESS}.{name, priceNote, features, digitalFeatures}`
+//   - `dashboard.subscription.comingSoonBadge` for the per-feature badge
+//   - `dashboard.subscription.verify.*` for the post-checkout banner states
 //   - `dashboard.subscription.overLimit.*` for the limit-reached warning card
 //   - `dashboard.subscription.badge.*` for the subscription-status badge
 //   - `dashboard.subscription.usage.*` for the products/digital/storage usage tiles
@@ -30,31 +46,6 @@
 //   - `dashboard.subscription.cancelDialog.*` for the cancel confirmation
 //   - `dashboard.subscription.platformFee.*` for the fee-per-tier note
 //   - `toast.subscription.*` for all toast messages
-//
-// PLAN_CONFIG is now built inside the component via `useMemo` so that plan
-// names, price notes, and feature lists translate on re-render. Features
-// arrays are pulled out with `t.raw()` to keep them as proper string[].
-// The per-tier numeric configs (icons) stay static outside the component.
-//
-// [i18n PATCH — 2026-04-19 (same session)]
-// Two keys the first draft referenced did not actually exist in the JSON,
-// so this file was patched in place after the JSON was cross-checked:
-//
-//   1. `dashboard.subscription.planCardTitle` — DOES NOT EXIST.
-//      Originally used `t('planCardTitle', { name })` expecting "Free Plan"
-//      etc. Replaced with inline concatenation: `{plan.name} {t('planSuffix')}`
-//      which leverages the existing `dashboard.subscription.planSuffix` = "Plan".
-//      Translators localize the word "Plan" once; the plan name comes from
-//      the plans.{tier}.name key.
-//
-//   2. `dashboard.subscription.verify.failedBodyPrefix` / `failedBodySuffix` —
-//      DO NOT EXIST. JSON has a single `verify.failedBody` that already reads
-//      "If your card has already been charged, … contact support at" — ending
-//      right before the email link. Replaced the split-string pattern with
-//      a single `{failedBody}` followed inline by the `<a>{supportEmail}</a>`
-//      link and a terminating period. If translators need to reorder the
-//      email link inside the sentence in a new locale, that becomes a
-//      JSON-level rewrite later.
 // ==========================================
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -102,12 +93,10 @@ import {
   type SubscriptionTier,
 } from '@/lib/api/subscription';
 import { getErrorMessage } from '@/lib/api/client';
+import { FEATURES } from '@/lib/config/features';
 
 // ==========================================
-// PLAN CONFIG — icons + prices only (static, identifier-grade)
-// Prices are dollar amounts tracked in USD on the platform regardless
-// of UI language, so they stay outside i18n. Icons are React refs.
-// All user-facing copy (names, priceNote, features) is translated.
+// PLAN STATIC CONFIG — icons + prices only (identifier-grade)
 // ==========================================
 
 const PLAN_STATIC: Record<
@@ -130,7 +119,7 @@ const PLATFORM_FEE: Record<SubscriptionTier, string> = {
 };
 
 // ==========================================
-// [FIX #3] VERIFY POLLING CONFIG
+// VERIFY POLLING CONFIG
 // ==========================================
 
 const POLL_INTERVAL_MS = 2000;
@@ -170,10 +159,15 @@ export default function SubscriptionPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
 
-  // [FIX #3] Verify flow state
+  // Verify flow state
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartRef = useRef<number>(0);
+
+  // [PHASE 3] Capture initial sessionId — used to decide whether to run
+  // the Stripe reconcile fallback. Stable across the polling lifetime
+  // even after we strip the URL on success.
+  const sessionIdRef = useRef<string | null>(null);
 
   // ── Build plan config with i18n-aware copy ──────────────────
   const PLAN_CONFIG = useMemo(
@@ -185,6 +179,7 @@ export default function SubscriptionPage() {
           priceNote: t('plans.FREE.priceNote'),
           icon: PLAN_STATIC.FREE.icon,
           features: t.raw('plans.FREE.features') as string[],
+          digitalFeatures: t.raw('plans.FREE.digitalFeatures') as string[],
         },
         STARTER: {
           name: t('plans.STARTER.name'),
@@ -192,6 +187,7 @@ export default function SubscriptionPage() {
           priceNote: t('plans.STARTER.priceNote'),
           icon: PLAN_STATIC.STARTER.icon,
           features: t.raw('plans.STARTER.features') as string[],
+          digitalFeatures: t.raw('plans.STARTER.digitalFeatures') as string[],
         },
         BUSINESS: {
           name: t('plans.BUSINESS.name'),
@@ -199,6 +195,7 @@ export default function SubscriptionPage() {
           priceNote: t('plans.BUSINESS.priceNote'),
           icon: PLAN_STATIC.BUSINESS.icon,
           features: t.raw('plans.BUSINESS.features') as string[],
+          digitalFeatures: t.raw('plans.BUSINESS.digitalFeatures') as string[],
         },
       }) satisfies Record<
         SubscriptionTier,
@@ -208,6 +205,7 @@ export default function SubscriptionPage() {
           priceNote: string;
           icon: typeof Rocket;
           features: string[];
+          digitalFeatures: string[];
         }
       >,
     [t],
@@ -232,7 +230,7 @@ export default function SubscriptionPage() {
     fetchData();
   }, [fetchData]);
 
-  // ── [FIX #3] Stop polling helper ────────────────────────────
+  // ── Stop polling helper ─────────────────────────────────────
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
@@ -240,19 +238,19 @@ export default function SubscriptionPage() {
     }
   }, []);
 
-  // ── [FIX #3] Reconcile fallback ─────────────────────────────
+  // ── Reconcile fallback (Stripe-only) ────────────────────────
   const runReconcile = useCallback(async () => {
     setVerifyState('reconciling');
     try {
       const result = await subscriptionApi.reconcile();
-      if (result.reconciled && result.tier !== 'FREE') {
+      if (result.reconciled && result.tier && result.tier !== 'FREE') {
         setVerifyState('completed');
         await fetchData();
         toast.success(tToast('reconcileSuccess'), {
           description: tToast('reconcileSuccessDetail', { tier: result.tier }),
         });
       } else {
-        // Reconcile says still FREE → webhook never processed, payment might have failed
+        // Reconcile says still FREE → webhook never processed, payment may have failed
         setVerifyState('failed');
         toast.error(tToast('verificationFailed'), {
           description: tToast('verificationFailedDetail'),
@@ -264,7 +262,7 @@ export default function SubscriptionPage() {
     }
   }, [fetchData, tToast]);
 
-  // ── [FIX #3] Handle return from Stripe Checkout with polling ─
+  // ── Handle return from checkout (Stripe OR LemonSqueezy) ────
   useEffect(() => {
     const status = searchParams.get('status');
     const sessionId = searchParams.get('session_id');
@@ -275,30 +273,51 @@ export default function SubscriptionPage() {
       return;
     }
 
-    if (status !== 'success' || !sessionId) return;
+    // [PHASE 3] LS redirect URL has no session_id. Only require ?status=success.
+    if (status !== 'success') return;
+
+    // Capture sessionId for later — survives URL cleanup on success
+    sessionIdRef.current = sessionId;
 
     // Start polling
     setVerifyState('verifying');
     pollStartRef.current = Date.now();
 
     const poll = async () => {
-      // Timeout check → fallback to reconcile
+      // Timeout check
       if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
         stopPolling();
-        await runReconcile();
+        if (sessionIdRef.current) {
+          // Stripe path — try reconcile as fallback
+          await runReconcile();
+        } else {
+          // LS path — no reconcile available
+          setVerifyState('failed');
+          toast.error(tToast('verificationFailed'), {
+            description: tToast('verificationFailedDetail'),
+          });
+        }
         return;
       }
 
       try {
-        const result = await subscriptionApi.verify(sessionId);
+        // [PHASE 3] verify() accepts optional sessionId; LS path passes undefined
+        const result = await subscriptionApi.verify(
+          sessionIdRef.current ?? undefined,
+        );
 
         if (result.status === 'completed') {
           stopPolling();
           setVerifyState('completed');
           await fetchData();
+
+          // Resolve tier from any of the response shapes (Stripe vs LS)
+          const completedTier =
+            result.subscription?.tier ?? result.tier ?? null;
+
           toast.success(tToast('paymentSuccess'), {
-            description: result.subscription
-              ? tToast('paymentSuccessDetail', { tier: result.subscription.tier })
+            description: completedTier
+              ? tToast('paymentSuccessDetail', { tier: completedTier })
               : tToast('paymentSuccessGeneric'),
           });
           // Clean URL after success
@@ -344,8 +363,30 @@ export default function SubscriptionPage() {
   };
 
   const handleManualRetry = async () => {
-    setVerifyState('reconciling');
-    await runReconcile();
+    setVerifyState('verifying');
+    try {
+      const result = await subscriptionApi.verify(
+        sessionIdRef.current ?? undefined,
+      );
+      if (result.status === 'completed') {
+        setVerifyState('completed');
+        await fetchData();
+        return;
+      }
+      // Still pending → for Stripe path, escalate to reconcile
+      if (sessionIdRef.current) {
+        await runReconcile();
+      } else {
+        // LS path: nothing more we can do
+        setVerifyState('failed');
+        toast.error(tToast('verificationFailed'), {
+          description: tToast('verificationFailedDetail'),
+        });
+      }
+    } catch (err) {
+      setVerifyState('failed');
+      toast.error(tToast('reconcileFailed'), { description: getErrorMessage(err) });
+    }
   };
 
   // ── Loading ─────────────────────────────────────────────────
@@ -381,6 +422,9 @@ export default function SubscriptionPage() {
   const PlanIcon = currentPlan.icon;
   const isFreeForever = currentPlan.priceNote === freeForeverNote;
 
+  // [PHASE 3] Show comingSoon badge on digital features when feature is off
+  const showDigitalBadge = !FEATURES.digitalProducts;
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
@@ -388,7 +432,7 @@ export default function SubscriptionPage() {
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
-      {/* ── [FIX #3] Verify Banner ─────────────────────────── */}
+      {/* ── Verify Banner ──────────────────────────────────── */}
       {verifyState === 'verifying' && (
         <Alert>
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -444,7 +488,7 @@ export default function SubscriptionPage() {
       )}
 
       {/* ── Over-Limit Banner ──────────────────────────────── */}
-      {(isAtLimit?.products || isAtLimit?.digitalProducts) && (
+      {(isAtLimit?.products || (FEATURES.digitalProducts && isAtLimit?.digitalProducts)) && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="pt-6">
             <div className="flex gap-3">
@@ -459,7 +503,7 @@ export default function SubscriptionPage() {
                       used: usage.products,
                       max: limits?.maxProducts ?? 0,
                     })}
-                  {isAtLimit?.digitalProducts &&
+                  {FEATURES.digitalProducts && isAtLimit?.digitalProducts &&
                     t('overLimit.digitalProductsPart', {
                       used: usage.digitalProducts,
                       max: limits?.maxDigitalProducts ?? 0,
@@ -508,9 +552,15 @@ export default function SubscriptionPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Usage */}
+          {/* Usage tiles — digital + storage hidden when feature flag off */}
           {limits && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div
+              className={
+                FEATURES.digitalProducts
+                  ? 'grid grid-cols-1 sm:grid-cols-3 gap-3'
+                  : 'grid grid-cols-1 gap-3'
+              }
+            >
               <div className="rounded-lg border p-3">
                 <p className="text-xs text-muted-foreground">{t('usage.products')}</p>
                 <p className="text-lg font-bold">
@@ -521,28 +571,34 @@ export default function SubscriptionPage() {
                   </span>
                 </p>
               </div>
-              <div className="rounded-lg border p-3">
-                <p className="text-xs text-muted-foreground">{t('usage.digital')}</p>
-                <p className="text-lg font-bold">
-                  {usage.digitalProducts}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {' / '}
-                    {limits.maxDigitalProducts >= 999
-                      ? t('usage.infinity')
-                      : limits.maxDigitalProducts}
-                  </span>
-                </p>
-              </div>
-              <div className="rounded-lg border p-3">
-                <p className="text-xs text-muted-foreground">{t('usage.storage')}</p>
-                <p className="text-lg font-bold">
-                  {(usage.storageMb / 1024).toFixed(2)}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {' / '}
-                    {limits.maxStorageGb} GB
-                  </span>
-                </p>
-              </div>
+
+              {FEATURES.digitalProducts && (
+                <div className="rounded-lg border p-3">
+                  <p className="text-xs text-muted-foreground">{t('usage.digital')}</p>
+                  <p className="text-lg font-bold">
+                    {usage.digitalProducts}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {' / '}
+                      {limits.maxDigitalProducts >= 999
+                        ? t('usage.infinity')
+                        : limits.maxDigitalProducts}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {FEATURES.digitalProducts && (
+                <div className="rounded-lg border p-3">
+                  <p className="text-xs text-muted-foreground">{t('usage.storage')}</p>
+                  <p className="text-lg font-bold">
+                    {(usage.storageMb / 1024).toFixed(2)}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {' / '}
+                      {limits.maxStorageGb} GB
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -623,11 +679,44 @@ export default function SubscriptionPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Separator />
+
+                {/* Physical features — always rendered */}
                 <ul className="space-y-2">
                   {config.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
+                    <li key={`f-${i}`} className="flex items-start gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                       <span>{feature}</span>
+                    </li>
+                  ))}
+
+                  {/* [PHASE 3] Digital features — dimmed + Coming Soon badge when off */}
+                  {config.digitalFeatures.map((feature, i) => (
+                    <li
+                      key={`d-${i}`}
+                      className={
+                        showDigitalBadge
+                          ? 'flex items-start gap-2 text-sm text-muted-foreground'
+                          : 'flex items-start gap-2 text-sm'
+                      }
+                    >
+                      <Check
+                        className={
+                          showDigitalBadge
+                            ? 'h-4 w-4 shrink-0 mt-0.5'
+                            : 'h-4 w-4 text-primary shrink-0 mt-0.5'
+                        }
+                      />
+                      <span className="flex-1">
+                        {feature}
+                        {showDigitalBadge && (
+                          <Badge
+                            variant="outline"
+                            className="ml-2 text-[10px] py-0 h-4 align-middle"
+                          >
+                            {t('comingSoonBadge')}
+                          </Badge>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>

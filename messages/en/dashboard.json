@@ -255,6 +255,7 @@
       "cancel": "Cancel subscription",
       "cancelling": "Canceling...",
       "activeUntil": "Active until {date} ({days} days left)",
+      "comingSoonBadge": "Coming Soon",
       "badge": {
         "active": "Active",
         "pastDue": "Payment Past Due",
@@ -292,11 +293,13 @@
           "priceNote": "Forever free",
           "features": [
             "5 products",
-            "3 digital products",
-            "0.5 GB storage",
-            "Max 20 MB per file",
             "2 photos per product",
             "1 hero template"
+          ],
+          "digitalFeatures": [
+            "3 digital products",
+            "0.5 GB storage",
+            "Max 20 MB per file"
           ]
         },
         "STARTER": {
@@ -305,11 +308,13 @@
           "priceNote": "/month",
           "features": [
             "20 products",
-            "20 digital products",
-            "1 GB storage",
-            "Max 50 MB per file",
             "3 photos per product",
             "3 hero templates"
+          ],
+          "digitalFeatures": [
+            "20 digital products",
+            "1 GB storage",
+            "Max 50 MB per file"
           ]
         },
         "BUSINESS": {
@@ -318,11 +323,13 @@
           "priceNote": "/month",
           "features": [
             "50 products",
-            "50 digital products",
-            "20 GB storage",
-            "Max 500 MB per file",
             "5 photos per product",
             "All hero templates"
+          ],
+          "digitalFeatures": [
+            "50 digital products",
+            "20 GB storage",
+            "Max 500 MB per file"
           ]
         }
       },
@@ -358,6 +365,25 @@
         "cancel": "Cancel",
         "confirm": "Yes, cancel",
         "canceling": "Canceling..."
+      }
+    },
+    "comingSoon": {
+      "digitalProducts": {
+        "title": "Digital Products — Coming Soon",
+        "description": "We're polishing the digital product experience for Indonesian sellers. Sell ebooks, templates, courses, and more — soon."
+      },
+      "discover": {
+        "title": "Marketplace — Coming Soon",
+        "description": "The Discover marketplace will let buyers browse digital products from sellers across Fibidy. Stay tuned!"
+      },
+      "library": {
+        "title": "Library — Coming Soon",
+        "description": "Your purchased digital products will live here. The Library will be ready when our marketplace launches."
+      },
+      "cta": {
+        "backToProducts": "Back to Products",
+        "backToDashboard": "Back to Dashboard",
+        "backToHome": "Back to Home"
       }
     },
     "setupStore": {

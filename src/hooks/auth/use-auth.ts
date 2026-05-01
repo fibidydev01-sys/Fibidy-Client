@@ -20,6 +20,13 @@
 //
 // `useCheckSlug` below has no user-facing strings — only boolean state
 // returned to callers. No translation needed.
+//
+// [PHASE 3 — DIGITAL PRODUCTS FLAG]
+// `useLogin` BUYER fallback: when digital is off, BUYERs login → straight
+// to /dashboard/setup-store (their only meaningful destination).
+// When digital is on, they land on /dashboard/library (existing behavior).
+// SELLER always lands on /dashboard/products. The `?from=` redirect from
+// AuthGuard still wins if present.
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -30,6 +37,7 @@ import { getErrorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { tenantsApi } from '@/lib/api/tenants';
 import { toast } from '@/lib/providers/root-provider';
+import { FEATURES } from '@/lib/config/features';
 import type { LoginInput, RegisterInput } from '@/types/auth';
 
 export function useLogin() {
@@ -57,9 +65,17 @@ export function useLogin() {
         );
 
         const from = searchParams.get('from');
+
+        // [PHASE 3] BUYER fallback respects FEATURES.digitalProducts:
+        //   - Digital ON  → /dashboard/library (existing)
+        //   - Digital OFF → /dashboard/setup-store (only useful destination)
+        const buyerFallback = FEATURES.digitalProducts
+          ? '/dashboard/library'
+          : '/dashboard/setup-store';
+
         const defaultRedirect = response.tenant.role === 'SELLER'
           ? '/dashboard/products'
-          : '/dashboard/library';
+          : buyerFallback;
         router.push(from || defaultRedirect);
 
         return response;

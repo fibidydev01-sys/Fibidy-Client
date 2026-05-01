@@ -1,5 +1,17 @@
 'use client';
 
+// ==========================================
+// DASHBOARD SIDEBAR (desktop)
+// File: src/components/layout/dashboard/dashboard-sidebar.tsx
+//
+// [PHASE 3] Digital-related nav items are now conditional on
+// FEATURES.digitalProducts:
+//   - Downloads (seller-only) — hidden when off
+//   - Library (both roles)    — hidden when off
+//   - BUYER role with digital off has only "Start Selling" — Library
+//     link is hidden (it would 503 anyway).
+// ==========================================
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -24,6 +36,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
+import { FEATURES } from '@/lib/config/features';
 
 interface NavItem {
   titleKey: string;
@@ -31,17 +44,33 @@ interface NavItem {
   icon: LucideIcon;
 }
 
+// ── SELLER nav: Products + Studio always; digital items conditional ──
 const sellerNavItems: NavItem[] = [
   { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard },
   { titleKey: 'studio', href: '/dashboard/studio', icon: Layout },
-  { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History },
-  { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
+  ...(FEATURES.digitalProducts
+    ? [
+        {
+          titleKey: 'downloads',
+          href: '/dashboard/products/downloads',
+          icon: History,
+        },
+        { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
+      ]
+    : []),
 ];
 
-const buyerNavItems: NavItem[] = [
-  { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
-  { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
-];
+// ── BUYER nav: Library only when digital ON; setup-store always ──
+const buyerNavItems: NavItem[] = FEATURES.digitalProducts
+  ? [
+      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
+      { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
+    ]
+  : [
+      // Digital off — BUYER's only meaningful destination is setup-store.
+      // RouteGuard will redirect BUYER from any other path here.
+      { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
+    ];
 
 export function DashboardSidebar() {
   const t = useTranslations('dashboard.nav');

@@ -14,12 +14,23 @@
 //   ACTIVE (has future req)     → info, View Updates
 //   REJECTED                    → red error, Contact Support
 //   isPolling                   → loading state after returning from Stripe
+//
+// [PHASE 3 — DIGITAL PRODUCTS FLAG]
+// When FEATURES.digitalProducts is false, this banner returns null.
+// KYC is only meaningful for digital-product sellers — the entire Stripe
+// Connect flow is also gated by the backend guard, so showing the banner
+// would advertise an unreachable feature.
+//
+// Note: useKycStatus() is also gated via React Query's `enabled` so this
+// component receives `kycStatus = undefined` when off — but we early-return
+// here for clarity and to avoid the brief "loading status..." flash.
 
 import { useTranslations } from 'next-intl';
 import { useInitiateKyc } from '@/hooks/dashboard/use-products';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { FEATURES } from '@/lib/config/features';
 import type { KycStatus, KycError } from '@/types/product';
 
 interface KycBannerProps {
@@ -48,6 +59,9 @@ export function KycBanner({
   futureRequirementsDeadline,
   isPolling,
 }: KycBannerProps) {
+  // [PHASE 3] Skip entirely when digital products feature is gated
+  if (!FEATURES.digitalProducts) return null;
+
   const t = useTranslations('dashboard.kycBanner');
   const tStates = useTranslations('dashboard.kycBanner.states');
   const tActions = useTranslations('dashboard.kycBanner.actions');

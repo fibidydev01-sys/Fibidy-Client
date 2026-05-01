@@ -19,6 +19,12 @@ import type { ApiError } from '@/types/api';
 // keys are translated; when omitted (non-UI caller), the raw key is
 // returned. This keeps the API client framework-agnostic while
 // staying i18n-aware.
+//
+// [PHASE 3 — DIGITAL PRODUCTS FEATURE FLAG]
+// ApiRequestError now captures backend's `code` and `feature` fields
+// from structured 503 errors. New helper `isFeatureDisabled(err)` lets
+// callers detect FEATURE_COMING_SOON and render Coming Soon UI without
+// looking at error message strings.
 // ==========================================
 
 export interface RequestConfig extends RequestInit {
@@ -312,11 +318,19 @@ class ApiClient {
 
 // ==========================================
 // API ERROR CLASS
+//
+// [PHASE 3] Added `code` and `feature` fields captured from backend.
+// These let callers detect specific structured errors (currently
+// FEATURE_COMING_SOON) without parsing message strings.
 // ==========================================
 
 export class ApiRequestError extends Error {
   public statusCode: number;
   public errors?: string[];
+  /** Backend structured error code. e.g. "FEATURE_COMING_SOON" */
+  public code?: string;
+  /** Feature identifier when applicable. e.g. "digital_products" */
+  public feature?: string;
 
   constructor(error: ApiError) {
     const message = Array.isArray(error.message)
@@ -327,6 +341,8 @@ export class ApiRequestError extends Error {
     this.name = 'ApiRequestError';
     this.statusCode = error.statusCode;
     this.errors = Array.isArray(error.message) ? error.message : undefined;
+    this.code = error.code;
+    this.feature = error.feature;
   }
 
   isValidationError(): boolean {
@@ -351,6 +367,17 @@ export class ApiRequestError extends Error {
 
   isServerError(): boolean {
     return this.statusCode >= 500;
+  }
+
+  /**
+   * [PHASE 3] Detect whether this error is a "feature disabled" 503
+   * emitted by NestJS DigitalProductsGuard.
+   *
+   * Equivalent to the standalone `isFeatureDisabled(err)` helper below,
+   * provided here for convenience when you already have the typed error.
+   */
+  isFeatureDisabled(): boolean {
+    return this.statusCode === 503 && this.code === 'FEATURE_COMING_SOON';
   }
 }
 
@@ -411,6 +438,38 @@ export const api = new ApiClient({
 
 function isApiError(error: unknown): error is ApiRequestError {
   return error instanceof ApiRequestError;
+}
+
+/**
+ * [PHASE 3] Detect whether an error indicates a backend feature is disabled.
+ *
+ * Backend's DigitalProductsGuard returns:
+ *   { statusCode: 503, code: 'FEATURE_COMING_SOON', feature: '...' }
+ *
+ * Use this in catch blocks to decide whether to render Coming Soon UI
+ * vs. surface as a real error. Example:
+ *
+ *   try {
+ *     await productsApi.getKycStatus();
+ *   } catch (err) {
+ *     if (isFeatureDisabled(err)) {
+ *       // Silently skip — feature is gated, expected behavior
+ *       return;
+ *     }
+ *     toast.error(getErrorMessage(err, t));
+ *   }
+ *
+ * In practice you should rarely hit this path — hooks already use
+ * `enabled: FEATURES.digitalProducts` to skip fetching entirely. This
+ * helper exists as a defensive fallback (e.g. for direct `api.get`
+ * calls or for users who bypass the FE flag via DevTools).
+ */
+export function isFeatureDisabled(error: unknown): boolean {
+  return (
+    isApiError(error) &&
+    error.statusCode === 503 &&
+    error.code === 'FEATURE_COMING_SOON'
+  );
 }
 
 /** Translation function signature — compatible with next-intl's `t`. */

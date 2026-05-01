@@ -2,17 +2,20 @@
 // DISCOVER LAYOUT
 // File: src/app/[locale]/discover/layout.tsx
 //
-// EDIT: mount <AuthDialog /> once in layout
+// [PHASE 3] When FEATURES.digitalProducts is false, layout short-circuits
+// with <ComingSoonPage feature="discover" />. All child routes
+// (/discover, /discover/[id]) are blocked since they wrap inside this
+// layout. AuthDialog also doesn't mount in this state — no need to
+// authenticate just to see a coming-soon page.
+//
+// EDIT: mount <AuthDialog /> once in layout (only when feature enabled)
 // AuthDialog is triggered via useAuthDialogStore.open() from buy-button.tsx
 //
 // [i18n FIX — 2026-04-19]
 // Three things change:
 //
 // 1. Static `metadata` export → async `generateMetadata` using
-//    `getTranslations` (namespace `discover.metadata`). Reuses existing
-//    JSON keys `discover.metadata.layoutTemplate` (for the `%s | ...`
-//    template) and `discover.metadata.layoutDefault` (for the fallback
-//    when a child page doesn't set its own title).
+//    `getTranslations` (namespace `discover.metadata`).
 //
 // 2. The "Discover" heading inside the minimal layout header is resolved
 //    via `getTranslations` at render time and passed through as a plain
@@ -26,6 +29,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { AuthDialog } from '@/components/user-auth/auth-dialog';
+import { FEATURES } from '@/lib/config/features';
+import { ComingSoonPage } from '@/components/shared/coming-soon-page';
 
 export async function generateMetadata({
   params,
@@ -51,6 +56,13 @@ export default async function DiscoverLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
+  // [PHASE 3] Short-circuit when feature is gated.
+  // No header, no auth dialog — just the coming-soon page with a CTA home.
+  if (!FEATURES.digitalProducts) {
+    return <ComingSoonPage feature="discover" ctaHref="/" ctaLabelKey="backToHome" />;
+  }
+
   const t = await getTranslations({ locale, namespace: 'discover.header' });
 
   return (

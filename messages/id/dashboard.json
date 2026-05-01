@@ -255,6 +255,7 @@
       "cancel": "Batalkan langganan",
       "cancelling": "Membatalkan...",
       "activeUntil": "Aktif sampai {date} (sisa {days} hari)",
+      "comingSoonBadge": "Segera Hadir",
       "badge": {
         "active": "Aktif",
         "pastDue": "Pembayaran Terlambat",
@@ -292,11 +293,13 @@
           "priceNote": "Gratis selamanya",
           "features": [
             "5 produk",
-            "3 produk digital",
-            "Penyimpanan 0.5 GB",
-            "Maks 20 MB per file",
             "2 foto per produk",
             "1 template hero"
+          ],
+          "digitalFeatures": [
+            "3 produk digital",
+            "Penyimpanan 0.5 GB",
+            "Maks 20 MB per file"
           ]
         },
         "STARTER": {
@@ -305,11 +308,13 @@
           "priceNote": "/bulan",
           "features": [
             "20 produk",
-            "20 produk digital",
-            "Penyimpanan 1 GB",
-            "Maks 50 MB per file",
             "3 foto per produk",
             "3 template hero"
+          ],
+          "digitalFeatures": [
+            "20 produk digital",
+            "Penyimpanan 1 GB",
+            "Maks 50 MB per file"
           ]
         },
         "BUSINESS": {
@@ -318,11 +323,13 @@
           "priceNote": "/bulan",
           "features": [
             "50 produk",
-            "50 produk digital",
-            "Penyimpanan 20 GB",
-            "Maks 500 MB per file",
             "5 foto per produk",
             "Semua template hero"
+          ],
+          "digitalFeatures": [
+            "50 produk digital",
+            "Penyimpanan 20 GB",
+            "Maks 500 MB per file"
           ]
         }
       },
@@ -358,6 +365,25 @@
         "cancel": "Batal",
         "confirm": "Ya, batalkan",
         "canceling": "Membatalkan..."
+      }
+    },
+    "comingSoon": {
+      "digitalProducts": {
+        "title": "Produk Digital — Segera Hadir",
+        "description": "Kami sedang menyempurnakan fitur produk digital untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi — segera."
+      },
+      "discover": {
+        "title": "Marketplace — Segera Hadir",
+        "description": "Halaman Jelajah akan memungkinkan pembeli menelusuri produk digital dari seller di seluruh Fibidy. Pantau terus!"
+      },
+      "library": {
+        "title": "Library — Segera Hadir",
+        "description": "Produk digital yang sudah kamu beli akan tersimpan di sini. Library akan siap saat marketplace kami diluncurkan."
+      },
+      "cta": {
+        "backToProducts": "Kembali ke Produk",
+        "backToDashboard": "Kembali ke Dashboard",
+        "backToHome": "Kembali ke Beranda"
       }
     },
     "setupStore": {
