@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { tenantsApi } from '@/lib/api/tenants';
 import { productsApi } from '@/lib/api/products';
-import { TenantHero } from '@/components/dashboard/blocks/block';
+import { TenantHero } from '@/components/dashboard/blocks/tenant-hero';
 import { TenantProducts } from '@/components/store/products/tenant-products';
 import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
 import { ProductListSchema } from '@/components/store/shared/product-list-schema';

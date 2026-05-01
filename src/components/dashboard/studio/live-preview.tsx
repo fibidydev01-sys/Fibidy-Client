@@ -3,7 +3,7 @@
 import { EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { TenantHero } from '@/components/dashboard/blocks/block';
+import { TenantHero } from '@/components/dashboard/blocks/tenant-hero';
 import type { TenantLandingConfig } from '@/types/landing';
 import type { Tenant } from '@/types/tenant';
 
