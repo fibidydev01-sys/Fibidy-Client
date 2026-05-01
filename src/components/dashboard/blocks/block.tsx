@@ -1,13 +1,9 @@
 'use client';
 
+import { lazy, Suspense, ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
-import type { ComponentType } from 'react';
 import type { Tenant, PublicTenant } from '@/types/tenant';
 import type { TenantLandingConfig } from '@/types/landing';
-
-// 🔑 Import semua hero sekaligus via namespace.
-// Tambah hero baru: edit index.ts saja, file ini TIDAK perlu disentuh.
-import * as Heroes from './index';
 
 interface TenantHeroProps {
   config?: TenantLandingConfig['hero'];
@@ -27,29 +23,13 @@ interface HeroComponentProps {
   storeName?: string;
 }
 
-// Treat the namespace as a generic record so we can lookup by string key.
-const HERO_REGISTRY = Heroes as unknown as Record<
-  string,
-  ComponentType<HeroComponentProps> | undefined
->;
-
-function resolveHero(block: string | undefined): ComponentType<HeroComponentProps> {
-  const blockNumber = (block ?? 'hero1').replace('hero', '');
-  const key = `Hero${blockNumber}`; // matches export names: Hero1, Hero2, ...
-  const Component = HERO_REGISTRY[key];
-
-  if (!Component) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[TenantHero] Block "${block}" → export "${key}" not found. Falling back to Hero1. ` +
-      `Available: [${Object.keys(HERO_REGISTRY).join(', ')}]`,
-    );
-    return HERO_REGISTRY.Hero1!;
-  }
-
-  return Component;
-}
-
+/**
+ * 🚀 SMART DYNAMIC LOADING - AUTO-DISCOVERY ENABLED!
+ * NO MANUAL IMPORTS! Just add hero201.tsx and it works!
+ *
+ * 🎯 DATA SOURCE:
+ * Priority: tenant fields > landingConfig > defaults (dari i18n)
+ */
 export function TenantHero({ config, tenant }: TenantHeroProps) {
   const tSettings = useTranslations('settings.hero');
   const block = config?.block;
@@ -69,7 +49,30 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
     storeName: tenant.name,
   };
 
-  const HeroComponent = resolveHero(block);
+  // 🚀 SMART: Dynamic component loading
+  const blockNumber = block?.replace('hero', '');
+  const HeroComponent = lazy(() =>
+    import(`./hero${blockNumber}`)
+      .then((mod) => ({ default: mod[`Hero${blockNumber}`] as ComponentType<HeroComponentProps> }))
+      .catch(() =>
+        import('./hero1').then((mod) => ({
+          default: mod.Hero1 as ComponentType<HeroComponentProps>,
+        }))
+      )
+  );
 
-  return <HeroComponent {...commonProps} />;
+  return (
+    <Suspense fallback={<HeroSkeleton />}>
+      <HeroComponent {...commonProps} />
+    </Suspense>
+  );
+}
+
+function HeroSkeleton() {
+  const t = useTranslations('common.state');
+  return (
+    <div className="h-screen w-full animate-pulse bg-muted flex items-center justify-center">
+      <div className="text-muted-foreground">{t('loading')}</div>
+    </div>
+  );
 }
