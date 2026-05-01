@@ -1,6 +1,6 @@
 'use client';
 
-import { lazy, Suspense, ComponentType } from 'react';
+import { lazy, Suspense, useMemo, type ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Tenant, PublicTenant } from '@/types/tenant';
 import type { TenantLandingConfig } from '@/types/landing';
@@ -24,15 +24,77 @@ interface HeroComponentProps {
 }
 
 /**
- * 🚀 SMART DYNAMIC LOADING - AUTO-DISCOVERY ENABLED!
- * NO MANUAL IMPORTS! Just add hero201.tsx and it works!
+ * 🚀 SMART DYNAMIC LOADING — case-sensitive safe, prod-build safe.
  *
- * 🎯 DATA SOURCE:
- * Priority: tenant fields > landingConfig > defaults (dari i18n)
+ * Drop file `hero26.tsx` (lowercase!) yang export `Hero26` → otomatis
+ * ke-pickup di runtime. Tidak perlu daftarin manual.
+ *
+ * Bug fixes vs versi sebelumnya:
+ * 1. Fallback `./Hero1` → `./hero1` (lowercase, match nama file di disk).
+ *    Bug ini sebelumnya silent di Windows (case-insensitive FS) tapi
+ *    fatal di Linux/Vercel.
+ * 2. `lazy()` di-cache di MODULE LEVEL, bukan di-recreate setiap render.
+ *    Sebelumnya bikin unmount/remount tiap state change.
+ * 3. `webpackInclude` magic comment → kasih webpack petunjuk eksplisit
+ *    file mana yang harus masuk bundle. Tanpa ini, prod build bisa
+ *    miss file di code-split chunks.
+ * 4. Try multiple export name patterns supaya robust kalau ada file
+ *    yang kebetulan export beda (default, lowercase, dst).
  */
+
+// ── Module-level cache: lazy() dipanggil sekali per block, lalu reuse ──
+const HERO_CACHE = new Map<string, ComponentType<HeroComponentProps>>();
+
+function getHeroComponent(block: string): ComponentType<HeroComponentProps> {
+  const cached = HERO_CACHE.get(block);
+  if (cached) return cached;
+
+  const blockNumber = block.replace('hero', '');
+
+  const Component = lazy(() =>
+    import(
+      /* webpackInclude: /hero\d+\.tsx?$/ */
+      /* webpackChunkName: "blocks/[request]" */
+      `./${block}`
+    )
+      .then((mod) => {
+        // Try common export shapes (capital is the convention, but be permissive)
+        const exported =
+          mod[`Hero${blockNumber}`] ??
+          mod[`hero${blockNumber}`] ??
+          mod.default;
+
+        if (!exported) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `[TenantHero] No matching export in "${block}". ` +
+            `Expected: Hero${blockNumber} | hero${blockNumber} | default. ` +
+            `Got: [${Object.keys(mod).join(', ')}]`,
+          );
+          throw new Error(`No export in ${block}`);
+        }
+
+        return { default: exported as ComponentType<HeroComponentProps> };
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(`[TenantHero] Failed to load "${block}", falling back to hero1:`, err);
+        return import(
+          /* webpackChunkName: "blocks/hero1" */
+          './hero1'
+        ).then((m) => ({
+          default: (m.Hero1 ?? m.default) as ComponentType<HeroComponentProps>,
+        }));
+      }),
+  );
+
+  HERO_CACHE.set(block, Component);
+  return Component;
+}
+
 export function TenantHero({ config, tenant }: TenantHeroProps) {
   const tSettings = useTranslations('settings.hero');
-  const block = config?.block;
+  const block = config?.block || 'hero1';
   const heroConfig = config;
   const heroConfigSettings = heroConfig?.config;
 
@@ -49,17 +111,9 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
     storeName: tenant.name,
   };
 
-  // 🚀 SMART: Dynamic component loading
-  const blockNumber = block?.replace('hero', '');
-  const HeroComponent = lazy(() =>
-    import(`./hero${blockNumber}`)
-      .then((mod) => ({ default: mod[`Hero${blockNumber}`] as ComponentType<HeroComponentProps> }))
-      .catch(() =>
-        import('./Hero1').then((mod) => ({
-          default: mod.Hero1 as ComponentType<HeroComponentProps>,
-        }))
-      )
-  );
+  // useMemo memastikan referensi component stable per `block`,
+  // selain itu cache di module level juga sudah cover.
+  const HeroComponent = useMemo(() => getHeroComponent(block), [block]);
 
   return (
     <Suspense fallback={<HeroSkeleton />}>
