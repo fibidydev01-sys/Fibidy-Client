@@ -1,24 +1,19 @@
 #!/bin/bash
 # ================================================================
 # collect-refactor-fe.sh
-# Targeted Collection — FE files affected by Stripe Billing → LS Refactor
+# FINAL CLEAN Collection — FE files for LS-vs-Stripe Refactor
 #
-# Used in NEXT chat session to implement Batch 2 (Frontend cleanup)
-# of REFACTOR-PLAN-LS-VS-STRIPE.md
+# Scope: Batch 2 (FE Stripe Subscription removal) + Batch 4 (FE type)
+# Plan : docs/REFACTOR-PLAN-LS-VS-STRIPE.md
 #
-# Scope:
-#   TIER 1 — DEFINITELY MODIFIED (consumer of changed BE contract)
-#     Group A — API client: subscription.ts                   (1 file)
-#     Group B — Subscription page (biggest change)            (1 file)
-#     Group C — i18n keys cleanup                             (4 files)
+# Tier 1 — MODIFIED in Batch 2 + Batch 4 (must verify post-refactor)
+#   Group A — API client (Batch 2 + 4)                       (1 file)
+#   Group B — Subscription page (biggest UI change)          (1 file)
+#   Group C — i18n keys (reconcile keys removed)             (4 files)
 #
-#   TIER 2 — DEFENSIVE SCAN (might have stale Stripe billing refs)
-#     Group D — Checkout pages (Stripe Connect ambiguity)     (4 files)
-#     Group E — Other API clients & shared infra              (3 files)
-#     Group F — Auth flow (uses subscription redirects)       (2 files)
-#
-#   TIER 3 — REFERENCE ONLY (read-only context)
-#     Group G — Types & config                                (3 files)
+# Tier 2 — UNTOUCHED but adjacent (verify no stale refs)
+#   Group D — Stripe Connect checkout pages (must be pristine) (4 files)
+#   Group E — Auth + plan hooks (verify no Stripe billing leak) (2 files)
 #
 # Output: collections/COLLECT-refactor-fe-[timestamp].txt
 # Usage : bash collect-refactor-fe.sh
@@ -81,133 +76,116 @@ block() {
 }
 
 cat > "$FILE" << EOF
-##  COLLECTION — FE Refactor Audit
+##  COLLECTION — FE Refactor Audit (FINAL CLEAN)
 ##  Generated : $(date '+%Y-%m-%d %H:%M:%S')
-##  Purpose   : Implement Batch 2 of REFACTOR-PLAN-LS-VS-STRIPE.md
-##  Scope     : Files affected by Stripe Billing removal (LS becomes sole provider)
-##  Total     : 18 files
+##  Purpose   : Verify Batch 2 + Batch 4 FE final state
+##  Scope     : Stripe Subscription billing removal (LS = sole provider)
+##  Total     : 12 files
 EOF
 
-echo -e "\n${WHITE}  ── Collecting Refactor-Affected FE Files ──${NC}"
-echo -e "${YELLOW}  ── Tier 1: Definitely modified ──${NC}"
+echo -e "\n${WHITE}  ── Collecting FE Refactor Files (FINAL CLEAN) ──${NC}"
+echo -e "${YELLOW}  ── Tier 1: Modified in Batch 2 + Batch 4 ──${NC}"
 
-block "TIER 1 — DEFINITELY MODIFIED (BE contract consumers)"
+block "TIER 1 — MODIFIED (verify final state matches batch READMEs)"
 
-sec "Group A — API client: subscription.ts (CORE CHANGES)"
-# CHANGES:
-#   - Remove reconcile() method
-#   - Remove BillingProvider type
-#   - Remove ReconcileResponse interface
-#   - Simplify VerifySubscriptionResponse (remove subscription? field)
-#   - Remove sessionId param from verify()
-#   - Clean up "[PHASE 3 — LEMONSQUEEZY MIGRATION]" comments
+sec "Group A — API client (Batch 2 + Batch 4 type cleanup)"
+# Batch 2:
+#   - Removed BillingProvider type
+#   - Removed ReconcileResponse interface
+#   - Removed reconcile() method
+#   - Removed sessionId? param on verify() (now zero-arg)
+#   - Removed optional `subscription?` field on VerifySubscriptionResponse
+# Batch 4:
+#   - Removed `stripeSubId: string | null` from SubscriptionRecord
+#   - Made lsSubscriptionId/lsRenewsAt/lsEndsAt non-optional
 cf "$SRC/lib/api/subscription.ts"
 
-sec "Group B — Subscription page (BIGGEST CHANGE)"
-# CHANGES:
-#   - Remove sessionIdRef
-#   - Remove runReconcile() function
-#   - Remove 'reconciling' from VerifyState type
-#   - Remove conditional sessionId checks in poll() and handleManualRetry()
-#   - Remove reconciling Alert banner JSX
-#   - Simplify URL search params (no session_id)
+sec "Group B — Subscription page (biggest UI change)"
+# Batch 2:
+#   - Removed sessionIdRef
+#   - Removed runReconcile() callback
+#   - Removed 'reconciling' from VerifyState union
+#   - Removed reconciling banner JSX
+#   - Simplified useEffect polling (no Stripe fork)
+#   - Simplified handleManualRetry (no reconcile fallback)
+#   - Removed session_id URL param reading
 cf "$SRC/app/[locale]/(dashboard)/dashboard/subscription/page.tsx"
 
-sec "Group C — i18n keys cleanup"
-# CHANGES IN THESE 4 FILES:
+sec "Group C — i18n keys (reconcile-related strings removed)"
+# Batch 2 — keys to confirm DELETED:
 #   dashboard.json:
-#     - Remove: dashboard.subscription.verify.reconcilingTitle
-#     - Remove: dashboard.subscription.verify.reconcilingBody
+#     ✗ dashboard.subscription.verify.reconcilingTitle
+#     ✗ dashboard.subscription.verify.reconcilingBody
 #   toast.json:
-#     - Remove: toast.subscription.reconcileFailed
-#     - Remove: toast.subscription.reconcileSuccess
-#     - Remove: toast.subscription.reconcileSuccessDetail
+#     ✗ toast.subscription.reconcileFailed
+#     ✗ toast.subscription.reconcileSuccess
+#     ✗ toast.subscription.reconcileSuccessDetail
 cf "$MSG/en/dashboard.json"
 cf "$MSG/id/dashboard.json"
 cf "$MSG/en/toast.json"
 cf "$MSG/id/toast.json"
 
-echo -e "\n${YELLOW}  ── Tier 2: Defensive scan ──${NC}"
+echo -e "\n${YELLOW}  ── Tier 2: Untouched but adjacent (no stale refs) ──${NC}"
 
-block "TIER 2 — DEFENSIVE SCAN (might have stale Stripe billing refs)"
+block "TIER 2 — VERIFY UNTOUCHED (no stale Stripe billing refs)"
 
-sec "Group D — Checkout pages (Stripe Connect vs Subscription ambiguity)"
-# WHY SCAN:
-#   STRIPE_SUCCESS_URL was originally:
-#     "https://fibidy.com/checkout/success?session_id={CHECKOUT_SESSION_ID}"
-#
-#   This was Stripe Connect product purchase redirect, NOT subscription.
-#   Subscription uses /dashboard/subscription?status=success now.
-#
-#   Verify these pages are PURELY for Stripe Connect product purchase:
-#     - If YES: keep as-is (Connect dormant, gated by feature flag)
-#     - If NO (handles subscription too): need cleanup
-#
-# RISK if skipped:
-#   Dead code referencing stripe-billing only flow could remain.
+sec "Group D — Stripe Connect checkout (marketplace, must be pristine)"
+# WHY READ:
+#   Per Batch 2 README, these are explicitly OUT OF SCOPE — they handle
+#   Stripe Connect digital product purchase (different flow entirely).
+#   Verify they don't accidentally reference removed subscription APIs
+#   (subscriptionApi.reconcile, BillingProvider, etc.)
 cf "$SRC/app/[locale]/checkout/cancel/page.tsx"
 cf "$SRC/app/[locale]/checkout/cancel/client.tsx"
 cf "$SRC/app/[locale]/checkout/success/page.tsx"
 cf "$SRC/app/[locale]/checkout/success/client.tsx"
 
-sec "Group E — Related API clients & infra (verify no Stripe billing refs)"
-# WHY SCAN:
-#   - checkout.ts: Stripe Connect product purchase API. Should be clean.
-#   - client.ts: Generic API client. Should be clean.
-#   - query-keys.ts: Verify subscription.payments key still relevant
-cf "$SRC/lib/api/checkout.ts"
-cf "$SRC/lib/api/client.ts"
-cf "$SRC/lib/shared/query-keys.ts"
-
-sec "Group F — Auth flow (subscription redirect target)"
-# WHY SCAN:
-#   - use-auth.ts already conditional on FEATURES.digitalProducts
-#   - But might have stale subscription-related redirects
+sec "Group E — Auth + subscription plan hooks (verify isolation)"
+# WHY READ:
+#   - use-auth.ts: gated by FEATURES.digitalProducts but might still
+#     have stale subscription redirect refs
+#   - use-subscription-plan.ts: read-only plan info, but should not
+#     reference stripeSubId or billingProvider after Batch 4
 cf "$SRC/hooks/auth/use-auth.ts"
 cf "$SRC/hooks/dashboard/use-subscription-plan.ts"
-
-echo -e "\n${YELLOW}  ── Tier 3: Reference only ──${NC}"
-
-block "TIER 3 — REFERENCE ONLY (read-only context for refactor)"
-
-sec "Group G — Types & config (verify type contracts)"
-# WHY READ:
-#   - api.ts: Verify ApiError shape unchanged (BE removes Stripe-only error codes)
-#   - features.ts: Confirm DIGITAL_PRODUCTS flag still master switch
-#   - tenant.ts: Verify tenant type doesn't have stale Stripe-billing fields
-cf "$SRC/types/api.ts"
-cf "$SRC/lib/config/features.ts"
-cf "$SRC/types/tenant.ts"
 
 PCT=0; [ $TOTAL -gt 0 ] && PCT=$(( FOUND * 100 / TOTAL ))
 
 echo ""
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
-echo -e "  ${GREEN}✓ Found   : $FOUND / $TOTAL${NC}"
+echo -e "  ${GREEN}✓ OK      : $FOUND / $TOTAL${NC}"
 echo -e "  ${RED}✗ Missing : $MISSING${NC}"
 echo -e "  Coverage  : $PCT%"
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
 echo -e "  Output: ${CYAN}$FILE${NC}"
 echo ""
-echo -e "${WHITE}  Next: attach output to next chat with Claude${NC}"
-echo -e "${WHITE}  Say: \"Lanjut Batch 2 dari REFACTOR-PLAN, file FE attached\"${NC}"
+echo -e "${WHITE}  Sanity grep — should return ZERO hits in src/:${NC}"
+echo -e "${DIM}    grep -rn 'reconcile\\|sessionId' src/app/\\[locale\\]/\\(dashboard\\)/dashboard/subscription${NC}"
+echo -e "${DIM}    grep -rn 'BillingProvider\\|stripeSubId\\|ReconcileResponse' src/${NC}"
+echo -e "${DIM}    grep -rn 'reconcilingTitle\\|reconcileFailed' messages/${NC}"
+echo ""
 
-{ 
+{
   echo ""
   echo "##  SUMMARY"
-  echo "Found    : $FOUND / $TOTAL"
+  echo "OK       : $FOUND / $TOTAL"
   echo "Missing  : $MISSING"
   echo "Coverage : $PCT%"
   echo ""
   echo "##  TIER BREAKDOWN"
-  echo "Tier 1 (DEFINITELY MODIFIED) : 6 files"
-  echo "Tier 2 (DEFENSIVE SCAN)      : 9 files"
-  echo "Tier 3 (REFERENCE ONLY)      : 3 files"
+  echo "Tier 1 (MODIFIED)        : 6 files"
+  echo "Tier 2 (VERIFY UNTOUCHED): 6 files"
   echo ""
-  echo "##  NEXT STEPS"
-  echo "1. Verify all Tier 1 files present"
-  echo "2. Grep Tier 2 files for stale Stripe billing refs:"
-  echo "   grep -rn 'reconcile\\|sessionId\\|STRIPE_PRICE\\|STRIPE_SUCCESS_URL' src/"
-  echo "3. Attach output file to next Claude chat"
-  echo "4. Say: 'Lanjut Batch 2 dari REFACTOR-PLAN'"
+  echo "##  POST-REFACTOR SANITY GREPS (run from client/)"
+  echo "# These should ALL return zero hits:"
+  echo "grep -rn 'BillingProvider\\|stripeSubId\\|ReconcileResponse' src/"
+  echo "grep -rn 'subscriptionApi\\.reconcile\\|runReconcile' src/"
+  echo "grep -rn 'reconciling\\|sessionIdRef' src/app"
+  echo "grep -rn 'reconcilingTitle\\|reconcilingBody' messages/"
+  echo "grep -rn 'reconcileFailed\\|reconcileSuccess' messages/"
+  echo ""
+  echo "# Stripe Connect checkout (marketplace) MAY still legitimately use"
+  echo "# session_id — that is a different flow (Connect Direct Charge)."
+  echo "# Confirm those refs are scoped to /checkout/* only:"
+  echo "grep -rn 'session_id' src/app/\\[locale\\]/checkout/"
 } >> "$FILE"
