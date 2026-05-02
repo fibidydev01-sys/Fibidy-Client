@@ -4,23 +4,31 @@
 // PHASE 1 I18N: Composed with next-intl middleware.
 //
 // ROUTING FLOW:
-//  1. Skip static/api/OG/sitemap
+//  1. Skip static/api/OG/sitemap/manifest
 //  2. Subdomain (tokoA.fibidy.com) → rewrite to /en/store/tokoA
 //  3. Custom domain → rewrite to /en/store/{slug}
-//  4. [NEW] Path-based (/store/{slug}) → rewrite to /en/store/{slug}
-//     This handles localhost dev + fibidy.com/store/{slug} access,
-//     mirroring the subdomain experience so internal file structure
-//     stays unified under [locale]/store/[slug]/.
+//  4. Path-based (/store/{slug}) → rewrite to /en/store/{slug}
 //  5. Fallback → delegate to next-intl middleware
 //
-// UNCHANGED:
-//  - All subdomain extraction logic
-//  - Reserved subdomains list
-//  - Custom domain resolution via /api/tenant/resolve-domain
-//  - Skip rules for static/api/OG/sitemap
-//  - x-custom-domain + x-tenant-slug headers
-//  - DEBUG logging
-//  - Matcher config
+// [404-HARDENING — May 2026]
+// Two skip-list expansions to prevent middleware from intercepting
+// public/* assets and causing 404s under specific edge cases:
+//
+//   1. MATCHER negative-lookahead now excludes:
+//        xml | json | txt | map | woff | woff2 | ttf | css | js
+//      (was only image extensions).
+//      Effect: middleware never runs for these. Faster + safer.
+//
+//   2. HANDLER skip list now explicitly catches:
+//        - /sitemap-N.xml (next-sitemap output, e.g. sitemap-0.xml)
+//        - /manifest.json (PWA manifest)
+//      Old code only matched exact /sitemap.xml. With sitemapSize=45000
+//      and growing product catalog, sitemap-1.xml etc. would slip
+//      through and risk next-intl rewrite → 404.
+//
+// All existing logic preserved verbatim — extraction, reserved subdomains,
+// custom domain resolve, path-based store routing, next-intl delegation,
+// DEBUG logging, x-custom-domain + x-tenant-slug headers.
 // ==========================================
 
 import { NextResponse } from 'next/server';
@@ -43,7 +51,6 @@ const RESERVED_SUBDOMAINS = [
 
 // ==========================================
 // NEXT-INTL MIDDLEWARE INSTANCE
-// Handles locale detection / redirect for main-domain (non-tenant) routes.
 // ==========================================
 
 const intlMiddleware = createMiddleware(routing);
@@ -107,9 +114,8 @@ async function resolveCustomDomain(
 
 /**
  * Defensive: strip a leading locale prefix from the pathname before we
- * inject our own. Covers the edge case where a user types
- * `tokoA.fibidy.com/en/products` — without this, we'd end up with
- * `/en/store/tokoA/en/products` (double-locale, broken route).
+ * inject our own. Covers `tokoA.fibidy.com/en/products` edge case —
+ * without this, we'd get `/en/store/tokoA/en/products` (broken).
  *
  * With Phase 1 having only 'en', this is mostly future-proofing.
  */
@@ -134,7 +140,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 1. SKIP: Static files, API routes, OG images
+  // 1. SKIP: Static files, API routes, OG images, public assets
+  //
+  // [404-HARDENING] Expanded extension regex to include xml/json/txt/map.
+  // Explicit catches added for /sitemap-N.xml (next-sitemap output) and
+  // /manifest.json (PWA). The matcher config below ALSO excludes these,
+  // so this is defense-in-depth — if matcher ever drifts, handler catches.
   // ==========================================
   if (
     pathname.startsWith('/_next') ||
@@ -143,9 +154,11 @@ export async function proxy(request: NextRequest) {
     pathname.includes('/opengraph-image') ||
     pathname.includes('/twitter-image') ||
     pathname === '/sitemap.xml' ||
+    /^\/sitemap-\d+\.xml$/.test(pathname) || // [404-HARDENING] sitemap-0.xml, sitemap-1.xml, ...
+    pathname === '/manifest.json' ||         // [404-HARDENING] PWA manifest
     pathname === '/robots.txt' ||
     pathname.startsWith('/server-sitemap') ||
-    pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf)$/)
+    pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|xml|json|txt|map)$/)
   ) {
     if (DEBUG && (pathname.includes('/opengraph-image') || pathname.includes('/twitter-image'))) {
       console.log('[Proxy] Skipping OG image route:', pathname);
@@ -154,7 +167,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 2. SUBDOMAIN ROUTING — inject locale into rewrite path
+  // 2. SUBDOMAIN ROUTING
   // ==========================================
   const subdomain = extractSubdomain(hostname);
 
@@ -172,7 +185,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 3. CUSTOM DOMAIN ROUTING — inject locale into rewrite path
+  // 3. CUSTOM DOMAIN ROUTING
   // ==========================================
   if (isCustomDomain(hostname)) {
     const slug = await resolveCustomDomain(hostname, request);
@@ -196,13 +209,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 4. [NEW] PATH-BASED STORE ROUTING
-  //
-  // Main domain (including localhost in dev) hitting /store/{slug}
-  // gets rewritten to /{locale}/store/{slug} so that:
-  //   - Dev experience mirrors prod subdomain rewrite
-  //   - User URL stays clean (no /en visible)
-  //   - Next.js matches the correct [locale]/store/[slug] route
+  // 4. PATH-BASED STORE ROUTING
   // ==========================================
   if (pathname.startsWith('/store/')) {
     const url = request.nextUrl.clone();
@@ -216,9 +223,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // 5. MAIN APP — delegate to next-intl middleware
-  // Handles locale detection and (if localePrefix='always') the `/` → `/en` redirect.
-  // With localePrefix='as-needed', this is effectively a no-op for the default locale.
+  // 5. MAIN APP — delegate to next-intl
   // ==========================================
   if (DEBUG) console.log('[Proxy] Delegating to next-intl middleware');
   return intlMiddleware(request);
@@ -231,9 +236,18 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files (public folder)
+     * - public files (extension whitelist)
+     *
+     * [404-HARDENING] Extension list expanded from
+     * (svg|png|jpg|jpeg|gif|webp|ico) to include:
+     *   - xml  → sitemap-0.xml, sitemap-1.xml, ...
+     *   - json → manifest.json
+     *   - txt  → robots.txt (defense; was already exact-matched in handler)
+     *   - map  → source maps
+     *   - woff, woff2, ttf → font files
+     *   - css, js → catches any root-level static like /sw.js
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|xml|json|txt|map|woff|woff2|ttf|css|js)$).*)',
   ],
 };
 

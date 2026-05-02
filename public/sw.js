@@ -4,12 +4,24 @@
 //
 // [TIDUR-NYENYAK v3.1 FIX]
 // - Removed unused `isCacheValid` helper function (line 23 warning)
-//   — was dead code, never called anywhere in fetch handler.
-//   TTL-based cache invalidation isn't currently wired up, kept the
-//   TTL constants only as reference for future implementation.
-// - Removed unused `ttl` from destructure at line 109 (warning) —
-//   only `isStore` is actually consumed in the fetch handler.
-//   If you want to implement per-route TTL later, re-add the destructure.
+// - Removed unused `ttl` from destructure at line 109 (warning)
+//
+// [404-HARDENING — May 2026]
+// Locale-aware skip rules. Pre-fix:
+//   pathname.startsWith('/dashboard') only matches `/dashboard...`
+//   Indonesian users on `/id/dashboard...` slipped through — got cached.
+//   On next deploy with new chunk hashes, cached HTML pointed at dead
+//   chunk URLs → 404 chunks → broken page (functionally a 404).
+//
+// Fix: introduce stripLocalePrefix() helper. shouldSkipCache() and
+// getStoreRouteType() both run path matching against the stripped form.
+// Locale list hardcoded (en|id) since SW is vanilla JS — no TS imports.
+// Add this to LOCALES array if you ever expand i18n.
+//
+// Also expanded skip categories:
+//   - /forgot-password → was missing, would cache password reset page
+//   - /checkout/       → Stripe redirect flow, never cache
+//   - /onboard/        → KYC connect flow, never cache
 // ==========================================
 
 const STATIC_CACHE = 'fibidy-static-v1';
@@ -23,9 +35,11 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png',
 ];
 
+// [404-HARDENING] Hardcoded locales — SW is vanilla JS, can't import.
+// Sync with src/i18n/routing.ts whenever you add a new locale.
+const LOCALES = ['en', 'id'];
+
 // TTL constants kept as reference — not currently wired up.
-// If you want TTL-based cache invalidation, re-introduce isCacheValid()
-// helper and check cached response age in the fetch handler.
 const TTL = {
   STORE_PAGE: 60 * 60 * 24 * 1000,
   STORE_PRODUCT: 60 * 60 * 1000,
@@ -42,14 +56,38 @@ function stampResponse(response) {
   });
 }
 
+// ==========================================
+// [404-HARDENING] LOCALE PREFIX STRIPPER
+//
+// Returns pathname with leading /{locale} removed if present.
+//   /id/dashboard → /dashboard
+//   /en/store/abc → /store/abc
+//   /id           → /
+//   /dashboard    → /dashboard (unchanged)
+//
+// Pattern requires the locale to be FOLLOWED by `/` or end-of-string,
+// so paths like `/idea` (where 'id' is just a substring) don't get
+// mangled.
+// ==========================================
+function stripLocalePrefix(pathname) {
+  const localePattern = '^/(' + LOCALES.join('|') + ')(/.*)?$';
+  const match = pathname.match(new RegExp(localePattern));
+  if (!match) return pathname;
+  return match[2] || '/';
+}
+
 function getStoreRouteType(pathname) {
-  if (/^\/store\/[^/]+\/products\/[^/]+/.test(pathname)) {
+  // [404-HARDENING] Strip locale before regex match so /id/store/abc
+  // is treated the same as /store/abc.
+  const stripped = stripLocalePrefix(pathname);
+
+  if (/^\/store\/[^/]+\/products\/[^/]+/.test(stripped)) {
     return { isStore: true, ttl: TTL.STORE_PRODUCT };
   }
-  if (/^\/store\/[^/]+\/products\/?$/.test(pathname)) {
+  if (/^\/store\/[^/]+\/products\/?$/.test(stripped)) {
     return { isStore: true, ttl: TTL.STORE_PRODUCTS_LIST };
   }
-  if (/^\/store\/[^/]+/.test(pathname)) {
+  if (/^\/store\/[^/]+/.test(stripped)) {
     return { isStore: true, ttl: TTL.STORE_PAGE };
   }
   return { isStore: false, ttl: 0 };
@@ -57,12 +95,34 @@ function getStoreRouteType(pathname) {
 
 function shouldSkipCache(url) {
   const pathname = url.pathname;
+
+  // [404-HARDENING] Locale-stripped path for app-route matching.
+  // /api/ and /_next/ are never locale-prefixed, so we check those
+  // against the raw pathname.
+  const stripped = stripLocalePrefix(pathname);
+
+  // OG/Twitter images are dynamic per-page — never cache
   if (pathname.includes('/opengraph-image') || pathname.includes('/twitter-image')) return true;
+
+  // API routes (always at root, never locale-prefixed)
   if (pathname.startsWith('/api/')) return true;
+
+  // Next.js internals
   if (pathname.startsWith('/_next/')) return true;
+
+  // RSC requests carry stale chunks risk
   if (url.searchParams.has('_rsc')) return true;
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) return true;
-  if (pathname.startsWith('/login') || pathname.startsWith('/register')) return true;
+
+  // [404-HARDENING] Auth-required app shell — locale-aware
+  if (stripped.startsWith('/dashboard') || stripped.startsWith('/admin')) return true;
+  if (stripped.startsWith('/login') || stripped.startsWith('/register')) return true;
+  if (stripped.startsWith('/forgot-password')) return true;
+
+  // [404-HARDENING] Stripe checkout redirect / KYC connect flow.
+  // These pages depend on session_id query params — caching breaks them.
+  if (stripped.startsWith('/checkout/')) return true;
+  if (stripped.startsWith('/onboard/')) return true;
+
   return false;
 }
 
@@ -111,7 +171,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // [v3.1 FIX] Only destructure what we use — `ttl` was unused warning
   const { isStore } = getStoreRouteType(url.pathname);
 
   if (isStore) {
