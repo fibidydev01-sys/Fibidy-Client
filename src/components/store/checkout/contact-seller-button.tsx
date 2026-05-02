@@ -45,6 +45,11 @@
 //     },
 //     ...
 //   }
+//
+// [IDR MIGRATION — May 2026]
+// Default `currency` prop: 'USD' → 'IDR'. Caller (DiscoverDetailClient)
+// passes `product.currency` which can be undefined → default fires.
+// Must match platform default to render Rp formatting in WA template.
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
@@ -76,7 +81,7 @@ export function ContactSellerButton({
   sellerName,
   sellerWhatsapp,
   price,
-  currency = 'USD',
+  currency = 'IDR',
   className,
   variant = 'outline',
   size = 'default',

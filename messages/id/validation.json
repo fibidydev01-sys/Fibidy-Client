@@ -22,7 +22,10 @@
       "descriptionMaxLength": "Deskripsi maksimal {max} karakter",
       "categoryMaxLength": "Kategori maksimal {max} karakter",
       "priceNegative": "Harga tidak boleh negatif",
-      "comparePriceNegative": "Harga pembanding tidak boleh negatif"
+      "priceInteger": "Harga harus bilangan bulat — Rupiah tidak menggunakan desimal",
+      "priceMin": "Harga minimal Rp {min}",
+      "comparePriceNegative": "Harga pembanding tidak boleh negatif",
+      "comparePriceInteger": "Harga pembanding harus bilangan bulat — Rupiah tidak menggunakan desimal"
     },
     "store": {
       "slugTaken": "URL ini sudah dipakai",

@@ -16,6 +16,13 @@ import { api } from './client';
 //   - Subscription.stripeSubId field removed from DB
 //   - Subscription.billingProvider field removed from DB
 //   - Tenant.stripeCustomerId field removed from DB
+//
+// [IDR MIGRATION — May 2026]
+// Added `businessThreshold` to SubscriptionInfo. Backend now returns
+// the BUSINESS qualifier threshold values (Rp 3.000.000 OR 20 transactions)
+// in the response so the FE can render progress bars without hardcoding.
+// Source: src/subscription/subscription.constants.ts on the BE.
+// salesTrack.totalAmount is now in Rupiah (was USD pre-migration).
 // ==========================================
 
 export type SubscriptionTier = 'FREE' | 'STARTER' | 'BUSINESS';
@@ -39,6 +46,20 @@ interface SubscriptionRecord {
   lsEndsAt: string | null;
 }
 
+/**
+ * BUSINESS tier qualifier thresholds.
+ * Seller qualifies if EITHER condition is met (OR logic):
+ *   - totalSalesAmount (in Rupiah) >= amountIdr
+ *   - totalSalesCount >= txCount
+ *
+ * Source of truth: BE `src/subscription/subscription.constants.ts`.
+ * FE reads from API response — DO NOT hardcode 3000000 / 20 anywhere.
+ */
+export interface BusinessThreshold {
+  amountIdr: number;
+  txCount: number;
+}
+
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
   status: SubscriptionStatus | null;
@@ -55,7 +76,16 @@ export interface SubscriptionInfo {
     digitalProducts: boolean;
   };
   businessQualified: boolean;
+  /**
+   * BUSINESS qualifier thresholds.
+   * Defined optional for backward compat — BE that hasn't been redeployed
+   * with the IDR migration won't return this field. FE callers MUST handle
+   * undefined with a sensible fallback (recommend: skip progress UI entirely
+   * rather than hardcoding stale USD numbers).
+   */
+  businessThreshold?: BusinessThreshold;
   salesTrack: {
+    /** Total sales in Rupiah (post-IDR migration). Was USD pre-migration. */
     totalAmount: number;
     totalCount: number;
   };

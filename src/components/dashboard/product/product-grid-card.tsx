@@ -1,37 +1,30 @@
 'use client';
 
-import Image from 'next/image';
-import { Package, FileText } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+// ==========================================
+// PRODUCT GRID CARD — Dashboard product list
+// File: src/components/dashboard/product/product-grid-card.tsx
+//
+// Consumer: ./product-grid.tsx
+//   <ProductGridCard product={product} onClick={handleProductClick} />
+//
+// The card is a clickable summary tile. Edit / Delete / Toggle Active
+// are NOT triggered from the card — those live in ProductPreviewDrawer
+// which opens on card click. Keep this component dumb-presentational.
+//
+// [IDR MIGRATION — May 2026]
+// Replaced hardcoded `${(product.price ?? 0).toFixed(2)}` with
+// `formatPrice(product.price ?? 0, product.currency ?? 'IDR')`.
+// Pre-migration this rendered "$50000.00" — wrong for IDR products.
+//
+// Also exports ProductGridCardSkeleton for loading states. Imported by
+// ./product-grid.tsx as part of <ProductsGridSkeleton />.
+// ==========================================
+
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Package, FileText } from 'lucide-react';
+import { formatPrice } from '@/lib/shared/format';
 import type { Product } from '@/types/product';
-
-// ==========================================
-// SKELETON
-// ==========================================
-
-export function ProductGridCardSkeleton() {
-  return (
-    <div className="group">
-      <Skeleton className="aspect-square w-full rounded-xl" />
-      <div className="mt-2 space-y-1">
-        <Skeleton className="h-3.5 w-3/4" />
-        <Skeleton className="h-3 w-1/2" />
-      </div>
-    </div>
-  );
-}
-
-// ==========================================
-// PRODUCT GRID CARD — v3 unified
-//
-// Thumbnail priority (semua tipe produk sama):
-//   1. images[0]  → cover image yang diupload user (utama)
-//   2. Fallback icon → FileText (digital) atau Package (custom/jasa)
-//
-// Fix: digital product (fileKey != null) tetap pakai images[0]
-//      bukan langsung fallback ke icon FileText
-// ==========================================
 
 interface ProductGridCardProps {
   product: Product;
@@ -39,86 +32,94 @@ interface ProductGridCardProps {
 }
 
 export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
-  const t = useTranslations('dashboard.products.card');
-
-  // Selalu cek images[0] dulu — berlaku untuk semua tipe produk
   const imageUrl = product.images?.[0] ?? null;
   const isDigital = !!product.fileKey;
-  const salesCount = product._count?.purchases ?? 0;
+  const isCustomPrice = product.price === 0;
+
+  // [IDR MIGRATION] Default to IDR uniformly. Was: hardcoded $X.XX.
+  const currency = product.currency ?? 'IDR';
 
   return (
     <button
+      type="button"
       onClick={() => onClick(product)}
-      className="group block w-full text-left"
+      className="group block w-full text-left rounded-xl border border-border/50 bg-card overflow-hidden transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      {/* Thumbnail */}
-      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden bg-muted">
         {imageUrl ? (
-          // ── Ada cover image → tampil untuk semua tipe produk ──
-          <Image
+          <OptimizedImage
             src={imageUrl}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-150 group-hover:scale-105"
+            crop="fill"
+            gravity="auto"
+            sizes="(max-width: 640px) 50vw, 33vw"
+            className="object-cover transition-transform group-hover:scale-105"
+            fallback={
+              <div className="flex h-full items-center justify-center">
+                {isDigital ? (
+                  <FileText className="h-10 w-10 text-muted-foreground/30" />
+                ) : (
+                  <Package className="h-10 w-10 text-muted-foreground/30" />
+                )}
+              </div>
+            }
           />
         ) : (
-          // ── Tidak ada cover image → fallback icon ──────────────
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted gap-1">
+          <div className="flex h-full items-center justify-center">
             {isDigital ? (
-              <>
-                <FileText className="h-10 w-10 text-muted-foreground/40" />
-                <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase">
-                  {product.fileType ?? t('fileFallback')}
-                </span>
-              </>
+              <FileText className="h-10 w-10 text-muted-foreground/30" />
             ) : (
-              <Package className="h-12 w-12 text-muted-foreground/40" />
+              <Package className="h-10 w-10 text-muted-foreground/30" />
             )}
-          </div>
-        )}
-
-        {/* Badge: Draft */}
-        {!product.isActive && (
-          <div className="absolute top-2 left-2">
-            <span className="bg-yellow-500/90 text-white text-xs px-2 py-0.5 rounded">
-              {t('draft')}
-            </span>
-          </div>
-        )}
-
-        {/* Badge: File type — hanya kalau digital DAN tidak ada cover image */}
-        {isDigital && product.fileType && !imageUrl && (
-          <div className="absolute top-2 right-2">
-            <span className="bg-black/60 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase">
-              {product.fileType}
-            </span>
-          </div>
-        )}
-
-        {/* Badge: File type — kalau ada cover image, tetap tampil tapi lebih subtle */}
-        {isDigital && product.fileType && imageUrl && (
-          <div className="absolute top-2 right-2">
-            <span className="bg-black/50 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase">
-              {product.fileType}
-            </span>
           </div>
         )}
       </div>
 
-      {/* Info below card */}
-      <div className="mt-2 px-0.5">
-        <p className="text-sm font-medium truncate">{product.name}</p>
-        <div className="flex items-center justify-between mt-0.5">
-          <span className="text-xs font-semibold text-primary">
-            ${(product.price ?? 0).toFixed(2)}
-          </span>
-          {salesCount > 0 && (
-            <span className="text-[10px] text-muted-foreground">
-              {t('sold', { count: salesCount })}
+      {/* Body */}
+      <div className="px-3 py-2.5">
+        {product.category && (
+          <p className="text-xs text-muted-foreground truncate leading-none mb-1">
+            {product.category}
+          </p>
+        )}
+        <h3 className="font-medium text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
+          {product.name}
+        </h3>
+
+        <div className="mt-2">
+          {!isCustomPrice ? (
+            <span className="font-semibold text-sm text-primary">
+              {/* [IDR MIGRATION] formatPrice respects currency, defaults IDR. */}
+              {formatPrice(product.price ?? 0, currency)}
             </span>
+          ) : (
+            <span className="text-xs text-muted-foreground italic">—</span>
           )}
         </div>
       </div>
     </button>
+  );
+}
+
+// ==========================================
+// SKELETON
+//
+// Imported by ./product-grid.tsx for <ProductsGridSkeleton count={n} />.
+// Mirrors the card shape so loading state doesn't shift layout.
+// ==========================================
+
+export function ProductGridCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+      <Skeleton className="aspect-square w-full rounded-none" />
+      <div className="px-3 py-2.5 space-y-2">
+        <Skeleton className="h-3 w-1/3" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-1/3 mt-2" />
+      </div>
+    </div>
   );
 }

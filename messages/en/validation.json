@@ -22,7 +22,10 @@
       "descriptionMaxLength": "Description must be at most {max} characters",
       "categoryMaxLength": "Category must be at most {max} characters",
       "priceNegative": "Price cannot be negative",
-      "comparePriceNegative": "Compare price cannot be negative"
+      "priceInteger": "Price must be a whole number — Rupiah does not use decimals",
+      "priceMin": "Minimum price is Rp {min}",
+      "comparePriceNegative": "Compare price cannot be negative",
+      "comparePriceInteger": "Compare price must be a whole number — Rupiah does not use decimals"
     },
     "store": {
       "slugTaken": "This URL is already taken",

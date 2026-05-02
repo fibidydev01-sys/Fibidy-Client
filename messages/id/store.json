@@ -121,6 +121,11 @@
         "send": "Kirim via WhatsApp"
       },
       "contactSellerWhatsappTemplate": "Halo {name},\n\nSaya tertarik dengan produk kamu:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nTerima kasih! 🙏",
+      "contactSellerWhatsappLabels": {
+        "price": "Harga",
+        "name": "Nama",
+        "question": "Pertanyaan"
+      },
       "askSellerWhatsapp": "Tanya Penjual via WhatsApp",
       "orderWhatsapp": "Pesan via WhatsApp",
       "orderDialog": {
@@ -138,6 +143,10 @@
         "send": "Kirim via WhatsApp"
       },
       "orderWhatsappTemplate": "Halo {name},\n\nSaya ingin pesan:\n\n*{product}*\n{namePart}{notesPart}\n\nMohon konfirmasi ketersediaan.\nTerima kasih! 🙏",
+      "orderWhatsappLabels": {
+        "name": "Nama",
+        "notes": "Catatan"
+      },
       "stripe": {
         "signInToBuy": "Masuk untuk Membeli",
         "buyNow": "Beli Sekarang — {price}",

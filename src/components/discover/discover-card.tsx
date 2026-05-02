@@ -1,58 +1,96 @@
-import Link from 'next/link';
-import { FileText, Music, Video, Image, Archive } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import type { PublicProduct } from '@/types/product';
+'use client';
 
 // ==========================================
-// DISCOVER CARD
+// DISCOVER CARD — Marketplace browse view
 //
-// Note: tidak ada user-facing strings yang perlu di-wire.
-// File type (PDF/MP3/etc) murni data dari backend, bukan i18n.
-// Price format pakai $ (USD) — currency akan di-handle universal.
-// Seller name & product name & description = data dari DB.
+// [IDR MIGRATION — May 2026]
+// Replaced hardcoded `${product.price.toFixed(2)}` with
+// `formatPrice(product.price, product.currency ?? 'IDR')`.
+// Pre-migration this rendered "$50000.00" for IDR products — wrong on
+// every dimension (wrong symbol, wrong separator, wrong decimals).
+// Now respects `product.currency` if set; defaults to IDR.
 // ==========================================
 
-const FILE_ICONS: Record<string, React.ElementType> = {
-  pdf: FileText, epub: FileText,
-  mp3: Music, wav: Music,
-  mp4: Video, mov: Video,
-  jpg: Image, jpeg: Image, png: Image,
-  zip: Archive, rar: Archive,
-};
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { FileText } from 'lucide-react';
+import { formatPrice } from '@/lib/shared/format';
+import type { DiscoverProduct } from '@/types/discover';
 
 interface DiscoverCardProps {
-  product: PublicProduct;
+  product: DiscoverProduct;
 }
 
 export function DiscoverCard({ product }: DiscoverCardProps) {
-  const Icon = FILE_ICONS[product.fileType] ?? FileText;
+  const t = useTranslations('discover.card');
+
+  const imageUrl = product.images?.[0] ?? null;
+  // [IDR MIGRATION] Default to IDR. Was: hardcoded $X.XX.
+  const currency = product.currency ?? 'IDR';
 
   return (
-    <Link href={`/discover/${product.id}`} className="block group">
-      <div className="border rounded-xl p-4 space-y-3 hover:border-primary/50 hover:shadow-sm transition-all">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+    <Link href={`/discover/${product.id}`}>
+      <Card className="group overflow-hidden h-full flex flex-col transition-shadow hover:shadow-md">
+        {/* Image */}
+        <div className="relative aspect-square overflow-hidden bg-muted">
+          {imageUrl ? (
+            <OptimizedImage
+              src={imageUrl}
+              alt={product.name}
+              fill
+              crop="fill"
+              gravity="auto"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform group-hover:scale-105"
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <FileText className="h-10 w-10 text-muted-foreground/30" />
+                </div>
+              }
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <FileText className="h-10 w-10 text-muted-foreground/30" />
+            </div>
+          )}
+
+          {/* Digital badge */}
+          <div className="absolute top-2 right-2">
+            <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600 text-white">
+              {t('digitalBadge')}
+            </Badge>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-              {product.name}
+        </div>
+
+        {/* Body */}
+        <div className="px-3 py-2.5 flex-1 flex flex-col">
+          {product.category && (
+            <p className="text-xs text-muted-foreground truncate leading-none mb-1">
+              {product.category}
             </p>
-            <p className="text-xs text-muted-foreground truncate">{product.sellerName}</p>
+          )}
+          <h3 className="font-medium text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
+            {product.name}
+          </h3>
+
+          {/* Seller */}
+          {product.tenantName && (
+            <p className="text-xs text-muted-foreground mt-1 truncate">
+              {t('bySeller', { name: product.tenantName })}
+            </p>
+          )}
+
+          {/* Price */}
+          <div className="mt-auto pt-2">
+            <span className="font-semibold text-sm text-primary">
+              {formatPrice(product.price, currency)}
+            </span>
           </div>
         </div>
-
-        {product.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
-        )}
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold">${product.price.toFixed(2)}</span>
-          <Badge variant="outline" className="text-xs">
-            {product.fileType.toUpperCase()}
-          </Badge>
-        </div>
-      </div>
+      </Card>
     </Link>
   );
 }

@@ -99,13 +99,13 @@
           "descriptionLabel": "Description",
           "descriptionPlaceholder": "Describe the product — contents, page count, key features...",
           "descriptionHelper": "A clear description helps buyers purchase with confidence.",
-          "priceLabel": "Price (USD)",
+          "priceLabel": "Price (IDR)",
           "priceRequired": "*",
-          "pricePlaceholder": "9.99",
-          "priceHelper": "Price in USD — buyers pay via Stripe",
+          "pricePlaceholder": "50000",
+          "priceHelper": "Price in IDR — buyers pay via Stripe Connect, settlement is in IDR",
           "comparePriceLabel": "Compare-at price",
-          "comparePricePlaceholder": "19.99",
-          "comparePriceHelper": "Original price before discount — shown with strikethrough"
+          "comparePricePlaceholder": "100000",
+          "comparePriceHelper": "Original price before discount — shown with strikethrough. Leave empty if not on sale."
         },
         "upload": {
           "editModeNote": "Product file — the file cannot be changed after upload. Delete the product and create a new one if you need to replace the file.",
@@ -350,9 +350,9 @@
         "title": "Business unlock progress",
         "description": "Meet one of the requirements to unlock Business plan upgrade",
         "totalSales": "Total sales",
-        "totalSalesValue": "{amount} / $200",
+        "totalSalesValue": "{amount} / {threshold}",
         "totalTransactions": "Total transactions",
-        "totalTransactionsValue": "{count} / 20",
+        "totalTransactionsValue": "{count} / {threshold}",
         "or": "or"
       },
       "cancelDialog": {

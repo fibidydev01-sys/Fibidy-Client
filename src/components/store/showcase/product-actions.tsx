@@ -9,6 +9,11 @@
 //
 // fileKey == null → Custom/Service:
 //   - "Order via WhatsApp" only
+//
+// [IDR MIGRATION — May 2026]
+// Removed `(isDigital ? 'USD' : 'IDR')` ternary.
+// Default to IDR uniformly — Stripe Connect (digital) settles in IDR
+// post-migration, custom/service products always were IDR.
 // ==========================================
 
 import { useTranslations } from 'next-intl';
@@ -26,7 +31,9 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
   const t = useTranslations('store.product.detail');
   const tCheckout = useTranslations('store.checkout');
   const isDigital = !!product.fileKey;
-  const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
+
+  // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
+  const currency = product.currency ?? 'IDR';
 
   return (
     <div className="space-y-4">

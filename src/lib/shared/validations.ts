@@ -16,6 +16,16 @@ import { z } from 'zod';
 // The plain-English constants (LEGACY_*) are kept as a fallback for
 // any non-React context (e.g. raw Node scripts or tests) but new code
 // should always use the factory.
+//
+// [IDR MIGRATION — May 2026]
+// productSchema.price now enforces:
+//   - .int() — Indonesian Rupiah doesn't use fractional values
+//   - .min(1000) — minimum Rp 1.000 for paid products (matches BE DTO)
+// productSchema.comparePrice:
+//   - .int() — same reasoning
+//   - .min(0) — allows 0 (no compare price = optional)
+// Stripe Connect path multiplies price * 100 for API minor unit
+// (IDR is two-decimal in Stripe per official docs).
 // ==========================================
 
 /** Minimal translation function shape compatible with next-intl */
@@ -54,6 +64,11 @@ export type RegisterFormData = {
 
 // ==========================================
 // PRODUCT
+//
+// [IDR MIGRATION] price + comparePrice now integer Rupiah.
+// price minimum: Rp 1.000 (paid products). Min must match BE DTO
+// (confirm-upload.dto.ts @Min(1000)).
+// comparePrice minimum: 0 (optional field, allow zero/unset).
 // ==========================================
 
 export const createProductSchema = (t: TranslateFn) =>
@@ -70,9 +85,13 @@ export const createProductSchema = (t: TranslateFn) =>
       .string()
       .max(100, t('validation.product.categoryMaxLength', { max: 100 }))
       .optional(),
-    price: z.number().min(0, t('validation.product.priceNegative')),
+    price: z
+      .number()
+      .int(t('validation.product.priceInteger'))
+      .min(1000, t('validation.product.priceMin', { min: 1000 })),
     comparePrice: z
       .number()
+      .int(t('validation.product.comparePriceInteger'))
       .min(0, t('validation.product.comparePriceNegative'))
       .optional(),
     images: z.array(z.string()).optional(),
@@ -112,6 +131,8 @@ export type PasswordChangeFormData = z.infer<ReturnType<typeof createPasswordCha
 // LEGACY — plain schemas for non-React contexts ONLY
 // (tests, scripts, non-UI server code).
 // Do not use in UI — always prefer the factories above.
+//
+// [IDR MIGRATION] Mirror the IDR rules from createProductSchema.
 // ==========================================
 
 export const loginSchema = z.object({
@@ -132,9 +153,13 @@ export const productSchema = z.object({
     .string()
     .max(100, 'Category must be at most 100 characters')
     .optional(),
-  price: z.number().min(0, 'Price cannot be negative'),
+  price: z
+    .number()
+    .int('Price must be an integer (Rupiah does not use decimals)')
+    .min(1000, 'Minimum price is Rp 1.000'),
   comparePrice: z
     .number()
+    .int('Compare price must be an integer (Rupiah does not use decimals)')
     .min(0, 'Compare price cannot be negative')
     .optional(),
   images: z.array(z.string()).optional(),

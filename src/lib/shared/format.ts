@@ -1,33 +1,49 @@
 // ==========================================
-// FORMAT UTILITIES — v5 (i18n-aware)
+// FORMAT UTILITIES — v6 (IDR-default)
 //
-// [I18N MIGRATION] All formatters now accept an optional `locale` param.
-// Phase 1 default: 'en-US'. Phase 2 consumers pass `useLocale()` result.
+// [IDR MIGRATION — May 2026]
+// Default currency: 'USD' → 'IDR'
+// Default locale:   'en-US' → 'id-ID'
 //
-// Changes from v4:
-// - formatPrice, formatPriceUSD, formatDateShort: accept locale param
-// - formatFileSize functions: accept locale param for toLocaleString
-// - generateWhatsAppLink: unchanged (pure util)
+// Rationale: post-IDR migration, ALL Stripe Connect transactions
+// (digital products) settle in IDR. Custom/service products also
+// default to IDR. The only path that still uses USD is LemonSqueezy
+// subscription billing — and that doesn't go through this util
+// (PLAN_STATIC hardcodes the "$5"/"$15" strings as identifiers).
+//
+// IDR formatting always uses 'id-ID' locale regardless of UI locale —
+// Rupiah convention is fixed: "Rp 50.000" with dot as thousand separator
+// and zero decimals. Forcing en-US would render "IDR 50,000" which is
+// wrong for Indonesian buyers.
+//
+// Other formatters (formatDateShort, formatFileSize*) keep their
+// previous default of en-US since the UI is bilingual EN/ID and these
+// don't carry currency-specific conventions.
 // ==========================================
 
-/** Default locale for Phase 1. */
+/** Default locale for non-currency formatters (dates, file sizes). */
 const DEFAULT_LOCALE = 'en-US';
+
+/** Default currency for price formatting. Post-IDR migration: IDR. */
+const DEFAULT_CURRENCY = 'IDR';
 
 /**
  * Format price with proper currency symbol and locale.
  *
- * @param price    numeric amount
- * @param currency ISO 4217 code ('USD', 'IDR', ...). Default 'USD'.
- * @param locale   BCP 47 locale tag. Default 'en-US'.
+ * @param price    numeric amount. For IDR: integer Rupiah (e.g. 50000 → "Rp 50.000").
+ *                 For USD: decimal allowed (e.g. 9.99 → "$9.99").
+ * @param currency ISO 4217 code ('IDR', 'USD', ...). Default 'IDR'.
+ * @param locale   BCP 47 locale tag. Default 'id-ID' for IDR, 'en-US' for others.
+ *                 Note: IDR ALWAYS uses 'id-ID' regardless of this param —
+ *                 Rupiah formatting convention is fixed.
  */
 export function formatPrice(
   price: number,
-  currency: string = 'USD',
-  locale: string = DEFAULT_LOCALE,
+  currency: string = DEFAULT_CURRENCY,
+  locale?: string,
 ): string {
   if (currency === 'IDR') {
-    // IDR always uses id-ID regardless of UI locale — Rupiah formatting
-    // is culturally tied to Indonesian locale rules (no decimals, `Rp` prefix).
+    // IDR always uses id-ID — Rupiah formatting convention is locale-bound.
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency,
@@ -36,7 +52,7 @@ export function formatPrice(
     }).format(price);
   }
 
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(locale ?? DEFAULT_LOCALE, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
@@ -45,7 +61,9 @@ export function formatPrice(
 }
 
 /**
- * Format a USD amount. Convenience wrapper around formatPrice.
+ * Format a USD amount. Convenience wrapper.
+ * Used by: LemonSqueezy subscription display (if migrated to dynamic).
+ * NOT used by Stripe Connect path — that's IDR.
  */
 export function formatPriceUSD(
   price: number,
@@ -55,7 +73,15 @@ export function formatPriceUSD(
 }
 
 /**
- * Format a date in short form: "Apr 18, 2026".
+ * Format an IDR amount. Convenience wrapper for explicit IDR formatting.
+ * Equivalent to formatPrice(price, 'IDR') but more readable in code.
+ */
+export function formatPriceIDR(price: number): string {
+  return formatPrice(price, 'IDR');
+}
+
+/**
+ * Format a date in short form: "Apr 18, 2026" / "18 Apr 2026".
  *
  * @param date   Date / ISO string / null
  * @param locale BCP 47 locale tag. Default 'en-US'.
@@ -95,9 +121,6 @@ export function generateWhatsAppLink(phone: string, message: string): string {
 
 /**
  * Format file size from MB (backend) to KB display.
- * @param sizeMb - file size in MB (from backend)
- * @param locale - BCP 47 locale tag for thousands separator. Default 'en-US'.
- * @returns formatted string, e.g. "512 KB", "2,048 KB"
  */
 export function formatFileSizeFromMb(
   sizeMb: number,
@@ -110,9 +133,6 @@ export function formatFileSizeFromMb(
 
 /**
  * Format file size from bytes (File object) to KB display.
- * @param bytes - file size in bytes
- * @param locale - BCP 47 locale tag for thousands separator. Default 'en-US'.
- * @returns formatted string, e.g. "512 KB", "2,048 KB"
  */
 export function formatFileSizeFromBytes(
   bytes: number,

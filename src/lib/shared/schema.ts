@@ -6,6 +6,23 @@ import { seoConfig } from '@/lib/constants/shared/seo.config';
 // [I18N MIGRATION] Phase 1 = English only.
 // All fallback strings are in English.
 // `availableLanguage` and `inLanguage` pull from seoConfig (single source of truth).
+//
+// [IDR MIGRATION — May 2026]
+// Three SEO-affecting changes:
+//
+// 1. generateProductSchema → priceCurrency: 'IDR' (was conditional USD/USD)
+//    Affects Google Search rich results / SERP price snippets.
+//    Without this, Google displays "$50,000" for Rp 50.000 products.
+//
+// 2. generateLocalBusinessSchema → currenciesAccepted: 'IDR' (was 'USD')
+//    Affects schema.org LocalBusiness markup. Stripe Connect for
+//    Indonesian sellers settles in IDR — must declare correctly.
+//    paymentAccepted stays 'Credit Card, Stripe' (descriptive, not currency).
+//    priceRange stays '$$' (schema.org generic notation, not literal USD).
+//
+// 3. Removed the `(isDigital ? 'USD' : 'USD')` ternary — both branches
+//    were USD anyway, classic "ternary that does nothing". Now defaults
+//    to IDR consistent with the rest of the platform.
 // ==========================================
 
 // ==========================================
@@ -121,9 +138,12 @@ export function generateLocalBusinessSchema(tenant: {
     address: tenant.address
       ? { '@type': 'PostalAddress', streetAddress: tenant.address, addressCountry: 'ID' }
       : undefined,
+    // priceRange: schema.org generic notation ($-$$$$ scale, not literal USD).
+    // Indonesian buyers / Google parsers understand this as "moderate price tier".
     priceRange: '$$',
     paymentAccepted: 'Credit Card, Stripe',
-    currenciesAccepted: 'USD',
+    // [IDR MIGRATION] Settlement currency for Stripe Connect transactions.
+    currenciesAccepted: 'IDR',
     areaServed: { '@type': 'Country', name: 'Worldwide' },
     contactPoint: tenant.whatsapp
       ? {
@@ -160,9 +180,10 @@ export function generateProductSchema(
   const productUrl = getTenantUrl(tenant.slug, productPath);
   const tenantUrl = getTenantUrl(tenant.slug);
 
-  // Resolve currency: digital → USD, custom → product.currency or USD fallback
-  const isDigital = !!product.fileKey;
-  const priceCurrency = product.currency ?? (isDigital ? 'USD' : 'USD');
+  // [IDR MIGRATION] Default to IDR — affects Google rich results SERP display.
+  // Removed prior `(isDigital ? 'USD' : 'USD')` ternary (both branches USD = no-op).
+  // If product explicitly carries a currency override, respect it; otherwise IDR.
+  const priceCurrency = product.currency ?? 'IDR';
 
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
     .toISOString()

@@ -15,6 +15,12 @@
 //   checkout sessions when user rapidly clicks Buy.
 // - If 409 returned → show friendly message, keep button enabled
 //   so user can retry after a few seconds.
+//
+// [IDR MIGRATION — May 2026]
+// Default `currency` prop changed: 'USD' → 'IDR'.
+// Caller from product-actions.tsx passes currency explicitly, but
+// the default fires if a future caller forgets — must match the
+// platform default to avoid showing "$50,000.00" for Rp 50.000 products.
 // ==========================================
 
 import { useState } from 'react';
@@ -38,7 +44,7 @@ interface StripeCheckoutButtonProps {
 export function StripeCheckoutButton({
   productId,
   price,
-  currency = 'USD',
+  currency = 'IDR',
   className,
 }: StripeCheckoutButtonProps) {
   const t = useTranslations('store.checkout.stripe');

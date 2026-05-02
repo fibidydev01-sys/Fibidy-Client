@@ -3,6 +3,11 @@
 // ==========================================
 // PRODUCT CARD — Public Store
 // Adaptive: Digital (fileKey != null) vs Custom/Service (fileKey == null)
+//
+// [IDR MIGRATION — May 2026]
+// Removed `(isDigital ? 'USD' : 'IDR')` ternary.
+// Post-migration uniform default IDR — see product-info.tsx for rationale.
+// `isDigital` is still used for icon/badge logic (FileText vs Package).
 // ==========================================
 
 import { useMemo } from 'react';
@@ -31,7 +36,9 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
   // fileKey != null → Digital → Stripe checkout
   // fileKey == null → Custom/Service → WA order
   const isDigital = !!product.fileKey;
-  const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
+
+  // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
+  const currency = product.currency ?? 'IDR';
 
   // Use the first thumbnail from the images array
   const imageUrl = product.images?.[0] ?? null;

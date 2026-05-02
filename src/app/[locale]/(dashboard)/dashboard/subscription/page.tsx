@@ -19,12 +19,32 @@
 //   6. On timeout → show "verification failed" + retry button
 //
 // Cancel: cancel-at-period-end via LS API → user retains access until ends_at
-// Business: STARTER + ($200 sales OR 20 transactions)
+// Business: STARTER + (Rp 3.000.000 sales OR 20 transactions)
 //
 // ── Digital Products feature flag ─────────────────────────────
 // When FEATURES.digitalProducts is off:
 //   - Digital usage tile + storage tile are hidden
 //   - Tier comparison renders digital features dimmed with "Coming Soon" badge
+//
+// [IDR MIGRATION — May 2026] — Bug #7 fix
+// Three minimal changes:
+//
+//   1. Import `formatPriceIDR` from `@/lib/shared/format` for Rupiah display.
+//
+//   2. Resolve BUSINESS qualifier thresholds from API response:
+//      - `planInfo.businessThreshold.amountIdr` (was hardcoded $200 USD)
+//      - `planInfo.businessThreshold.txCount`   (was hardcoded 20, value
+//                                                 stays the same but is now
+//                                                 sourced from BE)
+//      Fallback constants kept for backward compat with un-redeployed BE.
+//
+//   3. Pass formatted IDR string + threshold to i18n templates:
+//      `totalSalesValue`        now expects `{amount}` and `{threshold}`
+//      `totalTransactionsValue` now expects `{count}` and `{threshold}`
+//      Progress bar percentage divides by threshold (not /200 USD).
+//
+// PLAN_STATIC ($0/$5/$15) and PLATFORM_FEE percentages STAY — those are
+// LemonSqueezy product configuration verbatim, not platform pricing.
 // ==========================================
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -73,9 +93,20 @@ import {
 } from '@/lib/api/subscription';
 import { getErrorMessage } from '@/lib/api/client';
 import { FEATURES } from '@/lib/config/features';
+// [IDR MIGRATION] formatPriceIDR for Rupiah-formatted progress display.
+import { formatPriceIDR } from '@/lib/shared/format';
 
 // ==========================================
 // PLAN STATIC CONFIG — icons + prices only (identifier-grade)
+// ==========================================
+//
+// USD prices below reflect the LemonSqueezy product dashboard config.
+// LS handles internal currency conversion — buyers see USD because the
+// LS product is set to USD pricing. If/when LS products are switched to
+// IDR, update these strings — code structure does not need to change.
+// (Same UX pattern as Tokopedia displaying via Midtrans — no disclaimer
+// is needed because the buyer pays the listed amount in the listed
+// currency.)
 // ==========================================
 
 const PLAN_STATIC: Record<
@@ -105,6 +136,18 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60000;
 
 type VerifyState = 'idle' | 'verifying' | 'completed' | 'failed';
+
+// ==========================================
+// BUSINESS QUALIFIER FALLBACK CONSTANTS
+//
+// [IDR MIGRATION] BE returns thresholds via planInfo.businessThreshold.
+// These constants serve as fallbacks for backward compat with un-redeployed
+// BE. Remove after one release cycle once production BE is confirmed
+// returning the field.
+// ==========================================
+
+const BUSINESS_THRESHOLD_AMOUNT_FALLBACK = 3_000_000; // Rp 3.000.000
+const BUSINESS_THRESHOLD_TX_FALLBACK = 20;
 
 // ==========================================
 // HELPERS
@@ -345,6 +388,14 @@ export default function SubscriptionPage() {
   const usage = planInfo?.usage ?? { products: 0, digitalProducts: 0, storageMb: 0 };
   const limits = planInfo?.limits;
   const isAtLimit = planInfo?.isAtLimit;
+
+  // [IDR MIGRATION] Resolve BUSINESS thresholds from API response, with
+  // fallback constants for un-redeployed BE.
+  const businessThreshold = planInfo?.businessThreshold;
+  const thresholdAmount =
+    businessThreshold?.amountIdr ?? BUSINESS_THRESHOLD_AMOUNT_FALLBACK;
+  const thresholdTxCount =
+    businessThreshold?.txCount ?? BUSINESS_THRESHOLD_TX_FALLBACK;
 
   const currentPlan = PLAN_CONFIG[tier];
   const PlanIcon = currentPlan.icon;
@@ -725,19 +776,24 @@ export default function SubscriptionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Sales amount progress */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
                   {t('businessUnlock.totalSales')}
                 </span>
                 <span className="font-medium">
+                  {/* [IDR MIGRATION] formatPriceIDR for both numerator + threshold.
+                      Was: salesTrack.totalAmount.toFixed(2) — produced "30000.00". */}
                   {t('businessUnlock.totalSalesValue', {
-                    amount: salesTrack.totalAmount.toFixed(2),
+                    amount: formatPriceIDR(salesTrack.totalAmount),
+                    threshold: formatPriceIDR(thresholdAmount),
                   })}
                 </span>
               </div>
               <Progress
-                value={Math.min(100, (salesTrack.totalAmount / 200) * 100)}
+                /* [IDR MIGRATION] Threshold from BE response (was hardcoded /200 USD). */
+                value={Math.min(100, (salesTrack.totalAmount / thresholdAmount) * 100)}
                 className="h-2"
               />
             </div>
@@ -750,19 +806,23 @@ export default function SubscriptionPage() {
               <div className="flex-1 border-t border-border" />
             </div>
 
+            {/* Tx count progress */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
                   {t('businessUnlock.totalTransactions')}
                 </span>
                 <span className="font-medium">
+                  {/* [IDR MIGRATION] threshold slot now sourced from BE. */}
                   {t('businessUnlock.totalTransactionsValue', {
                     count: salesTrack.totalCount,
+                    threshold: thresholdTxCount,
                   })}
                 </span>
               </div>
               <Progress
-                value={Math.min(100, (salesTrack.totalCount / 20) * 100)}
+                /* [IDR MIGRATION] Threshold from BE response (was hardcoded /20). */
+                value={Math.min(100, (salesTrack.totalCount / thresholdTxCount) * 100)}
                 className="h-2"
               />
             </div>

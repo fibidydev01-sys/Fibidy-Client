@@ -121,6 +121,11 @@
         "send": "Send via WhatsApp"
       },
       "contactSellerWhatsappTemplate": "Hi {name},\n\nI'm interested in your product:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nThank you! 🙏",
+      "contactSellerWhatsappLabels": {
+        "price": "Price",
+        "name": "Name",
+        "question": "Question"
+      },
       "askSellerWhatsapp": "Ask Seller via WhatsApp",
       "orderWhatsapp": "Order via WhatsApp",
       "orderDialog": {
@@ -138,6 +143,10 @@
         "send": "Send via WhatsApp"
       },
       "orderWhatsappTemplate": "Hi {name},\n\nI'd like to order:\n\n*{product}*\n{namePart}{notesPart}\n\nPlease confirm availability.\nThank you! 🙏",
+      "orderWhatsappLabels": {
+        "name": "Name",
+        "notes": "Notes"
+      },
       "stripe": {
         "signInToBuy": "Sign in to Buy",
         "buyNow": "Buy Now — {price}",

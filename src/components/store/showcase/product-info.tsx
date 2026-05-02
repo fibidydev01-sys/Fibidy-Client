@@ -1,7 +1,13 @@
 // ==========================================
 // PRODUCT INFO
-// Fix: pass currency to formatPrice
-// Digital → USD, Custom/Service → IDR or based on product.currency
+//
+// [IDR MIGRATION — May 2026]
+// Removed `(isDigital ? 'USD' : 'IDR')` ternary.
+// Post-migration, ALL Stripe Connect transactions (including digital
+// products) settle in IDR. Custom/service products are also IDR.
+// Subscription billing is the only USD path — that's LemonSqueezy
+// and doesn't touch this component.
+// Default fallback is now 'IDR' uniformly.
 // ==========================================
 
 import { useTranslations } from 'next-intl';
@@ -19,11 +25,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const t = useTranslations('store.product.info');
   const { isCustomPrice, hasDiscount, discountPercent } = getProductPricing(product);
 
-  // Resolve currency:
-  //   Digital (fileKey != null) → use product.currency (always 'USD' from BE)
-  //   Custom/Service (fileKey == null) → fallback 'IDR'
-  const isDigital = !!product.fileKey;
-  const currency = product.currency ?? (isDigital ? 'USD' : 'IDR');
+  // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
+  const currency = product.currency ?? 'IDR';
 
   return (
     <div className="space-y-4">

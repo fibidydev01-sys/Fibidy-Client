@@ -99,13 +99,13 @@
           "descriptionLabel": "Deskripsi",
           "descriptionPlaceholder": "Deskripsikan produk — isi, jumlah halaman, fitur utama...",
           "descriptionHelper": "Deskripsi yang jelas membantu pembeli membeli dengan percaya diri.",
-          "priceLabel": "Harga (USD)",
+          "priceLabel": "Harga (Rp)",
           "priceRequired": "*",
-          "pricePlaceholder": "9.99",
-          "priceHelper": "Harga dalam USD — pembeli bayar via Stripe",
+          "pricePlaceholder": "50000",
+          "priceHelper": "Harga dalam Rupiah — pembeli bayar via Stripe Connect, settlement langsung dalam IDR",
           "comparePriceLabel": "Harga pembanding",
-          "comparePricePlaceholder": "19.99",
-          "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan"
+          "comparePricePlaceholder": "100000",
+          "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
         },
         "upload": {
           "editModeNote": "File produk — file tidak bisa diubah setelah diupload. Hapus produk dan buat baru jika perlu ganti file.",
@@ -350,9 +350,9 @@
         "title": "Progress unlock Business",
         "description": "Penuhi salah satu syarat untuk unlock upgrade paket Business",
         "totalSales": "Total penjualan",
-        "totalSalesValue": "{amount} / $200",
+        "totalSalesValue": "{amount} / {threshold}",
         "totalTransactions": "Total transaksi",
-        "totalTransactionsValue": "{count} / 20",
+        "totalTransactionsValue": "{count} / {threshold}",
         "or": "atau"
       },
       "cancelDialog": {
