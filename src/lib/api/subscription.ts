@@ -12,14 +12,10 @@ import { api } from './client';
 // Stripe Connect (marketplace digital product transactions) is a separate
 // concern and is unaffected by this — see lib/api/checkout.ts.
 //
-// Flow:
-//   1. createCheckout(tier) → backend returns LS hosted checkout URL
-//   2. Frontend redirects to that URL
-//   3. After payment, LS redirects back to /dashboard/subscription?status=success
-//   4. Frontend polls verify() — backend reads tenant row, returns 'completed'
-//      once LS webhook has updated the tier
-//   5. cancelSubscription() — backend calls LS API; user retains access
-//      until period end (cancel-at-period-end)
+// Schema cleanup completed in Batch 4:
+//   - Subscription.stripeSubId field removed from DB
+//   - Subscription.billingProvider field removed from DB
+//   - Tenant.stripeCustomerId field removed from DB
 // ==========================================
 
 export type SubscriptionTier = 'FREE' | 'STARTER' | 'BUSINESS';
@@ -36,15 +32,11 @@ interface PlanLimits {
 }
 
 interface SubscriptionRecord {
-  // Stripe fields kept for legacy rows in DB. New subscriptions never
-  // populate these; they're read-only for display/debugging purposes.
-  stripeSubId: string | null;
-  // LemonSqueezy fields — populated on all new subscriptions.
-  lsSubscriptionId?: string | null;
+  lsSubscriptionId: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
-  lsRenewsAt?: string | null;
-  lsEndsAt?: string | null;
+  lsRenewsAt: string | null;
+  lsEndsAt: string | null;
 }
 
 export interface SubscriptionInfo {
