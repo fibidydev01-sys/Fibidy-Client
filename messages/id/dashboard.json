@@ -265,8 +265,6 @@
       "verify": {
         "verifyingTitle": "Memproses pembayaran...",
         "verifyingBody": "Tunggu beberapa detik untuk aktivasi langganan. Jangan refresh halaman.",
-        "reconcilingTitle": "Memeriksa status pembayaran di Stripe...",
-        "reconcilingBody": "Biasanya hanya butuh beberapa detik.",
         "completedTitle": "Langganan aktif!",
         "completedBody": "Paket kamu sudah di-upgrade. Nikmati fitur barunya! 🎉",
         "failedTitle": "Verifikasi pembayaran gagal.",

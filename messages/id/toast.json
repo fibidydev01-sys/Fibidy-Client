@@ -42,10 +42,7 @@
       "paymentSuccessGeneric": "Langganan kamu aktif.",
       "paymentCanceled": "Pembayaran dibatalkan.",
       "verificationFailed": "Verifikasi gagal",
-      "verificationFailedDetail": "Silakan coba lagi atau hubungi support jika kartu sudah ditagih.",
-      "reconcileFailed": "Rekonsiliasi gagal",
-      "reconcileSuccess": "Langganan aktif!",
-      "reconcileSuccessDetail": "Paket kamu sekarang {tier}."
+      "verificationFailedDetail": "Silakan coba lagi atau hubungi support jika kartu sudah ditagih."
     },
     "checkout": {
       "cancelFailed": "Checkout dibatalkan.",

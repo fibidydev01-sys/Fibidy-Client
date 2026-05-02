@@ -6,46 +6,25 @@
 //
 // Tiers: FREE → STARTER → BUSINESS
 //
-// Backend is provider-agnostic (Phase 3 — LemonSqueezy migration):
-//   - Stripe Checkout (legacy / future)
-//   - LemonSqueezy Checkout (active for Indonesia payouts)
+// Subscription billing is LemonSqueezy only as of the May 2026
+// LS-vs-Stripe separation refactor. See docs/REFACTOR-PLAN-LS-VS-STRIPE.md.
 //
 // Flow:
 //   1. Click Subscribe → POST /subscription/checkout?tier=X → checkoutUrl
-//   2. window.location.href = checkoutUrl
-//   3. After payment, provider redirects back to /dashboard/subscription
-//      - Stripe: ?status=success&session_id={CHECKOUT_SESSION_ID}
-//      - LS:     ?status=success           (NO sessionId)
-//   4. Poll GET /subscription/verify[?sessionId=xxx] every 2s
+//   2. window.location.href = checkoutUrl  (LS hosted checkout)
+//   3. After payment, LS redirects back to /dashboard/subscription?status=success
+//      (LS redirect URL has no session_id — backend doesn't need it)
+//   4. Poll GET /subscription/verify every 2s until 'completed' or 60s timeout
 //   5. On 'completed' → refetch plan, show success
-//   6. On 60s timeout:
-//      - Stripe path: call POST /subscription/reconcile as fallback
-//      - LS path:     show "verification failed" + retry button
+//   6. On timeout → show "verification failed" + retry button
 //
-// Cancel: cancel-at-period-end → user retains access until ends_at
+// Cancel: cancel-at-period-end via LS API → user retains access until ends_at
 // Business: STARTER + ($200 sales OR 20 transactions)
 //
-// [PHASE 3 — DIGITAL PRODUCTS FLAG]
-//   - Polling no longer requires sessionId (LS-compatible)
-//   - Reconcile / retry button visible only for Stripe-provider subs
-//   - Digital usage tile + storage tile hidden when FEATURES.digitalProducts off
-//   - Tier comparison splits features (physical) + digitalFeatures (with badge)
-//   - When digital off, digitalFeatures rendered dimmed with "Coming Soon" badge
-//
-// [i18n]
-// JSON keys used:
-//   - `dashboard.subscription.*` for page-level copy
-//   - `dashboard.subscription.plans.{FREE,STARTER,BUSINESS}.{name, priceNote, features, digitalFeatures}`
-//   - `dashboard.subscription.comingSoonBadge` for the per-feature badge
-//   - `dashboard.subscription.verify.*` for the post-checkout banner states
-//   - `dashboard.subscription.overLimit.*` for the limit-reached warning card
-//   - `dashboard.subscription.badge.*` for the subscription-status badge
-//   - `dashboard.subscription.usage.*` for the products/digital/storage usage tiles
-//   - `dashboard.subscription.cta.*` for plan-card buttons
-//   - `dashboard.subscription.businessUnlock.*` for the qualification progress
-//   - `dashboard.subscription.cancelDialog.*` for the cancel confirmation
-//   - `dashboard.subscription.platformFee.*` for the fee-per-tier note
-//   - `toast.subscription.*` for all toast messages
+// ── Digital Products feature flag ─────────────────────────────
+// When FEATURES.digitalProducts is off:
+//   - Digital usage tile + storage tile are hidden
+//   - Tier comparison renders digital features dimmed with "Coming Soon" badge
 // ==========================================
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -125,7 +104,7 @@ const PLATFORM_FEE: Record<SubscriptionTier, string> = {
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60000;
 
-type VerifyState = 'idle' | 'verifying' | 'reconciling' | 'completed' | 'failed';
+type VerifyState = 'idle' | 'verifying' | 'completed' | 'failed';
 
 // ==========================================
 // HELPERS
@@ -163,11 +142,6 @@ export default function SubscriptionPage() {
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollStartRef = useRef<number>(0);
-
-  // [PHASE 3] Capture initial sessionId — used to decide whether to run
-  // the Stripe reconcile fallback. Stable across the polling lifetime
-  // even after we strip the URL on success.
-  const sessionIdRef = useRef<string | null>(null);
 
   // ── Build plan config with i18n-aware copy ──────────────────
   const PLAN_CONFIG = useMemo(
@@ -238,34 +212,9 @@ export default function SubscriptionPage() {
     }
   }, []);
 
-  // ── Reconcile fallback (Stripe-only) ────────────────────────
-  const runReconcile = useCallback(async () => {
-    setVerifyState('reconciling');
-    try {
-      const result = await subscriptionApi.reconcile();
-      if (result.reconciled && result.tier && result.tier !== 'FREE') {
-        setVerifyState('completed');
-        await fetchData();
-        toast.success(tToast('reconcileSuccess'), {
-          description: tToast('reconcileSuccessDetail', { tier: result.tier }),
-        });
-      } else {
-        // Reconcile says still FREE → webhook never processed, payment may have failed
-        setVerifyState('failed');
-        toast.error(tToast('verificationFailed'), {
-          description: tToast('verificationFailedDetail'),
-        });
-      }
-    } catch (err) {
-      setVerifyState('failed');
-      toast.error(tToast('reconcileFailed'), { description: getErrorMessage(err) });
-    }
-  }, [fetchData, tToast]);
-
-  // ── Handle return from checkout (Stripe OR LemonSqueezy) ────
+  // ── Handle return from LS checkout ──────────────────────────
   useEffect(() => {
     const status = searchParams.get('status');
-    const sessionId = searchParams.get('session_id');
 
     if (status === 'canceled') {
       toast.info(tToast('paymentCanceled'));
@@ -273,11 +222,7 @@ export default function SubscriptionPage() {
       return;
     }
 
-    // [PHASE 3] LS redirect URL has no session_id. Only require ?status=success.
     if (status !== 'success') return;
-
-    // Capture sessionId for later — survives URL cleanup on success
-    sessionIdRef.current = sessionId;
 
     // Start polling
     setVerifyState('verifying');
@@ -287,37 +232,24 @@ export default function SubscriptionPage() {
       // Timeout check
       if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
         stopPolling();
-        if (sessionIdRef.current) {
-          // Stripe path — try reconcile as fallback
-          await runReconcile();
-        } else {
-          // LS path — no reconcile available
-          setVerifyState('failed');
-          toast.error(tToast('verificationFailed'), {
-            description: tToast('verificationFailedDetail'),
-          });
-        }
+        setVerifyState('failed');
+        toast.error(tToast('verificationFailed'), {
+          description: tToast('verificationFailedDetail'),
+        });
         return;
       }
 
       try {
-        // [PHASE 3] verify() accepts optional sessionId; LS path passes undefined
-        const result = await subscriptionApi.verify(
-          sessionIdRef.current ?? undefined,
-        );
+        const result = await subscriptionApi.verify();
 
         if (result.status === 'completed') {
           stopPolling();
           setVerifyState('completed');
           await fetchData();
 
-          // Resolve tier from any of the response shapes (Stripe vs LS)
-          const completedTier =
-            result.subscription?.tier ?? result.tier ?? null;
-
           toast.success(tToast('paymentSuccess'), {
-            description: completedTier
-              ? tToast('paymentSuccessDetail', { tier: completedTier })
+            description: result.tier
+              ? tToast('paymentSuccessDetail', { tier: result.tier })
               : tToast('paymentSuccessGeneric'),
           });
           // Clean URL after success
@@ -334,7 +266,7 @@ export default function SubscriptionPage() {
     pollIntervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
 
     return stopPolling;
-  }, [searchParams, fetchData, runReconcile, stopPolling, tToast]);
+  }, [searchParams, fetchData, stopPolling, tToast]);
 
   // ── Handlers ────────────────────────────────────────────────
   const handleCheckout = async (tier: 'STARTER' | 'BUSINESS') => {
@@ -365,27 +297,23 @@ export default function SubscriptionPage() {
   const handleManualRetry = async () => {
     setVerifyState('verifying');
     try {
-      const result = await subscriptionApi.verify(
-        sessionIdRef.current ?? undefined,
-      );
+      const result = await subscriptionApi.verify();
       if (result.status === 'completed') {
         setVerifyState('completed');
         await fetchData();
         return;
       }
-      // Still pending → for Stripe path, escalate to reconcile
-      if (sessionIdRef.current) {
-        await runReconcile();
-      } else {
-        // LS path: nothing more we can do
-        setVerifyState('failed');
-        toast.error(tToast('verificationFailed'), {
-          description: tToast('verificationFailedDetail'),
-        });
-      }
+      // Still pending after timeout — declare failure.
+      // No reconcile fallback exists for LS; webhook is the only source of truth.
+      setVerifyState('failed');
+      toast.error(tToast('verificationFailed'), {
+        description: tToast('verificationFailedDetail'),
+      });
     } catch (err) {
       setVerifyState('failed');
-      toast.error(tToast('reconcileFailed'), { description: getErrorMessage(err) });
+      toast.error(tToast('verificationFailed'), {
+        description: getErrorMessage(err),
+      });
     }
   };
 
@@ -422,7 +350,7 @@ export default function SubscriptionPage() {
   const PlanIcon = currentPlan.icon;
   const isFreeForever = currentPlan.priceNote === freeForeverNote;
 
-  // [PHASE 3] Show comingSoon badge on digital features when feature is off
+  // Show comingSoon badge on digital features when feature is off
   const showDigitalBadge = !FEATURES.digitalProducts;
 
   return (
@@ -439,16 +367,6 @@ export default function SubscriptionPage() {
           <AlertDescription>
             <strong>{t('verify.verifyingTitle')}</strong>{' '}
             {t('verify.verifyingBody')}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {verifyState === 'reconciling' && (
-        <Alert>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <AlertDescription>
-            <strong>{t('verify.reconcilingTitle')}</strong>{' '}
-            {t('verify.reconcilingBody')}
           </AlertDescription>
         </Alert>
       )}
@@ -689,7 +607,7 @@ export default function SubscriptionPage() {
                     </li>
                   ))}
 
-                  {/* [PHASE 3] Digital features — dimmed + Coming Soon badge when off */}
+                  {/* Digital features — dimmed + Coming Soon badge when off */}
                   {config.digitalFeatures.map((feature, i) => (
                     <li
                       key={`d-${i}`}

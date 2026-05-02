@@ -3,34 +3,27 @@ import { api } from './client';
 // ==========================================
 // SUBSCRIPTION API
 //
-// BE tiers: FREE | STARTER | BUSINESS
-// Subscription lifecycle (provider-agnostic):
-//   - Stripe Checkout (legacy) OR LemonSqueezy Checkout (active for ID payouts)
-//   - Webhook updates DB → tier active
-//   - Cancel: cancel-at-period-end → user retains access until ends_at
+// Backend tiers: FREE | STARTER | BUSINESS
 //
-// [TIDUR-NYENYAK FIX #3] Added verify() + reconcile() for
-// subscription success page. Mirrors checkout verify pattern.
+// Subscription billing is handled exclusively by LemonSqueezy as of the
+// May 2026 LS-vs-Stripe separation refactor. Stripe is no longer used
+// for tier subscriptions — see docs/REFACTOR-PLAN-LS-VS-STRIPE.md.
 //
-// [PHASE 3 — LEMONSQUEEZY MIGRATION]
-//   1. `verify()` now accepts `sessionId?` (optional) — LS path doesn't have
-//      a sessionId in the redirect URL, so verify polls DB directly.
-//   2. `subscription.billingProvider` exposed in `SubscriptionInfo` so FE
-//      can detect whether to offer Stripe-only reconcile UI.
+// Stripe Connect (marketplace digital product transactions) is a separate
+// concern and is unaffected by this — see lib/api/checkout.ts.
+//
+// Flow:
+//   1. createCheckout(tier) → backend returns LS hosted checkout URL
+//   2. Frontend redirects to that URL
+//   3. After payment, LS redirects back to /dashboard/subscription?status=success
+//   4. Frontend polls verify() — backend reads tenant row, returns 'completed'
+//      once LS webhook has updated the tier
+//   5. cancelSubscription() — backend calls LS API; user retains access
+//      until period end (cancel-at-period-end)
 // ==========================================
 
 export type SubscriptionTier = 'FREE' | 'STARTER' | 'BUSINESS';
 export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED';
-
-/**
- * [PHASE 3] Backend exposes which provider is fronting this subscription.
- * - 'STRIPE'         — legacy / future when Stripe supports ID payouts
- * - 'LEMON_SQUEEZY'  — current default (Merchant of Record for Indonesia)
- *
- * FE uses this to decide whether to show the Stripe-only "Force re-check"
- * (reconcile) button on the failed-verification banner.
- */
-export type BillingProvider = 'STRIPE' | 'LEMON_SQUEEZY';
 
 interface PlanLimits {
   maxProducts: number;
@@ -43,14 +36,13 @@ interface PlanLimits {
 }
 
 interface SubscriptionRecord {
+  // Stripe fields kept for legacy rows in DB. New subscriptions never
+  // populate these; they're read-only for display/debugging purposes.
   stripeSubId: string | null;
-  /** [PHASE 3] LemonSqueezy subscription identifier */
+  // LemonSqueezy fields — populated on all new subscriptions.
   lsSubscriptionId?: string | null;
-  /** [PHASE 3] Which provider is fronting this subscription */
-  billingProvider?: BillingProvider;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
-  /** [PHASE 3] LS-equivalent of currentPeriodEnd (provider-specific) */
   lsRenewsAt?: string | null;
   lsEndsAt?: string | null;
 }
@@ -87,17 +79,17 @@ interface CancelResponse {
 }
 
 // ==========================================
-// VERIFY & RECONCILE TYPES
+// VERIFY RESPONSE
 // ==========================================
 
 /**
- * Response from GET /subscription/verify (with or without sessionId)
+ * Response from GET /subscription/verify
  *
- * Stripe path: pass sessionId, backend reconciles via Stripe API
- * LS path:     omit sessionId, backend polls Subscription table
+ * Backend reads the tenant row and returns:
+ *   - 'pending'   — webhook hasn't processed yet, keep polling
+ *   - 'completed' — tenant tier upgraded, safe to show success UI
  *
- * `pending` = webhook hasn't processed yet, keep polling.
- * `completed` = tenant tier upgraded, safe to show success UI.
+ * Recommended polling: every 2s, max 60s timeout.
  */
 export interface VerifySubscriptionResponse {
   status: 'pending' | 'completed';
@@ -105,26 +97,6 @@ export interface VerifySubscriptionResponse {
   subscriptionStatus?: SubscriptionStatus | null;
   periodEnd?: string | null;
   source?: string;
-  /** Stripe-specific: present when path went through verify-with-sessionId */
-  subscription?: {
-    tier: 'STARTER' | 'BUSINESS';
-    status: SubscriptionStatus;
-    currentPeriodEnd: string;
-  };
-}
-
-/**
- * Response from POST /subscription/reconcile
- *
- * Stripe-only fallback when webhook never arrived.
- * For LS subscriptions backend returns `reconciled: false, reason: 'no_customer'`
- * (no Stripe customer ID exists). Safe to call regardless — idempotent.
- */
-export interface ReconcileResponse {
-  message?: string;
-  reconciled: boolean;
-  tier?: SubscriptionTier;
-  reason?: string;
 }
 
 // ==========================================
@@ -138,49 +110,25 @@ export const subscriptionApi = {
 
   /**
    * POST /subscription/checkout?tier=STARTER|BUSINESS
-   * Returns checkout URL — backend routes to LS or Stripe based on env flags.
-   * Frontend just redirects.
+   * Returns LemonSqueezy hosted checkout URL — frontend just redirects.
    */
   createCheckout: (tier: 'STARTER' | 'BUSINESS') =>
     api.post<CheckoutResponse>(`/subscription/checkout?tier=${tier}`),
 
   /**
    * POST /subscription/cancel
-   * Cancels at period end. User retains access until billing period ends.
-   * Backend routes to LS or Stripe based on subscription.billingProvider.
+   * Cancel-at-period-end via LemonSqueezy API.
+   * User retains access until billing period ends.
    */
-  cancelSubscription: () =>
-    api.post<CancelResponse>('/subscription/cancel'),
+  cancelSubscription: () => api.post<CancelResponse>('/subscription/cancel'),
 
   /**
    * GET /subscription/verify
-   * GET /subscription/verify?sessionId=xxx
    *
-   * Dual-mode endpoint:
-   *   - Stripe path: pass sessionId from query string after Stripe redirect.
-   *     Backend reconciles via Stripe API if webhook is late.
-   *   - LS path:     omit sessionId. Backend just polls the DB until tier
-   *                  changes (LS webhook updates DB asynchronously).
-   *
-   * [PHASE 3] sessionId is optional. When omitted (LS path), the backend
-   * returns `{ status: 'pending' }` until the LS webhook updates DB,
-   * then returns `{ status: 'completed', tier, ... }`.
+   * Polls the backend until LS webhook has processed and upgraded the
+   * tenant tier. Returns 'pending' until the webhook lands, then 'completed'.
    *
    * Recommended polling: every 2s, max 60s timeout.
    */
-  verify: (sessionId?: string) =>
-    api.get<VerifySubscriptionResponse>('/subscription/verify', {
-      params: sessionId ? { sessionId } : undefined,
-    }),
-
-  /**
-   * POST /subscription/reconcile
-   *
-   * Stripe-specific fallback when checkout webhook never arrived.
-   * For LS-only tenants, returns `{ reconciled: false, reason: 'no_customer' }`
-   * — call site should check `result.reconciled` before showing success.
-   *
-   * Idempotent — safe to retry.
-   */
-  reconcile: () => api.post<ReconcileResponse>('/subscription/reconcile'),
+  verify: () => api.get<VerifySubscriptionResponse>('/subscription/verify'),
 };

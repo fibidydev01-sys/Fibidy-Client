@@ -42,10 +42,7 @@
       "paymentSuccessGeneric": "Your subscription is active.",
       "paymentCanceled": "Payment canceled.",
       "verificationFailed": "Verification failed",
-      "verificationFailedDetail": "Please try again or contact support if you have already been charged.",
-      "reconcileFailed": "Reconcile failed",
-      "reconcileSuccess": "Subscription active!",
-      "reconcileSuccessDetail": "Your plan is now {tier}."
+      "verificationFailedDetail": "Please try again or contact support if you have already been charged."
     },
     "checkout": {
       "cancelFailed": "Checkout was canceled.",

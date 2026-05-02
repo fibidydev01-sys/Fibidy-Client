@@ -265,8 +265,6 @@
       "verify": {
         "verifyingTitle": "Processing payment...",
         "verifyingBody": "Please wait a few seconds for your subscription to activate. Do not refresh the page.",
-        "reconcilingTitle": "Checking payment status with Stripe...",
-        "reconcilingBody": "This usually takes just a few seconds.",
         "completedTitle": "Subscription active!",
         "completedBody": "Your plan has been upgraded. Enjoy your new features! 🎉",
         "failedTitle": "Payment verification failed.",
