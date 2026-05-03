@@ -1,10 +1,30 @@
 #!/bin/bash
 
 # ================================================================
-# CLIENT — AUTH FLOW COVERAGE CHECKER
-# Cek semua file auth domain: login, register, forgot-password,
-# auth guard, auth store, hooks, discover buy flow (login-gate)
-# Run from: client directory (where src/ lives)
+# CLIENT — VERCEL VIBES COVERAGE CHECKER
+# [VERCEL VIBES — May 2026]
+#
+# Collect semua file yang terlibat dalam:
+#   1.  Proxy / Middleware (edge auth gate)
+#   2.  Auth flow: login, register, forgot-password
+#   3.  Auth components & layout (guard, auth-layout, auth-logo)
+#   4.  Auth store & hooks
+#   5.  Auth types & API module (client.ts)
+#   6.  Marketing page (NEW: layout, page, header, footer, hero)
+#   7.  i18n messages: marketing.json (en + id)
+#   8.  Register wizard refactor (register-nav, register-step-indicator)
+#   9.  User auth dialog (buy gate)
+#
+# Quality checks:
+#   A.  Proxy ada auth gate (step 5) — check keyword
+#   B.  (auth)/layout.tsx sudah TIDAK ada GuestGuard
+#   C.  register.tsx pakai RegisterNav (bukan WizardNav)
+#   D.  buy-button.tsx ada login redirect + ?from=
+#   E.  auth-store TIDAK bocor ke page.tsx (server component)
+#   F.  marketing.json exists di en/ dan id/
+#   G.  auth page.tsx tidak ada 'use client'
+#
+# Run dari: root direktori client (tempat src/ ada)
 # ================================================================
 
 GREEN='\033[0;32m'
@@ -17,6 +37,7 @@ NC='\033[0m'
 
 PROJECT_ROOT="."
 SRC_DIR="$PROJECT_ROOT/src"
+MSG_DIR="$PROJECT_ROOT/messages"
 OUT="collections"
 mkdir -p "$OUT"
 
@@ -35,7 +56,8 @@ collect_file() {
 
     if [ -f "$file" ]; then
         local rel="${file#$PROJECT_ROOT/}"
-        local lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+        local lines
+        lines=$(wc -l < "$file" 2>/dev/null || echo "0")
         echo -e "  ${GREEN}✓${NC} $rel ${CYAN}(${lines} lines)${NC}"
         FOUND=$((FOUND + 1))
         echo "================================================" >> "$output"
@@ -68,171 +90,297 @@ section_header() {
 }
 
 # ================================================================
-# CHECK: auth-guard redirect ke /login kalau belum login
+# QUALITY CHECK HELPERS
 # ================================================================
-check_auth_guard_redirect() {
+
+check_pass() {
+    local label=$1
+    local output=$2
+    echo -e "  ${GREEN}✓${NC} $label"
+    echo "OK — $label" >> "$output"
+}
+
+check_fail() {
+    local label=$1
+    local output=$2
+    echo -e "  ${RED}✗ VIOLATION:${NC} $label"
+    echo "VIOLATION — $label" >> "$output"
+}
+
+check_warn() {
+    local label=$1
+    local output=$2
+    echo -e "  ${YELLOW}⚠ WARNING:${NC} $label"
+    echo "WARNING — $label" >> "$output"
+}
+
+check_missing() {
+    local label=$1
+    local output=$2
+    echo -e "  ${RED}✗ MISSING:${NC} $label"
+    echo "MISSING — $label" >> "$output"
+}
+
+# ================================================================
+# A. PROXY — ada auth gate (step 5)
+# ================================================================
+check_proxy_auth_gate() {
     local output=$1
     echo "" >> "$output"
     echo "################################################################" >> "$output"
-    echo "##  AUTH GUARD CHECK — redirect ke /login" >> "$output"
+    echo "##  CHECK A — proxy.ts: auth gate (step 5)" >> "$output"
     echo "################################################################" >> "$output"
     echo "" >> "$output"
+    echo -e "\n${MAGENTA}▶ CHECK A — proxy.ts: auth gate${NC}"
 
-    echo -e "\n${MAGENTA}▶ AUTH GUARD CHECK${NC}"
-
-    local file="$SRC_DIR/components/layout/auth/auth-guard.tsx"
-
+    local file="$SRC_DIR/proxy.ts"
     if [ ! -f "$file" ]; then
-        echo -e "  ${RED}✗ MISSING: auth-guard.tsx tidak ditemukan!${NC}"
-        echo "MISSING — auth-guard.tsx tidak ditemukan" >> "$output"
-    else
-        if grep -q "login" "$file" 2>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} auth-guard.tsx ada referensi redirect ke login"
-            echo "OK — auth-guard redirect ke login" >> "$output"
-        else
-            echo -e "  ${RED}✗ auth-guard.tsx tidak redirect ke /login!${NC}"
-            echo "VIOLATION — auth-guard.tsx tidak ada redirect ke login" >> "$output"
-        fi
+        check_missing "proxy.ts tidak ditemukan!" "$output"
+        return
     fi
+
+    # Harus ada keyword auth gate
+    if grep -qiE "auth.?gate|step.?5|isAuthenticated|fibidy.?token|cookie" "$file" 2>/dev/null; then
+        check_pass "proxy.ts ada auth gate logic (cookie/token check)" "$output"
+    else
+        check_fail "proxy.ts TIDAK ada auth gate — cookie check tidak ditemukan" "$output"
+    fi
+
+    # Harus ada escape hatch untuk ?reason=
+    if grep -q "reason" "$file" 2>/dev/null; then
+        check_pass "proxy.ts ada stale-cookie escape hatch (?reason= param)" "$output"
+    else
+        check_warn "proxy.ts tidak ada ?reason= escape hatch — stale cookie bisa loop" "$output"
+    fi
+
+    # Harus ada ?from= handling
+    if grep -q "from" "$file" 2>/dev/null; then
+        check_pass "proxy.ts ada ?from= return URL handling" "$output"
+    else
+        check_warn "proxy.ts tidak ada ?from= — user tidak balik ke halaman asal setelah login" "$output"
+    fi
+
     echo "" >> "$output"
 }
 
 # ================================================================
-# CHECK: buy-button.tsx harus redirect ke /login?from=/discover/:id
-# kalau belum authenticated
+# B. (auth)/layout.tsx — TIDAK boleh ada GuestGuard
+# ================================================================
+check_no_guest_guard() {
+    local output=$1
+    echo "" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "##  CHECK B — (auth)/layout.tsx: GuestGuard sudah dilepas" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "" >> "$output"
+    echo -e "\n${MAGENTA}▶ CHECK B — (auth)/layout.tsx: no GuestGuard${NC}"
+
+    local file="$SRC_DIR/app/[locale]/(auth)/layout.tsx"
+    if [ ! -f "$file" ]; then
+        check_missing "(auth)/layout.tsx tidak ditemukan!" "$output"
+        return
+    fi
+
+    if grep -q "GuestGuard" "$file" 2>/dev/null; then
+        check_fail "(auth)/layout.tsx masih import GuestGuard — proxy sudah handle ini, hapus!" "$output"
+    else
+        check_pass "(auth)/layout.tsx bersih dari GuestGuard (proxy yang handle redirect)" "$output"
+    fi
+
+    echo "" >> "$output"
+}
+
+# ================================================================
+# C. register.tsx — pakai RegisterNav, BUKAN WizardNav
+# ================================================================
+check_register_uses_register_nav() {
+    local output=$1
+    echo "" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "##  CHECK C — register.tsx: pakai RegisterNav (bukan WizardNav)" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "" >> "$output"
+    echo -e "\n${MAGENTA}▶ CHECK C — register.tsx: RegisterNav check${NC}"
+
+    local file="$SRC_DIR/components/auth/register/register.tsx"
+    if [ ! -f "$file" ]; then
+        check_missing "register.tsx tidak ditemukan!" "$output"
+        return
+    fi
+
+    if grep -q "WizardNav" "$file" 2>/dev/null; then
+        check_fail "register.tsx masih pakai WizardNav — harusnya pakai RegisterNav (fixed offset meleset)" "$output"
+    else
+        check_pass "register.tsx bersih dari WizardNav" "$output"
+    fi
+
+    if grep -q "RegisterNav" "$file" 2>/dev/null; then
+        check_pass "register.tsx pakai RegisterNav (inline nav, no fixed offset)" "$output"
+    else
+        check_warn "register.tsx tidak pakai RegisterNav — pastikan nav-nya inline bukan floating" "$output"
+    fi
+
+    if grep -q "RegisterStepIndicator" "$file" 2>/dev/null; then
+        check_pass "register.tsx pakai RegisterStepIndicator (auth-specific)" "$output"
+    else
+        check_warn "register.tsx tidak pakai RegisterStepIndicator" "$output"
+    fi
+
+    # pb-24 / pb-20 spacer harus sudah dihapus
+    if grep -qE "pb-24|pb-20" "$file" 2>/dev/null; then
+        check_warn "register.tsx masih ada pb-24/pb-20 spacer — harusnya sudah dihapus" "$output"
+    else
+        check_pass "register.tsx bersih dari pb-24/pb-20 spacer" "$output"
+    fi
+
+    echo "" >> "$output"
+}
+
+# ================================================================
+# D. buy-button.tsx — login redirect + ?from=
 # ================================================================
 check_buy_button_login_gate() {
     local output=$1
     echo "" >> "$output"
     echo "################################################################" >> "$output"
-    echo "##  BUY BUTTON LOGIN GATE CHECK" >> "$output"
+    echo "##  CHECK D — buy-button.tsx: login gate + ?from=" >> "$output"
     echo "################################################################" >> "$output"
     echo "" >> "$output"
-
-    echo -e "\n${MAGENTA}▶ BUY BUTTON LOGIN GATE CHECK${NC}"
+    echo -e "\n${MAGENTA}▶ CHECK D — buy-button.tsx: login gate${NC}"
 
     local file="$SRC_DIR/components/discover/buy-button.tsx"
-
     if [ ! -f "$file" ]; then
-        echo -e "  ${RED}✗ MISSING: buy-button.tsx tidak ditemukan!${NC}"
-        echo "MISSING — buy-button.tsx tidak ditemukan" >> "$output"
-    else
-        if grep -q "login" "$file" 2>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} buy-button.tsx ada login redirect"
-            echo "OK — buy-button.tsx ada login redirect" >> "$output"
-        else
-            echo -e "  ${RED}✗ buy-button.tsx tidak ada login redirect!${NC}"
-            echo "MISSING — buy-button.tsx tidak ada login redirect" >> "$output"
-        fi
-
-        if grep -q "from" "$file" 2>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} buy-button.tsx ada ?from= return URL"
-            echo "OK — buy-button.tsx ada ?from= return URL" >> "$output"
-        else
-            echo -e "  ${YELLOW}⚠ buy-button.tsx tidak ada ?from= param — user tidak balik ke produk setelah login${NC}"
-            echo "WARNING — buy-button.tsx tidak ada ?from= return URL" >> "$output"
-        fi
-    fi
-    echo "" >> "$output"
-}
-
-# ================================================================
-# CHECK: login page harus handle ?from= redirect setelah login sukses
-# ================================================================
-check_login_from_redirect() {
-    local output=$1
-    echo "" >> "$output"
-    echo "################################################################" >> "$output"
-    echo "##  LOGIN FROM REDIRECT CHECK — handle ?from= param" >> "$output"
-    echo "################################################################" >> "$output"
-    echo "" >> "$output"
-
-    echo -e "\n${MAGENTA}▶ LOGIN FROM REDIRECT CHECK${NC}"
-
-    local file="$SRC_DIR/components/auth/login/login.tsx"
-
-    if [ ! -f "$file" ]; then
-        echo -e "  ${RED}✗ MISSING: components/auth/login/login.tsx tidak ditemukan!${NC}"
-        echo "MISSING — login.tsx tidak ditemukan" >> "$output"
-    else
-        if grep -q "from\|searchParams\|useSearchParams" "$file" 2>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} login.tsx handle ?from= redirect"
-            echo "OK — login.tsx handle ?from= redirect" >> "$output"
-        else
-            echo -e "  ${YELLOW}⚠ login.tsx tidak handle ?from= — user tidak balik ke halaman asal setelah login${NC}"
-            echo "WARNING — login.tsx tidak handle ?from= searchParam" >> "$output"
-        fi
-    fi
-    echo "" >> "$output"
-}
-
-# ================================================================
-# CHECK: page.tsx di [locale]/(auth)/ tidak boleh ada 'use client'
-# ================================================================
-check_auth_pages_pattern() {
-    local output=$1
-    echo "" >> "$output"
-    echo "################################################################" >> "$output"
-    echo "##  PATTERN CHECK — [locale]/(auth)/page.tsx tidak boleh use client" >> "$output"
-    echo "################################################################" >> "$output"
-    echo "" >> "$output"
-
-    echo -e "\n${MAGENTA}▶ PATTERN CHECK (auth pages)${NC}"
-
-    # Path yang benar: app/[locale]/(auth)/
-    local auth_dir="$SRC_DIR/app/[locale]/(auth)"
-    local violations=""
-
-    if [ -d "$auth_dir" ]; then
-        local found
-        found=$(find "$auth_dir" -name "page.tsx" 2>/dev/null | xargs grep -l "'use client'" 2>/dev/null)
-        if [ -n "$found" ]; then
-            violations="$found"
-        fi
-    else
-        echo -e "  ${RED}✗ Directory tidak ditemukan: $auth_dir${NC}"
-        echo "MISSING — auth dir tidak ditemukan: $auth_dir" >> "$output"
-        echo "" >> "$output"
+        check_missing "buy-button.tsx tidak ditemukan!" "$output"
         return
     fi
 
-    if [ -n "$violations" ]; then
-        echo -e "  ${RED}✗ page.tsx dengan 'use client' ditemukan di [locale]/(auth)/:${NC}"
-        echo "$violations" | while read -r f; do echo "    $f"; done
-        echo "VIOLATION: auth page.tsx mengandung use client:" >> "$output"
-        echo "$violations" >> "$output"
+    if grep -q "login" "$file" 2>/dev/null; then
+        check_pass "buy-button.tsx ada login redirect" "$output"
     else
-        echo -e "  ${GREEN}✓${NC} Semua [locale]/(auth)/page.tsx bersih dari 'use client'"
-        echo "OK — semua auth page.tsx bersih" >> "$output"
+        check_fail "buy-button.tsx TIDAK ada login redirect — user bisa coba beli tanpa login" "$output"
     fi
+
+    if grep -q "from" "$file" 2>/dev/null; then
+        check_pass "buy-button.tsx ada ?from= return URL" "$output"
+    else
+        check_warn "buy-button.tsx tidak ada ?from= — user tidak balik ke produk setelah login" "$output"
+    fi
+
     echo "" >> "$output"
 }
 
 # ================================================================
-# CHECK: auth-store tidak bocor ke server component
+# E. auth-store — TIDAK bocor ke page.tsx (server component)
 # ================================================================
-check_auth_store_usage() {
+check_auth_store_not_in_pages() {
     local output=$1
     echo "" >> "$output"
     echo "################################################################" >> "$output"
-    echo "##  AUTH STORE CHECK — tidak dipakai di page.tsx (server component)" >> "$output"
+    echo "##  CHECK E — auth-store: tidak dipakai di page.tsx" >> "$output"
     echo "################################################################" >> "$output"
     echo "" >> "$output"
-
-    echo -e "\n${MAGENTA}▶ AUTH STORE USAGE CHECK${NC}"
+    echo -e "\n${MAGENTA}▶ CHECK E — auth-store: server component safety${NC}"
 
     local violations
     violations=$(find "$SRC_DIR/app" -name "page.tsx" 2>/dev/null | xargs grep -l "auth-store" 2>/dev/null)
 
     if [ -n "$violations" ]; then
-        echo -e "  ${RED}✗ auth-store diimport di page.tsx (server component):${NC}"
-        echo "$violations" | while read -r f; do echo "    $f"; done
-        echo "VIOLATION: auth-store diimport di page.tsx" >> "$output"
-        echo "$violations" >> "$output"
+        check_fail "auth-store diimport di page.tsx (server component):" "$output"
+        echo "$violations" | while read -r f; do
+            echo -e "    ${RED}→ $f${NC}"
+            echo "    → $f" >> "$output"
+        done
     else
-        echo -e "  ${GREEN}✓${NC} auth-store tidak diimport di page.tsx (aman)"
-        echo "OK — auth-store tidak bocor ke server component" >> "$output"
+        check_pass "auth-store tidak bocor ke page.tsx (aman)" "$output"
     fi
+
+    echo "" >> "$output"
+}
+
+# ================================================================
+# F. marketing.json — exists di en/ dan id/
+# ================================================================
+check_marketing_json() {
+    local output=$1
+    echo "" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "##  CHECK F — marketing.json exists (en + id)" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "" >> "$output"
+    echo -e "\n${MAGENTA}▶ CHECK F — marketing.json i18n files${NC}"
+
+    local en_file="$MSG_DIR/en/marketing.json"
+    local id_file="$MSG_DIR/id/marketing.json"
+
+    if [ -f "$en_file" ]; then
+        local lines
+        lines=$(wc -l < "$en_file" 2>/dev/null || echo "0")
+        check_pass "messages/en/marketing.json ada (${lines} lines)" "$output"
+        # Cek keys penting
+        for key in "metadata" "header" "hero" "footer"; do
+            if grep -q "\"$key\"" "$en_file" 2>/dev/null; then
+                echo -e "    ${GREEN}✓${NC} en/marketing.json → \"$key\" key ada"
+                echo "    OK — en/marketing.json: \"$key\" key ada" >> "$output"
+            else
+                echo -e "    ${RED}✗${NC} en/marketing.json → \"$key\" key MISSING!"
+                echo "    MISSING — en/marketing.json: \"$key\" key tidak ada" >> "$output"
+            fi
+        done
+    else
+        check_missing "messages/en/marketing.json TIDAK ADA — jalankan json-patch.md!" "$output"
+    fi
+
+    if [ -f "$id_file" ]; then
+        local lines
+        lines=$(wc -l < "$id_file" 2>/dev/null || echo "0")
+        check_pass "messages/id/marketing.json ada (${lines} lines)" "$output"
+        for key in "metadata" "header" "hero" "footer"; do
+            if grep -q "\"$key\"" "$id_file" 2>/dev/null; then
+                echo -e "    ${GREEN}✓${NC} id/marketing.json → \"$key\" key ada"
+                echo "    OK — id/marketing.json: \"$key\" key ada" >> "$output"
+            else
+                echo -e "    ${RED}✗${NC} id/marketing.json → \"$key\" key MISSING!"
+                echo "    MISSING — id/marketing.json: \"$key\" key tidak ada" >> "$output"
+            fi
+        done
+    else
+        check_missing "messages/id/marketing.json TIDAK ADA — jalankan json-patch.md!" "$output"
+    fi
+
+    echo "" >> "$output"
+}
+
+# ================================================================
+# G. auth page.tsx — tidak ada 'use client'
+# ================================================================
+check_auth_pages_no_use_client() {
+    local output=$1
+    echo "" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "##  CHECK G — (auth)/page.tsx: tidak boleh 'use client'" >> "$output"
+    echo "################################################################" >> "$output"
+    echo "" >> "$output"
+    echo -e "\n${MAGENTA}▶ CHECK G — auth page.tsx pattern${NC}"
+
+    local auth_dir="$SRC_DIR/app/[locale]/(auth)"
+    if [ ! -d "$auth_dir" ]; then
+        check_missing "Directory tidak ditemukan: $auth_dir" "$output"
+        return
+    fi
+
+    local violations
+    violations=$(find "$auth_dir" -name "page.tsx" 2>/dev/null | xargs grep -l "'use client'" 2>/dev/null)
+
+    if [ -n "$violations" ]; then
+        check_fail "(auth)/page.tsx dengan 'use client' ditemukan:" "$output"
+        echo "$violations" | while read -r f; do
+            echo -e "    ${RED}→ $f${NC}"
+            echo "    → $f" >> "$output"
+        done
+    else
+        check_pass "Semua (auth)/page.tsx bersih dari 'use client'" "$output"
+    fi
+
     echo "" >> "$output"
 }
 
@@ -249,66 +397,71 @@ main() {
 
     local timestamp
     timestamp=$(date '+%Y%m%d-%H%M%S')
-    local output_file="$OUT/FE-AUTH-COVERAGE-$timestamp.txt"
+    local output_file="$OUT/VERCEL-VIBES-COVERAGE-$timestamp.txt"
 
     cat > "$output_file" << EOF
 ################################################################
-##  CLIENT — AUTH FLOW COVERAGE REPORT
+##  CLIENT — VERCEL VIBES COVERAGE REPORT
+##  [VERCEL VIBES — May 2026]
 ##  Generated: $(date '+%Y-%m-%d %H:%M:%S')
 ##
-##  Checks:
-##    1.  Types               — auth.ts, tenant.ts, discover.ts
-##    2.  API module          — lib/api/auth.ts, client.ts
-##    3.  Store               — auth-store.ts, auth-dialog-store.ts
-##    4.  Hooks               — use-auth.ts, use-register-wizard.ts
-##    5.  App routes (auth)   — login, register, forgot-password
-##    6.  Components (auth)   — login, register, forgot-password
-##    7.  Layout (auth)       — auth-guard, auth-layout, auth-logo
-##    8.  User auth dialog    — auth-dialog, dialog-login-form, dialog-register-form
-##    9.  Discover buy gate   — buy-button.tsx login redirect
-##    10. Auth guard check    — redirect ke /login
-##    11. Login ?from= check  — return URL setelah login
-##    12. Pattern check       — auth page.tsx tidak use client
-##    13. Auth store check    — tidak bocor ke server component
+##  Sections:
+##    1.  Proxy (edge auth gate)
+##    2.  Auth types & API module
+##    3.  Auth store & hooks
+##    4.  App routes — (auth): login, register, forgot-password
+##    5.  Components — auth: login, register wizard, forgot-password
+##    6.  Components — register NEW: register-nav, register-step-indicator
+##    7.  Layout — auth: auth-guard, auth-layout, auth-logo
+##    8.  App routes — (marketing): layout, page
+##    9.  Components — marketing: header, footer, hero
+##    10. i18n messages — marketing.json (en + id)
+##    11. User auth dialog (discover buy gate)
+##
+##  Quality Checks:
+##    A.  proxy.ts ada auth gate + ?reason= + ?from=
+##    B.  (auth)/layout.tsx TIDAK ada GuestGuard
+##    C.  register.tsx pakai RegisterNav (bukan WizardNav)
+##    D.  buy-button.tsx ada login redirect + ?from=
+##    E.  auth-store tidak bocor ke page.tsx
+##    F.  marketing.json exists + semua keys ada
+##    G.  (auth)/page.tsx tidak ada 'use client'
 ################################################################
 
 EOF
 
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}  FE AUTH FLOW — COVERAGE CHECKER                         ${NC}"
+    echo -e "${BLUE}  VERCEL VIBES — AUTH + COOKIE + MARKETING COVERAGE       ${NC}"
+    echo -e "${BLUE}  [VERCEL VIBES — May 2026]                                ${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
-    # ── 1. TYPES ─────────────────────────────────────────────────
-    section_header "1. TYPES" "$output_file"
-    collect_file "$SRC_DIR/types/auth.ts" "$output_file"
-    collect_file "$SRC_DIR/types/tenant.ts" "$output_file"
-    collect_file "$SRC_DIR/types/discover.ts" "$output_file"
+    # ── 1. PROXY ─────────────────────────────────────────────────
+    section_header "1. PROXY — edge auth gate" "$output_file"
+    collect_file "$SRC_DIR/proxy.ts" "$output_file"
 
-    # ── 2. API MODULE ─────────────────────────────────────────────
-    section_header "2. LIB — API MODULE" "$output_file"
+    # ── 2. AUTH TYPES & API MODULE ───────────────────────────────
+    section_header "2. AUTH TYPES & API MODULE" "$output_file"
+    collect_file "$SRC_DIR/types/auth.ts" "$output_file"
     collect_file "$SRC_DIR/lib/api/auth.ts" "$output_file"
     collect_file "$SRC_DIR/lib/api/client.ts" "$output_file"
 
-    # ── 3. STORE ─────────────────────────────────────────────────
-    section_header "3. STORE" "$output_file"
+    # ── 3. STORE & HOOKS ─────────────────────────────────────────
+    section_header "3. STORE & HOOKS" "$output_file"
     collect_file "$SRC_DIR/stores/auth-store.ts" "$output_file"
     collect_file "$SRC_DIR/stores/auth-dialog-store.ts" "$output_file"
-
-    # ── 4. HOOKS ─────────────────────────────────────────────────
-    section_header "4. HOOKS — AUTH" "$output_file"
     collect_file "$SRC_DIR/hooks/auth/use-auth.ts" "$output_file"
     collect_file "$SRC_DIR/hooks/auth/use-register-wizard.ts" "$output_file"
 
-    # ── 5. APP ROUTES — AUTH (path: app/[locale]/(auth)/) ────────
-    section_header "5. APP ROUTES — AUTH" "$output_file"
+    # ── 4. APP ROUTES — (auth) ───────────────────────────────────
+    section_header "4. APP ROUTES — (auth)" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(auth)/layout.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(auth)/login/page.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(auth)/login/banner.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(auth)/register/page.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(auth)/forgot-password/page.tsx" "$output_file"
 
-    # ── 6. COMPONENTS — AUTH ─────────────────────────────────────
-    section_header "6. COMPONENTS — AUTH" "$output_file"
+    # ── 5. COMPONENTS — AUTH ─────────────────────────────────────
+    section_header "5. COMPONENTS — AUTH" "$output_file"
     collect_file "$SRC_DIR/components/auth/login/login.tsx" "$output_file"
     collect_file "$SRC_DIR/components/auth/register/register.tsx" "$output_file"
     collect_file "$SRC_DIR/components/auth/register/step-account.tsx" "$output_file"
@@ -318,30 +471,54 @@ EOF
     collect_file "$SRC_DIR/components/auth/register/step-welcome.tsx" "$output_file"
     collect_file "$SRC_DIR/components/auth/forgot-password/forgot-password.tsx" "$output_file"
 
+    # ── 6. COMPONENTS — REGISTER NEW (VERCEL VIBES) ──────────────
+    section_header "6. COMPONENTS — REGISTER NEW [VERCEL VIBES]" "$output_file"
+    collect_file "$SRC_DIR/components/auth/register/register-nav.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/auth/register/register-step-indicator.tsx" "$output_file"
+
     # ── 7. LAYOUT — AUTH ─────────────────────────────────────────
     section_header "7. LAYOUT — AUTH" "$output_file"
     collect_file "$SRC_DIR/components/layout/auth/auth-guard.tsx" "$output_file"
     collect_file "$SRC_DIR/components/layout/auth/auth-layout.tsx" "$output_file"
     collect_file "$SRC_DIR/components/layout/auth/auth-logo.tsx" "$output_file"
 
-    # ── 8. USER AUTH DIALOG ───────────────────────────────────────
-    section_header "8. USER AUTH DIALOG" "$output_file"
+    # ── 8. APP ROUTES — (marketing) NEW ──────────────────────────
+    section_header "8. APP ROUTES — (marketing) [VERCEL VIBES NEW]" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(marketing)/layout.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(marketing)/page.tsx" "$output_file"
+
+    # ── 9. COMPONENTS — MARKETING NEW ────────────────────────────
+    section_header "9. COMPONENTS — MARKETING [VERCEL VIBES NEW]" "$output_file"
+    collect_file "$SRC_DIR/components/marketing/marketing-header.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/marketing/marketing-footer.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/marketing/marketing-hero.tsx" "$output_file"
+
+    # ── 10. i18n MESSAGES — MARKETING ────────────────────────────
+    section_header "10. i18n MESSAGES — marketing.json" "$output_file"
+    collect_file "$MSG_DIR/en/marketing.json" "$output_file"
+    collect_file "$MSG_DIR/id/marketing.json" "$output_file"
+
+    # ── 11. USER AUTH DIALOG (discover buy gate) ─────────────────
+    section_header "11. USER AUTH DIALOG — discover buy gate" "$output_file"
     collect_file "$SRC_DIR/components/user-auth/auth-dialog.tsx" "$output_file"
     collect_file "$SRC_DIR/components/user-auth/dialog-login-form.tsx" "$output_file"
     collect_file "$SRC_DIR/components/user-auth/dialog-register-form.tsx" "$output_file"
-
-    # ── 9. DISCOVER BUY GATE ─────────────────────────────────────
-    # path: app/[locale]/discover/[id]/client.tsx
-    section_header "9. DISCOVER — BUY LOGIN GATE" "$output_file"
     collect_file "$SRC_DIR/components/discover/buy-button.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/discover/[id]/client.tsx" "$output_file"
 
     # ── QUALITY CHECKS ───────────────────────────────────────────
-    check_auth_guard_redirect "$output_file"
+    echo "" >> "$output_file"
+    echo "################################################################" >> "$output_file"
+    echo "##  QUALITY CHECKS" >> "$output_file"
+    echo "################################################################" >> "$output_file"
+
+    check_proxy_auth_gate "$output_file"
+    check_no_guest_guard "$output_file"
+    check_register_uses_register_nav "$output_file"
     check_buy_button_login_gate "$output_file"
-    check_login_from_redirect "$output_file"
-    check_auth_pages_pattern "$output_file"
-    check_auth_store_usage "$output_file"
+    check_auth_store_not_in_pages "$output_file"
+    check_marketing_json "$output_file"
+    check_auth_pages_no_use_client "$output_file"
 
     # ── SUMMARY ──────────────────────────────────────────────────
     local pct=0
@@ -354,11 +531,11 @@ EOF
 
     echo ""
     echo -e "${summary_color}╔════════════════════════════════════════════════════╗${NC}"
-    echo -e "${summary_color}║  COVERAGE REPORT                                   ║${NC}"
+    echo -e "${summary_color}║  VERCEL VIBES — COVERAGE REPORT                    ║${NC}"
     echo -e "${summary_color}╠════════════════════════════════════════════════════╣${NC}"
-    echo -e "${summary_color}║  ✓ Found  : ${FOUND} / ${TOTAL}                              ║${NC}"
-    echo -e "${summary_color}║  ✗ Missing: ${MISSING}                                       ║${NC}"
-    echo -e "${summary_color}║  Coverage : ${pct}%                                   ║${NC}"
+    printf "${summary_color}║  ✓ Found   : %-3d / %-3d                             ║${NC}\n" "$FOUND" "$TOTAL"
+    printf "${summary_color}║  ✗ Missing : %-3d                                    ║${NC}\n" "$MISSING"
+    printf "${summary_color}║  Coverage  : %-3d%%                                  ║${NC}\n" "$pct"
     echo -e "${summary_color}╚════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}📂 Output: $output_file${NC}"
