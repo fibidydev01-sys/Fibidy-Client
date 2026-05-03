@@ -117,7 +117,6 @@ check_buy_button_login_gate() {
         echo -e "  ${RED}✗ MISSING: buy-button.tsx tidak ditemukan!${NC}"
         echo "MISSING — buy-button.tsx tidak ditemukan" >> "$output"
     else
-        # Cek ada login redirect
         if grep -q "login" "$file" 2>/dev/null; then
             echo -e "  ${GREEN}✓${NC} buy-button.tsx ada login redirect"
             echo "OK — buy-button.tsx ada login redirect" >> "$output"
@@ -126,7 +125,6 @@ check_buy_button_login_gate() {
             echo "MISSING — buy-button.tsx tidak ada login redirect" >> "$output"
         fi
 
-        # Cek ada ?from= param untuk return URL setelah login
         if grep -q "from" "$file" 2>/dev/null; then
             echo -e "  ${GREEN}✓${NC} buy-button.tsx ada ?from= return URL"
             echo "OK — buy-button.tsx ada ?from= return URL" >> "$output"
@@ -169,19 +167,20 @@ check_login_from_redirect() {
 }
 
 # ================================================================
-# CHECK: page.tsx di (auth)/ tidak boleh ada 'use client'
+# CHECK: page.tsx di [locale]/(auth)/ tidak boleh ada 'use client'
 # ================================================================
 check_auth_pages_pattern() {
     local output=$1
     echo "" >> "$output"
     echo "################################################################" >> "$output"
-    echo "##  PATTERN CHECK — (auth)/page.tsx tidak boleh use client" >> "$output"
+    echo "##  PATTERN CHECK — [locale]/(auth)/page.tsx tidak boleh use client" >> "$output"
     echo "################################################################" >> "$output"
     echo "" >> "$output"
 
     echo -e "\n${MAGENTA}▶ PATTERN CHECK (auth pages)${NC}"
 
-    local auth_dir="$SRC_DIR/app/(auth)"
+    # Path yang benar: app/[locale]/(auth)/
+    local auth_dir="$SRC_DIR/app/[locale]/(auth)"
     local violations=""
 
     if [ -d "$auth_dir" ]; then
@@ -190,15 +189,20 @@ check_auth_pages_pattern() {
         if [ -n "$found" ]; then
             violations="$found"
         fi
+    else
+        echo -e "  ${RED}✗ Directory tidak ditemukan: $auth_dir${NC}"
+        echo "MISSING — auth dir tidak ditemukan: $auth_dir" >> "$output"
+        echo "" >> "$output"
+        return
     fi
 
     if [ -n "$violations" ]; then
-        echo -e "  ${RED}✗ page.tsx dengan 'use client' ditemukan di (auth)/:${NC}"
+        echo -e "  ${RED}✗ page.tsx dengan 'use client' ditemukan di [locale]/(auth)/:${NC}"
         echo "$violations" | while read -r f; do echo "    $f"; done
         echo "VIOLATION: auth page.tsx mengandung use client:" >> "$output"
         echo "$violations" >> "$output"
     else
-        echo -e "  ${GREEN}✓${NC} Semua (auth)/page.tsx bersih dari 'use client'"
+        echo -e "  ${GREEN}✓${NC} Semua [locale]/(auth)/page.tsx bersih dari 'use client'"
         echo "OK — semua auth page.tsx bersih" >> "$output"
     fi
     echo "" >> "$output"
@@ -217,7 +221,6 @@ check_auth_store_usage() {
 
     echo -e "\n${MAGENTA}▶ AUTH STORE USAGE CHECK${NC}"
 
-    # Cari page.tsx yang import auth-store langsung
     local violations
     violations=$(find "$SRC_DIR/app" -name "page.tsx" 2>/dev/null | xargs grep -l "auth-store" 2>/dev/null)
 
@@ -254,18 +257,19 @@ main() {
 ##  Generated: $(date '+%Y-%m-%d %H:%M:%S')
 ##
 ##  Checks:
-##    1.  Types               — auth.ts
-##    2.  API module          — lib/api/auth.ts
-##    3.  Store               — auth-store.ts
+##    1.  Types               — auth.ts, tenant.ts, discover.ts
+##    2.  API module          — lib/api/auth.ts, client.ts
+##    3.  Store               — auth-store.ts, auth-dialog-store.ts
 ##    4.  Hooks               — use-auth.ts, use-register-wizard.ts
 ##    5.  App routes (auth)   — login, register, forgot-password
 ##    6.  Components (auth)   — login, register, forgot-password
 ##    7.  Layout (auth)       — auth-guard, auth-layout, auth-logo
-##    8.  Discover buy gate   — buy-button.tsx login redirect
-##    9.  Auth guard check    — redirect ke /login
-##    10. Login ?from= check  — return URL setelah login
-##    11. Pattern check       — auth page.tsx tidak use client
-##    12. Auth store check    — tidak bocor ke server component
+##    8.  User auth dialog    — auth-dialog, dialog-login-form, dialog-register-form
+##    9.  Discover buy gate   — buy-button.tsx login redirect
+##    10. Auth guard check    — redirect ke /login
+##    11. Login ?from= check  — return URL setelah login
+##    12. Pattern check       — auth page.tsx tidak use client
+##    13. Auth store check    — tidak bocor ke server component
 ################################################################
 
 EOF
@@ -278,6 +282,7 @@ EOF
     section_header "1. TYPES" "$output_file"
     collect_file "$SRC_DIR/types/auth.ts" "$output_file"
     collect_file "$SRC_DIR/types/tenant.ts" "$output_file"
+    collect_file "$SRC_DIR/types/discover.ts" "$output_file"
 
     # ── 2. API MODULE ─────────────────────────────────────────────
     section_header "2. LIB — API MODULE" "$output_file"
@@ -287,18 +292,20 @@ EOF
     # ── 3. STORE ─────────────────────────────────────────────────
     section_header "3. STORE" "$output_file"
     collect_file "$SRC_DIR/stores/auth-store.ts" "$output_file"
+    collect_file "$SRC_DIR/stores/auth-dialog-store.ts" "$output_file"
 
     # ── 4. HOOKS ─────────────────────────────────────────────────
     section_header "4. HOOKS — AUTH" "$output_file"
     collect_file "$SRC_DIR/hooks/auth/use-auth.ts" "$output_file"
     collect_file "$SRC_DIR/hooks/auth/use-register-wizard.ts" "$output_file"
 
-    # ── 5. APP ROUTES — AUTH ─────────────────────────────────────
+    # ── 5. APP ROUTES — AUTH (path: app/[locale]/(auth)/) ────────
     section_header "5. APP ROUTES — AUTH" "$output_file"
-    collect_file "$SRC_DIR/app/(auth)/layout.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/(auth)/login/page.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/(auth)/register/page.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/(auth)/forgot-password/page.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(auth)/layout.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(auth)/login/page.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(auth)/login/banner.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(auth)/register/page.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(auth)/forgot-password/page.tsx" "$output_file"
 
     # ── 6. COMPONENTS — AUTH ─────────────────────────────────────
     section_header "6. COMPONENTS — AUTH" "$output_file"
@@ -317,11 +324,17 @@ EOF
     collect_file "$SRC_DIR/components/layout/auth/auth-layout.tsx" "$output_file"
     collect_file "$SRC_DIR/components/layout/auth/auth-logo.tsx" "$output_file"
 
-    # ── 8. DISCOVER BUY GATE ─────────────────────────────────────
-    # buy-button.tsx harus redirect ke login kalau belum auth
-    section_header "8. DISCOVER — BUY LOGIN GATE" "$output_file"
+    # ── 8. USER AUTH DIALOG ───────────────────────────────────────
+    section_header "8. USER AUTH DIALOG" "$output_file"
+    collect_file "$SRC_DIR/components/user-auth/auth-dialog.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/user-auth/dialog-login-form.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/user-auth/dialog-register-form.tsx" "$output_file"
+
+    # ── 9. DISCOVER BUY GATE ─────────────────────────────────────
+    # path: app/[locale]/discover/[id]/client.tsx
+    section_header "9. DISCOVER — BUY LOGIN GATE" "$output_file"
     collect_file "$SRC_DIR/components/discover/buy-button.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/discover/[id]/client.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/discover/[id]/client.tsx" "$output_file"
 
     # ── QUALITY CHECKS ───────────────────────────────────────────
     check_auth_guard_redirect "$output_file"

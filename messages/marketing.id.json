@@ -1,0 +1,23 @@
+{
+  "marketing": {
+    "metadata": {
+      "title": "Fibidy — Toko digital Anda, dalam 5 menit",
+      "description": "Setup, upload, jualan. Cara paling cepat memulai toko digital di Indonesia."
+    },
+    "header": {
+      "login": "Masuk",
+      "register": "Mulai Gratis"
+    },
+    "hero": {
+      "heading": "Toko digital Anda, dalam 5 menit",
+      "subheading": "Setup. Upload. Jualan. Fibidy adalah cara paling mudah memulai toko digital — tanpa biaya setup, tanpa minimum bulanan.",
+      "cta": "Mulai Jualan",
+      "ctaSecondary": "Masuk"
+    },
+    "footer": {
+      "copyright": "© {year} Fibidy. Semua hak cipta dilindungi.",
+      "terms": "Syarat",
+      "privacy": "Privasi"
+    }
+  }
+}

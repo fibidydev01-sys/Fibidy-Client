@@ -1,0 +1,23 @@
+{
+  "marketing": {
+    "metadata": {
+      "title": "Fibidy — Your digital storefront, in 5 minutes",
+      "description": "Set up, upload, sell. The fastest way to launch a digital storefront in Indonesia."
+    },
+    "header": {
+      "login": "Sign in",
+      "register": "Get started"
+    },
+    "hero": {
+      "heading": "Your digital storefront, in 5 minutes",
+      "subheading": "Set up. Upload. Sell. Fibidy is the simplest way to launch a digital storefront — no setup fees, no monthly minimums.",
+      "cta": "Start selling",
+      "ctaSecondary": "Sign in"
+    },
+    "footer": {
+      "copyright": "© {year} Fibidy. All rights reserved.",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
+  }
+}

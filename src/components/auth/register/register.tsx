@@ -1,5 +1,44 @@
 'use client';
 
+// ==========================================
+// REGISTER FORM
+// File: src/components/auth/register/register.tsx
+//
+// [VERCEL VIBES — May 2026]
+// Two visible bug fixes via component duplication:
+//
+// 1. STEP INDICATOR (header)
+//    Was: shared <StepIndicator> from dashboard
+//    Now: <RegisterStepIndicator> in this folder
+//    Same API, fixes nothing visually by itself — but unblocks future
+//    auth-only iterations without touching dashboard wizards.
+//
+// 2. WIZARD NAV (footer)
+//    Was: shared <WizardNav>, fixed-bottom with `left: var(--sidebar-width)`
+//         and `bottom-16` mobile offset. On the auth page neither
+//         CSS variable nor tab-bar exists → nav was misaligned with
+//         the centered form on desktop and floated 64px above the
+//         viewport bottom on mobile.
+//    Now: <RegisterNav>, inline (no `position: fixed`), no sidebar
+//         offset, no tab-bar offset. Nav scrolls with the form content.
+//         Single render path for desktop + mobile via responsive
+//         utilities.
+//
+// Side effects of the inline nav:
+//    - Dropped `pb-24` from the mobile container (was reserving space
+//      for the fixed footer; not needed anymore).
+//    - Dropped `pb-20` and `lg:h-full lg:flex-col` from the desktop
+//      container (same reason).
+//    - Step content now renders ONCE outside the responsive header
+//      blocks (was rendered twice — once in the lg block, once in the
+//      mobile block). The headers stay responsive; the body is shared.
+//    - The "Already have a store?" sign-in link is now rendered ONCE
+//      below the nav (was duplicated for desktop and mobile).
+//
+// Everything else (validation, submit handler, welcome screen,
+// agreement state, error alert) is unchanged.
+// ==========================================
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -11,8 +50,8 @@ import { StepStoreInfo } from './step-store-info';
 import { StepAccount } from './step-account';
 import { StepReview } from './step-review';
 import { StepWelcome } from './step-welcome';
-import { StepIndicator } from '@/components/dashboard/shared/step-wizard';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { RegisterStepIndicator } from './register-step-indicator';
+import { RegisterNav } from './register-nav';
 import { toast } from 'sonner';
 
 function isPasswordStrong(password: string): boolean {
@@ -105,7 +144,7 @@ export function RegisterForm() {
         whatsapp: wizard.state.whatsapp!,
       });
     } catch {
-      // Error ditangani di hook
+      // Error handled in hook
     }
   };
 
@@ -124,7 +163,9 @@ export function RegisterForm() {
     );
   }
 
-  // ── WIZARD (step 2–5) ─────────────────────────────────────────────────
+  // ── STEP CONTENT ──────────────────────────────────────────────────────
+  // Rendered ONCE outside the responsive header blocks (was duplicated
+  // pre-VV refactor).
   const stepContent = (
     <>
       {wizard.state.currentStep === 2 && (
@@ -160,16 +201,15 @@ export function RegisterForm() {
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto h-full flex flex-col">
-
+    <div className="w-full max-w-2xl mx-auto flex flex-col">
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* ══════════ DESKTOP ══════════ */}
-      <div className="hidden lg:flex lg:flex-col lg:h-full">
+      {/* ══════════ DESKTOP HEADER ══════════ */}
+      <div className="hidden lg:block">
         <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
           <div className="space-y-1">
             <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
@@ -183,7 +223,7 @@ export function RegisterForm() {
             </p>
           </div>
           <div className="shrink-0 pt-0.5">
-            <StepIndicator
+            <RegisterStepIndicator
               steps={STEPS}
               currentStep={indicatorStep}
               onStepClick={(i) => wizard.goToStep(i + 2)}
@@ -191,59 +231,55 @@ export function RegisterForm() {
             />
           </div>
         </div>
-
-        <div className="flex-1 min-h-[340px] pb-20">
-          {stepContent}
-        </div>
-
-        <p className="hidden lg:block text-center text-sm text-muted-foreground mt-4">
-          {t('alreadyHaveStore')}{' '}
-          <Link href="/login" className="text-primary hover:underline font-medium">
-            {t('signInLink')}
-          </Link>
-        </p>
       </div>
 
-      {/* ══════════ MOBILE ══════════ */}
-      <div className="lg:hidden flex flex-col pb-24">
-        <div className="mb-6">
-          <div className="flex justify-center mb-4">
-            <StepIndicator
-              steps={STEPS}
-              currentStep={indicatorStep}
-              onStepClick={(i) => wizard.goToStep(i + 2)}
-              size="sm"
-            />
-          </div>
-          <div className="text-center space-y-0.5">
-            <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
-              {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
-            </p>
-            <h3 className="text-base font-bold tracking-tight">
-              {STEPS[indicatorStep]?.title}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {STEPS[indicatorStep]?.desc}
-            </p>
-          </div>
+      {/* ══════════ MOBILE HEADER ══════════ */}
+      <div className="lg:hidden mb-6">
+        <div className="flex justify-center mb-4">
+          <RegisterStepIndicator
+            steps={STEPS}
+            currentStep={indicatorStep}
+            onStepClick={(i) => wizard.goToStep(i + 2)}
+            size="sm"
+          />
         </div>
-
-        <div className="min-h-[300px]">
-          {stepContent}
+        <div className="text-center space-y-0.5">
+          <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
+            {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
+          </p>
+          <h3 className="text-base font-bold tracking-tight">
+            {STEPS[indicatorStep]?.title}
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {STEPS[indicatorStep]?.desc}
+          </p>
         </div>
       </div>
 
-      <WizardNav
+      {/* ══════════ STEP CONTENT (shared) ══════════ */}
+      <div className="min-h-[300px]">
+        {stepContent}
+      </div>
+
+      {/* ══════════ INLINE NAV (replaces fixed WizardNav) ══════════ */}
+      <RegisterNav
         steps={STEPS}
         currentStep={indicatorStep}
         onPrev={wizard.prevStep}
         onNext={handleNext}
-        onSave={handleSubmit}
-        isSaving={isLoading}
-        lastStepLabel={isLoading ? t('review.submittingButton') : t('review.submitButton')}
-        lastStepSavingLabel={t('review.submittingButton')}
         onLastStep={handleSubmit}
+        isSaving={isLoading}
+        lastStepLabel={t('review.submitButton')}
+        lastStepSavingLabel={t('review.submittingButton')}
       />
+
+      {/* ══════════ SIGN-IN LINK ══════════ */}
+      <p className="text-center text-sm text-muted-foreground mt-6">
+        {t('alreadyHaveStore')}{' '}
+        <Link href="/login" className="text-primary hover:underline font-medium">
+          {t('signInLink')}
+        </Link>
+      </p>
     </div>
   );
 }
