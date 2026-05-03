@@ -17,22 +17,11 @@
 // (renders "Rp 50.000"). formatPrice handles locale-correct symbol +
 // thousand separator + decimal rules.
 //
-// API: imports `checkoutApi` from `@/lib/api/checkout`. The `verify()`
-// method should accept session_id and return at minimum:
-//   {
-//     status: 'pending' | 'completed',
-//     purchase?: {
-//       id: string;
-//       productName: string;
-//       paidAmount: number;
-//       currency: string;
-//       fileKey?: string | null;
-//     }
-//   }
-//
-// If your `checkoutApi.verify()` returns a different shape, adjust the
-// destructuring in the poll() function below — the rest of the rendering
-// stays the same.
+// [TYPE PARITY FIX — May 2026]
+// `checkoutApi.verify(sessionId)` is now exposed as an alias of
+// `verifySession()` — see lib/api/checkout.ts. The response shape
+// also gained a `fileKey?` field so the Download CTA branch below
+// resolves cleanly.
 // ==========================================
 
 import { useEffect, useState } from 'react';
@@ -47,7 +36,6 @@ import { getErrorMessage } from '@/lib/api/client';
 import { formatPrice } from '@/lib/shared/format';
 
 // Local type — mirrors expected shape from checkoutApi.verify().
-// Adjust if your API returns a different structure.
 interface PurchaseInfo {
   id: string;
   productName: string;
@@ -80,9 +68,6 @@ export function CheckoutSuccessClient() {
 
     const poll = async () => {
       try {
-        // checkoutApi.verify expected shape:
-        //   { status: 'pending' | 'completed', purchase?: PurchaseInfo }
-        // If your shape differs (e.g. flat fields), adapt this line.
         const result = await checkoutApi.verify(sessionId);
         if (cancelled) return;
 

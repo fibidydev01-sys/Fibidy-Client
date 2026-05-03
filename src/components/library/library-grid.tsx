@@ -3,6 +3,12 @@
 // [TIDUR-NYENYAK v3 FIX]
 // Replaced <a href="/discover"> with <Link href="/discover"> from next/link.
 // The <a> tag triggers full page reload + misses Next.js prefetching.
+//
+// [TYPE PARITY FIX — May 2026]
+// React `key` now reads `purchase.purchaseId ?? purchase.id`.
+// Both are required strings on the Purchase type post-fix, but the
+// nullish-coalesce shields against any legacy payload that emits
+// only one of them.
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -46,7 +52,10 @@ export function LibraryGrid({ purchases, isLoading }: LibraryGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {purchases.map((purchase) => (
-        <LibraryCard key={purchase.purchaseId} purchase={purchase} />
+        <LibraryCard
+          key={purchase.purchaseId ?? purchase.id}
+          purchase={purchase}
+        />
       ))}
     </div>
   );

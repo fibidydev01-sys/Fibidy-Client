@@ -1,48 +1,69 @@
 'use client';
 
 // ==========================================
-// PRODUCT FORM — Step: Details (Name + Price)
+// PRODUCT FORM — Step: Details (Name + Price + Category + Description)
+//
+// [PROPS PARITY FIX — May 2026]
+// Previously this component declared:
+//
+//   interface StepDetailsProps {
+//     register: UseFormRegister<ProductFormData>;
+//     errors: FieldErrors<ProductFormData>;
+//     watch: UseFormWatch<ProductFormData>;
+//     setValue: UseFormSetValue<ProductFormData>;
+//   }
+//
+// But the parent (product.tsx) renders it as:
+//
+//   <StepDetails form={form} categories={categories} />
+//
+// At runtime that meant `register` was `undefined`, so calling
+// `register('name')` blew up with a TypeError on the very first
+// render — surfacing as the "Application error: a client-side
+// exception has occurred" message on /dashboard/products/new.
+//
+// Sibling steps (StepUpload, StepMedia) already use the
+// `form: UseFormReturn<ProductFormData>` shape, so this file now
+// matches that convention. We destructure the four hooks we need
+// inside the component body.
+//
+// `categories` is accepted as an optional prop and wired into a
+// native <datalist> for typeahead — useful for sellers who already
+// have a few categories saved. Falls back to free-text entry when
+// no categories are provided.
 //
 // [IDR MIGRATION — May 2026]
 // Currency change: USD → IDR for product creation/editing.
 // Three changes to the price inputs:
 //
 //   1. Prefix: <span>$</span> → <span>Rp</span>
-//      Visual cue to seller that they're entering Rupiah.
+//   2. step: "0.01" → "1000"  (IDR has no fractional values)
+//   3. min on price: "0" → "1000"  (matches BE DTO @Min(1000))
+//   4. comparePrice min stays "0" — optional, allow zero/unset.
+//   5. onChange uses parseInt(value, 10) so we never feed a decimal
+//      into the IDR field.
 //
-//   2. step: "0.01" → "1000"
-//      IDR has no fractional values. Step of 1000 also matches typical
-//      pricing increments in Indonesian commerce (Rp 25.000, Rp 50.000,
-//      Rp 75.000, etc).
-//
-//   3. min on price: "0" → "1000"
-//      Matches BE DTO @Min(1000) and validation schema. Browsers
-//      enforce HTML5 `min` for type="number" so this is a first line
-//      of defense — Zod schema is the second.
-//
-//   4. comparePrice min stays "0" — optional field, allow zero/unset.
-//
-//   5. onChange: Number(e.target.value) → parseInt(e.target.value, 10)
-//      Coerce to integer so we never accidentally feed a decimal value
-//      into the IDR field. parseInt handles empty string → NaN, and we
-//      fall back to 0 for the temporary form state.
-//
-// Localized labels and helpers come from messages/{en,id}/dashboard.json
-// under `dashboard.products.form.*`.
+// [I18N FIX — May 2026]
+// Translations are read from `dashboard.products.form.details` (not
+// `dashboard.products.form`). The labels — `nameLabel`, `pricePlaceholder`
+// etc. — live under the `.details` sub-namespace in the JSON. Reading
+// from the parent namespace would resolve to undefined keys and throw
+// MISSING_MESSAGE in production, contributing to the same client-side
+// error symptom as the props mismatch above.
 // ==========================================
 
+import { useId } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { ProductFormData } from '@/lib/shared/validations';
-import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
 interface StepDetailsProps {
-  register: UseFormRegister<ProductFormData>;
-  errors: FieldErrors<ProductFormData>;
-  watch: UseFormWatch<ProductFormData>;
-  setValue: UseFormSetValue<ProductFormData>;
+  form: UseFormReturn<ProductFormData>;
+  /** Existing seller categories — used to populate a typeahead datalist. */
+  categories?: string[];
 }
 
 /**
@@ -56,9 +77,16 @@ function parseRupiahInput(value: string): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
-export function StepDetails({ register, errors, watch, setValue }: StepDetailsProps) {
-  const t = useTranslations('dashboard.products.form');
+export function StepDetails({ form, categories = [] }: StepDetailsProps) {
+  const t = useTranslations('dashboard.products.form.details');
+  const {
+    register,
+    formState: { errors },
+    watch,
+    setValue,
+  } = form;
 
+  const datalistId = useId();
   const price = watch('price') ?? 0;
   const comparePrice = watch('comparePrice');
 
@@ -95,15 +123,23 @@ export function StepDetails({ register, errors, watch, setValue }: StepDetailsPr
         )}
       </div>
 
-      {/* Category */}
+      {/* Category — free text with optional typeahead from existing categories */}
       <div className="space-y-2">
-        <Label htmlFor="category">{t('categoryLabel')}</Label>
+        <Label htmlFor="category">{t('categoryPlaceholder')}</Label>
         <Input
           id="category"
           placeholder={t('categoryPlaceholder')}
+          list={categories.length > 0 ? datalistId : undefined}
           {...register('category')}
           aria-invalid={!!errors.category}
         />
+        {categories.length > 0 && (
+          <datalist id={datalistId}>
+            {categories.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+        )}
         {errors.category && (
           <p className="text-sm text-destructive">{errors.category.message}</p>
         )}
@@ -129,7 +165,11 @@ export function StepDetails({ register, errors, watch, setValue }: StepDetailsPr
             placeholder={t('pricePlaceholder')}
             className="pl-9"
             value={price === 0 ? '' : price}
-            onChange={(e) => setValue('price', parseRupiahInput(e.target.value), { shouldValidate: true })}
+            onChange={(e) =>
+              setValue('price', parseRupiahInput(e.target.value), {
+                shouldValidate: true,
+              })
+            }
             aria-invalid={!!errors.price}
           />
         </div>
@@ -162,7 +202,9 @@ export function StepDetails({ register, errors, watch, setValue }: StepDetailsPr
               if (raw === '') {
                 setValue('comparePrice', undefined, { shouldValidate: true });
               } else {
-                setValue('comparePrice', parseRupiahInput(raw), { shouldValidate: true });
+                setValue('comparePrice', parseRupiahInput(raw), {
+                  shouldValidate: true,
+                });
               }
             }}
             aria-invalid={!!errors.comparePrice}

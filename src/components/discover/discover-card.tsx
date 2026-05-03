@@ -5,10 +5,17 @@
 //
 // [IDR MIGRATION — May 2026]
 // Replaced hardcoded `${product.price.toFixed(2)}` with
-// `formatPrice(product.price, product.currency ?? 'IDR')`.
-// Pre-migration this rendered "$50000.00" for IDR products — wrong on
-// every dimension (wrong symbol, wrong separator, wrong decimals).
-// Now respects `product.currency` if set; defaults to IDR.
+// `formatPrice(product.price, product.currency ?? 'IDR')`. Pre-migration
+// this rendered "$50000.00" for IDR products — wrong on every dimension
+// (wrong symbol, wrong separator, wrong decimals). Now respects
+// `product.currency` if set; defaults to IDR.
+//
+// [TYPE PARITY FIX — May 2026]
+// `DiscoverProduct` is an alias of `PublicProduct`, which exposes
+// the seller display name as `sellerName` — NOT `tenantName`. The
+// previous build referenced `product.tenantName` and would silently
+// render an empty seller line. Now uses `sellerName` so the "by {name}"
+// row actually fills in.
 // ==========================================
 
 import Link from 'next/link';
@@ -76,10 +83,10 @@ export function DiscoverCard({ product }: DiscoverCardProps) {
             {product.name}
           </h3>
 
-          {/* Seller */}
-          {product.tenantName && (
+          {/* Seller — denormalized from public discover payload */}
+          {product.sellerName && (
             <p className="text-xs text-muted-foreground mt-1 truncate">
-              {t('bySeller', { name: product.tenantName })}
+              {t('bySeller', { name: product.sellerName })}
             </p>
           )}
 

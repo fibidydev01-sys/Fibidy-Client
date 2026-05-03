@@ -6,6 +6,12 @@
 //
 // Card stays visible (not grayed out) — buyer still sees purchase
 // history, but cannot download the file anymore.
+//
+// [TYPE PARITY FIX — May 2026]
+// `Purchase` now declares `purchaseId`, `fileType`, and `seller` so
+// this file compiles without `as any` casts. We still defensively
+// fall back to legacy field names (`id`, `productFileType`) in case
+// any code path returns the older shape.
 
 'use client';
 
@@ -52,8 +58,15 @@ interface LibraryCardProps {
 
 export function LibraryCard({ purchase }: LibraryCardProps) {
   const t = useTranslations('dashboard.library.card');
-  const Icon = FILE_ICONS[purchase.fileType] ?? FileText;
-  const { getDownloadUrl } = useDownloadUrl(purchase.purchaseId);
+
+  // Tolerant of either field name. Buyer-library API emits `fileType`
+  // and `purchaseId`; legacy paths may emit `productFileType` / `id`.
+  const fileType = purchase.fileType ?? purchase.productFileType ?? '';
+  const purchaseId = purchase.purchaseId ?? purchase.id;
+  const sellerName = purchase.seller?.name ?? '';
+
+  const Icon = FILE_ICONS[fileType] ?? FileText;
+  const { getDownloadUrl } = useDownloadUrl(purchaseId);
 
   // [FIX #1] Source of truth: downloadRevoked field from backend.
   // Fallback: if server hasn't been deployed yet and field is missing,
@@ -77,9 +90,9 @@ export function LibraryCard({ purchase }: LibraryCardProps) {
           <p className="text-sm font-semibold truncate">
             {purchase.productName}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {purchase.seller.name}
-          </p>
+          {sellerName && (
+            <p className="text-xs text-muted-foreground">{sellerName}</p>
+          )}
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-muted-foreground">
               {new Date(purchase.purchasedAt).toLocaleDateString('en-US')}

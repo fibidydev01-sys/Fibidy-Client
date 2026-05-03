@@ -9,6 +9,14 @@
 //   3. Buttons: Cancel (ghost) | Request Refund (destructive)
 //
 // On confirm → POST /refund/:purchaseId → toast result
+//
+// [TYPE PARITY FIX — May 2026]
+// Two changes to align with the updated Purchase type:
+//   1. Resolve the purchase id via `purchase.purchaseId ?? purchase.id`
+//      so the API call hits the correct endpoint regardless of which
+//      field name the BE returns.
+//   2. Render the seller name only when `purchase.seller?.name` exists.
+//      Some legacy purchases may lack the denormalized seller join.
 
 'use client';
 
@@ -38,8 +46,12 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
   const t = useTranslations('dashboard.library.refund.dialog');
   const { mutate: requestRefund, isPending } = useRequestRefund();
 
+  // Tolerant of either field name — see Purchase type comments.
+  const purchaseId = purchase.purchaseId ?? purchase.id;
+  const sellerName = purchase.seller?.name ?? '';
+
   const handleConfirm = () => {
-    requestRefund(purchase.purchaseId, {
+    requestRefund(purchaseId, {
       onSettled: () => {
         onOpenChange(false);
       },
@@ -60,7 +72,8 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
               <div className="rounded-lg border bg-muted/30 px-3 py-2.5">
                 <p className="text-sm font-medium text-foreground">{purchase.productName}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {formatPrice(purchase.paidAmount, purchase.currency)} · {purchase.seller.name}
+                  {formatPrice(purchase.paidAmount, purchase.currency)}
+                  {sellerName ? ` · ${sellerName}` : ''}
                 </p>
               </div>
 
@@ -75,13 +88,15 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
                   <div className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{t('approvedBold')}</span> {t('approvedFileUndownloadable')}
+                      <span className="font-medium text-foreground">{t('approvedBold')}</span>{' '}
+                      {t('approvedFileUndownloadable')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{t('approvedBold')}</span> {t('approvedFileCorrupted')}
+                      <span className="font-medium text-foreground">{t('approvedBold')}</span>{' '}
+                      {t('approvedFileCorrupted')}
                     </span>
                   </div>
                 </div>
@@ -91,19 +106,22 @@ export function RefundDialog({ purchase, open, onOpenChange }: RefundDialogProps
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedContentMismatch')}
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span>{' '}
+                      {t('rejectedContentMismatch')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedNoLongerNeed')}
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span>{' '}
+                      {t('rejectedNoLongerNeed')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <X className="h-3.5 w-3.5 text-destructive shrink-0" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span> {t('rejectedAccident')}
+                      <span className="font-medium text-foreground">{t('notApprovedBold')}</span>{' '}
+                      {t('rejectedAccident')}
                     </span>
                   </div>
                 </div>

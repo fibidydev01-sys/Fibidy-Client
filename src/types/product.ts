@@ -22,6 +22,22 @@
 //   - Purchase            (lib/api/library.ts, checkout/success/client.tsx)
 //   - DownloadUrlResponse (lib/api/library.ts)
 // All other types preserved verbatim from the pre-replace original.
+//
+// [TYPE PARITY FIX — May 2026]
+// The buyer-library API actually returns these field names that diverged
+// from this type: `purchaseId`, `fileType`, and a denormalized `seller`
+// object. The Purchase type now declares them so the library components
+// (library-card, library-grid, refund-button, refund-dialog) compile.
+//
+// To stay backward compatible with `checkout/success/client.tsx` (which
+// reads `purchase.id`), we keep BOTH `id` AND `purchaseId` as required
+// strings. BE returns the same value under both names; if BE only returns
+// one, the fetch layer or a lightweight adapter should mirror it before
+// handing the object to React. (See library.ts api wrapper for where
+// such mirroring would go.)
+//
+// `seller` is optional — older purchases or non-buyer queries may
+// not include it. Components null-check before reading.
 // ==========================================
 
 import type { SubscriptionTier } from '@/lib/api/subscription';
@@ -334,15 +350,37 @@ export interface DiscoverResponse {
 // [IDR MIGRATION] paidAmount is integer Rupiah for IDR purchases
 // (e.g. 50000 = Rp 50.000). currency reflects what was charged.
 // formatPrice(paidAmount, currency) handles display correctly.
+//
+// [TYPE PARITY FIX — May 2026]
+// Three additions for buyer-library API parity:
+//   - `purchaseId` — kept alongside `id` because BE returns this name
+//     in the buyer library payload. Library components were already
+//     coded against `purchaseId`. Both fields carry the same value.
+//   - `fileType` — alias for `productFileType` used by buyer library.
+//   - `seller` — denormalized seller info. Library card shows seller
+//     name underneath product name; refund dialog shows seller
+//     alongside paid amount.
 // ==========================================
 
 export type PurchaseStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
 
 export interface Purchase {
+  /**
+   * Primary key. The buyer-library API returns the same value under
+   * both `id` and `purchaseId` so callers can use either.
+   */
   id: string;
+  /**
+   * Alias for `id`. Buyer library API emits this name; library
+   * components reference it directly.
+   */
+  purchaseId: string;
+
   productId: string;
   productName: string;
+  /** Lowercase file extension (e.g. "pdf", "epub"). Same value under both names. */
   productFileType?: string | null;
+  fileType?: string | null;
 
   /** Stripe Checkout Session ID — used for success page polling */
   stripeSessionId?: string | null;
@@ -370,6 +408,15 @@ export interface Purchase {
    * render (for refund flow) but Download button must be disabled.
    */
   downloadRevoked?: boolean;
+
+  /**
+   * Denormalized seller info. Optional because some legacy purchases
+   * may not have it joined; components null-check before reading.
+   */
+  seller?: {
+    name: string;
+    slug?: string;
+  };
 
   /** Refund metadata — populated only when refund has been requested */
   refundRequest?: RefundRequestInfo | null;

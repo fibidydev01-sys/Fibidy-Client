@@ -8,6 +8,18 @@
 // | refundRequest.status === 'PENDING'     | Disabled, loading    | "Refund pending"       |
 // | refundRequest.status === 'APPROVED'    | Disabled, green      | "Refunded"             |
 // | refundRequest.status === 'REJECTED'    | Disabled + tooltip   | "Refund rejected"      |
+//
+// [TYPE PARITY FIX — May 2026]
+// `purchase.refundEligibility` is optional/nullable on the Purchase
+// type — older payloads may omit it entirely. Previously this file
+// destructured it directly (`const { canRequest, daysRemaining } =
+// purchase.refundEligibility`), which TS rightly rejected and which
+// would have crashed at runtime on any purchase without eligibility
+// data attached. We now read it through a default object so the
+// downstream branching works whether the field is present or not.
+// Default `canRequest: false` matches the safest UX — show the
+// "Refund expired" disabled state rather than offering a refund
+// button that the BE will reject.
 
 'use client';
 
@@ -23,11 +35,24 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { RefundDialog } from './refund-dialog';
-import type { Purchase, RefundRejectReason } from '@/types/product';
+import type {
+  Purchase,
+  RefundRejectReason,
+  RefundEligibility,
+} from '@/types/product';
 
 interface RefundButtonProps {
   purchase: Purchase;
 }
+
+// Safe default when BE omits refundEligibility.
+// `canRequest: false` is the conservative pick — UX shows "expired"
+// instead of dangling a button that the API will refuse.
+const DEFAULT_ELIGIBILITY: RefundEligibility = {
+  canRequest: false,
+  reason: null,
+  daysRemaining: 0,
+};
 
 export function RefundButton({ purchase }: RefundButtonProps) {
   const t = useTranslations('dashboard.library.refund.button');
@@ -35,7 +60,8 @@ export function RefundButton({ purchase }: RefundButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const refund = purchase.refundRequest;
-  const { canRequest, daysRemaining } = purchase.refundEligibility;
+  const { canRequest, daysRemaining } =
+    purchase.refundEligibility ?? DEFAULT_ELIGIBILITY;
 
   function getRejectReasonMessage(reason?: RefundRejectReason | null): string {
     switch (reason) {

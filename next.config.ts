@@ -23,13 +23,6 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // ==========================================
-  // TYPESCRIPT BUILD ERROR BYPASS
-  // ==========================================
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-  // ==========================================
   // TURBOPACK CONFIG (Next.js 16+ default)
   // ==========================================
   turbopack: {},
