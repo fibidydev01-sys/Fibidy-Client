@@ -43,7 +43,6 @@
 //      `totalTransactionsValue` now expects `{count}` and `{threshold}`
 //      Progress bar percentage divides by threshold (not /200 USD).
 //
-// PLAN_STATIC ($0/$5/$15) and PLATFORM_FEE percentages STAY — those are
 // LemonSqueezy product configuration verbatim, not platform pricing.
 // ==========================================
 
@@ -116,9 +115,9 @@ const PLAN_STATIC: Record<
     icon: typeof Rocket;
   }
 > = {
-  FREE: { price: '$0', icon: Rocket },
-  STARTER: { price: '$5', icon: Zap },
-  BUSINESS: { price: '$15', icon: Crown },
+  FREE: { price: 'Gratis', icon: Rocket },
+  STARTER: { price: 'Rp 35.000', icon: Zap },
+  BUSINESS: { price: 'Rp 149.000', icon: Crown },
 };
 
 // Platform fee per tier — data, not copy

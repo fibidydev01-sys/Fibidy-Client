@@ -2,6 +2,21 @@
 
 // ─── Preview Product Sheet — v3 unified ────────────────────────────────────
 // v5: Display file size in KB instead of MB
+//
+// [IDR MIGRATION FOLLOW-UP — May 2026] — Bug #21 fix
+// Two changes to align this preview with the IDR migration:
+//
+//   1. Removed local `formatPrice` helper that produced `$X.XX` (USD).
+//      Replaced with `formatPriceIDR` from `@/lib/shared/format`.
+//      ProductForm only creates/edits IDR products via the upload pipeline,
+//      so the preview can format prices unconditionally as Rupiah.
+//
+//   2. Hardcoded `value="USD"` for the rowCurrency row → "IDR".
+//      Matches the rest of the IDR migration. If/when the platform ever
+//      supports multi-currency product creation, swap this for a dynamic
+//      value sourced from `formData` or a tenant-level currency field.
+//
+// No behavioral changes elsewhere.
 
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -16,7 +31,10 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
-import { formatFileSizeFromBytes } from '@/lib/shared/format';
+import {
+  formatFileSizeFromBytes,
+  formatPriceIDR,
+} from '@/lib/shared/format';
 import type { ProductFormData } from '@/lib/shared/validations';
 
 interface PreviewProductProps {
@@ -82,8 +100,14 @@ export function PreviewProduct({
   const images = formData.images || [];
   const firstImage = images[0];
 
-  const formatPrice = (val?: number | null) =>
-    val ? `$${val.toFixed(2)}` : null;
+  // [IDR MIGRATION] Format helper — IDR Rupiah, integer (no decimals).
+  // Was: `${val.toFixed(2)}` USD. Now: "Rp 50.000" via Intl.NumberFormat('id-ID').
+  // formatPriceIDR returns "Rp 0" for 0/null/undefined input — guard for null
+  // and 0 (which we treat as "not filled in" for the seller-facing preview).
+  const formatPrice = (val?: number | null): string | null => {
+    if (val == null || val === 0) return null;
+    return formatPriceIDR(val);
+  };
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -188,7 +212,10 @@ export function PreviewProduct({
               />
               <PreviewRow
                 label={t('rowCurrency')}
-                value="USD"
+                /* [IDR MIGRATION] Was hardcoded "USD". Product creation pipeline
+                   stores currency: 'IDR' on BE (products-upload.service.ts), so
+                   the preview should reflect that uniformly. */
+                value="IDR"
                 valueClass="text-muted-foreground"
               />
             </div>

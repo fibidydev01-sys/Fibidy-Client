@@ -10,9 +10,21 @@
 // `admin.dashboard.title`, `admin.dashboard.subtitle`, and
 // `admin.dashboard.stats.*`.
 //
-// Currency formatter keeps `en-US` / `USD` locale because prices on the
-// platform are tracked in USD regardless of UI language. Revisit in Phase 2
-// if product requirements change.
+// [IDR MIGRATION — May 2026]
+// Removed local `formatCurrency` helper that used `'en-US'` / `'USD'` locale.
+// Replaced with `formatPriceIDR` from `@/lib/shared/format` — single source
+// of truth for Rupiah display across the app.
+//
+// Changes:
+//   1. Removed local formatCurrency function (USD + en-US).
+//   2. Replaced `'$0'` fallbacks with `formatPriceIDR(0)` which renders "Rp 0".
+//   3. Updated comment header — platform tracks IDR now, not USD. The previous
+//      comment (claiming "prices tracked in USD regardless of UI language")
+//      was outdated post-IDR migration.
+//
+// Fibidy is an Indonesian marketplace — Stripe Connect settles in IDR for
+// Indonesia accounts, LS subscription billing is IDR-native. Admin revenue
+// stats reflect platform-fee accruals, all in Rupiah.
 // ==========================================
 
 import { Users, CreditCard, TrendingUp, UserCheck, UserX } from 'lucide-react';
@@ -20,6 +32,8 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminStats } from '@/hooks/admin/use-admin';
+// [IDR MIGRATION] formatPriceIDR — Rupiah-formatted display via id-ID locale.
+import { formatPriceIDR } from '@/lib/shared/format';
 
 // ==========================================
 // STAT CARD
@@ -66,13 +80,6 @@ export default function AdminDashboardPage() {
   const t = useTranslations('admin.dashboard');
   const { stats, isLoading } = useAdminStats();
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(amount);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -108,9 +115,9 @@ export default function AdminDashboardPage() {
         />
         <StatCard
           title={t('stats.revenueThisMonth')}
-          value={stats ? formatCurrency(stats.revenueThisMonth) : '$0'}
+          value={formatPriceIDR(stats?.revenueThisMonth ?? 0)}
           sub={t('stats.revenueThisMonthSub', {
-            total: stats ? formatCurrency(stats.totalRevenue) : '$0',
+            total: formatPriceIDR(stats?.totalRevenue ?? 0),
           })}
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={isLoading}

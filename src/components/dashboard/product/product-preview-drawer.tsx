@@ -14,6 +14,17 @@
 // `tProductType('fileFallback')` so it stays consistent with the rest
 // of the product-type labels ("Digital", "Custom", etc.) and gets
 // translated once new locales are added in Phase 2.
+//
+// [IDR MIGRATION FOLLOW-UP — May 2026] — Bug #22 fix
+// Replaced hardcoded `${(product.price ?? 0).toFixed(2)}` and
+// `${product.comparePrice.toFixed(2)}` with `formatPrice()` from
+// `@/lib/shared/format`, defaulting currency to `'IDR'` to match the
+// rest of the IDR migration. Was rendering "$50000.00" for IDR products
+// — wrong on every dimension (symbol, separator, decimal rule).
+// Now renders "Rp 50.000".
+//
+// `product.currency` carries the actual currency from BE; we fall back
+// to 'IDR' for legacy/null values consistent with format.ts default.
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Image from 'next/image';
@@ -36,7 +47,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/shared/utils';
-import { formatDateShort, formatFileSizeFromMb } from '@/lib/shared/format';
+import {
+  formatDateShort,
+  formatFileSizeFromMb,
+  formatPrice,
+} from '@/lib/shared/format';
 import type { Product } from '@/types/product';
 
 interface ProductPreviewDrawerProps {
@@ -111,6 +126,10 @@ function DrawerInner({
 
   // [FIX #9] Delete is blocked if product has purchases.
   const canDelete = salesCount === 0;
+
+  // [IDR MIGRATION] Default to IDR uniformly. Was: hardcoded $X.XX.
+  // formatPrice respects locale + symbol + decimal rules per currency.
+  const currency = product.currency ?? 'IDR';
 
   return (
     <>
@@ -208,12 +227,13 @@ function DrawerInner({
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-baseline gap-3">
+              {/* [IDR MIGRATION] formatPrice — was: ${(price).toFixed(2)} */}
               <span className="text-2xl font-bold">
-                ${(product.price ?? 0).toFixed(2)}
+                {formatPrice(product.price ?? 0, currency)}
               </span>
               {product.comparePrice && product.comparePrice > product.price && (
                 <span className="text-sm text-muted-foreground line-through">
-                  ${product.comparePrice.toFixed(2)}
+                  {formatPrice(product.comparePrice, currency)}
                 </span>
               )}
             </div>

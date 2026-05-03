@@ -10,6 +10,10 @@ import { seoConfig } from '@/lib/constants/shared/seo.config';
 // - Breadcrumb "Home" label remains literal EN — once Layer 4 wires
 //   up page-level translations, consumers of this helper can pass
 //   a pre-translated label via generateBreadcrumbs caller side if needed
+//
+// [IDR MIGRATION — May 2026]
+// createProductMetadata: currency default changed USD → IDR.
+// Intl.NumberFormat now always uses 'id-ID' locale + 0 decimal digits.
 // ==========================================
 
 // ==========================================
@@ -138,20 +142,14 @@ export function createProductMetadata({
 }): Metadata {
   const title = `${product.name} — ${tenant.name} | Fibidy`;
 
-  // Resolve currency from product:
-  // - Digital (fileKey != null) → USD
-  // - Custom/service → product.currency or fallback USD
-  const isDigital = !!product.fileKey;
-  const currency = product.currency ?? (isDigital ? 'USD' : 'USD');
-
-  const priceFormatted = new Intl.NumberFormat(
-    currency === 'USD' ? 'en-US' : 'id-ID',
-    {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: currency === 'USD' ? 2 : 0,
-    }
-  ).format(product.price);
+  // [IDR MIGRATION] All Stripe Connect transactions settle in IDR.
+  // Default to IDR — respect explicit product.currency if set.
+  const currency = product.currency ?? 'IDR';
+  const priceFormatted = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+  }).format(product.price);
 
   const description =
     product.description || `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;

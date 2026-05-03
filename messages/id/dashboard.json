@@ -287,7 +287,7 @@
       "plans": {
         "FREE": {
           "name": "Gratis",
-          "price": "$0",
+          "price": "Gratis",
           "priceNote": "Gratis selamanya",
           "features": [
             "5 produk",
@@ -302,7 +302,7 @@
         },
         "STARTER": {
           "name": "Starter",
-          "price": "$5",
+          "price": "Rp 35.000",
           "priceNote": "/bulan",
           "features": [
             "20 produk",
@@ -317,7 +317,7 @@
         },
         "BUSINESS": {
           "name": "Business",
-          "price": "$15",
+          "price": "Rp 149.000",
           "priceNote": "/bulan",
           "features": [
             "50 produk",
@@ -569,8 +569,8 @@
     "upgradeModal": {
       "defaultTitle": "Limit paket tercapai",
       "defaultDescription": "Upgrade paket untuk unlock limit lebih tinggi dan fitur premium.",
-      "upgradeStarterLabel": "Upgrade ke Starter — $5/bln",
-      "upgradeBusinessLabel": "Upgrade ke Business — $15/bln",
+      "upgradeStarterLabel": "Upgrade ke Starter — Rp 35.000/bln",
+      "upgradeBusinessLabel": "Upgrade ke Business — Rp 149.000/bln",
       "viewAllPlans": "Lihat semua paket",
       "viewUpgradePlans": "Lihat paket upgrade",
       "maybeLater": "Mungkin nanti"

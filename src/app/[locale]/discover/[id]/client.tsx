@@ -152,7 +152,7 @@ export function DiscoverDetailClient({ product }: Props) {
           sellerName={product.sellerName}
           sellerWhatsapp={product.sellerWhatsapp ?? ''}
           price={product.price}
-          currency={product.currency}
+          currency={product.currency ?? undefined}
           className="w-full"
           variant="outline"
           size="lg"
