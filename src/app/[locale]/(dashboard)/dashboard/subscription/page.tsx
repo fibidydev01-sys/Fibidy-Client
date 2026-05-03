@@ -6,44 +6,44 @@
 //
 // Tiers: FREE → STARTER → BUSINESS
 //
+// [UI REDESIGN — May 2026]
+// Visual-only refresh inspired by shadcnblocks pricing.
+// NO LOGIC CHANGES — every fetch, mutation, banner, dialog, polling
+// effect, and state machine is preserved verbatim. Only the markup
+// for the plan-comparison cards (and the current-plan card header)
+// has been reshaped:
+//
+//   1. Plan cards now use equal-height layout via `flex flex-col` +
+//      `flex-1` content area + `mt-auto` CTA. Cards in the grid
+//      stretch to the tallest sibling, matching the shadcnblocks look.
+//
+//   2. Lucide icons (Rocket / Zap / Crown) removed from plan
+//      headers per design feedback. A small colored dot replaces
+//      them as a subtle visual cue for tier identity.
+//
+//   3. The per-line "Coming Soon" badge on each digital feature is
+//      gone. Instead, the three digital limits PLUS the platform fee
+//      are grouped into a single "Coming Soon" section with a Rocket
+//      icon header and a Lock icon next to each item — only when
+//      `FEATURES.digitalProducts === false`. When the flag flips ON,
+//      digital features render as normal checked items and the fee
+//      appears in its own muted box (the original treatment).
+//
+//   4. The Business plan CTA shows "Coming Soon" (disabled) when
+//      `FEATURES.digitalProducts === false`, regardless of qualification
+//      state. When the flag flips ON, the existing CTA branching kicks
+//      back in (Upgrade / Not yet qualified / Requires Starter first /
+//      Current plan / Downgrade).
+//
+// All other behavior — verify polling, manual retry, cancel dialog,
+// over-limit banner, business unlock progress — is untouched.
+//
 // Subscription billing is LemonSqueezy only as of the May 2026
 // LS-vs-Stripe separation refactor. See docs/REFACTOR-PLAN-LS-VS-STRIPE.md.
 //
-// Flow:
-//   1. Click Subscribe → POST /subscription/checkout?tier=X → checkoutUrl
-//   2. window.location.href = checkoutUrl  (LS hosted checkout)
-//   3. After payment, LS redirects back to /dashboard/subscription?status=success
-//      (LS redirect URL has no session_id — backend doesn't need it)
-//   4. Poll GET /subscription/verify every 2s until 'completed' or 60s timeout
-//   5. On 'completed' → refetch plan, show success
-//   6. On timeout → show "verification failed" + retry button
-//
-// Cancel: cancel-at-period-end via LS API → user retains access until ends_at
-// Business: STARTER + (Rp 3.000.000 sales OR 20 transactions)
-//
-// ── Digital Products feature flag ─────────────────────────────
-// When FEATURES.digitalProducts is off:
-//   - Digital usage tile + storage tile are hidden
-//   - Tier comparison renders digital features dimmed with "Coming Soon" badge
-//
-// [IDR MIGRATION — May 2026] — Bug #7 fix
-// Three minimal changes:
-//
-//   1. Import `formatPriceIDR` from `@/lib/shared/format` for Rupiah display.
-//
-//   2. Resolve BUSINESS qualifier thresholds from API response:
-//      - `planInfo.businessThreshold.amountIdr` (was hardcoded $200 USD)
-//      - `planInfo.businessThreshold.txCount`   (was hardcoded 20, value
-//                                                 stays the same but is now
-//                                                 sourced from BE)
-//      Fallback constants kept for backward compat with un-redeployed BE.
-//
-//   3. Pass formatted IDR string + threshold to i18n templates:
-//      `totalSalesValue`        now expects `{amount}` and `{threshold}`
-//      `totalTransactionsValue` now expects `{count}` and `{threshold}`
-//      Progress bar percentage divides by threshold (not /200 USD).
-//
-// LemonSqueezy product configuration verbatim, not platform pricing.
+// [IDR MIGRATION — May 2026] — preserved
+// `formatPriceIDR` for Rupiah display, `businessThreshold` from BE
+// response for progress bars, fallback constants for un-redeployed BE.
 // ==========================================
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -51,17 +51,16 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import {
-  Rocket,
-  Crown,
   Loader2,
   Calendar,
   AlertTriangle,
   Check,
   X,
-  Zap,
   TrendingUp,
   ShieldCheck,
   CheckCircle2,
+  Rocket,
+  Lock,
 } from 'lucide-react';
 import {
   Card,
@@ -92,32 +91,28 @@ import {
 } from '@/lib/api/subscription';
 import { getErrorMessage } from '@/lib/api/client';
 import { FEATURES } from '@/lib/config/features';
-// [IDR MIGRATION] formatPriceIDR for Rupiah-formatted progress display.
 import { formatPriceIDR } from '@/lib/shared/format';
 
 // ==========================================
-// PLAN STATIC CONFIG — icons + prices only (identifier-grade)
+// PLAN STATIC CONFIG — price + dot color (no icons)
 // ==========================================
 //
-// USD prices below reflect the LemonSqueezy product dashboard config.
-// LS handles internal currency conversion — buyers see USD because the
-// LS product is set to USD pricing. If/when LS products are switched to
-// IDR, update these strings — code structure does not need to change.
-// (Same UX pattern as Tokopedia displaying via Midtrans — no disclaimer
-// is needed because the buyer pays the listed amount in the listed
-// currency.)
+// Tier identity is communicated via a small colored dot next to the
+// plan name (slate / emerald / violet) instead of a Lucide icon.
+// This keeps the cards visually quieter and more consistent with the
+// shadcnblocks reference.
 // ==========================================
 
 const PLAN_STATIC: Record<
   SubscriptionTier,
   {
     price: string;
-    icon: typeof Rocket;
+    dotColor: string;
   }
 > = {
-  FREE: { price: 'Gratis', icon: Rocket },
-  STARTER: { price: 'Rp 35.000', icon: Zap },
-  BUSINESS: { price: 'Rp 149.000', icon: Crown },
+  FREE: { price: 'Gratis', dotColor: 'bg-slate-400' },
+  STARTER: { price: 'Rp 35.000', dotColor: 'bg-emerald-500' },
+  BUSINESS: { price: 'Rp 149.000', dotColor: 'bg-violet-500' },
 };
 
 // Platform fee per tier — data, not copy
@@ -138,14 +133,9 @@ type VerifyState = 'idle' | 'verifying' | 'completed' | 'failed';
 
 // ==========================================
 // BUSINESS QUALIFIER FALLBACK CONSTANTS
-//
-// [IDR MIGRATION] BE returns thresholds via planInfo.businessThreshold.
-// These constants serve as fallbacks for backward compat with un-redeployed
-// BE. Remove after one release cycle once production BE is confirmed
-// returning the field.
 // ==========================================
 
-const BUSINESS_THRESHOLD_AMOUNT_FALLBACK = 3_000_000; // Rp 3.000.000
+const BUSINESS_THRESHOLD_AMOUNT_FALLBACK = 3_000_000;
 const BUSINESS_THRESHOLD_TX_FALLBACK = 20;
 
 // ==========================================
@@ -193,7 +183,7 @@ export default function SubscriptionPage() {
           name: t('plans.FREE.name'),
           price: PLAN_STATIC.FREE.price,
           priceNote: t('plans.FREE.priceNote'),
-          icon: PLAN_STATIC.FREE.icon,
+          dotColor: PLAN_STATIC.FREE.dotColor,
           features: t.raw('plans.FREE.features') as string[],
           digitalFeatures: t.raw('plans.FREE.digitalFeatures') as string[],
         },
@@ -201,7 +191,7 @@ export default function SubscriptionPage() {
           name: t('plans.STARTER.name'),
           price: PLAN_STATIC.STARTER.price,
           priceNote: t('plans.STARTER.priceNote'),
-          icon: PLAN_STATIC.STARTER.icon,
+          dotColor: PLAN_STATIC.STARTER.dotColor,
           features: t.raw('plans.STARTER.features') as string[],
           digitalFeatures: t.raw('plans.STARTER.digitalFeatures') as string[],
         },
@@ -209,7 +199,7 @@ export default function SubscriptionPage() {
           name: t('plans.BUSINESS.name'),
           price: PLAN_STATIC.BUSINESS.price,
           priceNote: t('plans.BUSINESS.priceNote'),
-          icon: PLAN_STATIC.BUSINESS.icon,
+          dotColor: PLAN_STATIC.BUSINESS.dotColor,
           features: t.raw('plans.BUSINESS.features') as string[],
           digitalFeatures: t.raw('plans.BUSINESS.digitalFeatures') as string[],
         },
@@ -219,7 +209,7 @@ export default function SubscriptionPage() {
           name: string;
           price: string;
           priceNote: string;
-          icon: typeof Rocket;
+          dotColor: string;
           features: string[];
           digitalFeatures: string[];
         }
@@ -227,7 +217,6 @@ export default function SubscriptionPage() {
     [t],
   );
 
-  // Marker for "forever free" so we know not to append the priceNote twice
   const freeForeverNote = t('plans.FREE.priceNote');
 
   // ── Fetch data ──────────────────────────────────────────────
@@ -266,12 +255,10 @@ export default function SubscriptionPage() {
 
     if (status !== 'success') return;
 
-    // Start polling
     setVerifyState('verifying');
     pollStartRef.current = Date.now();
 
     const poll = async () => {
-      // Timeout check
       if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
         stopPolling();
         setVerifyState('failed');
@@ -294,16 +281,13 @@ export default function SubscriptionPage() {
               ? tToast('paymentSuccessDetail', { tier: result.tier })
               : tToast('paymentSuccessGeneric'),
           });
-          // Clean URL after success
           window.history.replaceState({}, '', '/dashboard/subscription');
         }
-        // pending → keep polling
       } catch {
         // Network hiccup — keep polling, timeout will catch persistent failure
       }
     };
 
-    // Immediate first check
     poll();
     pollIntervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
 
@@ -345,8 +329,6 @@ export default function SubscriptionPage() {
         await fetchData();
         return;
       }
-      // Still pending after timeout — declare failure.
-      // No reconcile fallback exists for LS; webhook is the only source of truth.
       setVerifyState('failed');
       toast.error(tToast('verificationFailed'), {
         description: tToast('verificationFailedDetail'),
@@ -388,8 +370,6 @@ export default function SubscriptionPage() {
   const limits = planInfo?.limits;
   const isAtLimit = planInfo?.isAtLimit;
 
-  // [IDR MIGRATION] Resolve BUSINESS thresholds from API response, with
-  // fallback constants for un-redeployed BE.
   const businessThreshold = planInfo?.businessThreshold;
   const thresholdAmount =
     businessThreshold?.amountIdr ?? BUSINESS_THRESHOLD_AMOUNT_FALLBACK;
@@ -397,11 +377,12 @@ export default function SubscriptionPage() {
     businessThreshold?.txCount ?? BUSINESS_THRESHOLD_TX_FALLBACK;
 
   const currentPlan = PLAN_CONFIG[tier];
-  const PlanIcon = currentPlan.icon;
   const isFreeForever = currentPlan.priceNote === freeForeverNote;
 
-  // Show comingSoon badge on digital features when feature is off
-  const showDigitalBadge = !FEATURES.digitalProducts;
+  // When digital features are gated, render the grouped Coming Soon
+  // section instead of per-line badges. When the flag flips ON, this
+  // becomes false and the cards render the original layout.
+  const showComingSoonSection = !FEATURES.digitalProducts;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -438,7 +419,10 @@ export default function SubscriptionPage() {
             <div>
               <strong>{t('verify.failedTitle')}</strong>{' '}
               {t('verify.failedBody')}{' '}
-              <a href={`mailto:${t('verify.supportEmail')}`} className="underline font-medium">
+              <a
+                href={`mailto:${t('verify.supportEmail')}`}
+                className="underline font-medium"
+              >
                 {t('verify.supportEmail')}
               </a>
               .
@@ -456,7 +440,8 @@ export default function SubscriptionPage() {
       )}
 
       {/* ── Over-Limit Banner ──────────────────────────────── */}
-      {(isAtLimit?.products || (FEATURES.digitalProducts && isAtLimit?.digitalProducts)) && (
+      {(isAtLimit?.products ||
+        (FEATURES.digitalProducts && isAtLimit?.digitalProducts)) && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="pt-6">
             <div className="flex gap-3">
@@ -471,7 +456,8 @@ export default function SubscriptionPage() {
                       used: usage.products,
                       max: limits?.maxProducts ?? 0,
                     })}
-                  {FEATURES.digitalProducts && isAtLimit?.digitalProducts &&
+                  {FEATURES.digitalProducts &&
+                    isAtLimit?.digitalProducts &&
                     t('overLimit.digitalProductsPart', {
                       used: usage.digitalProducts,
                       max: limits?.maxDigitalProducts ?? 0,
@@ -489,9 +475,15 @@ export default function SubscriptionPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <PlanIcon className="h-6 w-6 text-primary" />
+              {/* Replaced Lucide icon with subtle dot — see UI redesign note. */}
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${currentPlan.dotColor}`}
+                aria-hidden
+              />
               <div>
-                <CardTitle>{currentPlan.name} {t('planSuffix')}</CardTitle>
+                <CardTitle>
+                  {currentPlan.name} {t('planSuffix')}
+                </CardTitle>
                 <CardDescription>
                   {currentPlan.price}
                   {!isFreeForever
@@ -575,7 +567,10 @@ export default function SubscriptionPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>
-                {t('activeUntil', { date: formatDate(periodEnd), days: daysRemaining })}
+                {t('activeUntil', {
+                  date: formatDate(periodEnd),
+                  days: daysRemaining,
+                })}
               </span>
             </div>
           )}
@@ -594,15 +589,16 @@ export default function SubscriptionPage() {
         </CardContent>
       </Card>
 
-      {/* ── Plan Comparison ────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* ── Plan Comparison ─────────────────────────────────
+          Equal-height cards via flex-col + flex-1 + mt-auto.
+          Headers carry a colored dot only — no Lucide icons. */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
         {(
           Object.entries(PLAN_CONFIG) as [
             SubscriptionTier,
             (typeof PLAN_CONFIG)[SubscriptionTier],
           ][]
         ).map(([planTier, config]) => {
-          const Icon = config.icon;
           const isCurrent = planTier === tier;
           const isUpgrade =
             (tier === 'FREE' &&
@@ -621,16 +617,27 @@ export default function SubscriptionPage() {
           const businessNeedStarter =
             planTier === 'BUSINESS' && tier === 'FREE';
 
+          // [UI REDESIGN] When the digital flag is OFF, the BUSINESS plan
+          // CTA is uniformly "Coming Soon" disabled — overrides every
+          // other CTA branch except `isCurrent`. When the flag flips ON,
+          // this condition is false and the original branching applies.
+          const businessFullComingSoon =
+            planTier === 'BUSINESS' && showComingSoonSection;
+
           const planIsFreeForever = config.priceNote === freeForeverNote;
 
           return (
             <Card
               key={planTier}
-              className={isCurrent ? 'border-primary ring-1 ring-primary/20' : ''}
+              className={`flex flex-col ${isCurrent ? 'border-primary ring-1 ring-primary/20' : ''}`}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <Icon className="h-5 w-5 text-primary" />
+                  {/* Colored dot replaces Lucide icon */}
+                  <span
+                    className={`h-2 w-2 rounded-full ${config.dotColor}`}
+                    aria-hidden
+                  />
                   <CardTitle className="text-lg">{config.name}</CardTitle>
                 </div>
                 <div className="mt-2">
@@ -645,10 +652,11 @@ export default function SubscriptionPage() {
                   </p>
                 )}
               </CardHeader>
-              <CardContent className="space-y-4">
+
+              <CardContent className="flex flex-col flex-1 space-y-4">
                 <Separator />
 
-                {/* Physical features — always rendered */}
+                {/* Global features — always rendered with primary checkmark */}
                 <ul className="space-y-2">
                   {config.features.map((feature, i) => (
                     <li key={`f-${i}`} className="flex items-start gap-2 text-sm">
@@ -656,106 +664,134 @@ export default function SubscriptionPage() {
                       <span>{feature}</span>
                     </li>
                   ))}
-
-                  {/* Digital features — dimmed + Coming Soon badge when off */}
-                  {config.digitalFeatures.map((feature, i) => (
-                    <li
-                      key={`d-${i}`}
-                      className={
-                        showDigitalBadge
-                          ? 'flex items-start gap-2 text-sm text-muted-foreground'
-                          : 'flex items-start gap-2 text-sm'
-                      }
-                    >
-                      <Check
-                        className={
-                          showDigitalBadge
-                            ? 'h-4 w-4 shrink-0 mt-0.5'
-                            : 'h-4 w-4 text-primary shrink-0 mt-0.5'
-                        }
-                      />
-                      <span className="flex-1">
-                        {feature}
-                        {showDigitalBadge && (
-                          <Badge
-                            variant="outline"
-                            className="ml-2 text-[10px] py-0 h-4 align-middle"
-                          >
-                            {t('comingSoonBadge')}
-                          </Badge>
-                        )}
-                      </span>
-                    </li>
-                  ))}
                 </ul>
 
-                <div className="rounded-lg bg-muted/50 px-3 py-2">
-                  <p className="text-xs text-muted-foreground">
-                    {t('platformFee.label')}{' '}
-                    <span className="font-semibold text-foreground">
-                      {PLATFORM_FEE[planTier]}
-                    </span>
-                  </p>
-                </div>
+                {/* Digital features — grouped Coming Soon when flag off,
+                    or rendered as standard checked items when flag on */}
+                {showComingSoonSection ? (
+                  <div className="rounded-lg border border-amber-200/60 bg-amber-50/50 dark:border-amber-800/40 dark:bg-amber-950/20 p-3 space-y-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <Rocket className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                        {t('comingSoon.sectionLabel')}
+                      </span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {config.digitalFeatures.map((feature, i) => (
+                        <li
+                          key={`d-${i}`}
+                          className="flex items-start gap-2 text-sm text-muted-foreground"
+                        >
+                          <Lock className="h-3 w-3 shrink-0 mt-1" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                      {/* Platform fee folded into the Coming Soon section since
+                          it only applies to file-based product sales. */}
+                      <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Lock className="h-3 w-3 shrink-0 mt-1" />
+                        <span>
+                          {t('platformFee.label')} {PLATFORM_FEE[planTier]}
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  <>
+                    <ul className="space-y-2">
+                      {config.digitalFeatures.map((feature, i) => (
+                        <li
+                          key={`d-${i}`}
+                          className="flex items-start gap-2 text-sm"
+                        >
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                {isCurrent && (
-                  <Button className="w-full" disabled>
-                    <ShieldCheck className="h-4 w-4 mr-2" />
-                    {t('cta.currentPlan')}
-                  </Button>
+                    <div className="rounded-lg bg-muted/50 px-3 py-2">
+                      <p className="text-xs text-muted-foreground">
+                        {t('platformFee.label')}:{' '}
+                        <span className="font-semibold text-foreground">
+                          {PLATFORM_FEE[planTier]}
+                        </span>
+                      </p>
+                    </div>
+                  </>
                 )}
 
-                {isUpgrade && planTier === 'STARTER' && (
-                  <Button
-                    className="w-full"
-                    onClick={() => handleCheckout('STARTER')}
-                    disabled={!!checkoutLoading || verifyState === 'verifying'}
-                  >
-                    {checkoutLoading === 'STARTER' ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Zap className="h-4 w-4 mr-2" />
-                    )}
-                    {t('cta.upgradeStarter')}
-                  </Button>
-                )}
-
-                {isUpgrade &&
-                  planTier === 'BUSINESS' &&
-                  !businessLocked &&
-                  !businessNeedStarter && (
-                    <Button
-                      className="w-full"
-                      onClick={() => handleCheckout('BUSINESS')}
-                      disabled={!!checkoutLoading || verifyState === 'verifying'}
-                    >
-                      {checkoutLoading === 'BUSINESS' ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Crown className="h-4 w-4 mr-2" />
-                      )}
-                      {t('cta.upgradeBusiness')}
+                {/* CTA — pinned to the bottom for equal-height alignment.
+                    Branching order matters:
+                      1. isCurrent wins over everything (don't lock current plan).
+                      2. businessFullComingSoon overrides upgrade / downgrade /
+                         qualification CTAs when digital flag is OFF.
+                      3. Otherwise the original branching applies verbatim. */}
+                <div className="mt-auto pt-2">
+                  {isCurrent && (
+                    <Button className="w-full" disabled>
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      {t('cta.currentPlan')}
                     </Button>
                   )}
 
-                {businessNeedStarter && (
-                  <Button className="w-full" variant="outline" disabled>
-                    {t('cta.requiresStarterFirst')}
-                  </Button>
-                )}
+                  {!isCurrent && businessFullComingSoon && (
+                    <Button className="w-full" variant="outline" disabled>
+                      <Rocket className="h-4 w-4 mr-2" />
+                      {t('cta.businessComingSoon')}
+                    </Button>
+                  )}
 
-                {businessLocked && (
-                  <Button className="w-full" variant="outline" disabled>
-                    {t('cta.notYetQualified')}
-                  </Button>
-                )}
+                  {!isCurrent && !businessFullComingSoon && isUpgrade && planTier === 'STARTER' && (
+                    <Button
+                      className="w-full"
+                      onClick={() => handleCheckout('STARTER')}
+                      disabled={!!checkoutLoading || verifyState === 'verifying'}
+                    >
+                      {checkoutLoading === 'STARTER' && (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      )}
+                      {t('cta.upgradeStarter')}
+                    </Button>
+                  )}
 
-                {isDowngrade && (
-                  <Button className="w-full" variant="ghost" disabled>
-                    <X className="h-4 w-4 mr-2" />
-                    {t('cta.downgrade')}
-                  </Button>
-                )}
+                  {!isCurrent &&
+                    !businessFullComingSoon &&
+                    isUpgrade &&
+                    planTier === 'BUSINESS' &&
+                    !businessLocked &&
+                    !businessNeedStarter && (
+                      <Button
+                        className="w-full"
+                        onClick={() => handleCheckout('BUSINESS')}
+                        disabled={!!checkoutLoading || verifyState === 'verifying'}
+                      >
+                        {checkoutLoading === 'BUSINESS' && (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        )}
+                        {t('cta.upgradeBusiness')}
+                      </Button>
+                    )}
+
+                  {!isCurrent && !businessFullComingSoon && businessNeedStarter && (
+                    <Button className="w-full" variant="outline" disabled>
+                      {t('cta.requiresStarterFirst')}
+                    </Button>
+                  )}
+
+                  {!isCurrent && !businessFullComingSoon && businessLocked && (
+                    <Button className="w-full" variant="outline" disabled>
+                      {t('cta.notYetQualified')}
+                    </Button>
+                  )}
+
+                  {!isCurrent && !businessFullComingSoon && isDowngrade && (
+                    <Button className="w-full" variant="ghost" disabled>
+                      <X className="h-4 w-4 mr-2" />
+                      {t('cta.downgrade')}
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           );
@@ -782,8 +818,6 @@ export default function SubscriptionPage() {
                   {t('businessUnlock.totalSales')}
                 </span>
                 <span className="font-medium">
-                  {/* [IDR MIGRATION] formatPriceIDR for both numerator + threshold.
-                      Was: salesTrack.totalAmount.toFixed(2) — produced "30000.00". */}
                   {t('businessUnlock.totalSalesValue', {
                     amount: formatPriceIDR(salesTrack.totalAmount),
                     threshold: formatPriceIDR(thresholdAmount),
@@ -791,8 +825,10 @@ export default function SubscriptionPage() {
                 </span>
               </div>
               <Progress
-                /* [IDR MIGRATION] Threshold from BE response (was hardcoded /200 USD). */
-                value={Math.min(100, (salesTrack.totalAmount / thresholdAmount) * 100)}
+                value={Math.min(
+                  100,
+                  (salesTrack.totalAmount / thresholdAmount) * 100,
+                )}
                 className="h-2"
               />
             </div>
@@ -812,7 +848,6 @@ export default function SubscriptionPage() {
                   {t('businessUnlock.totalTransactions')}
                 </span>
                 <span className="font-medium">
-                  {/* [IDR MIGRATION] threshold slot now sourced from BE. */}
                   {t('businessUnlock.totalTransactionsValue', {
                     count: salesTrack.totalCount,
                     threshold: thresholdTxCount,
@@ -820,8 +855,10 @@ export default function SubscriptionPage() {
                 </span>
               </div>
               <Progress
-                /* [IDR MIGRATION] Threshold from BE response (was hardcoded /20). */
-                value={Math.min(100, (salesTrack.totalCount / thresholdTxCount) * 100)}
+                value={Math.min(
+                  100,
+                  (salesTrack.totalCount / thresholdTxCount) * 100,
+                )}
                 className="h-2"
               />
             </div>
@@ -839,9 +876,10 @@ export default function SubscriptionPage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t('cancelDialog.descriptionPrefix')}
-              {periodEnd && t('cancelDialog.descriptionPeriodSuffix', {
-                date: formatDate(periodEnd),
-              })}
+              {periodEnd &&
+                t('cancelDialog.descriptionPeriodSuffix', {
+                  date: formatDate(periodEnd),
+                })}
               {t('cancelDialog.descriptionSuffix')}
             </AlertDialogDescription>
           </AlertDialogHeader>

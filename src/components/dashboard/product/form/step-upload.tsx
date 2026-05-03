@@ -3,13 +3,21 @@
 // ─── Step 1: File Upload — upload file to R2 ──────────────────────
 // v4: Import from @/types/product and @/components/dashboard/product/
 // v5: Display file size in KB instead of MB
+// v6 [PHASE 3 — May 2026]: Coming Soon early-return when
+//     FEATURES.digitalProducts === false. Step 2 stays navigable in
+//     the wizard so sellers can SEE the upload step exists, but the
+//     action is replaced with a disabled "Coming Soon" tile + dimmed
+//     dropzone placeholder. Inserted AFTER `isEditing` (legacy sellers
+//     with existing files keep working) and BEFORE the KYC gate
+//     (since when the feature is off, KYC is moot anyway).
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { UploadDropzone } from '@/components/dashboard/product/upload-dropzone';
 import { Button } from '@/components/ui/button';
-import { FileText, ShieldAlert, ArrowRight } from 'lucide-react';
+import { FileText, ShieldAlert, ArrowRight, Rocket, Lock } from 'lucide-react';
 import { formatFileSizeFromMb } from '@/lib/shared/format';
+import { FEATURES } from '@/lib/config/features';
 import type { UseFormReturn } from 'react-hook-form';
 import type { ProductFormData } from '@/lib/shared/validations';
 import type { StorageUsage, KycStatus } from '@/types/product';
@@ -93,6 +101,51 @@ export function StepUpload({
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  // ── Coming Soon (FEATURES.digitalProducts === false) ────────────
+  // [PHASE 3 — May 2026] Step 2 stays in the wizard but the upload
+  // action is disabled. Visually consistent with the KYC gate below
+  // (amber tile + dimmed dropzone), but uses Rocket+Lock icons to
+  // signal "not ready yet" instead of "verification needed". Note:
+  // this branch only fires for *new* products — `isEditing` above
+  // already short-circuited for legacy products created before the
+  // flag was flipped off.
+  if (!FEATURES.digitalProducts) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-5 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0 mt-0.5">
+              <Rocket className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                {t('comingSoonTitle')}
+              </p>
+              <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
+                {t('comingSoonBody')}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled
+            className="w-full"
+          >
+            <Lock className="h-4 w-4 mr-2" />
+            {t('comingSoonCta')}
+          </Button>
+        </div>
+
+        <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 text-muted-foreground/40 select-none cursor-not-allowed">
+          <FileText className="h-8 w-8" />
+          <p className="text-sm">{t('comingSoonDropzoneLabel')}</p>
+        </div>
       </div>
     );
   }

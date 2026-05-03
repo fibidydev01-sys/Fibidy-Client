@@ -2,13 +2,13 @@
   "dashboard": {
     "metadata": {
       "productsTitle": "Produk",
-      "productsDescription": "Kelola produk digital kamu",
+      "productsDescription": "Kelola produk kamu",
       "libraryTitle": "Library",
-      "libraryDescription": "Produk digital yang sudah kamu beli",
+      "libraryDescription": "Produk yang sudah kamu beli",
       "downloadsTitle": "Riwayat Download",
-      "downloadsDescription": "Riwayat download produk digital",
+      "downloadsDescription": "Riwayat download produk",
       "setupStoreTitle": "Mulai Jualan",
-      "setupStoreDescription": "Siapkan toko kamu dan mulai jual produk digital",
+      "setupStoreDescription": "Siapkan toko kamu dan mulai jualan",
       "settingsTitle": "Pengaturan",
       "settingsDescription": "Kelola pengaturan toko kamu"
     },
@@ -31,7 +31,7 @@
       "title": "Produk",
       "newButton": "Produk baru",
       "addButton": "Tambah",
-      "empty": "Belum ada produk digital.",
+      "empty": "Belum ada produk.",
       "emptyHint": "Klik \"Tambah Produk\" untuk mulai jualan.",
       "card": {
         "draft": "Draft",
@@ -77,7 +77,7 @@
           },
           "file": {
             "title": "File",
-            "desc": "Upload file digital"
+            "desc": "Upload file produk"
           },
           "cover": {
             "title": "Cover",
@@ -95,16 +95,16 @@
           "categoryCreateOption": "Buat \"{query}\"",
           "nameLabel": "Nama produk",
           "nameRequired": "*",
-          "namePlaceholder": "contoh: Ebook Belajar NestJS, Template Notion",
+          "namePlaceholder": "Beri produk kamu nama yang menarik",
           "descriptionLabel": "Deskripsi",
-          "descriptionPlaceholder": "Deskripsikan produk — isi, jumlah halaman, fitur utama...",
-          "descriptionHelper": "Deskripsi yang jelas membantu pembeli membeli dengan percaya diri.",
+          "descriptionPlaceholder": "Ceritakan apa yang bikin produk ini spesial — apa yang pembeli dapat, kenapa mereka bakal suka",
+          "descriptionHelper": "Deskripsi yang jelas dan jujur bantu pembeli memutuskan dengan tenang.",
           "priceLabel": "Harga (Rp)",
           "priceRequired": "*",
           "pricePlaceholder": "50000",
-          "priceHelper": "Harga dalam Rupiah — pembeli bayar via Stripe Connect, settlement langsung dalam IDR",
+          "priceHelper": "Atur dalam Rupiah. Pembeli bayar via Stripe, settlement langsung dalam IDR.",
           "comparePriceLabel": "Harga pembanding",
-          "comparePricePlaceholder": "100000",
+          "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
         },
         "upload": {
@@ -113,17 +113,21 @@
           "kycTitle": "Verifikasi dibutuhkan",
           "kycCta": "Selesaikan Verifikasi di Pengaturan",
           "kycDropzoneDisabled": "Upload tersedia setelah verifikasi selesai",
-          "dropzoneInfo": "Upload file digital — {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
+          "dropzoneInfo": "Upload file produk — {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
           "dropzoneInfoLoading": "Memuat info penyimpanan...",
           "dropzoneLoading": "Memuat konfigurasi penyimpanan...",
+          "comingSoonTitle": "Segera Hadir",
+          "comingSoonBody": "Kami lagi menyempurnakan pengalaman upload file untuk seller Indonesia. Lanjut isi detail produknya dulu — fitur upload bakal siap segera.",
+          "comingSoonCta": "Segera Hadir",
+          "comingSoonDropzoneLabel": "Upload file akan tersedia segera",
           "kycStates": {
-            "NOT_STARTED": "Kamu belum setup pembayaran Stripe. Selesaikan verifikasi dulu untuk upload produk.",
-            "PENDING": "Verifikasi sedang diproses oleh Stripe. Tunggu konfirmasi sebelum upload produk.",
-            "NEEDS_MORE_INFO": "Stripe butuh informasi tambahan. Selesaikan verifikasi untuk upload produk.",
+            "NOT_STARTED": "Kamu belum setup pembayaran. Selesaikan verifikasi dulu untuk upload produk.",
+            "PENDING": "Verifikasi sedang diproses. Tunggu konfirmasi sebelum upload produk.",
+            "NEEDS_MORE_INFO": "Butuh informasi tambahan. Selesaikan verifikasi untuk upload produk.",
             "PAST_DUE": "Batas waktu verifikasi sudah lewat. Segera selesaikan untuk mencegah akun dinonaktifkan.",
             "CHARGES_ONLY": "Akun kamu bisa menerima pembayaran, tapi payout belum aktif. Selesaikan verifikasi dulu.",
-            "REJECTED": "Verifikasi ditolak oleh Stripe. Hubungi support di halaman Pengaturan.",
-            "fallback": "Selesaikan verifikasi Stripe dulu untuk upload dan jual produk."
+            "REJECTED": "Verifikasi ditolak. Hubungi support di halaman Pengaturan.",
+            "fallback": "Selesaikan verifikasi dulu untuk upload dan jual produk."
           }
         },
         "media": {
@@ -149,7 +153,7 @@
           "descriptionEdit": "Cek ulang detail listing sebelum disimpan.",
           "noName": "Tanpa nama",
           "sectionDetails": "Detail",
-          "sectionDigitalFile": "File Digital",
+          "sectionDigitalFile": "File Produk",
           "sectionCoverImages": "Gambar Cover",
           "sectionPrice": "Harga",
           "sectionStatus": "Status",
@@ -206,7 +210,7 @@
       "title": "Library",
       "subtitleCount": "{count} produk dimiliki",
       "empty": "Library kamu masih kosong.",
-      "emptyCta": "Beli produk digital di",
+      "emptyCta": "Telusuri produk di",
       "emptyCtaLink": "Jelajah",
       "card": {
         "accessRevoked": "Akses Dicabut",
@@ -256,6 +260,12 @@
       "cancelling": "Membatalkan...",
       "activeUntil": "Aktif sampai {date} (sisa {days} hari)",
       "comingSoonBadge": "Segera Hadir",
+      "comingSoon": {
+        "sectionLabel": "Segera Hadir",
+        "sectionHint": "Lagi dipoles biar pas untuk seller Indonesia — segera ya.",
+        "fullPlanLabel": "Segera Hadir",
+        "fullPlanHint": "Kami lagi finalisasi paket ini."
+      },
       "badge": {
         "active": "Aktif",
         "pastDue": "Pembayaran Terlambat",
@@ -275,12 +285,12 @@
       "overLimit": {
         "titlePattern": "Limit paket {planName} tercapai",
         "productsPart": "Produk: {used}/{max}. ",
-        "digitalProductsPart": "Produk digital: {used}/{max}. ",
+        "digitalProductsPart": "File produk: {used}/{max}. ",
         "suffix": "Upgrade untuk menambah kapasitas."
       },
       "usage": {
         "products": "Produk",
-        "digital": "Digital",
+        "digital": "File",
         "storage": "Penyimpanan",
         "infinity": "∞"
       },
@@ -295,7 +305,7 @@
             "1 template hero"
           ],
           "digitalFeatures": [
-            "3 produk digital",
+            "3 file produk",
             "Penyimpanan 0.5 GB",
             "Maks 20 MB per file"
           ]
@@ -310,7 +320,7 @@
             "3 template hero"
           ],
           "digitalFeatures": [
-            "20 produk digital",
+            "20 file produk",
             "Penyimpanan 1 GB",
             "Maks 50 MB per file"
           ]
@@ -325,14 +335,14 @@
             "Semua template hero"
           ],
           "digitalFeatures": [
-            "50 produk digital",
+            "50 file produk",
             "Penyimpanan 20 GB",
             "Maks 500 MB per file"
           ]
         }
       },
       "platformFee": {
-        "label": "Biaya platform:",
+        "label": "Biaya platform",
         "FREE": "15%",
         "STARTER": "5%",
         "BUSINESS": "2%"
@@ -344,7 +354,8 @@
         "requiresStarterFirst": "Butuh Starter dulu",
         "notYetQualified": "Belum memenuhi syarat",
         "downgrade": "Downgrade",
-        "foreverFree": "Gratis selamanya"
+        "foreverFree": "Gratis selamanya",
+        "businessComingSoon": "Segera Hadir"
       },
       "businessUnlock": {
         "title": "Progress unlock Business",
@@ -367,16 +378,16 @@
     },
     "comingSoon": {
       "digitalProducts": {
-        "title": "Produk Digital — Segera Hadir",
-        "description": "Kami sedang menyempurnakan fitur produk digital untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi — segera."
+        "title": "File Produk — Segera Hadir",
+        "description": "Kami lagi sempurnakan pengalaman jualan produk berbasis file untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi — segera."
       },
       "discover": {
         "title": "Marketplace — Segera Hadir",
-        "description": "Halaman Jelajah akan memungkinkan pembeli menelusuri produk digital dari seller di seluruh Fibidy. Pantau terus!"
+        "description": "Halaman Jelajah akan memungkinkan pembeli menelusuri produk dari seller di seluruh Fibidy. Pantau terus!"
       },
       "library": {
         "title": "Library — Segera Hadir",
-        "description": "Produk digital yang sudah kamu beli akan tersimpan di sini. Library akan siap saat marketplace kami diluncurkan."
+        "description": "Produk yang sudah kamu beli akan tersimpan di sini. Library akan siap saat marketplace kami diluncurkan."
       },
       "cta": {
         "backToProducts": "Kembali ke Produk",
@@ -502,24 +513,26 @@
       "refreshing": "Memperbarui link verifikasi..."
     },
     "kycBanner": {
-      "label": "Verifikasi Stripe Connect",
+      "label": "Verifikasi Pembayaran",
       "loading": "Memuat status verifikasi...",
       "polling": "Memeriksa status verifikasi...",
       "states": {
-        "notStartedFresh": "Setup pembayaran untuk mulai jual produk digital.",
+        "comingSoon": "Verifikasi pembayaran bakal aktif begitu fitur file produk rilis. Sabar ya — kami pasti kabari.",
+        "notStartedFresh": "Setup pembayaran untuk mulai jualan.",
         "notStartedReturning": "Kamu belum selesai setup pembayaran. Lanjutkan dari tempat terakhir.",
-        "pending": "Verifikasi sedang diproses oleh Stripe. Biasanya butuh 1–2 hari kerja.",
+        "pending": "Verifikasi sedang diproses. Biasanya butuh 1–2 hari kerja.",
         "needsMoreInfoTitle": "Verifikasi butuh perbaikan:",
-        "needsMoreInfoGeneric": "Stripe butuh informasi tambahan untuk melanjutkan verifikasi akun.",
+        "needsMoreInfoGeneric": "Butuh informasi tambahan untuk melanjutkan verifikasi akun.",
         "pastDueHeadline": "URGENT: Batas waktu verifikasi sudah lewat.",
         "pastDueBody": "Akun kamu terancam dinonaktifkan. Selesaikan verifikasi sekarang.",
         "chargesOnly": "Akun aktif menerima pembayaran. Payout ke bank belum aktif — selesaikan verifikasi untuk aktifkan payout.",
-        "activeWithFutureReq": "Akun aktif. Stripe punya update persyaratan baru yang perlu diselesaikan",
+        "activeWithFutureReq": "Akun aktif. Ada update persyaratan baru yang perlu diselesaikan",
         "activeWithFutureReqDeadline": " sebelum {date}",
         "activeClean": "Akun terverifikasi. Kamu bisa menerima pembayaran dan tarik dana.",
-        "rejected": "Verifikasi akun ditolak oleh Stripe. Hubungi tim support kami untuk bantuan."
+        "rejected": "Verifikasi akun ditolak. Hubungi tim support kami untuk bantuan."
       },
       "actions": {
+        "comingSoonButton": "Segera Hadir",
         "setupPayments": "Setup Pembayaran",
         "continueSetup": "Lanjutkan Setup",
         "completeDocuments": "Lengkapi Dokumen",

@@ -2,13 +2,13 @@
   "dashboard": {
     "metadata": {
       "productsTitle": "Products",
-      "productsDescription": "Manage your digital products",
+      "productsDescription": "Manage your products",
       "libraryTitle": "Library",
-      "libraryDescription": "Digital products you have purchased",
+      "libraryDescription": "Products you have purchased",
       "downloadsTitle": "Download History",
-      "downloadsDescription": "Digital product download history",
+      "downloadsDescription": "Product download history",
       "setupStoreTitle": "Start Selling",
-      "setupStoreDescription": "Set up your store and start selling digital products",
+      "setupStoreDescription": "Set up your store and start selling",
       "settingsTitle": "Settings",
       "settingsDescription": "Manage your store settings"
     },
@@ -31,7 +31,7 @@
       "title": "Products",
       "newButton": "New product",
       "addButton": "Add",
-      "empty": "No digital products yet.",
+      "empty": "No products yet.",
       "emptyHint": "Click \"Add Product\" to start selling.",
       "card": {
         "draft": "Draft",
@@ -77,7 +77,7 @@
           },
           "file": {
             "title": "File",
-            "desc": "Upload digital file"
+            "desc": "Upload product file"
           },
           "cover": {
             "title": "Cover",
@@ -95,17 +95,17 @@
           "categoryCreateOption": "Create \"{query}\"",
           "nameLabel": "Product name",
           "nameRequired": "*",
-          "namePlaceholder": "e.g. NestJS Learning Ebook, Notion Template",
+          "namePlaceholder": "Give your product an inviting name",
           "descriptionLabel": "Description",
-          "descriptionPlaceholder": "Describe the product — contents, page count, key features...",
-          "descriptionHelper": "A clear description helps buyers purchase with confidence.",
+          "descriptionPlaceholder": "Tell buyers what makes this special — what they get, why they'll love it",
+          "descriptionHelper": "A clear, honest description helps buyers feel confident.",
           "priceLabel": "Price (IDR)",
           "priceRequired": "*",
           "pricePlaceholder": "50000",
-          "priceHelper": "Price in IDR — buyers pay via Stripe Connect, settlement is in IDR",
+          "priceHelper": "Set in Rupiah. Buyers pay through Stripe and settlement is in IDR.",
           "comparePriceLabel": "Compare-at price",
-          "comparePricePlaceholder": "100000",
-          "comparePriceHelper": "Original price before discount — shown with strikethrough. Leave empty if not on sale."
+          "comparePricePlaceholder": "75000",
+          "comparePriceHelper": "Original price before discount — shown with a strikethrough. Leave empty if not on sale."
         },
         "upload": {
           "editModeNote": "Product file — the file cannot be changed after upload. Delete the product and create a new one if you need to replace the file.",
@@ -113,17 +113,21 @@
           "kycTitle": "Verification required",
           "kycCta": "Complete Verification in Settings",
           "kycDropzoneDisabled": "Upload available after verification is complete",
-          "dropzoneInfo": "Upload digital file — {types} · Max {size} · {usedGb}GB / {totalGb}GB used",
+          "dropzoneInfo": "Upload product file — {types} · Max {size} · {usedGb}GB / {totalGb}GB used",
           "dropzoneInfoLoading": "Loading storage info...",
           "dropzoneLoading": "Loading storage configuration...",
+          "comingSoonTitle": "Coming Soon",
+          "comingSoonBody": "We're polishing the file upload experience for Indonesian sellers. Continue setting up your product details — uploads will be ready soon.",
+          "comingSoonCta": "Coming Soon",
+          "comingSoonDropzoneLabel": "File upload available soon",
           "kycStates": {
-            "NOT_STARTED": "You haven't set up Stripe payments yet. Complete verification first to upload products.",
-            "PENDING": "Verification is being processed by Stripe. Please wait for confirmation before uploading products.",
-            "NEEDS_MORE_INFO": "Stripe requires additional information. Complete verification to upload products.",
+            "NOT_STARTED": "You haven't set up payments yet. Complete verification first to upload products.",
+            "PENDING": "Verification is being processed. Please wait for confirmation before uploading products.",
+            "NEEDS_MORE_INFO": "Additional information is required. Complete verification to upload products.",
             "PAST_DUE": "The verification deadline has passed. Complete it immediately to avoid account deactivation.",
             "CHARGES_ONLY": "Your account can accept payments, but payouts are not yet active. Complete verification first.",
-            "REJECTED": "Verification was rejected by Stripe. Contact support on the Settings page.",
-            "fallback": "Complete Stripe verification first to upload and sell products."
+            "REJECTED": "Verification was rejected. Contact support on the Settings page.",
+            "fallback": "Complete verification first to upload and sell products."
           }
         },
         "media": {
@@ -149,7 +153,7 @@
           "descriptionEdit": "Double-check your listing details before saving.",
           "noName": "No name",
           "sectionDetails": "Details",
-          "sectionDigitalFile": "Digital File",
+          "sectionDigitalFile": "Product File",
           "sectionCoverImages": "Cover Images",
           "sectionPrice": "Price",
           "sectionStatus": "Status",
@@ -206,7 +210,7 @@
       "title": "Library",
       "subtitleCount": "{count} products owned",
       "empty": "Your library is still empty.",
-      "emptyCta": "Buy digital products on",
+      "emptyCta": "Browse products on",
       "emptyCtaLink": "Discover",
       "card": {
         "accessRevoked": "Access Revoked",
@@ -256,6 +260,12 @@
       "cancelling": "Canceling...",
       "activeUntil": "Active until {date} ({days} days left)",
       "comingSoonBadge": "Coming Soon",
+      "comingSoon": {
+        "sectionLabel": "Coming Soon",
+        "sectionHint": "We're polishing this for Indonesian sellers — available soon.",
+        "fullPlanLabel": "Coming Soon",
+        "fullPlanHint": "We're putting the final touches on this plan."
+      },
       "badge": {
         "active": "Active",
         "pastDue": "Payment Past Due",
@@ -275,12 +285,12 @@
       "overLimit": {
         "titlePattern": "{planName} plan limit reached",
         "productsPart": "Products: {used}/{max}. ",
-        "digitalProductsPart": "Digital products: {used}/{max}. ",
+        "digitalProductsPart": "Product files: {used}/{max}. ",
         "suffix": "Upgrade to increase capacity."
       },
       "usage": {
         "products": "Products",
-        "digital": "Digital",
+        "digital": "Files",
         "storage": "Storage",
         "infinity": "∞"
       },
@@ -295,7 +305,7 @@
             "1 hero template"
           ],
           "digitalFeatures": [
-            "3 digital products",
+            "3 product files",
             "0.5 GB storage",
             "Max 20 MB per file"
           ]
@@ -310,7 +320,7 @@
             "3 hero templates"
           ],
           "digitalFeatures": [
-            "20 digital products",
+            "20 product files",
             "1 GB storage",
             "Max 50 MB per file"
           ]
@@ -325,14 +335,14 @@
             "All hero templates"
           ],
           "digitalFeatures": [
-            "50 digital products",
+            "50 product files",
             "20 GB storage",
             "Max 500 MB per file"
           ]
         }
       },
       "platformFee": {
-        "label": "Platform fee:",
+        "label": "Platform fee",
         "FREE": "15%",
         "STARTER": "5%",
         "BUSINESS": "2%"
@@ -344,7 +354,8 @@
         "requiresStarterFirst": "Requires Starter first",
         "notYetQualified": "Not yet qualified",
         "downgrade": "Downgrade",
-        "foreverFree": "Forever free"
+        "foreverFree": "Forever free",
+        "businessComingSoon": "Coming Soon"
       },
       "businessUnlock": {
         "title": "Business unlock progress",
@@ -367,16 +378,16 @@
     },
     "comingSoon": {
       "digitalProducts": {
-        "title": "Digital Products — Coming Soon",
-        "description": "We're polishing the digital product experience for Indonesian sellers. Sell ebooks, templates, courses, and more — soon."
+        "title": "Product Files — Coming Soon",
+        "description": "We're polishing the file-based product experience for Indonesian sellers. Sell ebooks, templates, courses, and more — soon."
       },
       "discover": {
         "title": "Marketplace — Coming Soon",
-        "description": "The Discover marketplace will let buyers browse digital products from sellers across Fibidy. Stay tuned!"
+        "description": "The Discover marketplace will let buyers browse products from sellers across Fibidy. Stay tuned!"
       },
       "library": {
         "title": "Library — Coming Soon",
-        "description": "Your purchased digital products will live here. The Library will be ready when our marketplace launches."
+        "description": "Your purchased products will live here. The Library will be ready when our marketplace launches."
       },
       "cta": {
         "backToProducts": "Back to Products",
@@ -502,24 +513,26 @@
       "refreshing": "Refreshing verification link..."
     },
     "kycBanner": {
-      "label": "Stripe Connect Verification",
+      "label": "Payment Verification",
       "loading": "Loading verification status...",
       "polling": "Checking verification status...",
       "states": {
-        "notStartedFresh": "Set up payments to start selling digital products.",
+        "comingSoon": "Payment verification will open up once product files launch. Sit tight — we'll let you know.",
+        "notStartedFresh": "Set up payments to start selling.",
         "notStartedReturning": "You haven't finished setting up payments. Pick up where you left off.",
-        "pending": "Verification in progress with Stripe. This usually takes 1–2 business days.",
+        "pending": "Verification in progress. This usually takes 1–2 business days.",
         "needsMoreInfoTitle": "Verification requires fixes:",
-        "needsMoreInfoGeneric": "Stripe needs additional information to continue account verification.",
+        "needsMoreInfoGeneric": "Additional information is needed to continue account verification.",
         "pastDueHeadline": "URGENT: The verification deadline has passed.",
         "pastDueBody": "Your account is at risk of being deactivated soon. Complete verification now.",
         "chargesOnly": "Account active for accepting payments. Payouts to your bank are not yet active — complete verification to enable payouts.",
-        "activeWithFutureReq": "Account active. Stripe has new requirement updates that need to be completed",
+        "activeWithFutureReq": "Account active. New requirement updates need to be completed",
         "activeWithFutureReqDeadline": " before {date}",
         "activeClean": "Account verified. You can accept payments and withdraw funds.",
-        "rejected": "Account verification was rejected by Stripe. Contact our support team for help."
+        "rejected": "Account verification was rejected. Contact our support team for help."
       },
       "actions": {
+        "comingSoonButton": "Coming Soon",
         "setupPayments": "Set Up Payments",
         "continueSetup": "Continue Setup",
         "completeDocuments": "Complete Documents",

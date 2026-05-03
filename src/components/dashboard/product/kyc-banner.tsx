@@ -3,6 +3,7 @@
 // KYC Banner — always visible, text changes per state.
 //
 // State coverage:
+//   COMING_SOON (FEATURES.digitalProducts === false) → disabled "Coming Soon"
 //   NOT_STARTED (no account)    → Setup Payment
 //   NOT_STARTED (has account)   → Continue Setup
 //   PENDING                     → info, no action
@@ -16,20 +17,23 @@
 //   isPolling                   → loading state after returning from Stripe
 //
 // [PHASE 3 — DIGITAL PRODUCTS FLAG]
-// When FEATURES.digitalProducts is false, this banner returns null.
-// KYC is only meaningful for digital-product sellers — the entire Stripe
-// Connect flow is also gated by the backend guard, so showing the banner
-// would advertise an unreachable feature.
+// Previously this component returned `null` when
+// `FEATURES.digitalProducts === false`, which hid it entirely.
+// Per the May 2026 design feedback, the banner should still appear
+// when the feature is gated — but as a friendly, disabled
+// "Coming Soon" tile so sellers can SEE that payment verification
+// is on the roadmap without being able to act on it yet.
 //
-// Note: useKycStatus() is also gated via React Query's `enabled` so this
-// component receives `kycStatus = undefined` when off — but we early-return
-// here for clarity and to avoid the brief "loading status..." flash.
+// useKycStatus() is also gated via React Query's `enabled` so this
+// component receives `kycStatus = undefined` when the flag is off —
+// the early-return below short-circuits BEFORE any of that matters,
+// so no spinner flash, no 503 noise.
 
 import { useTranslations } from 'next-intl';
 import { useInitiateKyc } from '@/hooks/dashboard/use-products';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Rocket } from 'lucide-react';
 import { FEATURES } from '@/lib/config/features';
 import type { KycStatus, KycError } from '@/types/product';
 
@@ -59,13 +63,35 @@ export function KycBanner({
   futureRequirementsDeadline,
   isPolling,
 }: KycBannerProps) {
-  // [PHASE 3] Skip entirely when digital products feature is gated
-  if (!FEATURES.digitalProducts) return null;
-
   const t = useTranslations('dashboard.kycBanner');
   const tStates = useTranslations('dashboard.kycBanner.states');
   const tActions = useTranslations('dashboard.kycBanner.actions');
   const { initiateKyc, isLoading } = useInitiateKyc();
+
+  // ── Coming Soon — feature flag gated ─────────────────────────
+  // Replaces the old `if (!FEATURES.digitalProducts) return null`.
+  // We render a friendly amber tile + disabled "Coming Soon" button
+  // so the verification flow's existence is still visible.
+  if (!FEATURES.digitalProducts) {
+    return (
+      <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+        <Rocket className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+        <AlertDescription className="space-y-2">
+          <Label
+            text={t('label')}
+            className="text-amber-700 dark:text-amber-400"
+          />
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            {tStates('comingSoon')}
+          </p>
+          <Button size="sm" variant="outline" disabled className="mt-1">
+            <Rocket className="h-3.5 w-3.5 mr-1.5" />
+            {tActions('comingSoonButton')}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   // ── isPolling — merchant just returned from Stripe ───────────
   if (isPolling) {
@@ -127,9 +153,7 @@ export function KycBanner({
       <Alert>
         <AlertDescription className="space-y-2">
           <Label text={t('label')} />
-          <p className="text-sm">
-            {tStates('pending')}
-          </p>
+          <p className="text-sm">{tStates('pending')}</p>
         </AlertDescription>
       </Alert>
     );
@@ -155,9 +179,7 @@ export function KycBanner({
               </ul>
             </>
           ) : (
-            <p className="text-sm">
-              {tStates('needsMoreInfoGeneric')}
-            </p>
+            <p className="text-sm">{tStates('needsMoreInfoGeneric')}</p>
           )}
           <ActionButton
             onClick={() => initiateKyc()}
@@ -179,12 +201,8 @@ export function KycBanner({
       <Alert variant="destructive">
         <AlertDescription className="space-y-2">
           <Label text={t('label')} />
-          <p className="text-sm font-semibold">
-            {tStates('pastDueHeadline')}
-          </p>
-          <p className="text-sm">
-            {tStates('pastDueBody')}
-          </p>
+          <p className="text-sm font-semibold">{tStates('pastDueHeadline')}</p>
+          <p className="text-sm">{tStates('pastDueBody')}</p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
@@ -205,9 +223,7 @@ export function KycBanner({
       <Alert>
         <AlertDescription className="space-y-2">
           <Label text={t('label')} />
-          <p className="text-sm">
-            {tStates('chargesOnly')}
-          </p>
+          <p className="text-sm">{tStates('chargesOnly')}</p>
           <ActionButton
             onClick={() => initiateKyc()}
             disabled={isLoading}
@@ -231,7 +247,9 @@ export function KycBanner({
             <p className="text-sm">
               {tStates('activeWithFutureReq')}
               {futureRequirementsDeadline
-                ? tStates('activeWithFutureReqDeadline', { date: formatDate(futureRequirementsDeadline) })
+                ? tStates('activeWithFutureReqDeadline', {
+                    date: formatDate(futureRequirementsDeadline),
+                  })
                 : ''}
               .
             </p>
@@ -267,9 +285,7 @@ export function KycBanner({
       <Alert variant="destructive">
         <AlertDescription className="space-y-2">
           <Label text={t('label')} />
-          <p className="text-sm">
-            {tStates('rejected')}
-          </p>
+          <p className="text-sm">{tStates('rejected')}</p>
           <Button size="sm" variant="outline" asChild>
             <a href="mailto:support@fibidy.com">{tActions('contactSupport')}</a>
           </Button>
