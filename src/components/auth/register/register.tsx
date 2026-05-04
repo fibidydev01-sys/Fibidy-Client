@@ -5,46 +5,51 @@
 // File: src/components/auth/register/register.tsx
 //
 // [VERCEL VIBES — May 2026]
-// Two visible bug fixes via component duplication:
+// Auth-only step indicator + nav (decoupled from dashboard wizards).
+// See register-step-indicator.tsx + register-nav.tsx for the duplicated
+// primitives. Behavior unchanged from Phase 2 except where noted below.
 //
-// 1. STEP INDICATOR (header)
-//    Was: shared <StepIndicator> from dashboard
-//    Now: <RegisterStepIndicator> in this folder
-//    Same API, fixes nothing visually by itself — but unblocks future
-//    auth-only iterations without touching dashboard wizards.
+// Phase 3 (Interactive Store Builder, May 2026):
 //
-// 2. WIZARD NAV (footer)
-//    Was: shared <WizardNav>, fixed-bottom with `left: var(--sidebar-width)`
-//         and `bottom-16` mobile offset. On the auth page neither
-//         CSS variable nor tab-bar exists → nav was misaligned with
-//         the centered form on desktop and floated 64px above the
-//         viewport bottom on mobile.
-//    Now: <RegisterNav>, inline (no `position: fixed`), no sidebar
-//         offset, no tab-bar offset. Nav scrolls with the form content.
-//         Single render path for desktop + mobile via responsive
-//         utilities.
+// 🔵 NEW — Builder handoff
+//   When useRegisterWizard pre-fills slug/category from query params,
+//   this form lands the user on Step 4 (Account) directly. No code
+//   needed here; the hook decides where to start.
 //
-// Side effects of the inline nav:
-//    - Dropped `pb-24` from the mobile container (was reserving space
-//      for the fixed footer; not needed anymore).
-//    - Dropped `pb-20` and `lg:h-full lg:flex-col` from the desktop
-//      container (same reason).
-//    - Step content now renders ONCE outside the responsive header
-//      blocks (was rendered twice — once in the lg block, once in the
-//      mobile block). The headers stay responsive; the body is shared.
-//    - The "Already have a store?" sign-in link is now rendered ONCE
-//      below the nav (was duplicated for desktop and mobile).
+// 🔵 NEW — agreementAccepted in register payload
+//   Phase 1 BE rewrote `RegisterDto` with `@Equals(true) agreementAccepted`.
+//   We pass `true` always — the user MUST tick the Review checkbox to
+//   reach this point (validateCurrentStep blocks otherwise), so by
+//   construction it's always `true` at submit time.
 //
-// Everything else (validation, submit handler, welcome screen,
-// agreement state, error alert) is unchanged.
+// 🔵 NEW — SLUG_TAKEN_AFTER_PREVIEW handling
+//   When BE returns 409 with code SLUG_TAKEN_AFTER_PREVIEW (race lost
+//   between marketing builder check and final insert), we surface an
+//   AlertDialog with up to 4 suggestion chips. Tapping a chip rewrites
+//   slug, closes dialog, user resubmits.
+//
+// 🔵 NEW — EMAIL_TAKEN_AFTER_PREVIEW handling
+//   Auto-jumps user back to Step 4 (Account) so they can update email.
+//   Toast already shown by useRegister.
 // ==========================================
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import { useRegisterWizard } from '@/hooks/auth/use-register-wizard';
 import { useRegister } from '@/hooks/auth/use-auth';
+import { generateSlugSuggestions } from '@/lib/utils/slug-suggestions';
 import { StepCategory } from './step-category';
 import { StepStoreInfo } from './step-store-info';
 import { StepAccount } from './step-account';
@@ -66,13 +71,55 @@ function isPasswordStrong(password: string): boolean {
 export function RegisterForm() {
   const t = useTranslations('auth.register');
   const wizard = useRegisterWizard();
-  const { register, isLoading, error } = useRegister();
+  const { register, isLoading, error, errorCode, reset: resetRegister } =
+    useRegister();
+  // Review step's agreement checkbox state. Pre-checked when arriving
+  // from the marketing builder (cameFromBuilder = true). Local state
+  // so visitor can untick if they change their mind (R1 decision).
   const [isAgreed, setIsAgreed] = useState(false);
 
+  // ── Pre-tick agreement when arriving from builder ───────────────
+  // Runs once, after the wizard finishes resolving cameFromBuilder.
+  useEffect(() => {
+    if (wizard.cameFromBuilder) {
+      setIsAgreed(true);
+    }
+  }, [wizard.cameFromBuilder]);
+
+  // ── Slug-taken AlertDialog state ────────────────────────────────
+  const [slugConflictOpen, setSlugConflictOpen] = useState(false);
+  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
+
+  // ── Watch errorCode → react to BE-specific failures ─────────────
+  useEffect(() => {
+    if (!errorCode) return;
+
+    if (errorCode === 'SLUG_TAKEN_AFTER_PREVIEW') {
+      const suggestions = wizard.state.slug
+        ? generateSlugSuggestions(wizard.state.slug)
+        : [];
+      setSlugSuggestions(suggestions);
+      setSlugConflictOpen(true);
+    } else if (errorCode === 'EMAIL_TAKEN_AFTER_PREVIEW') {
+      // Send user back to Step 4 (Account) so they can change email
+      wizard.goToStep(4);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorCode]);
+
   const STEPS = [
-    { title: t('stepsMeta.businessType.title'), desc: t('stepsMeta.businessType.desc') },
-    { title: t('stepsMeta.storeDetails.title'), desc: t('stepsMeta.storeDetails.desc') },
-    { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
+    {
+      title: t('stepsMeta.businessType.title'),
+      desc: t('stepsMeta.businessType.desc'),
+    },
+    {
+      title: t('stepsMeta.storeDetails.title'),
+      desc: t('stepsMeta.storeDetails.desc'),
+    },
+    {
+      title: t('stepsMeta.yourAccount.title'),
+      desc: t('stepsMeta.yourAccount.desc'),
+    },
     { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
   ] as const;
 
@@ -142,20 +189,36 @@ export function RegisterForm() {
         email: wizard.state.email!,
         password: wizard.state.password!,
         whatsapp: wizard.state.whatsapp!,
+        // Phase 1 BE requires this; Review step gate already enforced isAgreed.
+        agreementAccepted: true,
       });
     } catch {
-      // Error handled in hook
+      // Error handled in hook + via errorCode effect above
     }
   };
 
-  // ── WELCOME SCREEN ────────────────────────────────────────────────────
+  // ── Slug suggestion picker (from AlertDialog) ───────────────────
+  const handlePickSuggestion = (suggestion: string) => {
+    wizard.updateState({ slug: suggestion });
+    setSlugConflictOpen(false);
+    setSlugSuggestions([]);
+    resetRegister();
+    // Don't auto-resubmit — user might want to verify the new slug
+    // first. They can click submit again themselves.
+    toast.success(t('slugConflict.appliedToast', { slug: suggestion }));
+  };
+
+  // ── WELCOME SCREEN ──────────────────────────────────────────────
   if (isWelcome) {
     return (
       <div className="w-full max-w-2xl mx-auto">
         <StepWelcome onNext={wizard.nextStep} />
         <p className="text-center text-sm text-muted-foreground mt-6">
           {t('alreadyHaveStore')}{' '}
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link
+            href="/login"
+            className="text-primary hover:underline font-medium"
+          >
             {t('signInLink')}
           </Link>
         </p>
@@ -163,9 +226,7 @@ export function RegisterForm() {
     );
   }
 
-  // ── STEP CONTENT ──────────────────────────────────────────────────────
-  // Rendered ONCE outside the responsive header blocks (was duplicated
-  // pre-VV refactor).
+  // ── STEP CONTENT (rendered ONCE) ────────────────────────────────
   const stepContent = (
     <>
       {wizard.state.currentStep === 2 && (
@@ -194,7 +255,9 @@ export function RegisterForm() {
         <StepReview
           data={wizard.state}
           onEdit={(step) => wizard.goToStep(step)}
+          isAgreed={isAgreed}
           onAgreementChange={setIsAgreed}
+          cameFromBuilder={wizard.cameFromBuilder}
         />
       )}
     </>
@@ -202,7 +265,7 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col">
-      {error && (
+      {error && errorCode !== 'SLUG_TAKEN_AFTER_PREVIEW' && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -213,7 +276,10 @@ export function RegisterForm() {
         <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
           <div className="space-y-1">
             <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-              {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
+              {t('stepCounter', {
+                current: wizard.state.currentStep - 1,
+                total: STEPS.length,
+              })}
             </p>
             <h2 className="text-2xl font-bold tracking-tight leading-none">
               {STEPS[indicatorStep]?.title}
@@ -245,7 +311,10 @@ export function RegisterForm() {
         </div>
         <div className="text-center space-y-0.5">
           <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
+            {t('stepCounter', {
+              current: wizard.state.currentStep - 1,
+              total: STEPS.length,
+            })}
           </p>
           <h3 className="text-base font-bold tracking-tight">
             {STEPS[indicatorStep]?.title}
@@ -256,12 +325,10 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {/* ══════════ STEP CONTENT (shared) ══════════ */}
-      <div className="min-h-[300px]">
-        {stepContent}
-      </div>
+      {/* ══════════ STEP CONTENT ══════════ */}
+      <div className="min-h-[300px]">{stepContent}</div>
 
-      {/* ══════════ INLINE NAV (replaces fixed WizardNav) ══════════ */}
+      {/* ══════════ INLINE NAV ══════════ */}
       <RegisterNav
         steps={STEPS}
         currentStep={indicatorStep}
@@ -276,10 +343,69 @@ export function RegisterForm() {
       {/* ══════════ SIGN-IN LINK ══════════ */}
       <p className="text-center text-sm text-muted-foreground mt-6">
         {t('alreadyHaveStore')}{' '}
-        <Link href="/login" className="text-primary hover:underline font-medium">
+        <Link
+          href="/login"
+          className="text-primary hover:underline font-medium"
+        >
           {t('signInLink')}
         </Link>
       </p>
+
+      {/* ══════════ SLUG CONFLICT DIALOG ══════════ */}
+      <AlertDialog
+        open={slugConflictOpen}
+        onOpenChange={(open) => {
+          setSlugConflictOpen(open);
+          if (!open) resetRegister();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('slugConflict.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('slugConflict.description', {
+                slug: wizard.state.slug || '',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {slugSuggestions.length > 0 && (
+            <div className="py-2">
+              <p className="text-xs text-muted-foreground mb-2">
+                {t('slugConflict.suggestionsLabel')}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {slugSuggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handlePickSuggestion(s)}
+                    className="inline-flex items-center rounded-full border border-input bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('slugConflict.cancelButton')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                // Send user to Step 3 (StoreInfo) so they can pick manually
+                setSlugConflictOpen(false);
+                resetRegister();
+                wizard.goToStep(3);
+              }}
+            >
+              {t('slugConflict.editManuallyButton')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -14,9 +14,7 @@
 //   - logoutSuccess
 //
 // `setError(message)` remains passthrough — it's displayed in an inline
-// Alert component and carries backend-authored error text. Same rule as
-// use-admin.ts: Phase 2 can wire this to error.* keys once BE emits
-// structured error codes.
+// Alert component and carries backend-authored error text.
 //
 // `useCheckSlug` below has no user-facing strings — only boolean state
 // returned to callers. No translation needed.
@@ -24,16 +22,25 @@
 // [PHASE 3 — DIGITAL PRODUCTS FLAG]
 // `useLogin` BUYER fallback: when digital is off, BUYERs login → straight
 // to /dashboard/setup-store (their only meaningful destination).
-// When digital is on, they land on /dashboard/library (existing behavior).
-// SELLER always lands on /dashboard/products. The `?from=` redirect from
-// AuthGuard still wins if present.
+//
+// [PHASE 3 — INTERACTIVE STORE BUILDER, May 2026]
+// `useRegister` now exposes `errorCode` alongside `error` so the register
+// form can detect specific BE error codes (Phase 1 BE handoff):
+//   - SLUG_TAKEN_AFTER_PREVIEW   → render AlertDialog + suggestion chips
+//   - EMAIL_TAKEN_AFTER_PREVIEW  → toast "use a different email"
+//   - SLUG_RESERVED              → toast (rare; FE should catch first)
+//
+// Generic errors (no recognized code) still flow through `error` for
+// the inline Alert. Adding `errorCode` is purely additive — existing
+// callers that destructure `{ register, isLoading, error, reset }`
+// keep working unchanged.
 // ==========================================
 
 import { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
-import { getErrorMessage } from '@/lib/api/client';
+import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { tenantsApi } from '@/lib/api/tenants';
 import { toast } from '@/lib/providers/root-provider';
@@ -66,16 +73,14 @@ export function useLogin() {
 
         const from = searchParams.get('from');
 
-        // [PHASE 3] BUYER fallback respects FEATURES.digitalProducts:
-        //   - Digital ON  → /dashboard/library (existing)
-        //   - Digital OFF → /dashboard/setup-store (only useful destination)
         const buyerFallback = FEATURES.digitalProducts
           ? '/dashboard/library'
           : '/dashboard/setup-store';
 
-        const defaultRedirect = response.tenant.role === 'SELLER'
-          ? '/dashboard/products'
-          : buyerFallback;
+        const defaultRedirect =
+          response.tenant.role === 'SELLER'
+            ? '/dashboard/products'
+            : buyerFallback;
         router.push(from || defaultRedirect);
 
         return response;
@@ -100,6 +105,9 @@ export function useRegister() {
   const tToast = useTranslations('toast.auth');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Phase 3: capture structured BE error code so callers can branch
+  // on SLUG_TAKEN_AFTER_PREVIEW / EMAIL_TAKEN_AFTER_PREVIEW etc.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const { setTenant, setChecked } = useAuthStore();
   const router = useRouter();
 
@@ -107,6 +115,7 @@ export function useRegister() {
     async (data: RegisterInput) => {
       setIsLoading(true);
       setError(null);
+      setErrorCode(null);
 
       try {
         const response = await authApi.register(data);
@@ -124,7 +133,19 @@ export function useRegister() {
       } catch (err) {
         const message = getErrorMessage(err);
         setError(message);
-        toast.error(tToast('registerFailed'), message);
+
+        if (err instanceof ApiRequestError && err.code) {
+          setErrorCode(err.code);
+        }
+
+        // For SLUG_TAKEN_AFTER_PREVIEW we DON'T toast — caller will
+        // surface a richer AlertDialog with suggestion chips. All
+        // other errors get the standard toast.
+        const code = err instanceof ApiRequestError ? err.code : undefined;
+        if (code !== 'SLUG_TAKEN_AFTER_PREVIEW') {
+          toast.error(tToast('registerFailed'), message);
+        }
+
         throw err;
       } finally {
         setIsLoading(false);
@@ -133,9 +154,12 @@ export function useRegister() {
     [setTenant, setChecked, router, tToast],
   );
 
-  const reset = useCallback(() => setError(null), []);
+  const reset = useCallback(() => {
+    setError(null);
+    setErrorCode(null);
+  }, []);
 
-  return { register, isLoading, error, reset };
+  return { register, isLoading, error, errorCode, reset };
 }
 
 export function useLogout() {

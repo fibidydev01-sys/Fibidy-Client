@@ -12,12 +12,32 @@
 //   - Providers (QueryClient + Theme)
 //   - Toaster + PwaInstallPrompt
 //
-// NEW for i18n:
+// i18n integration:
 //   - params: Promise<{ locale }> (Next 16 async params)
 //   - setRequestLocale(locale) for static rendering
 //   - <html lang={locale}>
 //   - NextIntlClientProvider wraps Providers
 //   - generateStaticParams() for locale pre-generation
+//
+// [PHASE 4 — May 2026]
+// 1. Hreflang fixed for the homepage canonical:
+//      en  → /
+//      id  → /id
+//      x-default → /
+//    The previous `{ [locale]: '/' }` was wrong because it advertised
+//    the CURRENT locale's slug as the only alternate (e.g. on /id it
+//    said "id is at /" — which is the EN homepage, not the ID one).
+//
+//    Note: this is the LAYOUT-level default. Inner pages with their
+//    own metadata (e.g. /about) should override their alternates if
+//    they expose locale-specific paths. For the homepage (the most
+//    important SEO target), this default is correct.
+//
+// 2. Robots gating: `index: process.env.VERCEL_ENV === 'production'`.
+//    Prevents Vercel preview deployments (`*.vercel.app`) from being
+//    indexed by Google. Without this gate, every preview deploy could
+//    theoretically rank for "fibidy" branded queries — duplicate
+//    content + brand dilution.
 // ==========================================
 
 import type { Metadata, Viewport } from 'next';
@@ -70,9 +90,6 @@ export function generateStaticParams() {
 
 // ==========================================
 // METADATA (locale-aware wrapper around existing seoConfig)
-//
-// Phase 1: single locale ('en') — everything resolves to current seoConfig values.
-// Phase 2: swap string constants for per-locale t('seo.*') lookups here.
 // ==========================================
 
 export async function generateMetadata({
@@ -80,7 +97,14 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  // We only use `locale` in error checks today; kept here for future
+  // per-locale SEO field expansion (e.g. swapping defaultTitle by locale).
+  await params;
+
+  // [PHASE 4] Robots gating — production-only indexing.
+  // VERCEL_ENV is automatically set by Vercel: 'production' | 'preview' | 'development'.
+  // When undefined (e.g. local dev or non-Vercel host), defaults to noindex.
+  const shouldIndex = process.env.VERCEL_ENV === 'production';
 
   return {
     title: {
@@ -97,17 +121,22 @@ export async function generateMetadata({
     metadataBase: new URL(seoConfig.siteUrl),
     alternates: {
       canonical: '/',
+      // [PHASE 4] Per-locale hreflang. EN (default) at /, ID at /id, plus
+      // x-default fallback. Inner pages override their own when they
+      // expose locale-specific URLs.
       languages: {
-        // Phase 1: only 'en' is active. Keep key mirrored from locale for future-proofing.
-        [locale]: '/',
+        en: '/',
+        id: '/id',
+        'x-default': '/',
       },
     },
     robots: {
-      index: true,
+      // [PHASE 4] Preview deployments → noindex; production → index.
+      index: shouldIndex,
       follow: true,
       nocache: false,
       googleBot: {
-        index: true,
+        index: shouldIndex,
         follow: true,
         noimageindex: false,
         'max-video-preview': -1,

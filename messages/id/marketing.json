@@ -1,23 +1,243 @@
 {
   "marketing": {
     "metadata": {
-      "title": "Fibidy — Toko digital Anda, dalam 5 menit",
-      "description": "Setup, upload, jualan. Cara paling cepat memulai toko digital di Indonesia."
+      "title": "Fibidy — Buka toko, langsung jualan",
+      "description": "Cara paling cepat buat UMKM dan kreator Indonesia bikin toko online. Susun katalog, share link toko, pelanggan order via WhatsApp. Gratis selama beta."
     },
+
+    "announcement": {
+      "messageDesktop": "🚀 Fibidy beta udah jalan — bikin toko gratis dalam 5 menit.",
+      "messageMobile": "🚀 Fibidy beta — toko gratis 5 menit.",
+      "ctaLabel": "Mulai",
+      "dismissLabel": "Tutup pengumuman"
+    },
+
     "header": {
-      "login": "Masuk",
-      "register": "Mulai Gratis"
+      "nav": {
+        "features": "Fitur",
+        "pricing": "Harga",
+        "faq": "Tanya Jawab"
+      },
+      "ctaSignIn": "Masuk",
+      "ctaPrimary": "Buka Toko Gratis",
+      "menuOpen": "Buka menu",
+      "menuClose": "Tutup menu"
     },
+
     "hero": {
-      "heading": "Toko digital Anda, dalam 5 menit",
-      "subheading": "Setup. Upload. Jualan. Fibidy adalah cara paling mudah memulai toko digital — tanpa biaya setup, tanpa minimum bulanan.",
-      "cta": "Mulai Jualan",
-      "ctaSecondary": "Masuk"
+      "eyebrow": "Dibuat untuk UMKM Indonesia",
+      "headline": "Buka toko, langsung jualan.",
+      "subheadline": "Nggak perlu jago coding. Susun katalog, share link toko, terima orderan langsung lewat WhatsApp.",
+      "ctaPrimary": "Buka Toko Gratis",
+      "ctaSecondary": "Lihat demo",
+      "trustLine": "Gratis selama beta · Bikin toko 5 menit · Jualan via WhatsApp"
     },
+
+    "problem": {
+      "eyebrow": "Pasti pernah ngalamin",
+      "headline": "Jualan online harusnya nggak bikin pusing.",
+      "items": {
+        "commission": {
+          "title": "Marketplace ambil 20% dari tiap order",
+          "description": "Capek-capek jualan, malah jadi setoran ke platform lain. Saatnya pegang sendiri hasil keringat kamu."
+        },
+        "expensiveSlow": {
+          "title": "Bikin website sendiri mahal & ribet",
+          "description": "Quote mulai Rp 5 juta dan butuh berminggu-minggu. Tren keburu lewat."
+        },
+        "notLocal": {
+          "title": "Tools yang ada nggak dibikin untuk Indonesia",
+          "description": "Platform luar minta bayar dolar, nggak kenal WhatsApp, dan nggak ngomong bahasa pelanggan kamu."
+        }
+      }
+    },
+
+    "features": {
+      "eyebrow": "Fitur",
+      "headline": "Lengkap di yang penting. Nggak ada yang sia-sia.",
+      "subheadline": "Enam tools yang bawa ide kamu sampai jualan pertama hari ini juga.",
+      "items": {
+        "studio": {
+          "title": "Studio: bikin toko tinggal drag-drop",
+          "description": "Susun landing toko sesuai brand kamu — pilih hero, tarik blok produk, ganti warna. Nggak perlu desainer, nggak perlu coder, nggak perlu nunggu."
+        },
+        "multiTenant": {
+          "title": "Subdomain sendiri atau pakai domain kamu",
+          "description": "Jalan di nama-kamu.fibidy.com atau pasang tokomu.com — bebas, terserah brand kamu."
+        },
+        "whatsapp": {
+          "title": "Order via WhatsApp, langsung di toko",
+          "description": "Pelanggan tinggal tap satu tombol, langsung chat sama kamu di WA. Nggak ribet kartu, nggak ada checkout yang gantung."
+        },
+        "theme": {
+          "title": "Warna brand, kamu yang atur",
+          "description": "Pilih warna utama yang cocok sama kemasan, logo, atau vibe kamu — kepakai di semua halaman."
+        },
+        "seo": {
+          "title": "SEO siap pakai dari awal",
+          "description": "Sitemap, OpenGraph card, JSON-LD — udah otomatis. Produk kamu muncul rapi di Google, share-an WA, sama link IG."
+        },
+        "mobile": {
+          "title": "Mobile-first dari sananya",
+          "description": "Pelanggan kamu kebanyakan dari HP. Semua halaman udah jalan mulus di sana — nggak perlu setting tambahan."
+        }
+      }
+    },
+
+    "pricing": {
+      "eyebrow": "Harga",
+      "headline": "Tiga paket. Satu tangga. Pricing jujur.",
+      "subheadline": "Mulai dari gratis, upgrade kalau udah siap. Sama persis kayak yang kamu liat setelah daftar — nggak ada upsell mendadak.",
+      "roadmapNote": "Download produk digital, payout KYC, sama platform fee per paket masih dipoles. Kami tandai 'Coming Soon' di bawah — semua bakal aktif barengan pas paid plan launch."
+    },
+
+    "storeBuilder": {
+      "eyebrow": "Coba dulu, daftar kemudian",
+      "headline": "Toko kamu, dalam 30 detik. Lihat sendiri.",
+      "subheadline": "Pilih kategori, klaim alamat toko kamu, lihat tokonya kebentuk sendiri. Nggak perlu daftar dulu — daftar pas kamu udah suka.",
+      "categoryStep": {
+        "label": "Kamu jualan apa?",
+        "categories": {
+          "restaurant": "Restoran",
+          "fashion": "Fashion",
+          "beautySalon": "Beauty Salon",
+          "cleaning": "Jasa Cleaning",
+          "retail": "Toko Retail",
+          "other": "Lainnya..."
+        }
+      },
+      "subdomainStep": {
+        "label": "Alamat toko kamu",
+        "placeholder": "toko-kamu",
+        "charCounter": "{count}/30",
+        "states": {
+          "available": "Tersedia! Toko kamu siap dibuka.",
+          "checking": "Mengecek...",
+          "taken": "Sudah dipakai. Coba salah satu ini:",
+          "invalid": "Hanya huruf kecil, angka, dan strip (-).",
+          "tooShort": "Minimal 3 karakter.",
+          "reserved": "Nama ini di-reserve sistem."
+        },
+        "suggestionLabel": "Coba salah satu ini:"
+      },
+      "preview": {
+        "placeholderSlug": "toko-kamu",
+        "placeholderName": "Toko Kamu",
+        "placeholderCategory": "Pilih kategori",
+        "placeholderProduct": "Produk Anda di sini",
+        "navHome": "Beranda",
+        "navProducts": "Produk",
+        "navAbout": "Tentang",
+        "storeTagline": "Order apa aja via WhatsApp.",
+        "ctaButton": "Order via WhatsApp"
+      },
+      "agreement": {
+        "prefix": "Saya menyetujui",
+        "termsLink": "Syarat Layanan",
+        "and": "dan",
+        "privacyLink": "Kebijakan Privasi"
+      },
+      "ctaPrimary": "Buka Toko Gratis Sekarang",
+      "trustLine": "Daftar 2 menit · Tanpa kartu kredit"
+    },
+
+    "faq": {
+      "eyebrow": "Tanya jawab",
+      "headline": "Yang sering ditanyain.",
+      "items": {
+        "isFree": {
+          "q": "Beneran gratis nih Fibidy?",
+          "a": "Iya — gratis selama beta, nggak butuh kartu, nggak ada trial yang habis. Sekarang fokus kami cuma satu: bikin produk yang oke. Paid plan rilis akhir tahun. Pas itu rilis, seller beta dapet harga spesial."
+        },
+        "paymentNoStripe": {
+          "q": "Cara dibayar pelanggan gimana kalau Stripe belum live?",
+          "a": "Pelanggan tap 'Order via WhatsApp' di toko kamu — sisanya di tangan kamu. Transfer bank, OVO, GoPay, COD — bebas. Fibidy nggak nyentuh duitnya. Payout langsung via Stripe IDR ikut paid plan nanti."
+        },
+        "customDomain": {
+          "q": "Bisa pakai domain sendiri?",
+          "a": "Bisa — Fibidy support custom domain. Tinggal arahin tokomu.com ke kami, sisanya kami yang urus. Mau tetep di nama-kamu.fibidy.com juga bebas."
+        },
+        "betaRoadmap": {
+          "q": "Kapan paid plan rilis?",
+          "a": "Targetnya akhir 2026. Paid plan bawa payout Stripe IDR langsung, download produk digital, sama analytics seller. Seller beta dapet diskon spesial pas itu rilis."
+        },
+        "fibidyVsLinktree": {
+          "q": "Beda Fibidy vs Linktree apa?",
+          "a": "Linktree itu cuma list link. Fibidy itu katalog beneran: foto produk, harga, kategori, search, custom domain — semua siap pakai. Plus pelanggan bisa order langsung via WA, nggak nyasar ke situs lain."
+        },
+        "whatToSell": {
+          "q": "Bisa jual apa aja di Fibidy?",
+          "a": "Barang fisik (fashion, makanan, kerajinan), jasa (coaching, konsultasi, salon, sewa studio) — apa pun yang biasa pelanggan beli dari kamu via WA. Produk digital (template, ebook, kursus) ikut paid plan nanti."
+        },
+        "dataExport": {
+          "q": "Kalau mau pindah, bisa export data?",
+          "a": "Bisa. Data toko kamu ya punya kamu. Export CSV semua produk lagi disiapin; sementara ini, tim kami bantu seller mana pun yang mau pindahan manual — tinggal chat aja."
+        },
+        "migrate": {
+          "q": "Bisa pindah dari platform lain?",
+          "a": "Bisa. Foto produk, deskripsi, harga — bawa semua ke sini, Fibidy nggak ngunci kamu. Seller beta dapet bantuan migrasi langsung: kirim ping ke kami, beres."
+        }
+      }
+    },
+
+    "finalCta": {
+      "headline": "Mulai hari ini. Toko siap dalam 5 menit.",
+      "subheadline": "Gratis selama beta. Tanpa kartu kredit. Order via WhatsApp dari hari pertama.",
+      "ctaPrimary": "Buka Toko Gratis",
+      "trustLine": "Udah punya akun? Masuk lewat menu di atas."
+    },
+
     "footer": {
+      "tagline": "Cara paling cepat bikin toko digital di Indonesia.",
       "copyright": "© {year} Fibidy. Semua hak cipta dilindungi.",
-      "terms": "Syarat",
-      "privacy": "Privasi"
+      "columns": {
+        "product": {
+          "title": "Produk",
+          "links": {
+            "features": "Fitur",
+            "pricing": "Harga",
+            "discover": "Jelajahi toko",
+            "faq": "Tanya jawab"
+          }
+        },
+        "resources": {
+          "title": "Resources",
+          "links": {
+            "help": "Pusat bantuan",
+            "contact": "Hubungi kami",
+            "fees": "Biaya",
+            "payment": "Pembayaran"
+          }
+        },
+        "legal": {
+          "title": "Legal",
+          "links": {
+            "terms": "Syarat",
+            "privacy": "Privasi",
+            "refund": "Refund",
+            "sellerAgreement": "Perjanjian seller"
+          }
+        }
+      },
+      "themeToggle": {
+        "label": "Ganti tema",
+        "light": "Terang",
+        "dark": "Gelap",
+        "system": "Sistem"
+      },
+      "localeSwitcher": {
+        "label": "Ganti bahasa",
+        "en": "English",
+        "id": "Bahasa Indonesia"
+      }
+    },
+
+    "seo": {
+      "softwareApp": {
+        "name": "Fibidy",
+        "description": "Buka toko digital dalam 5 menit. Susun katalog, share link, terima orderan via WhatsApp. Gratis selama beta untuk UMKM dan kreator Indonesia.",
+        "category": "BusinessApplication"
+      }
     }
   }
 }

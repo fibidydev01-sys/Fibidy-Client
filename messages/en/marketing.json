@@ -1,23 +1,243 @@
 {
   "marketing": {
     "metadata": {
-      "title": "Fibidy — Your digital storefront, in 5 minutes",
-      "description": "Set up, upload, sell. The fastest way to launch a digital storefront in Indonesia."
+      "title": "Fibidy — Open your store. Sell today.",
+      "description": "The fastest way for Indonesian creators and small businesses to launch a digital storefront. Build your catalog, share your link, customers order via WhatsApp. Free during beta."
     },
+
+    "announcement": {
+      "messageDesktop": "🚀 Fibidy is live in beta — open your store free in 5 minutes.",
+      "messageMobile": "🚀 Fibidy beta — open your store free.",
+      "ctaLabel": "Get started",
+      "dismissLabel": "Dismiss announcement"
+    },
+
     "header": {
-      "login": "Sign in",
-      "register": "Get started"
+      "nav": {
+        "features": "Features",
+        "pricing": "Pricing",
+        "faq": "FAQ"
+      },
+      "ctaSignIn": "Sign in",
+      "ctaPrimary": "Open your store",
+      "menuOpen": "Open menu",
+      "menuClose": "Close menu"
     },
+
     "hero": {
-      "heading": "Your digital storefront, in 5 minutes",
-      "subheading": "Set up. Upload. Sell. Fibidy is the simplest way to launch a digital storefront — no setup fees, no monthly minimums.",
-      "cta": "Start selling",
-      "ctaSecondary": "Sign in"
+      "eyebrow": "Built for Indonesian sellers",
+      "headline": "Open your store. Sell today.",
+      "subheadline": "No coding, no setup fees. Build your catalog, share your link, and let customers order straight via WhatsApp.",
+      "ctaPrimary": "Open your store",
+      "ctaSecondary": "See the demo",
+      "trustLine": "Free during beta · 5 minutes to launch · WhatsApp-first ordering"
     },
+
+    "problem": {
+      "eyebrow": "The struggle is real",
+      "headline": "Selling online shouldn't break you.",
+      "items": {
+        "commission": {
+          "title": "Marketplaces eat 20% of every order",
+          "description": "Your hard work shouldn't fund someone else's growth. Keep more of what you earn."
+        },
+        "expensiveSlow": {
+          "title": "Custom websites are slow and pricey",
+          "description": "Quotes start at Rp 5 million and take weeks to ship. By then the trend is gone."
+        },
+        "notLocal": {
+          "title": "Tools weren't built for Indonesia",
+          "description": "Foreign platforms charge in USD, ignore WhatsApp, and don't speak your customers' language."
+        }
+      }
+    },
+
+    "features": {
+      "eyebrow": "Features",
+      "headline": "Everything you need. Nothing you don't.",
+      "subheadline": "Six tools that turn an idea into your first sale today.",
+      "items": {
+        "studio": {
+          "title": "Studio: drag-drop your storefront",
+          "description": "Build a landing page that mirrors your brand — pick a hero, drop in product blocks, swap the colors. No designer, no developer, no waiting."
+        },
+        "multiTenant": {
+          "title": "Your own subdomain or custom domain",
+          "description": "Launch at your-name.fibidy.com or plug in tokomu.com — your call, your brand."
+        },
+        "whatsapp": {
+          "title": "Order via WhatsApp, built in",
+          "description": "Customers tap one button and they're chatting with you on WA. No card friction, no checkout drop-off."
+        },
+        "theme": {
+          "title": "Brand colors, your way",
+          "description": "Pick the primary color that matches your packaging, your logo, your vibe — applied across every page."
+        },
+        "seo": {
+          "title": "SEO-ready out of the box",
+          "description": "Sitemap, OpenGraph cards, JSON-LD — handled. Your products show up clean on Google, WhatsApp shares, and Instagram links."
+        },
+        "mobile": {
+          "title": "Mobile-first, by default",
+          "description": "Most of your customers shop on a phone. Every page already works perfectly there — no extra config."
+        }
+      }
+    },
+
+    "pricing": {
+      "eyebrow": "Pricing",
+      "headline": "Three plans. One ladder. Honest pricing.",
+      "subheadline": "Start free, upgrade when you're ready. Same plans you see post-signup — no surprise upsells.",
+      "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below — we'll switch them on for everyone at the same time when paid plans launch."
+    },
+
+    "storeBuilder": {
+      "eyebrow": "Try it first, sign up later",
+      "headline": "Your store, in 30 seconds. See it live.",
+      "subheadline": "Pick a category, claim your address, watch your storefront build itself. No signup until you like what you see.",
+      "categoryStep": {
+        "label": "What are you selling?",
+        "categories": {
+          "restaurant": "Restaurant",
+          "fashion": "Fashion",
+          "beautySalon": "Beauty Salon",
+          "cleaning": "Cleaning Service",
+          "retail": "Retail Shop",
+          "other": "Other..."
+        }
+      },
+      "subdomainStep": {
+        "label": "Your store address",
+        "placeholder": "your-store",
+        "charCounter": "{count}/30",
+        "states": {
+          "available": "Available! Your store is ready to launch.",
+          "checking": "Checking...",
+          "taken": "Taken. Try one of these:",
+          "invalid": "Lowercase letters, numbers, and hyphens only.",
+          "tooShort": "At least 3 characters.",
+          "reserved": "This name is reserved by the system."
+        },
+        "suggestionLabel": "Try one of these:"
+      },
+      "preview": {
+        "placeholderSlug": "your-store",
+        "placeholderName": "Your Store",
+        "placeholderCategory": "Pick a category",
+        "placeholderProduct": "Your product here",
+        "navHome": "Home",
+        "navProducts": "Products",
+        "navAbout": "About",
+        "storeTagline": "Order anything via WhatsApp.",
+        "ctaButton": "Order via WhatsApp"
+      },
+      "agreement": {
+        "prefix": "I agree to the",
+        "termsLink": "Terms of Service",
+        "and": "and",
+        "privacyLink": "Privacy Policy"
+      },
+      "ctaPrimary": "Open your store now",
+      "trustLine": "Sign up in 2 minutes · No credit card needed"
+    },
+
+    "faq": {
+      "eyebrow": "FAQ",
+      "headline": "Questions, answered.",
+      "items": {
+        "isFree": {
+          "q": "Is Fibidy really free?",
+          "a": "Yes — free during beta, no card required, no trial expiry. We're focused on shipping a great product right now; paid plans land later this year. When they do, beta sellers get early-supporter pricing."
+        },
+        "paymentNoStripe": {
+          "q": "How do I get paid if Stripe isn't live yet?",
+          "a": "Customers tap 'Order via WhatsApp' on your storefront — you take it from there. Bank transfer, OVO, GoPay, COD — whatever works for you and the customer. Fibidy doesn't touch the money. Direct payouts via Stripe IDR are coming with paid plans."
+        },
+        "customDomain": {
+          "q": "Can I use my own domain?",
+          "a": "Yes — Fibidy supports custom domains. Point tokomu.com at us and we'll handle the rest. Or stay on your-name.fibidy.com — your call."
+        },
+        "betaRoadmap": {
+          "q": "When do paid plans launch?",
+          "a": "Targeting late 2026. Paid plans bring direct Stripe IDR payouts, digital product downloads, and seller analytics. Beta sellers get a thank-you discount when we ship them."
+        },
+        "fibidyVsLinktree": {
+          "q": "How is Fibidy different from Linktree?",
+          "a": "Linktree is a list of links. Fibidy is a real catalog: product photos, prices, categories, search, custom domain — all built in. Plus customers can order from you directly via WhatsApp, not bounce to another site."
+        },
+        "whatToSell": {
+          "q": "What can I sell on Fibidy?",
+          "a": "Physical goods (fashion, food, crafts), services (coaching, consultations, salon, studio time) — anything customers can buy from you via WA today. Digital products (templates, ebooks, courses) are coming with paid plans."
+        },
+        "dataExport": {
+          "q": "Can I export my products if I leave?",
+          "a": "Yes. Your data is yours. CSV export of all your products is on the roadmap; in the meantime, our team helps any seller migrate out manually if they ask."
+        },
+        "migrate": {
+          "q": "Can I move from another platform?",
+          "a": "Yes. Bring your product photos, descriptions, and prices over — Fibidy doesn't lock you in. Beta sellers get hands-on migration help: ping us and we'll do the lifting."
+        }
+      }
+    },
+
+    "finalCta": {
+      "headline": "Start today. Your store is ready in 5 minutes.",
+      "subheadline": "Free during beta. No credit card. Order via WhatsApp from day one.",
+      "ctaPrimary": "Open your store",
+      "trustLine": "Already have an account? Sign in from the menu above."
+    },
+
     "footer": {
+      "tagline": "The fastest way to launch your storefront in Indonesia.",
       "copyright": "© {year} Fibidy. All rights reserved.",
-      "terms": "Terms",
-      "privacy": "Privacy"
+      "columns": {
+        "product": {
+          "title": "Product",
+          "links": {
+            "features": "Features",
+            "pricing": "Pricing",
+            "discover": "Explore stores",
+            "faq": "FAQ"
+          }
+        },
+        "resources": {
+          "title": "Resources",
+          "links": {
+            "help": "Help center",
+            "contact": "Contact us",
+            "fees": "Fees",
+            "payment": "Payments"
+          }
+        },
+        "legal": {
+          "title": "Legal",
+          "links": {
+            "terms": "Terms",
+            "privacy": "Privacy",
+            "refund": "Refunds",
+            "sellerAgreement": "Seller agreement"
+          }
+        }
+      },
+      "themeToggle": {
+        "label": "Toggle theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "localeSwitcher": {
+        "label": "Switch language",
+        "en": "English",
+        "id": "Bahasa Indonesia"
+      }
+    },
+
+    "seo": {
+      "softwareApp": {
+        "name": "Fibidy",
+        "description": "Open your storefront in 5 minutes. Build your catalog, share your link, and let customers order via WhatsApp. Free during beta for Indonesian creators and small businesses.",
+        "category": "BusinessApplication"
+      }
     }
   }
 }

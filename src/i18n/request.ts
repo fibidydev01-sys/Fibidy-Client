@@ -6,6 +6,13 @@
 // next-intl v4 REQUIRES `locale` field in the return value.
 //
 // File is referenced by next.config.ts via createNextIntlPlugin.
+//
+// [MARKETING REBUILD — May 2026]
+// Added `marketing` namespace (15th file). marketing.json drives
+// all copy in the (marketing) route group — header, hero, problem,
+// features bento, pricing cards, how-it-works, FAQ, final CTA, footer.
+// Without this registration, getTranslations({namespace:'marketing.*'})
+// silently returns the key path instead of the translated string.
 // ==========================================
 
 import { getRequestConfig } from 'next-intl/server';
@@ -18,7 +25,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
-  // Merge all 14 namespaced message files at top level.
+  // Merge all 15 namespaced message files at top level.
   // Each file contributes its own top-level keys (no nesting under namespace).
   const messages = {
     ...(await import(`../../messages/${locale}/common.json`)).default,
@@ -35,6 +42,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../../messages/${locale}/toast.json`)).default,
     ...(await import(`../../messages/${locale}/error.json`)).default,
     ...(await import(`../../messages/${locale}/og.json`)).default,
+    ...(await import(`../../messages/${locale}/marketing.json`)).default,
   };
 
   return {

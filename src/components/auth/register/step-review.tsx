@@ -1,15 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+// ==========================================
+// STEP REVIEW
+// File: src/components/auth/register/step-review.tsx
+//
+// Phase 3 (Interactive Store Builder, May 2026):
+//
+// 🔵 Agreement state LIFTED to parent (register.tsx).
+//   Was: local `useState` here. Now: `isAgreed` + `onAgreementChange`
+//   come in as props. Parent controls because it needs to read the
+//   value to enable submit AND to pre-check from useRegisterWizard's
+//   cameFromBuilder flag (R1 = pre-checked + visible).
+//
+// 🔵 NEW prop `cameFromBuilder`
+//   When true, renders a small badge next to the checkbox: "✅ Disetujui
+//   di halaman builder" — gives the user clear feedback their earlier
+//   acceptance carried over. They can still untick if they change their
+//   mind, in which case the badge stays as historical context (the
+//   acceptance still happened, even if they're walking it back now).
+//
+// All other behavior unchanged from Phase 2.
+// ==========================================
+
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getCategoryConfig } from '@/lib/constants/shared/categories';
-import { Store, Mail, Lock, Phone, Edit2 } from 'lucide-react';
+import { Store, Mail, Lock, Phone, Edit2, CheckCircle2 } from 'lucide-react';
 
 // ==========================================
-// TYPES — onSubmit & isLoading dihapus (handled by parent)
+// TYPES
 // ==========================================
 
 interface StepReviewProps {
@@ -23,26 +44,32 @@ interface StepReviewProps {
     whatsapp?: string;
   };
   onEdit: (step: number) => void;
-  onAgreementChange?: (agreed: boolean) => void;
+  /** Controlled — agreement state lifted to parent (register.tsx) */
+  isAgreed: boolean;
+  /** Controlled — agreement state setter lifted to parent (register.tsx) */
+  onAgreementChange: (agreed: boolean) => void;
+  /** True when user arrived from the marketing Interactive Store Builder */
+  cameFromBuilder?: boolean;
 }
 
 // ==========================================
-// COMPONENT — no header, no nav (handled by parent)
+// COMPONENT
 // ==========================================
 
-export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps) {
+export function StepReview({
+  data,
+  onEdit,
+  isAgreed,
+  onAgreementChange,
+  cameFromBuilder = false,
+}: StepReviewProps) {
   const t = useTranslations('auth.register.review');
-  const categoryConfig = data.category ? getCategoryConfig(data.category) : null;
-  const [isAgreed, setIsAgreed] = useState(false);
-
-  const handleAgreementChange = (checked: boolean) => {
-    setIsAgreed(checked);
-    onAgreementChange?.(checked);
-  };
+  const categoryConfig = data.category
+    ? getCategoryConfig(data.category)
+    : null;
 
   return (
     <div className="space-y-3 max-w-md">
-
       {/* Business Type */}
       <ReviewCard label={t('businessType')} onEdit={() => onEdit(2)}>
         <p className="text-sm font-medium">
@@ -74,7 +101,9 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
           </div>
           {data.description && (
             <div>
-              <p className="text-xs text-muted-foreground">{t('description')}</p>
+              <p className="text-xs text-muted-foreground">
+                {t('description')}
+              </p>
               <p className="text-sm">{data.description}</p>
             </div>
           )}
@@ -104,40 +133,50 @@ export function StepReview({ data, onEdit, onAgreementChange }: StepReviewProps)
       </ReviewCard>
 
       {/* Agreement */}
-      <div className="flex items-start gap-3 pt-2">
-        <Checkbox
-          id="agreement"
-          checked={isAgreed}
-          onCheckedChange={(checked) => handleAgreementChange(checked === true)}
-          className="mt-0.5 shrink-0"
-        />
-        <label
-          htmlFor="agreement"
-          className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
-        >
-          {t('agreementPrefix')}{' '}
-          <a
-            href="/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-            onClick={(e) => e.stopPropagation()}
+      <div className="space-y-2 pt-2">
+        {cameFromBuilder && (
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+            <CheckCircle2 className="h-3 w-3" aria-hidden />
+            {t('agreementBuilderBadge')}
+          </div>
+        )}
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="agreement"
+            checked={isAgreed}
+            onCheckedChange={(checked) =>
+              onAgreementChange(checked === true)
+            }
+            className="mt-0.5 shrink-0"
+          />
+          <label
+            htmlFor="agreement"
+            className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
           >
-            {t('termsLink')}
-          </a>
-          {' '}{t('agreementAnd')}{' '}
-          <a
-            href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {t('privacyLink')}
-          </a>.
-        </label>
+            {t('agreementPrefix')}{' '}
+            <a
+              href="/legal/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {t('termsLink')}
+            </a>{' '}
+            {t('agreementAnd')}{' '}
+            <a
+              href="/legal/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {t('privacyLink')}
+            </a>
+            .
+          </label>
+        </div>
       </div>
-
     </div>
   );
 }

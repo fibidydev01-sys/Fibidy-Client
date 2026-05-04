@@ -11,6 +11,19 @@
 //  5. Auth gate → redirect based on cookie + route category    [VERCEL VIBES — May 2026]
 //  6. Fallback → delegate to next-intl middleware
 //
+// [PHASE 4 — May 2026]
+// Reserved-subdomain list + slug regex now imported from shared
+// constants instead of being inlined here. Three-way drift between
+// proxy.ts, FE shared constant, and BE shared constant is now zero —
+// they ALL point at the same definitions. Updating reserved entries
+// or slug rules now requires touching ONE file (per side, mirrored).
+//
+// What this fix prevents:
+//   - FE register form rejecting `admin` while proxy still routes
+//     `admin.fibidy.com` to a tenant lookup
+//   - Loose subdomain regex here permitting `a--b` while strict regex
+//     in DTO rejects it (or vice versa)
+//
 // [404-HARDENING — May 2026]
 // Two skip-list expansions to prevent middleware from intercepting
 // public/* assets and causing 404s under specific edge cases:
@@ -28,7 +41,7 @@
 //      through and risk next-intl rewrite → 404.
 //
 // [VERCEL VIBES — May 2026]
-// New step 5: edge-level auth gate. Reads the fibidy_auth cookie and
+// Step 5: edge-level auth gate. Reads the fibidy_auth cookie and
 // makes routing decisions BEFORE the page renders. This eliminates the
 // client-side flash where the login form would render briefly while
 // `useAuthCheck` fetched /auth/status, then redirect to /dashboard.
@@ -52,29 +65,17 @@
 // Security: middleware is for routing UX, NOT a security boundary. The
 // NestJS backend validates the cookie on every API call. CVE-2025-29927
 // note: this codebase is on Next 16.1.1 (well above patched versions).
-//
-// All existing logic preserved verbatim — extraction, reserved subdomains,
-// custom domain resolve, path-based store routing, next-intl delegation,
-// DEBUG logging, x-custom-domain + x-tenant-slug headers.
 // ==========================================
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from '@/i18n/routing';
+import { isReservedSubdomain } from '@/lib/constants/shared/reserved-subdomains';
+import { SLUG_REGEX } from '@/lib/constants/shared/slug.constants';
 
 const PROD_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'fibidy.com';
 const DEBUG = process.env.NODE_ENV === 'development';
-
-const RESERVED_SUBDOMAINS = [
-  'www', 'api', 'cdn', 'app', 'admin', 'dashboard',
-  'static', 'assets', 'images', 'files', 'uploads',
-  'login', 'register', 'logout', 'auth', 'oauth',
-  'blog', 'help', 'support', 'docs', 'status',
-  'pricing', 'about', 'contact', 'terms', 'privacy',
-  'store', 'shop', 'toko', 'fibidy', 'test', 'demo',
-  'null', 'undefined', 'root', 'system', 'mail', 'email',
-];
 
 // ==========================================
 // [VERCEL VIBES] AUTH GATE CONSTANTS
@@ -102,11 +103,14 @@ function extractSubdomain(hostname: string): string | null {
   if (hostname.endsWith(`.${PROD_DOMAIN}`)) {
     const subdomain = hostname.replace(`.${PROD_DOMAIN}`, '');
 
-    if (RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase())) {
+    // Phase 4: shared constant — drift-proof with FE register + BE auth.
+    if (isReservedSubdomain(subdomain)) {
       return null;
     }
 
-    if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(subdomain)) {
+    // Phase 4: shared regex — drift-proof with register.dto.ts + FE shared.
+    // Strict version: no consecutive hyphens (was looser before).
+    if (SLUG_REGEX.test(subdomain.toLowerCase())) {
       return subdomain;
     }
   }
