@@ -4,26 +4,161 @@
       "title": "Fibidy — Buka toko, langsung jualan",
       "description": "Cara paling cepat buat UMKM dan kreator Indonesia bikin toko online. Susun katalog, share link toko, pelanggan order via WhatsApp. Gratis selamanya buat mulai."
     },
-
     "announcement": {
       "messageDesktop": "🚀 Bikin toko gratis dalam 5 menit — tanpa kartu kredit.",
       "messageMobile": "🚀 Bikin toko gratis dalam 5 menit.",
       "ctaLabel": "Mulai",
       "dismissLabel": "Tutup pengumuman"
     },
-
     "header": {
       "nav": {
-        "features": "Fitur",
-        "pricing": "Harga",
-        "faq": "Tanya Jawab"
+        "triggers": {
+          "product": "Produk",
+          "resources": "Sumber Daya",
+          "solutions": "Solusi",
+          "enterprise": "Enterprise",
+          "pricing": "Harga"
+        },
+        "columns": {
+          "build": "Bangun",
+          "connect": "Hubungkan",
+          "platform": "Platform",
+          "getHelp": "Butuh Bantuan",
+          "howItWorks": "Cara Fibidy Kerja",
+          "updates": "Pembaruan",
+          "foodBev": "Makanan & Minuman",
+          "lifestyle": "Gaya Hidup",
+          "services": "Layanan",
+          "scale": "Skala Besar"
+        },
+        "items": {
+          "product": {
+            "storefrontBuilder": {
+              "label": "Storefront Builder",
+              "desc": "Bikin toko branded dalam hitungan menit"
+            },
+            "templates": {
+              "label": "Template",
+              "desc": "Mulai dari desain pilihan"
+            },
+            "orderInbox": {
+              "label": "Inbox Pesanan",
+              "desc": "Kelola semua pesanan di satu tempat"
+            },
+            "whatsapp": {
+              "label": "Channel WhatsApp",
+              "desc": "Jualan langsung di tempat pembeli ngobrol"
+            },
+            "customDomain": {
+              "label": "Custom Domain",
+              "desc": "Pakai .com atau subdomain sendiri"
+            },
+            "ssl": {
+              "label": "SSL Gratis",
+              "desc": "Aman by default di setiap toko"
+            },
+            "bento": {
+              "label": "Semua Fitur",
+              "desc": "Semua yang Fibidy kasih, dalam satu grid"
+            },
+            "scale": {
+              "label": "Infrastruktur Skala",
+              "desc": "Dibangun buat tumbuh bareng bisnismu"
+            },
+            "analytics": {
+              "label": "Analitik",
+              "desc": "Insight penjualan dan traffic"
+            }
+          },
+          "resources": {
+            "faq": {
+              "label": "FAQ",
+              "desc": "Jawaban cepat untuk pertanyaan umum"
+            },
+            "contact": {
+              "label": "Kontak",
+              "desc": "Hubungi tim support kami"
+            },
+            "discover": {
+              "label": "Jelajahi Toko",
+              "desc": "Lihat toko Fibidy publik"
+            },
+            "fees": {
+              "label": "Biaya",
+              "desc": "Rincian biaya yang transparan"
+            },
+            "payment": {
+              "label": "Metode Pembayaran",
+              "desc": "Cara pembeli bayar ke kamu"
+            },
+            "payout": {
+              "label": "Pencairan Dana",
+              "desc": "Cara kamu nerima uangnya"
+            },
+            "kyc": {
+              "label": "KYC & Verifikasi",
+              "desc": "Verifikasi identitas dan akun"
+            },
+            "blog": {
+              "label": "Blog",
+              "desc": "Cerita, tips, dan update produk"
+            },
+            "changelog": {
+              "label": "Changelog",
+              "desc": "Apa yang baru saja kami rilis"
+            },
+            "docs": {
+              "label": "Dokumentasi",
+              "desc": "Dokumentasi developer lengkap"
+            }
+          },
+          "solutions": {
+            "restaurant": {
+              "label": "Restoran",
+              "desc": "Menu, dine-in, dan delivery"
+            },
+            "coffeeshop": {
+              "label": "Coffee Shop",
+              "desc": "Pre-order dan pickup gampang"
+            },
+            "fashion": {
+              "label": "Fashion & Apparel",
+              "desc": "Ukuran, varian, dan lookbook"
+            },
+            "beautySalon": {
+              "label": "Salon Kecantikan",
+              "desc": "Booking dan katalog layanan"
+            },
+            "cleaning": {
+              "label": "Jasa Kebersihan",
+              "desc": "Quote, jadwal, dan tagihan"
+            },
+            "retail": {
+              "label": "Retail & Grocery",
+              "desc": "Inventori dan checkout cepat"
+            }
+          },
+          "enterprise": {
+            "bulkDomain": {
+              "label": "Custom Domain Skala Besar",
+              "desc": "Provisioning domain lintas tim"
+            },
+            "whitelabel": {
+              "label": "White-label & Perjanjian Seller",
+              "desc": "Brand kamu, infrastruktur kami"
+            },
+            "acceptableUse": {
+              "label": "Kebijakan Penggunaan",
+              "desc": "Apa yang boleh dan nggak boleh dijual"
+            }
+          }
+        }
       },
       "ctaSignIn": "Masuk",
       "ctaPrimary": "Buka Toko Gratis",
       "menuOpen": "Buka menu",
       "menuClose": "Tutup menu"
     },
-
     "hero": {
       "eyebrow": "Dibuat untuk UMKM Indonesia",
       "headline": "Buka toko, langsung jualan.",
@@ -40,7 +175,6 @@
       "ctaSecondary": "Lihat demo",
       "trustLine": "Gratis selamanya buat mulai · Bikin toko 5 menit · Jualan via WhatsApp"
     },
-
     "problem": {
       "eyebrow": "Pasti pernah ngalamin",
       "headline": "Jualan online harusnya nggak bikin pusing.",
@@ -59,7 +193,6 @@
         }
       }
     },
-
     "features": {
       "eyebrow": "Fitur",
       "headline": "Semua yang kamu butuhin buat mulai jualan.",
@@ -80,7 +213,6 @@
         }
       }
     },
-
     "scale": {
       "eyebrow": "Dibuat buat tumbuh",
       "headline": "Tumbuh bareng kamu.",
@@ -100,7 +232,6 @@
         }
       }
     },
-
     "howItWorks": {
       "eyebrow": "Cara kerjanya",
       "headline": "Dari ide ke jualan pertama, 5 menit.",
@@ -123,7 +254,6 @@
         }
       }
     },
-
     "pricing": {
       "eyebrow": "Harga",
       "headline": "Tiga paket. Satu tangga. Pricing jujur.",
@@ -131,7 +261,6 @@
       "popularBadge": "Populer",
       "roadmapNote": "Download digital, payout, dan platform fee masih dipoles — ditandai 'Coming Soon' di bawah. Semua aktif barengan pas fitur-fitur itu rilis."
     },
-
     "storeBuilder": {
       "eyebrow": "Coba dulu, daftar kemudian",
       "headline": "Toko kamu, dalam 30 detik. Lihat sendiri.",
@@ -222,7 +351,6 @@
       "ctaPrimary": "Buka Toko Gratis Sekarang",
       "trustLine": "Daftar 2 menit · Tanpa kartu kredit"
     },
-
     "faq": {
       "eyebrow": "Tanya jawab",
       "headline": "Yang sering ditanyain.",
@@ -261,14 +389,12 @@
         }
       }
     },
-
     "finalCta": {
       "headline": "Mulai hari ini. Toko siap dalam 5 menit.",
       "subheadline": "Gratis selamanya buat mulai. Tanpa kartu kredit. Order via WhatsApp dari hari pertama.",
       "ctaPrimary": "Buka Toko Gratis",
       "trustLine": "Udah punya akun? Masuk lewat menu di atas."
     },
-
     "footer": {
       "tagline": "Cara paling cepat bikin toko digital di Indonesia.",
       "copyright": "© {year} Fibidy. Hak cipta dilindungi.",
@@ -313,7 +439,6 @@
         "id": "Bahasa Indonesia"
       }
     },
-
     "seo": {
       "softwareApp": {
         "name": "Fibidy",

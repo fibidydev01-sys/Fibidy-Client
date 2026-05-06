@@ -4,26 +4,161 @@
       "title": "Fibidy — Open your store. Sell today.",
       "description": "The fastest way for Indonesian creators and small businesses to launch a digital storefront. Build your catalog, share your link, customers order via WhatsApp. Free forever to start."
     },
-
     "announcement": {
       "messageDesktop": "🚀 Open your store free in 5 minutes — no card needed.",
       "messageMobile": "🚀 Open your store free in 5 minutes.",
       "ctaLabel": "Get started",
       "dismissLabel": "Dismiss announcement"
     },
-
     "header": {
       "nav": {
-        "features": "Features",
-        "pricing": "Pricing",
-        "faq": "FAQ"
+        "triggers": {
+          "product": "Product",
+          "resources": "Resources",
+          "solutions": "Solutions",
+          "enterprise": "Enterprise",
+          "pricing": "Pricing"
+        },
+        "columns": {
+          "build": "Build",
+          "connect": "Connect",
+          "platform": "Platform",
+          "getHelp": "Get Help",
+          "howItWorks": "How Fibidy Works",
+          "updates": "Stay Updated",
+          "foodBev": "Food & Beverage",
+          "lifestyle": "Lifestyle",
+          "services": "Services",
+          "scale": "Scale"
+        },
+        "items": {
+          "product": {
+            "storefrontBuilder": {
+              "label": "Storefront Builder",
+              "desc": "Spin up a branded shop in minutes"
+            },
+            "templates": {
+              "label": "Templates",
+              "desc": "Start from a curated design"
+            },
+            "orderInbox": {
+              "label": "Order Inbox",
+              "desc": "Manage all orders in one place"
+            },
+            "whatsapp": {
+              "label": "WhatsApp Channel",
+              "desc": "Sell where your buyers chat"
+            },
+            "customDomain": {
+              "label": "Custom Domain",
+              "desc": "Bring your own .com or subdomain"
+            },
+            "ssl": {
+              "label": "Free SSL",
+              "desc": "Secure by default on every store"
+            },
+            "bento": {
+              "label": "All Features",
+              "desc": "Everything Fibidy ships, in one grid"
+            },
+            "scale": {
+              "label": "Scale Infrastructure",
+              "desc": "Built to grow with your business"
+            },
+            "analytics": {
+              "label": "Analytics",
+              "desc": "Sales and traffic insights"
+            }
+          },
+          "resources": {
+            "faq": {
+              "label": "FAQ",
+              "desc": "Quick answers to common questions"
+            },
+            "contact": {
+              "label": "Contact",
+              "desc": "Reach our support team"
+            },
+            "discover": {
+              "label": "Discover Stores",
+              "desc": "Browse public Fibidy shops"
+            },
+            "fees": {
+              "label": "Fees",
+              "desc": "Transparent pricing breakdown"
+            },
+            "payment": {
+              "label": "Payment Methods",
+              "desc": "How buyers pay you"
+            },
+            "payout": {
+              "label": "Payouts",
+              "desc": "How you get paid"
+            },
+            "kyc": {
+              "label": "KYC & Verification",
+              "desc": "Identity and account verification"
+            },
+            "blog": {
+              "label": "Blog",
+              "desc": "Stories, tips, and product updates"
+            },
+            "changelog": {
+              "label": "Changelog",
+              "desc": "What we just shipped"
+            },
+            "docs": {
+              "label": "Docs",
+              "desc": "Full developer documentation"
+            }
+          },
+          "solutions": {
+            "restaurant": {
+              "label": "Restaurant",
+              "desc": "Menus, dine-in, and delivery"
+            },
+            "coffeeshop": {
+              "label": "Coffee Shop",
+              "desc": "Pre-orders and pickup made easy"
+            },
+            "fashion": {
+              "label": "Fashion & Apparel",
+              "desc": "Sizes, variants, and lookbooks"
+            },
+            "beautySalon": {
+              "label": "Beauty Salon",
+              "desc": "Bookings and service catalogs"
+            },
+            "cleaning": {
+              "label": "Cleaning Services",
+              "desc": "Quote, schedule, and bill"
+            },
+            "retail": {
+              "label": "Retail & Grocery",
+              "desc": "Inventory and quick checkout"
+            }
+          },
+          "enterprise": {
+            "bulkDomain": {
+              "label": "Custom Domains at Scale",
+              "desc": "Provision domains across teams"
+            },
+            "whitelabel": {
+              "label": "White-label & Seller Agreement",
+              "desc": "Your brand, our infrastructure"
+            },
+            "acceptableUse": {
+              "label": "Acceptable Use Policy",
+              "desc": "What you can and can't sell"
+            }
+          }
+        }
       },
       "ctaSignIn": "Sign in",
       "ctaPrimary": "Open your store",
       "menuOpen": "Open menu",
       "menuClose": "Close menu"
     },
-
     "hero": {
       "eyebrow": "Built for Indonesian sellers",
       "headline": "Open your store. Sell today.",
@@ -40,7 +175,6 @@
       "ctaSecondary": "See the demo",
       "trustLine": "Free forever to start · 5 minutes to launch · WhatsApp-first ordering"
     },
-
     "problem": {
       "eyebrow": "The struggle is real",
       "headline": "Selling online shouldn't break you.",
@@ -59,7 +193,6 @@
         }
       }
     },
-
     "features": {
       "eyebrow": "Features",
       "headline": "Everything you need to start selling.",
@@ -80,7 +213,6 @@
         }
       }
     },
-
     "scale": {
       "eyebrow": "Built to scale",
       "headline": "Built to scale with you.",
@@ -100,7 +232,6 @@
         }
       }
     },
-
     "howItWorks": {
       "eyebrow": "How it works",
       "headline": "From idea to first sale, in 5 minutes.",
@@ -123,7 +254,6 @@
         }
       }
     },
-
     "pricing": {
       "eyebrow": "Pricing",
       "headline": "Three plans. One ladder. Honest pricing.",
@@ -131,7 +261,6 @@
       "popularBadge": "Popular",
       "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below — we'll switch them on for everyone at the same time when those features ship."
     },
-
     "storeBuilder": {
       "eyebrow": "Try it first, sign up later",
       "headline": "Your store, in 30 seconds. See it live.",
@@ -222,7 +351,6 @@
       "ctaPrimary": "Open your store now",
       "trustLine": "Sign up in 2 minutes · No credit card needed"
     },
-
     "faq": {
       "eyebrow": "FAQ",
       "headline": "Questions, answered.",
@@ -261,14 +389,12 @@
         }
       }
     },
-
     "finalCta": {
       "headline": "Start today. Your store is ready in 5 minutes.",
       "subheadline": "Free forever to start. No credit card. Order via WhatsApp from day one.",
       "ctaPrimary": "Open your store",
       "trustLine": "Already have an account? Sign in from the menu above."
     },
-
     "footer": {
       "tagline": "The fastest way to launch your storefront in Indonesia.",
       "copyright": "© {year} Fibidy. All rights reserved.",
@@ -313,7 +439,6 @@
         "id": "Bahasa Indonesia"
       }
     },
-
     "seo": {
       "softwareApp": {
         "name": "Fibidy",
