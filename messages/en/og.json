@@ -15,6 +15,21 @@
         "paymentsSub": "Orders"
       },
       "url": "fibidy.com"
+    },
+    "store": {
+      "notFound": "Store Not Found",
+      "error": "Error",
+      "invalidRequest": "Invalid Request",
+      "noImage": "No Image",
+      "fallbackDomain": "{slug}.fibidy.com",
+      "rootDomain": "fibidy.com"
+    },
+    "product": {
+      "notFound": "Product Not Found",
+      "fallbackName": "Product"
+    },
+    "tenant": {
+      "fallbackName": "Store"
     }
   }
 }

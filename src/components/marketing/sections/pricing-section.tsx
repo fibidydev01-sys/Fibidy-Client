@@ -2,19 +2,24 @@
 // PRICING SECTION (3-tier mirror — Vercel-open line-grid)
 // File: src/components/marketing/sections/pricing-section.tsx
 //
-// Phase 5 polish v16 (May 2026 — per-section grid rhythm):
+// Phase 5 polish v17 (May 2026 — typecheck cleanup):
 //
-// CHANGED in v16:
-//   - GRID_PATTERN_STYLE local declaration REMOVED.
-//   - Now uses createGridStyle({ intensity: 'soft', mask: 'fade-top' }).
-//     Rationale:
-//       * soft intensity (0.40 / dark 0.20) — pricing cards are
-//         visually heavy (tier badges, price numbers, feature lists).
-//         Grid harus subtle biar kartu yang dominan.
-//       * fade-top → grid tipis di atas, lebih jelas di bawah.
-//         Efeknya: kartu pricing seolah "ngambang" di area atas yang
-//         lapang, terus grid muncul di bawah sebagai grounding.
-//         Decision moment terasa fokus, bukan crowded.
+// CHANGED in v17:
+//   - REMOVED `footnote` prop passed into <PricingCard>. PricingCard's
+//     interface dropped that prop in v15.5 ("Forever free" subtext
+//     removed entirely per CEO directive). This section was still
+//     forwarding the value, which broke the build now that strict
+//     prop checking caught the mismatch.
+//   - The `freeForeverNote` lookup is no longer needed for forwarding,
+//     but it's still used to drive the `isFreeForever` boolean which
+//     blanks the priceNote. So the lookup stays — only the prop hand-
+//     off is dropped.
+//
+// PRESERVED from v16:
+//   - GRID_PATTERN_STYLE local declaration kept REMOVED.
+//   - createGridStyle({ intensity: 'soft', mask: 'fade-top' }).
+//     Rationale unchanged: pricing cards heavy → grid recedes; fade-top
+//     so cards "float" at top, grid grounds bottom.
 //
 // PRESERVED from v15.9:
 //   - Vercel-open layout (header block + 3 pricing columns block).
@@ -123,7 +128,6 @@ export async function PricingSection() {
                       comingSoonSection: tSub('comingSoon.sectionLabel'),
                       platformFeeLabel: tSub('platformFee.label'),
                     }}
-                    footnote={isFreeForever ? freeForeverNote : undefined}
                   />
                 </div>
               );
