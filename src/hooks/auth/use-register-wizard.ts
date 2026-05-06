@@ -6,35 +6,30 @@
 //
 // Phase 3 (Interactive Store Builder, May 2026):
 //
-// New behavior: when arriving from /register?slug=...&category=...&agreement=accepted
-// (handoff from marketing builder), the wizard:
+// Auto-skip behavior on arrival from /register?slug=...&category=...
+// from the marketing builder. Pre-fills slug + category, auto-derives
+// name, lands on Account step (4).
 //
-//   1. Pre-fills `state.slug` from query
-//   2. Pre-fills `state.category` from query (when valid + present)
-//   3. Auto-derives `state.name` from slug (Q5+N1)
-//      e.g. "kopi-nusantara" → "Kopi Nusantara"
-//      User can navigate back to step 3 to edit if they want.
-//   4. Skips Welcome (W1) — visitor already saw the marketing builder
-//   5. Skips Category (when category param valid)
-//   6. Skips StoreInfo (when slug + name pre-filled)
-//   7. Lands on step 4 (Account) — the only step that genuinely needs input
-//   8. Surfaces `cameFromBuilder` flag so step-review can pre-tick
-//      the agreement checkbox per Q8 = L1 + R1
+// Phase 5 (Magic UI polish, May 2026 — CEO unlock):
+//
+// CHANGED:
+//   - "Other" escape hatch in the marketing builder REMOVED. Every
+//     category from the query string now resolves to a real registry
+//     key (validated upstream at module-load time in store-builder.ts).
+//   - Hook still defensively validates the category param (defense in
+//     depth — query params can be hand-edited). If validation fails,
+//     falls back to landing on Category step instead of Account.
+//   - Behavior on slug-only (no category) query is preserved — was
+//     used for the legacy "Other" path, but a hand-crafted URL might
+//     still hit it, so the path stays.
 //
 // Edge cases handled:
 //   - Invalid slug format from query → ignored (lands on step 1 normally)
-//   - Reserved slug from query → ignored (defense in depth — builder local
-//     check should prevent this)
-//   - Category param missing or "other"/null → category step NOT skipped
+//   - Reserved slug from query → ignored
+//   - Invalid category param → ignored, lands on Category step
 //   - Agreement acceptance: TWO sources, either qualifies as "from builder":
 //       a) Query string ?agreement=accepted
 //       b) sessionStorage 'fibidy_builder_agreement' === '1'
-//     Defense in depth — query survives sessionStorage clearing in private
-//     tabs; sessionStorage survives URL rewrites/redirects.
-//
-// SSR safety: useSearchParams returns null on server first render in some
-// configurations. We guard accordingly. sessionStorage only touched inside
-// useEffect (browser-only).
 // ==========================================
 
 import { useEffect, useState } from 'react';
@@ -54,12 +49,6 @@ import { getCategoryConfig } from '@/lib/constants/shared/categories';
 const TOTAL_STEPS = 5;
 const AGREEMENT_BRIDGE_KEY = 'fibidy_builder_agreement';
 
-// Step indices (1-based to match existing register.tsx logic):
-//   1 = Welcome
-//   2 = Category
-//   3 = StoreInfo
-//   4 = Account
-//   5 = Review
 const STEP_WELCOME = 1;
 const STEP_CATEGORY = 2;
 const STEP_STORE_INFO = 3;
@@ -77,14 +66,6 @@ interface WizardState extends Partial<RegisterFormData> {
 // HELPERS — pure
 // ==========================================
 
-/**
- * Auto-derive a display name from a slug.
- * "kopi-nusantara" → "Kopi Nusantara"
- *
- * Used when handing off from marketing builder (which doesn't collect
- * name) so step 4 can submit successfully without forcing the user
- * back to step 3.
- */
 function deriveNameFromSlug(slug: string): string {
   return slug
     .split('-')
@@ -93,10 +74,6 @@ function deriveNameFromSlug(slug: string): string {
     .join(' ');
 }
 
-/**
- * Sanitize a query-string slug. Returns the slug if it passes ALL
- * validation (length, format, not reserved) — otherwise null.
- */
 function sanitizeSlugFromQuery(raw: string | null): string | null {
   if (!raw) return null;
   const cleaned = raw.toLowerCase().trim();
@@ -106,10 +83,6 @@ function sanitizeSlugFromQuery(raw: string | null): string | null {
   return cleaned;
 }
 
-/**
- * Validate a category key from query against the real category registry.
- * Returns the key if it exists, otherwise null.
- */
 function sanitizeCategoryFromQuery(raw: string | null): string | null {
   if (!raw) return null;
   return getCategoryConfig(raw) ? raw : null;
@@ -121,14 +94,9 @@ function sanitizeCategoryFromQuery(raw: string | null): string | null {
 
 export function useRegisterWizard() {
   const searchParams = useSearchParams();
-
-  // Tracks whether the user arrived from marketing builder. Used by
-  // step-review.tsx to pre-tick the agreement checkbox (R1).
   const [cameFromBuilder, setCameFromBuilder] = useState(false);
 
-  // ── Initial state (computed lazily once on mount) ───────────────
-  // useState's initializer runs ONLY on first mount, which is exactly
-  // the lifecycle we want for query-param handoff.
+  // Initial state computed lazily once on mount
   const [state, setState] = useState<WizardState>(() => {
     const base: WizardState = {
       currentStep: STEP_WELCOME,
@@ -149,13 +117,10 @@ export function useRegisterWizard() {
     // No usable slug → render normally from step 1.
     if (!slug) return base;
 
-    // Slug present + valid → at minimum we can pre-fill slug + name and
-    // skip Welcome. Category presence determines whether we ALSO skip
-    // Category step.
     const name = deriveNameFromSlug(slug);
 
     if (category) {
-      // Best case: both slug + category present → skip 3 steps, land on Account
+      // Best case: both slug + category present → skip to Account
       return {
         ...base,
         slug,
@@ -165,10 +130,8 @@ export function useRegisterWizard() {
       };
     }
 
-    // Slug only (e.g. user picked "Lainnya..." in the builder, which
-    // doesn't pass category param) → skip Welcome only, land on Category
-    // so they can pick the actual subcat. Slug + name still pre-filled
-    // so step 3 (StoreInfo) feels prepared when they reach it.
+    // Slug only (rare in Phase 5 — every chip carries a category, so
+    // this only happens with hand-crafted URLs). Land on Category step.
     return {
       ...base,
       slug,
@@ -177,8 +140,7 @@ export function useRegisterWizard() {
     };
   });
 
-  // ── Read agreement bridge (browser only) ────────────────────────
-  // Either query param or sessionStorage qualifies as "from builder".
+  // Read agreement bridge (browser only)
   useEffect(() => {
     if (!searchParams) return;
 
@@ -195,7 +157,6 @@ export function useRegisterWizard() {
     setCameFromBuilder(queryAgreement || storageAgreement);
   }, [searchParams]);
 
-  // ── State mutators ──────────────────────────────────────────────
   const updateState = (data: Partial<WizardState>) => {
     setState((prev) => ({ ...prev, ...data }));
   };
@@ -248,12 +209,6 @@ export function useRegisterWizard() {
     isFirstStep: state.currentStep === 1,
     isLastStep: state.currentStep === TOTAL_STEPS,
     totalSteps: TOTAL_STEPS,
-
-    /**
-     * True when the user arrived from the marketing Interactive Store Builder
-     * (either via ?agreement=accepted query OR sessionStorage bridge).
-     * Used by step-review.tsx to pre-tick the agreement checkbox (R1).
-     */
     cameFromBuilder,
   };
 }

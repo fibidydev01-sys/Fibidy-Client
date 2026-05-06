@@ -4,7 +4,7 @@
 //
 // This file holds everything that USED to live in src/app/layout.tsx:
 //   - <html>, <head>, <body>
-//   - Font loading (Inter)
+//   - Font loading (Geist + Geist Mono — via official `geist` package, v15.3.3)
 //   - Root metadata + viewport
 //   - Preconnect / DNS-prefetch
 //   - Apple / MS PWA meta tags
@@ -38,10 +38,43 @@
 //    indexed by Google. Without this gate, every preview deploy could
 //    theoretically rank for "fibidy" branded queries — duplicate
 //    content + brand dilution.
+//
+// [PHASE 5 polish v15.3.3 — May 2026]
+// Geist now loaded via the OFFICIAL `geist` npm package (the same
+// package Vercel themselves use on vercel.com), replacing the
+// previous `next/font/google` jalur from v15.3.0–v15.3.2.
+//
+// Why the swap:
+//   - `next/font/google` pulls a Google-redistributed copy of Geist.
+//     That copy is a subset — kerning pairs, font-feature-settings,
+//     and the full opsz axis can be trimmed depending on what Google
+//     hosts at any given moment.
+//   - The official `geist` package self-hosts the canonical .woff2
+//     files via `next/font/local` under the hood. Files are
+//     maintained by Vercel + Basement Studio (the original designers),
+//     updated in lockstep with the GitHub releases of vercel/geist-font,
+//     and ship with the full glyph set + feature settings intact.
+//   - Zero Google CDN dependency at runtime.
+//
+// What changed:
+//   - Imports: { Geist, Geist_Mono } from 'next/font/google'
+//             → { GeistSans } from 'geist/font/sans'
+//             + { GeistMono } from 'geist/font/mono'
+//   - No more Geist({ subsets, display, variable }) calls — the
+//     official package bakes those settings in (subset = 'latin',
+//     display = 'swap', variable = '--font-geist-sans' / '--font-geist-mono').
+//
+// What did NOT change:
+//   - CSS variable names: still --font-geist-sans / --font-geist-mono.
+//     globals.css and every consumer that references them keeps
+//     working without touching a single line of CSS.
+//   - The `.variable` className contract — applied to <body> below
+//     in the same place as before.
 // ==========================================
 
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
@@ -55,14 +88,26 @@ import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 // ==========================================
-// FONT CONFIGURATION
+// FONT CONFIGURATION — Geist + Geist Mono (v15.3.3)
+// ==========================================
+//
+// `GeistSans` and `GeistMono` are pre-configured Font objects exported
+// by the `geist` npm package. They are NOT factory functions — they
+// already carry the CSS variable wiring (`--font-geist-sans` /
+// `--font-geist-mono`) baked in by Vercel.
+//
+// Use them directly via `.variable` on a wrapping element. The
+// `.variable` value is a CSS class containing the `--font-*`
+// custom-property declaration; everything inside that element
+// inherits the variable through the cascade.
+//
+// No instantiation, no options object. The package itself is the
+// source of truth for subsetting, display strategy, weight axis
+// coverage, and font-feature-settings.
 // ==========================================
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+// (Intentionally no `Geist()` / `Geist_Mono()` calls here — the
+// official package exports the configured Font objects directly.)
 
 // ==========================================
 // VIEWPORT CONFIGURATION
@@ -252,7 +297,9 @@ export default async function LocaleLayout({
         {/* Organization + WebSite Schema (JSON-LD) */}
         <OrganizationSchema />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
+      >
         <NextIntlClientProvider>
           <Providers>
             {children}

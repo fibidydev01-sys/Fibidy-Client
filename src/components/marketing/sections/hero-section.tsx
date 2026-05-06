@@ -4,50 +4,69 @@
 // HERO SECTION
 // File: src/components/marketing/sections/hero-section.tsx
 //
-// The most important real estate on the page — visitors decide in
-// <8 seconds whether to keep reading. Composition follows the
-// LandingRabbit who/what/why framework:
+// Composition follows the LandingRabbit who/what/why framework:
+//   eyebrow      → who is this for (Magic UI announcement pill)
+//   headline     → what (two-line: static prefix + WordRotate noun)
+//   subheadline  → how (Stripe-style declarative sentence)
+//   CTA pair     → primary RainbowButton / secondary outline anchor
+//   trust line   → reassurance row
+//   visual       → Browser-mockup-framed StorefrontMockup
 //
-//   eyebrow      → who is this for ("Untuk UMKM Indonesia")
-//   headline     → what (≤8 words, benefit-led, action verb)
-//   subheadline  → why (1-2 sentences, value reinforcement)
-//   CTA pair     → primary "Buka Toko Gratis" / secondary "Lihat demo"
-//   trust line   → "Gratis selamanya · Tanpa kartu kredit · 5 menit"
-//   visual       → StorefrontMockup component (replace with real
-//                  screenshot when available)
+// Phase 5 polish v10 (May 2026 — Magic UI parity + cleaner copy):
 //
-// Why client component: framer-motion needs the client. The static
-// content underneath would happily SSR, but pulling motion out
-// would split this into a server-shell + client-island ceremony
-// for marginal gain. Keep it client.
+// CHANGED:
+//   1. Eyebrow now matches the canonical Magic UI animated-gradient-
+//      text DEMO exactly (the orange→purple animated gradient border
+//      via CSS masking, an icon, vertical divider, AnimatedGradientText
+//      span, and a ChevronRight). Replaces v9's simpler pill. The
+//      🎉 emoji from the demo is swapped for a Lucide <Rocket> icon —
+//      same role, full Tailwind color control, no platform rendering
+//      surprises.
 //
-// Animation: entrance fade + slide-up, stagger 80ms. `whileInView`
-// with `once: true` so it fires once per page load. prefers-reduced-
-// motion respected via framer's automatic handling.
+//   2. Headline restructured to a two-line layout:
+//         Line 1 — static "Open your" / "Buka"   (text-foreground)
+//         Line 2 — WordRotate cycling the noun   (text-primary, bold)
+//      WordRotate replaces v9's MorphingText. The visual difference:
+//      MorphingText was an SVG-filter morph of full sentences (heavy
+//      anti-aliasing, restricted to short strings). WordRotate is a
+//      framer-motion crossfade of single words — lighter, snappier,
+//      and the rotating word reads as the focal point because it sits
+//      isolated on its own line.
 //
-// [PHASE 4 — May 2026]
-// Secondary CTA — was `<Link href="/login">` (duplicated header Sign in,
-// anti-pattern from HANDOFF #2 §5 #11). Now `<a href="#store-builder">`
-// scrolling to the Interactive Store Builder section. Plain `<a>` is
-// used (not i18n Link) because same-page anchor hrefs don't need locale
-// prefixing — they preserve the current locale by definition.
+//      "Open your" stays anchored, the rotating word is what changes
+//      visit-to-visit and frame-to-frame. Classic Stripe / Airbnb
+//      copy pattern.
 //
-// [PHASE 4 PATCH — framer-motion v12 typing]
-// Variant objects must be explicitly typed as `Variants` from
-// framer-motion. Inline literal `ease: 'easeOut'` would otherwise widen
-// to `string` and fail the v12 `Easing` union check (motion-dom@12.x
-// tightened the inferred Transition shape). With `: Variants` annotation,
-// TS uses contextual typing on the literal and accepts it as a member
-// of the Easing union.
+//   3. i18n shape change:
+//        hero.headlinePrefix  → "Open your" / "Buka"  (NEW key)
+//        hero.headlineMorph   → ["cafe.", "salon.", ...] (REPURPOSED:
+//                              now nouns only, was full sentences)
+//        hero.headline        → kept untouched (sr-only fallback +
+//                              defensive fallback if i18n drifts)
+//
+// PRESERVED from v9:
+//   - Single soft pink gradient background
+//   - 1fr_1.1fr two-column layout
+//   - BrowserMockup wrapper around StorefrontMockup
+//   - RainbowButton primary CTA via onClick + router.push
+//   - Outline secondary CTA via asChild + plain <a> for #anchor
+//   - framer-motion 80ms stagger / 500ms fadeUp entrance
+//   - Stripe-style subheadline (the "how"); proof points stay in
+//     the trust line below CTAs
 // ==========================================
 
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, Rocket } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { RainbowButton } from '@/components/ui/rainbow-button';
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
+import { WordRotate } from '@/components/ui/word-rotate';
+import { BrowserMockup } from '@/components/marketing/shared/browser-mockup';
 import { StorefrontMockup } from '@/components/marketing/shared/storefront-mockup';
 import { hero } from '@/lib/data/marketing/hero';
+import { cn } from '@/lib/shared/utils';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -61,19 +80,22 @@ const stagger: Variants = {
 
 export function HeroSection() {
   const t = useTranslations('marketing.hero');
+  const router = useRouter();
+
+  // Pull the rotating-noun array. Defensive cast — if i18n drifts and
+  // the key isn't an array, fall back to a single-word array so
+  // WordRotate has something to render.
+  const morphRaw = t.raw('headlineMorph');
+  const morphTexts: string[] = Array.isArray(morphRaw)
+    ? (morphRaw as string[])
+    : ['store.'];
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Subtle gradient backdrop — Vercel-vibes restraint, not over-saturation */}
+    <section className="relative isolate overflow-hidden">
+      {/* ── BACKGROUND — single soft gradient base ── */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.04] via-background to-background"
-      />
-
-      {/* Subtle dot pattern — half opacity of typical Vercel grid */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 opacity-[0.4] [background-image:radial-gradient(circle_at_1px_1px,_var(--border)_1px,_transparent_0)] [background-size:24px_24px]"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.05] via-background to-background"
       />
 
       <div className="container mx-auto px-4 py-16 md:py-24 lg:py-28">
@@ -81,22 +103,83 @@ export function HeroSection() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16"
+          className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16"
         >
-          {/* Text column */}
+          {/* ── TEXT COLUMN ── */}
           <div className="text-center lg:text-left">
-            <motion.p
+            {/*
+              ── EYEBROW — Magic UI animated-gradient-text demo pattern ──
+              Mirrors the canonical demo from magicui.design exactly
+              (orange→purple animated gradient border via CSS masking,
+              icon, vertical divider, AnimatedGradientText span,
+              ChevronRight) with one swap: 🎉 → Lucide <Rocket />.
+              The pill is `inline-flex` so it sits content-width; the
+              parent flex handles centering on mobile and left-align
+              on lg+.
+            */}
+            <motion.div
               variants={fadeUp}
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+              className="flex justify-center lg:justify-start"
             >
-              {t('eyebrow')}
-            </motion.p>
+              <div className="group relative inline-flex items-center justify-center rounded-full px-4 py-1.5 shadow-[inset_0_-8px_10px_#8fdfff1f] transition-shadow duration-500 ease-out hover:shadow-[inset_0_-5px_10px_#8fdfff3f]">
+                <span
+                  className={cn(
+                    'animate-gradient absolute inset-0 block h-full w-full rounded-[inherit] bg-gradient-to-r from-[#ffaa40]/50 via-[#9c40ff]/50 to-[#ffaa40]/50 bg-[length:300%_100%] p-[1px]',
+                  )}
+                  style={{
+                    WebkitMask:
+                      'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    WebkitMaskComposite: 'destination-out',
+                    mask:
+                      'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                    maskComposite: 'subtract',
+                    WebkitClipPath: 'padding-box',
+                  }}
+                />
+                <Rocket
+                  className="size-4 text-neutral-700 dark:text-neutral-300"
+                  aria-hidden
+                />
+                <hr className="mx-2 h-4 w-px shrink-0 bg-neutral-500" />
+                <AnimatedGradientText className="text-sm font-medium">
+                  {t('eyebrow')}
+                </AnimatedGradientText>
+                <ChevronRight
+                  className="ml-1 size-4 stroke-neutral-500 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </div>
+            </motion.div>
 
+            {/*
+              ── HEADLINE — two-line layout ──
+              Line 1: static prefix in foreground color.
+              Line 2: WordRotate cycling the noun, BOLD, in primary
+              color. The semantic <h1> wraps both — WordRotate's
+              internal <motion.h1> nests, which is technically
+              non-strict HTML but every modern browser handles it
+              gracefully and crawlers index the outer h1's text on
+              first paint.
+            */}
             <motion.h1
               variants={fadeUp}
-              className="mt-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
+              className="mt-5 text-4xl font-bold tracking-tight leading-[1.1] md:text-5xl lg:text-6xl"
             >
-              {t('headline')}
+              <span className="block text-foreground">
+                {t('headlinePrefix')}
+              </span>
+              <span className="block">
+                <WordRotate
+                  words={morphTexts}
+                  className={cn(
+                    // WordRotate has its own font sizing baked in;
+                    // override to inherit our heading scale and color.
+                    '!text-4xl md:!text-5xl lg:!text-6xl',
+                    '!font-bold !tracking-tight !leading-[1.1]',
+                    '!text-primary',
+                  )}
+                />
+              </span>
             </motion.h1>
 
             <motion.p
@@ -110,15 +193,23 @@ export function HeroSection() {
               variants={fadeUp}
               className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
             >
-              <Button asChild size="lg" className="group min-w-[180px]">
-                <Link href={hero.ctaPrimaryHref}>
-                  {t('ctaPrimary')}
-                  <ArrowRight
-                    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-                    aria-hidden
-                  />
-                </Link>
-              </Button>
+              {/*
+                Primary CTA — RainbowButton via onClick + router.push.
+                RainbowButton doesn't expose asChild, so we navigate
+                programmatically. Loses Link's prefetch but keeps the
+                semantics clean (no <a><button> nesting).
+              */}
+              <RainbowButton
+                className="group h-11 min-w-[200px] text-sm font-semibold"
+                onClick={() => router.push(hero.ctaPrimaryHref)}
+              >
+                {t('ctaPrimary')}
+                <ArrowRight
+                  className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </RainbowButton>
+
               <Button
                 asChild
                 variant="outline"
@@ -126,10 +217,9 @@ export function HeroSection() {
                 className="min-w-[180px]"
               >
                 {/*
-                  [PHASE 4] Plain <a> for same-page anchor — Lenis handles
-                  smooth scroll, scroll-mt-20 on SectionShell handles the
-                  sticky-header offset, and we avoid the i18n Link locale
-                  prefixing issue with hash-only hrefs.
+                  Plain <a> for same-page anchor. Lenis (mounted in
+                  marketing layout) handles smooth scroll, scroll-mt-20
+                  on SectionShell handles sticky-header offset.
                 */}
                 <a href={hero.ctaSecondaryHref}>{t('ctaSecondary')}</a>
               </Button>
@@ -143,12 +233,14 @@ export function HeroSection() {
             </motion.p>
           </div>
 
-          {/* Visual column — StorefrontMockup with hover float */}
+          {/* ── VISUAL COLUMN — Browser-wrapped storefront ── */}
           <motion.div
             variants={fadeUp}
-            className="relative mx-auto w-full max-w-[480px] lg:max-w-none"
+            className="relative mx-auto w-full max-w-[640px] lg:max-w-none"
           >
-            <StorefrontMockup />
+            <BrowserMockup url="tokokopi.fibidy.com">
+              <StorefrontMockup />
+            </BrowserMockup>
           </motion.div>
         </motion.div>
       </div>

@@ -1,52 +1,114 @@
+'use client';
+
 // ==========================================
-// FEATURES SECTION (BENTO GRID)
+// FEATURES SECTION (Magic UI BENTO — Vercel-open layout)
 // File: src/components/marketing/sections/features-section.tsx
 //
-// 6-tile bento grid. Studio is the flagship (large/2x2 span);
-// Stripe + Multi-tenant get wide spans; the rest are 1x1.
+// Phase 5 polish v16 (May 2026 — per-section grid rhythm + Vercel-open):
 //
-// CSS Grid:
-//   - mobile  → 1 col, all tiles stack
-//   - md+     → 4-col grid; tiles use md:col-span-{1|2} + md:row-span-{1|2}
+// CHANGED in v16:
+//   - Section now bypasses SectionShell and adopts the Vercel-open
+//     layout pattern (matches problem, scale, howItWorks, pricing,
+//     faq, finalCta). Section-level full-bleed grid background +
+//     content occluder with bg-background + border-y + CornerCrosses
+//     at 4 outer corners.
+//   - Grid uses createGridStyle({ intensity: 'subtle', mask: 'fade-radial' }).
+//     Rationale:
+//       * subtle intensity → bento card sudah punya banyak visual
+//         (Marquee templates, AnimatedList notifications, AnimatedBeam
+//         icons, Calendar). Grid harus mundur biar nggak saingan.
+//       * fade-radial → grid clears around the bento area, focusing
+//         eye on the cards rather than the texture behind them.
 //
-// auto-rows-fr keeps the row heights uniform (saasframe.io 2026 guide)
-// so the bento doesn't wobble.
+// PRESERVED from v15.9:
+//   - Section header (eyebrow + headline + subheadline) still REMOVED
+//     per CEO directive. Bento grid leads the section.
+//   - 4-tile bento layout, FEATURE_VISUALS / FEATURE_ICONS registry,
+//     in-page anchors via TILE_HREFS — all preserved verbatim.
 //
-// Server component — no interactivity needed.
+// Wrapper change rationale: previously SectionShell provided
+// `scroll-mt-20`, vertical density (py-20/md:py-28), and container
+// constraint. v16 replicates those manually so the section can be
+// the positioning context for the full-width grid background
+// (SectionShell would constrain the grid to container width).
 // ==========================================
 
-import { getTranslations } from 'next-intl/server';
-import { SectionShell } from '@/components/marketing/shared/section-shell';
-import { SectionEyebrow } from '@/components/marketing/shared/section-eyebrow';
-import { FeatureTile } from '@/components/marketing/shared/feature-tile';
+import { useTranslations } from 'next-intl';
+import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
+import {
+  CornerCrosses,
+  createGridStyle,
+} from '@/components/marketing/shared/line-grid-frame';
+import {
+  FEATURE_VISUALS,
+  FEATURE_ICONS,
+} from '@/components/marketing/shared/feature-visuals';
 import { featureTiles } from '@/lib/data/marketing/features';
+import { cn } from '@/lib/shared/utils';
 
-export async function FeaturesSection() {
-  const t = await getTranslations('marketing.features');
+// In-page anchor targets for each tile's "Learn more" button.
+const TILE_HREFS: Record<string, string> = {
+  studio: '#store-builder',
+  orders: '#faq',
+  channels: '#faq',
+  saveTime: '#store-builder',
+};
+
+// ──────────────────────────────────────────────────────────────────
+// SECTION GRID CONFIG
+// subtle + fade-radial → grid recedes so bento cards take focus
+// ──────────────────────────────────────────────────────────────────
+const GRID = createGridStyle({ intensity: 'subtle', mask: 'fade-radial' });
+
+export function FeaturesSection() {
+  const t = useTranslations('marketing.features');
 
   return (
-    <SectionShell id="features">
-      <div className="mx-auto max-w-3xl text-center">
-        <SectionEyebrow>{t('eyebrow')}</SectionEyebrow>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-          {t('headline')}
-        </h2>
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-          {t('subheadline')}
-        </p>
-      </div>
+    <section
+      id="features"
+      className="relative scroll-mt-20 overflow-hidden bg-background py-20 md:py-28"
+    >
+      {/* Section-level grid background */}
+      <div
+        aria-hidden
+        className={cn('pointer-events-none absolute inset-0', GRID.className)}
+        style={GRID.style}
+      />
 
-      <div className="mx-auto mt-12 grid max-w-6xl auto-rows-fr grid-cols-1 gap-4 md:grid-cols-4 md:gap-5">
-        {featureTiles.map((tile) => (
-          <FeatureTile
-            key={tile.id}
-            icon={tile.icon}
-            title={t(`items.${tile.id}.title`)}
-            description={t(`items.${tile.id}.description`)}
-            span={tile.span}
-          />
-        ))}
+      <div className="container relative mx-auto px-4">
+        {/*
+          BLOCK — BENTO OCCLUDER
+          Solid bg-background paints over the grid pattern behind the
+          bento, leaving the cards rendered cleanly. border-y for
+          horizontal definition. CornerCrosses at 4 outer corners.
+
+          max-w-6xl matches the previous SectionShell-based bento width.
+          Inner padding (px-6 py-10 / md:px-10 md:py-14) gives the
+          BentoGrid room to breathe inside the block.
+        */}
+        <div className="relative mx-auto max-w-6xl border-y bg-background">
+          <CornerCrosses />
+          <div className="px-6 py-10 md:px-10 md:py-14">
+            <BentoGrid>
+              {featureTiles.map((tile) => {
+                const Visual = FEATURE_VISUALS[tile.visualKey];
+                const Icon = FEATURE_ICONS[tile.visualKey];
+                return (
+                  <BentoCard
+                    key={tile.id}
+                    name={t(`items.${tile.id}.title`)}
+                    Icon={Icon}
+                    className={tile.className}
+                    background={<Visual />}
+                    href={TILE_HREFS[tile.id] ?? '#features'}
+                    cta={t('cta')}
+                  />
+                );
+              })}
+            </BentoGrid>
+          </div>
+        </div>
       </div>
-    </SectionShell>
+    </section>
   );
 }

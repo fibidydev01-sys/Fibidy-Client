@@ -4,50 +4,40 @@
 // STORE BUILDER SECTION
 // File: src/components/marketing/sections/store-builder-section.tsx
 //
-// Phase 3 (Interactive Store Builder, May 2026):
+// Phase 5 polish v4 (May 2026 — non-interactive onboarding):
 //
-// Orchestrator for the inline "try it" experience. Composition:
+// CHANGED in v4:
+//   - handleCategoryGuidance() now fires the tour AND schedules an
+//     auto-dismiss after 2 seconds. Drops the user-clicks-Show-me
+//     interaction model from v3.
+//   - Re-entry guard: if the tour is already visible (e.g. user
+//     hammers the input), additional fires are no-ops to avoid
+//     stacking timers / overlay flashing.
+//   - SubdomainInput's onCategoryRequested now fires automatically
+//     on every threshold-breach attempt (no toast action button to
+//     click) — see subdomain-input.tsx v4 header.
 //
-//   ┌──────────────────────────────────────────┐
-//   │ Eyebrow + H2 + subheadline               │
-//   ├──────────────────────────────────────────┤
-//   │ LEFT (lg):                  RIGHT (lg):  │
-//   │  CategoryPicker             BuilderPreview (sticky)
-//   │  SubdomainInput
-//   │  SubdomainSuggestions
-//   │  Agreement checkbox + links
-//   │  Primary CTA
-//   │  Trust line
-//   └──────────────────────────────────────────┘
+// PRESERVED from v3:
+//   - useNextStep() hook for tour control
+//   - useEffect that closes the tour when categoryId becomes non-null
+//   - CategoryPicker carries id="builder-category-picker" internally
 //
-// Mobile (Q7 = M3): everything stacks vertical, CTA pinned to bottom
-// once the user scrolls past the preview, hidden again when the
-// CategoryPicker scrolls back into view (avoids overlap with the
-// inline form on first paint).
-//
-// Submit flow (Q8 = L1 agreement bridge):
-//   1. CTA enabled only when: category picked AND slug status='available'
-//      AND agreement ticked
-//   2. On click:
-//        - sessionStorage.setItem('fibidy_builder_agreement', '1')
-//          (Used by useRegisterWizard to pre-tick Review step)
-//        - router.push(`/register?slug=...&category=...&agreement=accepted`)
-//          (Defense-in-depth: if sessionStorage is cleared in a private
-//          tab, the query param still propagates the bridge.)
-//
-// 'use client' because: useState, useEffect, useRouter, sessionStorage
-// access, IntersectionObserver for sticky CTA visibility.
+// All Phase 3 + 5 v1/v2 invariants preserved: bridge URL contract,
+// sessionStorage `fibidy_builder_agreement` write, sticky CTA on
+// mobile, BrowserMockup wrap on the preview.
 // ==========================================
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { useNextStep } from 'nextstepjs';
 import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SectionShell } from '@/components/marketing/shared/section-shell';
 import { SectionEyebrow } from '@/components/marketing/shared/section-eyebrow';
+import { BrowserMockup } from '@/components/marketing/shared/browser-mockup';
 import { CategoryPicker } from '@/components/marketing/store-builder/category-picker';
 import {
   SubdomainInput,
@@ -56,14 +46,20 @@ import {
 import { SubdomainSuggestions } from '@/components/marketing/store-builder/subdomain-suggestions';
 import { BuilderPreview } from '@/components/marketing/store-builder/builder-preview';
 import { builderCategories } from '@/lib/data/marketing/store-builder';
+import { MARKETING_TOUR_NAMES } from '@/lib/data/marketing/tours';
 import { cn } from '@/lib/shared/utils';
 
-// SessionStorage key used by useRegisterWizard to pre-tick Review agreement
 const AGREEMENT_BRIDGE_KEY = 'fibidy_builder_agreement';
+
+/** How long the auto-dismissing tour spotlight stays visible. */
+const TOUR_AUTO_CLOSE_MS = 2000;
 
 export function StoreBuilderSection() {
   const t = useTranslations('marketing.storeBuilder');
   const router = useRouter();
+
+  // ── NextStep tour control ───────────────────────────────────────
+  const { startNextStep, closeNextStep, isNextStepVisible } = useNextStep();
 
   // ── State ───────────────────────────────────────────────────────
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -73,22 +69,23 @@ export function StoreBuilderSection() {
   });
   const [agreed, setAgreed] = useState<boolean>(false);
 
-  // ── Sticky CTA visibility (mobile, Q7=M3) ───────────────────────
-  // CTA pinned to bottom appears AFTER user scrolls past the
-  // CategoryPicker section anchor. Hides again when category-picker
-  // re-enters viewport (so it doesn't double up with the inline CTA).
+  // ── Refs ────────────────────────────────────────────────────────
   const inlineCtaRef = useRef<HTMLDivElement | null>(null);
+  /** Tracks the auto-close timer so we can clear it on re-fire / unmount. */
+  const tourCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [showStickyCta, setShowStickyCta] = useState(false);
 
+  // ── Sticky CTA visibility (mobile) ──────────────────────────────
   useEffect(() => {
     const target = inlineCtaRef.current;
     if (!target) return;
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        // Show sticky CTA when the inline CTA is OFFSCREEN below
-        // (i.e. user scrolled past it on mobile)
-        setShowStickyCta(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+        setShowStickyCta(
+          !entry.isIntersecting && entry.boundingClientRect.top < 0,
+        );
       },
       { threshold: 0 },
     );
@@ -96,29 +93,78 @@ export function StoreBuilderSection() {
     return () => obs.disconnect();
   }, []);
 
-  // ── Derived: can we submit? ─────────────────────────────────────
+  // ── Cleanup pending tour timer on unmount ───────────────────────
+  useEffect(() => {
+    return () => {
+      if (tourCloseTimerRef.current) {
+        clearTimeout(tourCloseTimerRef.current);
+        tourCloseTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // ── Auto-fire onboarding spotlight ──────────────────────────────
+  // v4: invoked automatically by SubdomainInput on every
+  // threshold-breach attempt (no user click). Re-entry is guarded —
+  // if a tour is already visible we no-op to avoid timer stacking
+  // and overlay flicker.
+  const handleCategoryGuidance = () => {
+    if (isNextStepVisible) return;
+    if (tourCloseTimerRef.current) {
+      // Defensive: clear any orphaned timer (shouldn't happen given
+      // the isNextStepVisible guard, but cheap insurance).
+      clearTimeout(tourCloseTimerRef.current);
+      tourCloseTimerRef.current = null;
+    }
+
+    startNextStep(MARKETING_TOUR_NAMES.CATEGORY_GATE);
+
+    // Auto-dismiss — flash spotlight, no interaction needed
+    tourCloseTimerRef.current = setTimeout(() => {
+      closeNextStep();
+      tourCloseTimerRef.current = null;
+    }, TOUR_AUTO_CLOSE_MS);
+  };
+
+  // ── Auto-close tour the moment a category is picked ─────────────
+  // Even if the auto-dismiss timer hasn't fired yet, picking a
+  // category renders the tour pointless — close immediately and
+  // cancel the pending timer.
+  useEffect(() => {
+    if (categoryId !== null && isNextStepVisible) {
+      closeNextStep();
+      if (tourCloseTimerRef.current) {
+        clearTimeout(tourCloseTimerRef.current);
+        tourCloseTimerRef.current = null;
+      }
+    }
+  }, [categoryId, isNextStepVisible, closeNextStep]);
+
+  // ── Derived ─────────────────────────────────────────────────────
+  const categorySelected = categoryId !== null;
   const canSubmit =
-    categoryId !== null && slugStatus.kind === 'available' && agreed;
+    categorySelected && slugStatus.kind === 'available' && agreed;
+
+  const previewUrl = slug
+    ? `${slug}.fibidy.com`
+    : `${t('preview.placeholderSlug')}.fibidy.com`;
 
   // ── Submit handler ──────────────────────────────────────────────
   const handleSubmit = () => {
     if (!canSubmit || categoryId === null) return;
 
     const matched = builderCategories.find((c) => c.id === categoryId);
-    // matched.categoryKey === null for "Other" → don't pass category param,
-    // register lands at step 2 (Category) instead of skipping it.
-    const categoryParam = matched?.categoryKey ?? null;
+    if (!matched) return;
 
-    // Bridge agreement via sessionStorage AND query param (defense in depth)
     try {
       sessionStorage.setItem(AGREEMENT_BRIDGE_KEY, '1');
     } catch {
-      // Private tabs can throw — query param still carries the signal
+      // Private tabs — query param still carries the signal
     }
 
     const params = new URLSearchParams();
     params.set('slug', slug);
-    if (categoryParam) params.set('category', categoryParam);
+    params.set('category', matched.categoryKey);
     params.set('agreement', 'accepted');
 
     router.push(`/register?${params.toString()}`);
@@ -141,12 +187,19 @@ export function StoreBuilderSection() {
       <div className="mx-auto mt-12 grid max-w-6xl gap-8 lg:grid-cols-2 lg:gap-12">
         {/* LEFT — form column */}
         <div className="space-y-6">
-          <CategoryPicker selectedId={categoryId} onSelect={setCategoryId} />
+          {/* CategoryPicker carries id="builder-category-picker" internally
+              — that's the selector NextStep uses for the category-gate tour. */}
+          <CategoryPicker
+            selectedId={categoryId}
+            onSelect={setCategoryId}
+          />
 
           <SubdomainInput
             value={slug}
             onChange={setSlug}
             onStatusChange={setSlugStatus}
+            categorySelected={categorySelected}
+            onCategoryRequested={handleCategoryGuidance}
           />
 
           <SubdomainSuggestions
@@ -155,7 +208,7 @@ export function StoreBuilderSection() {
             onPick={(s) => setSlug(s)}
           />
 
-          {/* Agreement checkbox (Q8 = L1) */}
+          {/* Agreement checkbox */}
           <div className="flex items-start gap-3 pt-2">
             <Checkbox
               id="builder-agreement"
@@ -191,7 +244,7 @@ export function StoreBuilderSection() {
             </label>
           </div>
 
-          {/* Inline CTA (always rendered) */}
+          {/* Inline CTA */}
           <div ref={inlineCtaRef} className="space-y-3 pt-2">
             <Button
               size="lg"
@@ -209,16 +262,19 @@ export function StoreBuilderSection() {
           </div>
         </div>
 
-        {/* RIGHT — sticky preview on lg+ */}
+        {/* RIGHT — Browser-wrapped preview, sticky on lg+ */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <BuilderPreview categoryId={categoryId} slug={slug} />
+          <BrowserMockup url={previewUrl}>
+            <BuilderPreview categoryId={categoryId} slug={slug} />
+          </BrowserMockup>
         </div>
       </div>
 
-      {/* Sticky bottom CTA (mobile only, Q7 = M3) */}
+      {/* Sticky bottom CTA (mobile only) */}
       <div
         className={cn(
           'fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 px-4 py-3 backdrop-blur-md transition-transform duration-200 lg:hidden',
+          'pb-[max(0.75rem,env(safe-area-inset-bottom))]',
           showStickyCta ? 'translate-y-0' : 'translate-y-full',
         )}
         aria-hidden={!showStickyCta}

@@ -2,12 +2,12 @@
   "marketing": {
     "metadata": {
       "title": "Fibidy — Open your store. Sell today.",
-      "description": "The fastest way for Indonesian creators and small businesses to launch a digital storefront. Build your catalog, share your link, customers order via WhatsApp. Free during beta."
+      "description": "The fastest way for Indonesian creators and small businesses to launch a digital storefront. Build your catalog, share your link, customers order via WhatsApp. Free forever to start."
     },
 
     "announcement": {
-      "messageDesktop": "🚀 Fibidy is live in beta — open your store free in 5 minutes.",
-      "messageMobile": "🚀 Fibidy beta — open your store free.",
+      "messageDesktop": "🚀 Open your store free in 5 minutes — no card needed.",
+      "messageMobile": "🚀 Open your store free in 5 minutes.",
       "ctaLabel": "Get started",
       "dismissLabel": "Dismiss announcement"
     },
@@ -27,10 +27,18 @@
     "hero": {
       "eyebrow": "Built for Indonesian sellers",
       "headline": "Open your store. Sell today.",
-      "subheadline": "No coding, no setup fees. Build your catalog, share your link, and let customers order straight via WhatsApp.",
+      "headlinePrefix": "Open your",
+      "headlineMorph": [
+        "cafe.",
+        "salon.",
+        "studio.",
+        "kitchen.",
+        "store."
+      ],
+      "subheadline": "Build your catalog, share your link, and take orders on WhatsApp.",
       "ctaPrimary": "Open your store",
       "ctaSecondary": "See the demo",
-      "trustLine": "Free during beta · 5 minutes to launch · WhatsApp-first ordering"
+      "trustLine": "Free forever to start · 5 minutes to launch · WhatsApp-first ordering"
     },
 
     "problem": {
@@ -54,32 +62,64 @@
 
     "features": {
       "eyebrow": "Features",
-      "headline": "Everything you need. Nothing you don't.",
-      "subheadline": "Six tools that turn an idea into your first sale today.",
+      "headline": "Everything you need to start selling.",
+      "subheadline": "Four building blocks that turn an idea into your first sale today. No fluff, no busywork.",
+      "cta": "Learn more",
       "items": {
         "studio": {
-          "title": "Studio: drag-drop your storefront",
-          "description": "Build a landing page that mirrors your brand — pick a hero, drop in product blocks, swap the colors. No designer, no developer, no waiting."
+          "title": "Designer-curated templates"
         },
-        "multiTenant": {
-          "title": "Your own subdomain or custom domain",
-          "description": "Launch at your-name.fibidy.com or plug in tokomu.com — your call, your brand."
+        "orders": {
+          "title": "Your store, alive with orders"
         },
-        "whatsapp": {
-          "title": "Order via WhatsApp, built in",
-          "description": "Customers tap one button and they're chatting with you on WA. No card friction, no checkout drop-off."
+        "channels": {
+          "title": "Reach every channel from one link"
         },
-        "theme": {
-          "title": "Brand colors, your way",
-          "description": "Pick the primary color that matches your packaging, your logo, your vibe — applied across every page."
+        "saveTime": {
+          "title": "5 minutes, not 5 weeks"
+        }
+      }
+    },
+
+    "scale": {
+      "eyebrow": "Built to scale",
+      "headline": "Built to scale with you.",
+      "subheadline": "From your first sale to your hundredth store. Fibidy's infrastructure grows alongside you — no servers to manage, no certificates to renew, no surprises.",
+      "features": {
+        "infiniteDomains": {
+          "title": "Unlimited domains",
+          "description": "Run as many storefronts as you need on Fibidy subdomains, and bring your own custom domain when you're ready. Every store is secured with free SSL, automatically."
         },
-        "seo": {
-          "title": "SEO-ready out of the box",
-          "description": "Sitemap, OpenGraph cards, JSON-LD — handled. Your products show up clean on Google, WhatsApp shares, and Instagram links."
+        "instantSsl": {
+          "title": "Instant SSL certificates",
+          "description": "Free SSL for every storefront in under five seconds — including your custom domains. HTTPS is active from the moment you press launch."
         },
-        "mobile": {
-          "title": "Mobile-first, by default",
-          "description": "Most of your customers shop on a phone. Every page already works perfectly there — no extra config."
+        "zeroMaintenance": {
+          "title": "Zero maintenance",
+          "description": "Never worry about renewing a certificate, patching a server, or paying for hosting. We handle the boring parts so you can focus on selling."
+        }
+      }
+    },
+
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "headline": "From idea to first sale, in 5 minutes.",
+      "subheadline": "Three small steps. No coding. No platform middleman.",
+      "steps": {
+        "build": {
+          "eyebrow": "Build",
+          "title": "Pick a template, make it yours",
+          "description": "Choose from designer-curated storefront templates. Swap the colors, edit the copy — every change shows up live. No drag-drop puzzles, no blank canvas."
+        },
+        "share": {
+          "eyebrow": "Share",
+          "title": "Drop your link anywhere",
+          "description": "your-name.fibidy.com works in WhatsApp, Instagram bios, TikTok captions, email signatures. Customers tap once and they're already shopping."
+        },
+        "sell": {
+          "eyebrow": "Sell",
+          "title": "Take orders right in WhatsApp",
+          "description": "Customer taps Order, you reply with payment details, ship it out. No card friction, no platform middleman — you handle the conversation, you handle the money."
         }
       }
     },
@@ -88,7 +128,8 @@
       "eyebrow": "Pricing",
       "headline": "Three plans. One ladder. Honest pricing.",
       "subheadline": "Start free, upgrade when you're ready. Same plans you see post-signup — no surprise upsells.",
-      "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below — we'll switch them on for everyone at the same time when paid plans launch."
+      "popularBadge": "Popular",
+      "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below — we'll switch them on for everyone at the same time when those features ship."
     },
 
     "storeBuilder": {
@@ -99,11 +140,11 @@
         "label": "What are you selling?",
         "categories": {
           "restaurant": "Restaurant",
+          "coffeeshop": "Coffee Shop",
           "fashion": "Fashion",
           "beautySalon": "Beauty Salon",
           "cleaning": "Cleaning Service",
-          "retail": "Retail Shop",
-          "other": "Other..."
+          "retail": "Retail Shop"
         }
       },
       "subdomainStep": {
@@ -116,7 +157,9 @@
           "taken": "Taken. Try one of these:",
           "invalid": "Lowercase letters, numbers, and hyphens only.",
           "tooShort": "At least 3 characters.",
-          "reserved": "This name is reserved by the system."
+          "reserved": "This name is reserved by the system.",
+          "lockedHint": "Pick a category first to claim your address.",
+          "toastNeedCategory": "Pick a category first to continue"
         },
         "suggestionLabel": "Try one of these:"
       },
@@ -124,18 +167,57 @@
         "placeholderSlug": "your-store",
         "placeholderName": "Your Store",
         "placeholderCategory": "Pick a category",
-        "placeholderProduct": "Your product here",
+        "placeholderEyebrow": "Live preview",
         "navHome": "Home",
         "navProducts": "Products",
         "navAbout": "About",
         "storeTagline": "Order anything via WhatsApp.",
-        "ctaButton": "Order via WhatsApp"
+        "ctaButton": "Order via WhatsApp",
+        "morph": [
+          "Open your cafe.",
+          "Open your salon.",
+          "Open your studio.",
+          "Open your kitchen.",
+          "Open your store."
+        ],
+        "banners": {
+          "restaurant": {
+            "eyebrow": "Restaurant",
+            "tagline": "Today's specials, delivered straight to your table or your door."
+          },
+          "coffeeshop": {
+            "eyebrow": "Coffee Shop",
+            "tagline": "Single-origin beans, brewed fresh and ready to ship."
+          },
+          "fashion": {
+            "eyebrow": "Fashion",
+            "tagline": "New drops every week, styled for the way you actually live."
+          },
+          "beautySalon": {
+            "eyebrow": "Beauty Salon",
+            "tagline": "Book your next look — hair, nails, glow, all in one place."
+          },
+          "cleaning": {
+            "eyebrow": "Cleaning Service",
+            "tagline": "A spotless home, on demand. Book a slot in under a minute."
+          },
+          "retail": {
+            "eyebrow": "Retail Shop",
+            "tagline": "Daily essentials, your favorite picks — delivered fast."
+          }
+        }
       },
       "agreement": {
         "prefix": "I agree to the",
         "termsLink": "Terms of Service",
         "and": "and",
         "privacyLink": "Privacy Policy"
+      },
+      "onboarding": {
+        "categoryGate": {
+          "title": "Pick a category first",
+          "content": "Then we can claim your store address."
+        }
       },
       "ctaPrimary": "Open your store now",
       "trustLine": "Sign up in 2 minutes · No credit card needed"
@@ -147,19 +229,19 @@
       "items": {
         "isFree": {
           "q": "Is Fibidy really free?",
-          "a": "Yes — free during beta, no card required, no trial expiry. We're focused on shipping a great product right now; paid plans land later this year. When they do, beta sellers get early-supporter pricing."
+          "a": "Yes — the Free plan is free forever, no card required, no trial expiry. You can run a real storefront on it indefinitely. Paid plans (Starter / Business) unlock higher limits and lower platform fees when you're ready to scale."
         },
         "paymentNoStripe": {
-          "q": "How do I get paid if Stripe isn't live yet?",
-          "a": "Customers tap 'Order via WhatsApp' on your storefront — you take it from there. Bank transfer, OVO, GoPay, COD — whatever works for you and the customer. Fibidy doesn't touch the money. Direct payouts via Stripe IDR are coming with paid plans."
+          "q": "How do customers pay me?",
+          "a": "Customers tap 'Order via WhatsApp' on your storefront — you take it from there. Bank transfer, OVO, GoPay, COD — whatever works for you and the customer. Fibidy doesn't touch the money. Direct payouts via Stripe IDR are coming as part of the Business plan roadmap."
         },
         "customDomain": {
           "q": "Can I use my own domain?",
           "a": "Yes — Fibidy supports custom domains. Point tokomu.com at us and we'll handle the rest. Or stay on your-name.fibidy.com — your call."
         },
-        "betaRoadmap": {
-          "q": "When do paid plans launch?",
-          "a": "Targeting late 2026. Paid plans bring direct Stripe IDR payouts, digital product downloads, and seller analytics. Beta sellers get a thank-you discount when we ship them."
+        "paidPlans": {
+          "q": "What do paid plans unlock?",
+          "a": "Starter (Rp 35.000/month) gives you 20 products, 3 photos each, and a 5% platform fee. Business (Rp 149.000/month) bumps that to 50 products, 5 photos each, and a 2% fee. Direct Stripe IDR payouts and digital product downloads are on the way."
         },
         "fibidyVsLinktree": {
           "q": "How is Fibidy different from Linktree?",
@@ -175,14 +257,14 @@
         },
         "migrate": {
           "q": "Can I move from another platform?",
-          "a": "Yes. Bring your product photos, descriptions, and prices over — Fibidy doesn't lock you in. Beta sellers get hands-on migration help: ping us and we'll do the lifting."
+          "a": "Yes. Bring your product photos, descriptions, and prices over — Fibidy doesn't lock you in. Sellers get hands-on migration help: ping us and we'll do the lifting."
         }
       }
     },
 
     "finalCta": {
       "headline": "Start today. Your store is ready in 5 minutes.",
-      "subheadline": "Free during beta. No credit card. Order via WhatsApp from day one.",
+      "subheadline": "Free forever to start. No credit card. Order via WhatsApp from day one.",
       "ctaPrimary": "Open your store",
       "trustLine": "Already have an account? Sign in from the menu above."
     },
@@ -235,7 +317,7 @@
     "seo": {
       "softwareApp": {
         "name": "Fibidy",
-        "description": "Open your storefront in 5 minutes. Build your catalog, share your link, and let customers order via WhatsApp. Free during beta for Indonesian creators and small businesses.",
+        "description": "Open your storefront in 5 minutes. Build your catalog, share your link, and let customers order via WhatsApp. Free forever to start, for Indonesian creators and small businesses.",
         "category": "BusinessApplication"
       }
     }

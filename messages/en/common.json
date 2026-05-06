@@ -68,6 +68,172 @@
         "AUTOMOTIVE": "Automotive",
         "LIFESTYLE_ENTERTAINMENT": "Lifestyle & Entertainment",
         "PROFESSIONAL_SERVICES": "Professional Services"
+      },
+      "items": {
+        "RESTAURANT": {
+          "label": "Restaurant",
+          "description": "Dine-in restaurant or food hall"
+        },
+        "CAFE": {
+          "label": "Cafe & Coffee Shop",
+          "description": "Coffee shop, cafe, or tea house"
+        },
+        "BAKERY": {
+          "label": "Bakery",
+          "description": "Bread, pastries, and baked goods"
+        },
+        "FOOD_DELIVERY": {
+          "label": "Food Delivery",
+          "description": "Online food ordering and delivery"
+        },
+        "CATERING": {
+          "label": "Catering",
+          "description": "Event catering and meal packages"
+        },
+        "STREET_FOOD": {
+          "label": "Street Food & Snacks",
+          "description": "Street food stall, food cart, or snack shop"
+        },
+        "HAIR_SALON": {
+          "label": "Hair Salon",
+          "description": "Hair styling, coloring, and treatment"
+        },
+        "BARBERSHOP": {
+          "label": "Barbershop",
+          "description": "Men's haircut and grooming"
+        },
+        "NAIL_SALON": {
+          "label": "Nail Salon",
+          "description": "Nail art, manicure, and pedicure"
+        },
+        "SPA_MASSAGE": {
+          "label": "Spa & Massage",
+          "description": "Spa treatments, massage, and relaxation"
+        },
+        "SKINCARE_CLINIC": {
+          "label": "Skincare Clinic",
+          "description": "Facial treatments, skincare, and aesthetics"
+        },
+        "PHARMACY": {
+          "label": "Pharmacy",
+          "description": "Medicine, vitamins, and health products"
+        },
+        "GYM_FITNESS": {
+          "label": "Gym & Fitness",
+          "description": "Gym, fitness center, or yoga studio"
+        },
+        "FASHION_APPAREL": {
+          "label": "Fashion & Apparel",
+          "description": "Clothing, accessories, and fashion items"
+        },
+        "FOOTWEAR": {
+          "label": "Footwear",
+          "description": "Shoes, sandals, and boots"
+        },
+        "ELECTRONICS_GADGETS": {
+          "label": "Electronics & Gadgets",
+          "description": "Phones, gadgets, and accessories"
+        },
+        "GROCERY_CONVENIENCE": {
+          "label": "Grocery & Convenience",
+          "description": "Grocery store, minimarket, or convenience shop"
+        },
+        "BEAUTY_COSMETICS": {
+          "label": "Beauty & Cosmetics",
+          "description": "Makeup, skincare products, and cosmetics"
+        },
+        "HOME_LIVING": {
+          "label": "Home & Living",
+          "description": "Furniture, home decor, and household items"
+        },
+        "CLEANING_SERVICE": {
+          "label": "Cleaning Service",
+          "description": "Home and office cleaning"
+        },
+        "PLUMBING": {
+          "label": "Plumbing",
+          "description": "Pipe repair, installation, and water systems"
+        },
+        "ELECTRICAL": {
+          "label": "Electrical",
+          "description": "Electrical installation and repair"
+        },
+        "AC_APPLIANCE_REPAIR": {
+          "label": "AC & Appliance Repair",
+          "description": "AC servicing and home appliance repair"
+        },
+        "LANDSCAPING": {
+          "label": "Landscaping & Gardening",
+          "description": "Garden design, lawn care, and plants"
+        },
+        "MOVING_SERVICE": {
+          "label": "Moving Service",
+          "description": "Furniture moving and relocation"
+        },
+        "INTERIOR_DESIGN": {
+          "label": "Interior Design",
+          "description": "Interior design and renovation consulting"
+        },
+        "CAR_REPAIR": {
+          "label": "Car Repair",
+          "description": "Car service, repair, and maintenance"
+        },
+        "MOTORCYCLE_REPAIR": {
+          "label": "Motorcycle Repair",
+          "description": "Motorcycle service and repair"
+        },
+        "CAR_WASH": {
+          "label": "Car Wash & Detailing",
+          "description": "Car wash, detailing, and coating"
+        },
+        "AUTO_PARTS": {
+          "label": "Auto Parts & Accessories",
+          "description": "Car and motorcycle parts, accessories"
+        },
+        "TRAVEL_AGENCY": {
+          "label": "Travel Agency",
+          "description": "Tour packages and travel booking"
+        },
+        "HOTEL_LODGING": {
+          "label": "Hotel & Lodging",
+          "description": "Hotel, guesthouse, and accommodation"
+        },
+        "PHOTOGRAPHY": {
+          "label": "Photography & Videography",
+          "description": "Photo and video for events, products, portraits"
+        },
+        "EVENT_VENUE": {
+          "label": "Event Venue",
+          "description": "Venue rental for weddings and events"
+        },
+        "TUTORING_EDUCATION": {
+          "label": "Tutoring & Education",
+          "description": "Private tutoring, courses, and classes"
+        },
+        "LAUNDRY": {
+          "label": "Laundry",
+          "description": "Laundry, dry cleaning, and ironing"
+        },
+        "TAILOR": {
+          "label": "Tailor & Alterations",
+          "description": "Custom clothing and garment alterations"
+        },
+        "PET_SHOP": {
+          "label": "Pet Shop",
+          "description": "Pet food, supplies, and accessories"
+        },
+        "PET_GROOMING": {
+          "label": "Pet Grooming",
+          "description": "Pet bathing, grooming, and care"
+        },
+        "PRINT_SHOP": {
+          "label": "Print Shop",
+          "description": "Printing, copying, and design services"
+        },
+        "RENTAL_PROPERTY": {
+          "label": "Rental Property",
+          "description": "Room, house, or property rental"
+        }
       }
     },
     "pwa": {

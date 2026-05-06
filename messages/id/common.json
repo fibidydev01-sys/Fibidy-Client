@@ -68,6 +68,172 @@
         "AUTOMOTIVE": "Otomotif",
         "LIFESTYLE_ENTERTAINMENT": "Gaya Hidup & Hiburan",
         "PROFESSIONAL_SERVICES": "Jasa Profesional"
+      },
+      "items": {
+        "RESTAURANT": {
+          "label": "Restoran",
+          "description": "Restoran dine-in atau food hall"
+        },
+        "CAFE": {
+          "label": "Kafe & Kedai Kopi",
+          "description": "Kedai kopi, kafe, atau kedai teh"
+        },
+        "BAKERY": {
+          "label": "Bakery",
+          "description": "Roti, pastry, dan kue panggang"
+        },
+        "FOOD_DELIVERY": {
+          "label": "Pesan Antar Makanan",
+          "description": "Pesanan makanan online dan antar"
+        },
+        "CATERING": {
+          "label": "Katering",
+          "description": "Katering acara dan paket makanan"
+        },
+        "STREET_FOOD": {
+          "label": "Jajanan & Street Food",
+          "description": "Warung jajanan, gerobak, atau toko cemilan"
+        },
+        "HAIR_SALON": {
+          "label": "Salon Rambut",
+          "description": "Potong, warna, dan perawatan rambut"
+        },
+        "BARBERSHOP": {
+          "label": "Barbershop",
+          "description": "Potong rambut dan grooming pria"
+        },
+        "NAIL_SALON": {
+          "label": "Salon Kuku",
+          "description": "Nail art, manicure, dan pedicure"
+        },
+        "SPA_MASSAGE": {
+          "label": "Spa & Pijat",
+          "description": "Treatment spa, pijat, dan relaksasi"
+        },
+        "SKINCARE_CLINIC": {
+          "label": "Klinik Skincare",
+          "description": "Facial, perawatan kulit, dan estetika"
+        },
+        "PHARMACY": {
+          "label": "Apotek",
+          "description": "Obat, vitamin, dan produk kesehatan"
+        },
+        "GYM_FITNESS": {
+          "label": "Gym & Fitness",
+          "description": "Gym, fitness center, atau studio yoga"
+        },
+        "FASHION_APPAREL": {
+          "label": "Fashion & Pakaian",
+          "description": "Pakaian, aksesoris, dan fashion"
+        },
+        "FOOTWEAR": {
+          "label": "Sepatu",
+          "description": "Sepatu, sandal, dan boots"
+        },
+        "ELECTRONICS_GADGETS": {
+          "label": "Elektronik & Gadget",
+          "description": "HP, gadget, dan aksesoris"
+        },
+        "GROCERY_CONVENIENCE": {
+          "label": "Toko Sembako & Minimarket",
+          "description": "Toko sembako, minimarket, atau toko serba ada"
+        },
+        "BEAUTY_COSMETICS": {
+          "label": "Kecantikan & Kosmetik",
+          "description": "Makeup, skincare, dan kosmetik"
+        },
+        "HOME_LIVING": {
+          "label": "Rumah & Dekorasi",
+          "description": "Furnitur, dekorasi rumah, dan perlengkapan"
+        },
+        "CLEANING_SERVICE": {
+          "label": "Jasa Cleaning",
+          "description": "Jasa bersih-bersih rumah dan kantor"
+        },
+        "PLUMBING": {
+          "label": "Tukang Pipa",
+          "description": "Perbaikan pipa, instalasi, dan sistem air"
+        },
+        "ELECTRICAL": {
+          "label": "Tukang Listrik",
+          "description": "Instalasi dan perbaikan listrik"
+        },
+        "AC_APPLIANCE_REPAIR": {
+          "label": "Service AC & Elektronik",
+          "description": "Service AC dan perbaikan elektronik rumah"
+        },
+        "LANDSCAPING": {
+          "label": "Tukang Taman",
+          "description": "Desain taman, perawatan rumput, dan tanaman"
+        },
+        "MOVING_SERVICE": {
+          "label": "Jasa Pindahan",
+          "description": "Pindah furnitur dan relokasi"
+        },
+        "INTERIOR_DESIGN": {
+          "label": "Desain Interior",
+          "description": "Konsultasi desain interior dan renovasi"
+        },
+        "CAR_REPAIR": {
+          "label": "Bengkel Mobil",
+          "description": "Servis, perbaikan, dan perawatan mobil"
+        },
+        "MOTORCYCLE_REPAIR": {
+          "label": "Bengkel Motor",
+          "description": "Servis dan perbaikan motor"
+        },
+        "CAR_WASH": {
+          "label": "Cuci Mobil & Detailing",
+          "description": "Cuci mobil, detailing, dan coating"
+        },
+        "AUTO_PARTS": {
+          "label": "Sparepart & Aksesoris",
+          "description": "Sparepart mobil, motor, dan aksesoris"
+        },
+        "TRAVEL_AGENCY": {
+          "label": "Travel Agent",
+          "description": "Paket tur dan booking perjalanan"
+        },
+        "HOTEL_LODGING": {
+          "label": "Hotel & Penginapan",
+          "description": "Hotel, guesthouse, dan penginapan"
+        },
+        "PHOTOGRAPHY": {
+          "label": "Fotografi & Videografi",
+          "description": "Foto dan video acara, produk, atau portrait"
+        },
+        "EVENT_VENUE": {
+          "label": "Venue Acara",
+          "description": "Sewa tempat untuk pernikahan dan acara"
+        },
+        "TUTORING_EDUCATION": {
+          "label": "Les & Pendidikan",
+          "description": "Les privat, kursus, dan kelas"
+        },
+        "LAUNDRY": {
+          "label": "Laundry",
+          "description": "Laundry, dry cleaning, dan setrika"
+        },
+        "TAILOR": {
+          "label": "Penjahit & Permak",
+          "description": "Jahit baju custom dan permak pakaian"
+        },
+        "PET_SHOP": {
+          "label": "Pet Shop",
+          "description": "Makanan, perlengkapan, dan aksesoris hewan"
+        },
+        "PET_GROOMING": {
+          "label": "Pet Grooming",
+          "description": "Mandi, grooming, dan perawatan hewan"
+        },
+        "PRINT_SHOP": {
+          "label": "Tempat Print",
+          "description": "Cetak, fotokopi, dan jasa desain"
+        },
+        "RENTAL_PROPERTY": {
+          "label": "Sewa Properti",
+          "description": "Sewa kamar, rumah, atau properti"
+        }
       }
     },
     "pwa": {

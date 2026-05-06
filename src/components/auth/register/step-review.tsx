@@ -4,29 +4,27 @@
 // STEP REVIEW
 // File: src/components/auth/register/step-review.tsx
 //
+// [POLISH v15.4 — May 2026]
+// Category label/description now read from i18n via
+// `getCategoryLabelKey()` / `getCategoryDescriptionKey()` helpers.
+// Previously: registry shipped hardcoded EN labels — ID locale users
+// saw "Cafe & Coffee Shop" in their Indonesian register flow.
+//
 // Phase 3 (Interactive Store Builder, May 2026):
 //
 // 🔵 Agreement state LIFTED to parent (register.tsx).
-//   Was: local `useState` here. Now: `isAgreed` + `onAgreementChange`
-//   come in as props. Parent controls because it needs to read the
-//   value to enable submit AND to pre-check from useRegisterWizard's
-//   cameFromBuilder flag (R1 = pre-checked + visible).
-//
-// 🔵 NEW prop `cameFromBuilder`
-//   When true, renders a small badge next to the checkbox: "✅ Disetujui
-//   di halaman builder" — gives the user clear feedback their earlier
-//   acceptance carried over. They can still untick if they change their
-//   mind, in which case the badge stays as historical context (the
-//   acceptance still happened, even if they're walking it back now).
-//
-// All other behavior unchanged from Phase 2.
+// 🔵 NEW prop `cameFromBuilder` — renders badge when true
 // ==========================================
 
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getCategoryConfig } from '@/lib/constants/shared/categories';
+import {
+  getCategoryConfig,
+  getCategoryLabelKey,
+  getCategoryDescriptionKey,
+} from '@/lib/constants/shared/categories';
 import { Store, Mail, Lock, Phone, Edit2, CheckCircle2 } from 'lucide-react';
 
 // ==========================================
@@ -64,20 +62,32 @@ export function StepReview({
   cameFromBuilder = false,
 }: StepReviewProps) {
   const t = useTranslations('auth.register.review');
+  // Root-level translator for cross-namespace lookups (categories live
+  // under common.*, not auth.*)
+  const tRoot = useTranslations();
+
   const categoryConfig = data.category
     ? getCategoryConfig(data.category)
+    : null;
+
+  // Resolve i18n label/description if category is valid. Fall back
+  // to the raw key if for some reason the i18n lookup fails (e.g.
+  // category from query param hasn't propagated to messages yet).
+  const categoryLabel = categoryConfig
+    ? tRoot(getCategoryLabelKey(categoryConfig.key))
+    : data.category ?? t('dash');
+  const categoryDescription = categoryConfig
+    ? tRoot(getCategoryDescriptionKey(categoryConfig.key))
     : null;
 
   return (
     <div className="space-y-3 max-w-md">
       {/* Business Type */}
       <ReviewCard label={t('businessType')} onEdit={() => onEdit(2)}>
-        <p className="text-sm font-medium">
-          {categoryConfig?.label ?? data.category ?? t('dash')}
-        </p>
-        {categoryConfig?.description && (
+        <p className="text-sm font-medium">{categoryLabel}</p>
+        {categoryDescription && (
           <p className="text-xs text-muted-foreground mt-0.5">
-            {categoryConfig.description}
+            {categoryDescription}
           </p>
         )}
       </ReviewCard>

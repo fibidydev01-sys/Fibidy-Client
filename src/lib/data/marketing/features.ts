@@ -2,62 +2,67 @@
 // FEATURES BENTO DATA
 // File: src/lib/data/marketing/features.ts
 //
-// Phase 2 (Marketing rewrite, May 2026):
+// Phase 5 polish v6 (May 2026 — official Magic UI bento parity):
 //
-// Six tiles in an asymmetric bento. Studio is the flagship (large
-// span — 2x2 on desktop, per Q3 = Studio LIVE).
+// 4-tile layout mirroring the official Magic UI bento-grid demo
+// (https://magicui.design/docs/components/bento-grid). The visual
+// signature — small tile + wide tile on the top row, wide tile +
+// small tile on the bottom row — gives the bento its distinctive
+// asymmetric rhythm. Each tile is reframed for Fibidy's UMKM voice.
 //
-// DROPPED (Phase 1 reality — see HANDOFF #2 §2):
-//   - 'stripe'    → Stripe Connect DORMANT, mention = over-claim
-//   - 'storage'   → R2 DORMANT (digital file storage)
-//   - 'analytics' → Per Q4: dashboard analytics not built yet
+// Layout (3-col grid, equal-height rows):
 //
-// ADDED (all confirmed live in Phase 1):
-//   - 'theme'     → tenant.theme.primaryColor used in storefront
-//   - 'seo'       → sitemap, OG image, JSON-LD LocalBusiness/Product
-//   - 'mobile'    → Tailwind responsive baseline tested
+//   ┌──────────┬──────────────────────────┐
+//   │ STUDIO   │  ORDERS                  │
+//   │ (small)  │  (wide)                  │
+//   ├──────────┴──────────────┬───────────┤
+//   │  CHANNELS               │ SAVE TIME │
+//   │  (wide)                 │ (small)   │
+//   └─────────────────────────┴───────────┘
 //
-// Layout (4-col desktop grid, auto-rows-fr):
-//   Row 1: [studio  studio] [multiTenant ─]
-//   Row 2: [studio  studio] [whatsapp    ─]
-//   Row 3: [theme] [seo] [mobile] (gap)
+// Mobile (<lg): each tile becomes col-span-3 → full width single
+// column stack in source order.
 //
-// 11 cells total → 1-cell gap on row 3 col 4. Same gap pattern as
-// the original 6-tile layout, just with honest tile content.
+// Mapping to the official demo:
+//   - Studio   ↔ Save your files (Marquee)
+//   - Orders   ↔ Notifications (AnimatedList)
+//   - Channels ↔ Integrations (AnimatedBeam) — visualises Fibidy
+//                fanning out to WhatsApp / Instagram / TikTok /
+//                custom domain / subdomain. Brings back the
+//                multi-tenant + WhatsApp narrative dropped in v5.
+//   - SaveTime ↔ Calendar — anchors "5 menit bukan 5 minggu".
 //
-// Why six and not twelve: HANDOFF §5 anti-pattern #6 — feature dump.
-// Six well-described features beat twelve icon-only ones.
-//
-// Copy lives at `marketing.features.items.{id}.*` in marketing.json.
-// Icon + span are non-translatable, so they live here.
+// Copy at `marketing.features.items.{id}.*` in marketing.json.
 // ==========================================
 
-import {
-  Sparkles,
-  Globe,
-  MessageCircle,
-  Palette,
-  Search,
-  Smartphone,
-} from 'lucide-react';
 import type { FeatureTileData } from '@/types/marketing';
 
 export const featureTiles: readonly FeatureTileData[] = [
-  // Flagship — Studio drag-drop landing builder (LIVE per Q3)
-  { id: 'studio', icon: Sparkles, span: 'large' },
+  // Top-left — small tile — Studio Marquee of curated templates
+  {
+    id: 'studio',
+    className: 'col-span-3 lg:col-span-1',
+    visualKey: 'studio',
+  },
 
-  // Trust pillar — Multi-tenant subdomain + custom domain
-  { id: 'multiTenant', icon: Globe, span: 'wide' },
+  // Top-right — wide tile — Order Notifications AnimatedList
+  {
+    id: 'orders',
+    className: 'col-span-3 lg:col-span-2',
+    visualKey: 'orders',
+  },
 
-  // WhatsApp-first ordering — Phase 1 differentiator (promoted to wide)
-  { id: 'whatsapp', icon: MessageCircle, span: 'wide' },
+  // Bottom-left — wide tile — Multi-channel reach AnimatedBeam
+  {
+    id: 'channels',
+    className: 'col-span-3 lg:col-span-2',
+    visualKey: 'channels',
+  },
 
-  // Brand customization — tenant.theme.primaryColor
-  { id: 'theme', icon: Palette, span: 'normal' },
-
-  // SEO — sitemap, OG image, JSON-LD already shipped
-  { id: 'seo', icon: Search, span: 'normal' },
-
-  // Mobile-first — Tailwind responsive baseline
-  { id: 'mobile', icon: Smartphone, span: 'normal' },
+  // Bottom-right — small tile — Save Your Time Calendar
+  {
+    id: 'saveTime',
+    className: 'col-span-3 lg:col-span-1',
+    visualKey: 'saveTime',
+  },
 ] as const;

@@ -7,18 +7,19 @@
 // lib/data/marketing/sections.ts to actual React components via
 // the REGISTRY object below.
 //
-// Editing copy, swapping order, or toggling a section never
-// requires touching this file. Adding a brand new section (e.g.
-// 'logos', 'testimonials' down the line):
-//   1. Build the section component
-//   2. Add it to REGISTRY here
-//   3. Add the SectionKey to types/marketing.ts
-//   4. Add the key to DEFAULT_SECTIONS in sections.ts
+// Phase 5 polish v15 (May 2026 — Scale section added):
+//   - ScaleSection ADDED to REGISTRY. Section key 'scale' is
+//     inserted between 'features' and 'howItWorks' in
+//     DEFAULT_SECTIONS. The new section renders a Vercel-inspired
+//     stacked-browser visual (showing Fibidy subdomains + custom
+//     domains) followed by three feature columns: Infinite domains
+//     / Instant SSL / Zero maintenance.
 //
-// Phase 3 (Interactive Store Builder, May 2026):
-//   - REGISTRY swap: 'howItWorks' → 'storeBuilder'
-//   - HowItWorksSection import deleted; the file itself is
-//     deleted in Phase 3 (see README.md Step 1)
+// Phase 5 polish v2 (May 2026):
+//   - HowItWorksSection ADDED to REGISTRY. Section key 'howItWorks'
+//     is restored to SectionKey + DEFAULT_SECTIONS (between features
+//     and pricing). The section renders a Vercel-style vertical
+//     timeline narrating Build → Share → Sell.
 //
 // generateMetadata reads marketing.metadata.* from i18n. Title and
 // description are locale-aware; OG image inheritance from the root
@@ -34,6 +35,8 @@ import { AnnouncementBar } from '@/components/marketing/sections/announcement-ba
 import { HeroSection } from '@/components/marketing/sections/hero-section';
 import { ProblemSection } from '@/components/marketing/sections/problem-section';
 import { FeaturesSection } from '@/components/marketing/sections/features-section';
+import { ScaleSection } from '@/components/marketing/sections/scale-section';
+import { HowItWorksSection } from '@/components/marketing/sections/how-it-works-section';
 import { PricingSection } from '@/components/marketing/sections/pricing-section';
 import { StoreBuilderSection } from '@/components/marketing/sections/store-builder-section';
 import { FaqSection } from '@/components/marketing/sections/faq-section';
@@ -47,6 +50,8 @@ const REGISTRY: Record<SectionKey, React.ComponentType> = {
   hero: HeroSection,
   problem: ProblemSection,
   features: FeaturesSection,
+  scale: ScaleSection,
+  howItWorks: HowItWorksSection,
   pricing: PricingSection,
   storeBuilder: StoreBuilderSection,
   faq: FaqSection,

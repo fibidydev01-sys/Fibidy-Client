@@ -64,9 +64,32 @@
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 
-  --font-sans: var(--font-inter), "Inter", sans-serif;
+  /* [v15.3.3] Geist via the OFFICIAL `geist` npm package — FAIL-LOUD.
+     Switched from `next/font/google` (used in v15.3.0–v15.3.2) to
+     `geist@^1.7.0`, which Vercel themselves use on vercel.com. The
+     package self-hosts the canonical .woff2 files via next/font/local
+     under the hood — no Google CDN dependency, full glyph set,
+     font-feature-settings support, and tracks the upstream
+     vercel/geist-font releases.
+
+     The CSS variable names (`--font-geist-sans`, `--font-geist-mono`)
+     are baked into the package by Vercel — same names as the previous
+     next/font/google jalur, so this rule and every consumer below
+     keeps working without a single CSS edit.
+
+     Inter is STILL deliberately removed from the fallback chain. If
+     Geist fails to load, we WANT the page to fall straight to system
+     sans-serif so the regression is visible immediately. With Inter
+     as a stealth fallback, a Geist outage could ship to production
+     unnoticed. Same logic for --font-mono. */
+  --font-sans: var(--font-geist-sans), sans-serif;
   --font-serif: "Playfair Display", serif;
-  --font-mono: "Roboto Mono", monospace;
+  --font-mono: var(--font-geist-mono), monospace;
+  --color-1: oklch(66.2% 0.225 25.9);
+  --color-2: oklch(60.4% 0.26 302);
+  --color-3: oklch(69.6% 0.165 251);
+  --color-4: oklch(80.2% 0.134 225);
+  --color-5: oklch(90.7% 0.231 133);
 }
 
 /* ==========================================
@@ -116,6 +139,11 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0.02 343.198);
   --sidebar-ring: oklch(0.718 0.202 349.761);
+  --color-1: oklch(66.2% 0.225 25.9);
+  --color-2: oklch(60.4% 0.26 302);
+  --color-3: oklch(69.6% 0.165 251);
+  --color-4: oklch(80.2% 0.134 225);
+  --color-5: oklch(90.7% 0.231 133);
 }
 
 @theme inline {
@@ -174,7 +202,11 @@
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
 
-  --font-inter: var(--font-inter);
+  /* [v15.3.2] Removed orphan `--font-inter: var(--font-inter)` which
+     exposed a `font-inter` Tailwind utility. After the Geist swap it
+     pointed at nothing. `font-sans` / `font-mono` remain the supported
+     utilities — they resolve through --font-sans / --font-mono in
+     :root above. No Inter anywhere in the chain — fail-loud. */
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -191,8 +223,49 @@
     to { height: 0; }
   }
 
+  /* v5: Magic UI marquee — horizontal + vertical scroll */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - var(--gap))); }
+  }
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-100% - var(--gap))); }
+  }
+
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+  --animate-marquee: marquee var(--duration, 40s) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
+  --color-color-5: var(--color-5);
+  --color-color-4: var(--color-4);
+  --color-color-3: var(--color-3);
+  --color-color-2: var(--color-2);
+  --color-color-1: var(--color-1);
+  @keyframes rainbow {
+  0% {
+    background-position: 0%;
+    }
+  100% {
+    background-position: 200%;
+    }
+  }
+  --animate-gradient: gradient 8s linear infinite
+;
+  @keyframes gradient {
+  to {
+    background-position: var(--bg-size, 300%) 0;
+    }
+  }}
+
+/* v5: respect prefers-reduced-motion for the new marquee animations
+   (Magic UI's CSS-only Marquee doesn't honor it by default). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-vertical {
+    animation: none !important;
+  }
 }
 
 @utility container {

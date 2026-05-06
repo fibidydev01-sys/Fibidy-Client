@@ -4,17 +4,37 @@
 //
 // Cross-component types for the (marketing) public landing.
 // Per HANDOFF §7: only types used in 2+ files live here.
-// Types used in a single section + its data file stay inline.
 //
-// Phase 3 (Interactive Store Builder, May 2026):
-//   - SectionKey: 'howItWorks' DROPPED, 'storeBuilder' ADDED
-//     (Q6=O1: Builder replaces "How It Works" because the builder
-//     IS how it works, more powerfully — visitors try the product
-//     before signing up.)
+// Phase 5 polish v15 (May 2026 — Scale section added):
 //
-// Anything declared here is implicitly part of the marketing
-// "contract" — changing a shape affects multiple sections at once,
-// so be deliberate.
+//   - SectionKey gains 'scale' between 'features' and 'howItWorks'.
+//     The new section renders a Vercel-inspired stacked-domains
+//     visual + three feature columns (infinite domains / instant
+//     SSL / zero maintenance). See:
+//       - components/marketing/sections/scale-section.tsx
+//       - lib/data/marketing/scale.ts
+//
+// Phase 5 polish v6 (May 2026 — official Magic UI bento parity):
+//
+//   - FeatureSpan stays REMOVED (dropped in v5). Magic UI's BentoCard
+//     consumes raw className strings for grid placement; an enum
+//     adds nothing.
+//
+//   - FeatureVisualKey union expanded back to 4 keys to match the
+//     official Magic UI bento-grid demo:
+//        v5: 'studio' | 'orders' | 'saveTime'
+//        v6: 'studio' | 'orders' | 'channels' | 'saveTime'
+//     `channels` is the AnimatedBeam tile — Fibidy's spin on the
+//     official "Integrations" card. Visualises a Fibidy storefront
+//     fanning out to the channels customers actually use (WhatsApp,
+//     Instagram, TikTok, custom domain, subdomain).
+//
+//   - FeatureTileData.className stays — it's how each tile drives
+//     its grid placement (`col-span-3 lg:col-span-1` / `col-span-3
+//     lg:col-span-2`). Same shape as v5.
+//
+// Other types (SectionKey, HowItWorksStep, PricingTierData,
+// BuilderCategoryData, BuilderVisualKey) untouched.
 // ==========================================
 
 import type { LucideIcon } from 'lucide-react';
@@ -22,93 +42,94 @@ import type { LucideIcon } from 'lucide-react';
 // ==========================================
 // SECTION REGISTRY
 // ==========================================
-//
-// Every renderable section key. The composer at
-// src/app/[locale]/(marketing)/page.tsx maps this list to a
-// React component via REGISTRY. Adding a new section means:
-//   1. Add the key here
-//   2. Add the component to REGISTRY in page.tsx
-//   3. Decide whether the key belongs in DEFAULT_SECTIONS
-//      (lib/data/marketing/sections.ts)
-// ==========================================
 
 export type SectionKey =
   | 'announcement'
   | 'hero'
   | 'problem'
   | 'features'
+  | 'scale'
+  | 'howItWorks'
   | 'pricing'
   | 'storeBuilder'
   | 'faq'
   | 'finalCta';
 
 // ==========================================
-// FEATURE TILE
-// ==========================================
-//
-// Bento grid uses span hints to drive CSS Grid layout. Three sizes:
-//   - 'large'  → 2 cols × 2 rows on desktop (flagship)
-//   - 'wide'   → 2 cols × 1 row
-//   - 'normal' → 1 col × 1 row
-//
-// On mobile everything collapses to 1 col regardless of span.
+// FEATURE TILE (Magic UI bento — 4 tiles as of v6)
 // ==========================================
 
-export type FeatureSpan = 'large' | 'wide' | 'normal';
+/**
+ * Visual mockup key — resolved through FEATURE_VISUALS registry in
+ * `components/marketing/shared/feature-visuals.tsx`.
+ *
+ * Phase 5 v6: 4 keys mirroring the official Magic UI bento-grid demo
+ * (Save your files / Notifications / Integrations / Calendar) — each
+ * reframed for Fibidy's UMKM voice.
+ */
+export type FeatureVisualKey = 'studio' | 'orders' | 'channels' | 'saveTime';
 
 export interface FeatureTileData {
   /** Stable id, used as i18n key suffix and React key */
   id: string;
-  /** Lucide icon component */
+  /**
+   * Raw Tailwind grid placement classes. Magic UI's bento demo uses
+   * the 3-column pattern:
+   *   'col-span-3 lg:col-span-1'   — small tile
+   *   'col-span-3 lg:col-span-2'   — wide tile
+   * Mobile fallback `col-span-3` ensures every tile fills the row
+   * width when the grid collapses to a single column.
+   */
+  className: string;
+  /** Which visual renders inside the card's background slot */
+  visualKey: FeatureVisualKey;
+}
+
+// ==========================================
+// HOW IT WORKS (side-by-side rows as of v3 — was timeline in v2)
+// ==========================================
+
+/**
+ * Three-step narrative — Build → Share → Sell. Each step renders
+ * inline visuals defined within the section component.
+ */
+export interface HowItWorksStep {
+  /** i18n key suffix under howItWorks.steps.{id} */
+  id: 'build' | 'share' | 'sell';
+  /** Visible step number (1-indexed) */
+  index: 1 | 2 | 3;
+  /** Lucide icon shown beside the eyebrow row */
   icon: LucideIcon;
-  /** Bento span hint (desktop) */
-  span: FeatureSpan;
 }
 
 // ==========================================
 // PRICING TIER
 // ==========================================
-//
-// Mirrors SubscriptionTier from lib/api/subscription so marketing and
-// dashboard stay aligned. Don't import from there to avoid pulling
-// the whole API client into marketing — duplicate the literal type
-// instead.
-// ==========================================
 
 export type MarketingTier = 'FREE' | 'STARTER' | 'BUSINESS';
 
 export interface PricingTierData {
-  /** Tier identifier — must match SubscriptionTier in lib/api/subscription */
   id: MarketingTier;
-  /** Visual cue dot (Tailwind bg-* class) — must match subscription page */
   dotColor: string;
-  /** Platform fee literal (e.g. '15%', '5%', '2%') */
   platformFee: string;
-  /** Whether to show a "recommended" highlight border */
   highlighted?: boolean;
 }
 
 // ==========================================
 // STORE BUILDER — CATEGORY
 // ==========================================
-//
-// 6 specific categories shown in the marketing builder. Each maps to
-// a real category key in lib/constants/shared/categories.ts so
-// auto-skip in register works cleanly (Q5=C decision).
-//
-// `categoryKey: null` means "Lainnya..." — when picked, builder still
-// pre-fills slug + agreement but register lands on Step 2 (Category)
-// so the user picks the actual subcat.
-// ==========================================
+
+export type BuilderVisualKey =
+  | 'restaurant'
+  | 'coffeeshop'
+  | 'fashion'
+  | 'beautySalon'
+  | 'cleaning'
+  | 'retail';
 
 export interface BuilderCategoryData {
-  /** Stable id — used as i18n key suffix + React key */
   id: string;
-  /** Lucide icon shown on the chip */
   icon: LucideIcon;
-  /**
-   * Real category key from lib/constants/shared/categories.ts.
-   * `null` = "Other" — register opens at Step 2 instead of skipping it.
-   */
-  categoryKey: string | null;
+  categoryKey: string;
+  visualKey: BuilderVisualKey;
 }

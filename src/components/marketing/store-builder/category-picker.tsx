@@ -6,16 +6,20 @@
 //
 // Phase 3 (Interactive Store Builder, May 2026):
 //
-// Step 1 of the builder. 6 specific category chips (Q5=C). Visitor
-// taps one → state updates upstream → preview eyebrow swaps to the
-// chosen category label.
+// Step 1 of the builder. Visitor taps one chip → state updates
+// upstream → preview refreshes to reflect the choice.
 //
-// Layout: 3 cols mobile / 3 cols desktop. Six tiles, evenly distributed.
-// Tile = icon + label, ~h-20, square-ish. Tap target ~80×60min.
+// Phase 5 (Magic UI polish, May 2026 — CEO unlock):
+//   - 6 specific chips (no "Other" escape hatch).
+//   - 3 cols × 2 rows on all screen widths.
+//   - Larger min-h tap targets, softer transitions.
 //
-// Why a button (not a real radio): radio semantics get awkward when
-// the chip itself is the visible target. Manual aria-pressed gives us
-// the right state announcement to AT users without semantic gymnastics.
+// Phase 5 polish v3 (May 2026 — NextStep onboarding):
+//   - Root container now carries `id="builder-category-picker"`.
+//     This is the selector NextStep.js targets when firing the
+//     'category-gate' tour from SubdomainInput's toast action.
+//     The picker gets a spotlight ring + tooltip pointing at it
+//     when the tour activates.
 // ==========================================
 
 import { useTranslations } from 'next-intl';
@@ -34,7 +38,7 @@ export function CategoryPicker({ selectedId, onSelect }: CategoryPickerProps) {
   const t = useTranslations('marketing.storeBuilder');
 
   return (
-    <div>
+    <div id="builder-category-picker">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
         {t('categoryStep.label')}
       </p>
@@ -80,22 +84,23 @@ function CategoryChip({
       onClick={() => onSelect(id)}
       aria-pressed={selected}
       className={cn(
-        'group flex flex-col items-center justify-center gap-1.5 rounded-xl border bg-card px-2 py-3 text-center transition-all',
-        'min-h-[76px] sm:min-h-[88px]',
+        'group flex flex-col items-center justify-center gap-2 rounded-xl border bg-card px-2 py-3.5 text-center transition-all duration-200',
+        'min-h-[80px] sm:min-h-[92px]',
+        'hover:-translate-y-0.5',
         selected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-          : 'border-border hover:border-primary/40 hover:bg-muted/40',
+          ? 'border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm'
+          : 'border-border hover:border-primary/40 hover:bg-muted/40 hover:shadow-sm',
       )}
     >
       <span
         className={cn(
           'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors sm:h-8 sm:w-8',
           selected
-            ? 'bg-primary text-primary-foreground'
+            ? 'bg-primary text-primary-foreground shadow-sm'
             : 'bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary',
         )}
       >
-        <Icon className="h-4 w-4 sm:h-4 sm:w-4" aria-hidden />
+        <Icon className="h-4 w-4" aria-hidden />
       </span>
       <span
         className={cn(
