@@ -31,6 +31,15 @@
 // 🔵 NEW — EMAIL_TAKEN_AFTER_PREVIEW handling
 //   Auto-jumps user back to Step 4 (Account) so they can update email.
 //   Toast already shown by useRegister.
+//
+// [v15.5 — May 2026]
+// 🔵 isAgreed default = true.
+//   Frictionless flow for ID-only deployment. Builder pre-tick effect
+//   below is now redundant for the default-arrival case but kept
+//   intentionally — it acts as a hard-reassert if some future code
+//   path resets the local state. Cheap, safe, no behavior change.
+//   NOTE: Revisit when EU/UK markets are added — pre-checked consent
+//   is invalid under GDPR Art. 4(11) (CJEU Planet49, 2019).
 // ==========================================
 
 import { useEffect, useState } from 'react';
@@ -73,13 +82,16 @@ export function RegisterForm() {
   const wizard = useRegisterWizard();
   const { register, isLoading, error, errorCode, reset: resetRegister } =
     useRegister();
-  // Review step's agreement checkbox state. Pre-checked when arriving
-  // from the marketing builder (cameFromBuilder = true). Local state
-  // so visitor can untick if they change their mind (R1 decision).
-  const [isAgreed, setIsAgreed] = useState(false);
+  // Review step's agreement checkbox state.
+  // v15.5: defaults to TRUE (pre-checked). User can untick if they
+  // change their mind. Builder handoff effect below re-asserts true
+  // defensively in case some future flow resets it.
+  const [isAgreed, setIsAgreed] = useState(true);
 
   // ── Pre-tick agreement when arriving from builder ───────────────
   // Runs once, after the wizard finishes resolving cameFromBuilder.
+  // Redundant given the new default but retained as a defensive
+  // re-assert — cheap, no observable behavior change.
   useEffect(() => {
     if (wizard.cameFromBuilder) {
       setIsAgreed(true);

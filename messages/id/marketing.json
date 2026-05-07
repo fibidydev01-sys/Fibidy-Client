@@ -5,7 +5,7 @@
       "description": "Cara paling cepat buat UMKM dan kreator Indonesia bikin toko online. Susun katalog, share link toko, pelanggan order via WhatsApp. Gratis selamanya buat mulai."
     },
     "announcement": {
-      "messageDesktop": "🚀 Bikin toko gratis dalam 5 menit — tanpa kartu kredit.",
+      "messageDesktop": "🚀 Bikin toko gratis dalam 5 menit — daftar cepat dan gampang.",
       "messageMobile": "🚀 Bikin toko gratis dalam 5 menit.",
       "ctaLabel": "Mulai",
       "dismissLabel": "Tutup pengumuman"
@@ -47,7 +47,7 @@
             },
             "whatsapp": {
               "label": "Channel WhatsApp",
-              "desc": "Jualan langsung di tempat pembeli ngobrol"
+              "desc": "Jualan di tempat pembeli kamu aktif"
             },
             "customDomain": {
               "label": "Custom Domain",
@@ -106,10 +106,6 @@
             "changelog": {
               "label": "Changelog",
               "desc": "Apa yang baru saja kami rilis"
-            },
-            "docs": {
-              "label": "Dokumentasi",
-              "desc": "Dokumentasi developer lengkap"
             }
           },
           "solutions": {
@@ -137,20 +133,6 @@
               "label": "Retail & Grocery",
               "desc": "Inventori dan checkout cepat"
             }
-          },
-          "enterprise": {
-            "bulkDomain": {
-              "label": "Custom Domain Skala Besar",
-              "desc": "Provisioning domain lintas tim"
-            },
-            "whitelabel": {
-              "label": "White-label & Perjanjian Seller",
-              "desc": "Brand kamu, infrastruktur kami"
-            },
-            "acceptableUse": {
-              "label": "Kebijakan Penggunaan",
-              "desc": "Apa yang boleh dan nggak boleh dijual"
-            }
           }
         }
       },
@@ -176,27 +158,27 @@
       "trustLine": "Gratis selamanya buat mulai · Bikin toko 5 menit · Jualan via WhatsApp"
     },
     "problem": {
-      "eyebrow": "Pasti pernah ngalamin",
-      "headline": "Jualan online harusnya nggak bikin pusing.",
+      "eyebrow": "Kami paham",
+      "headline": "Jualan online harusnya terasa simpel.",
       "items": {
         "commission": {
-          "title": "Marketplace ambil 20% dari tiap order",
-          "description": "Capek-capek jualan, malah jadi setoran ke platform lain. Saatnya pegang sendiri hasil keringat kamu."
+          "title": "Hasilnya buat kamu, bukan platform",
+          "description": "Setiap penjualan berarti. Fibidy dirancang biar bagian terbesar dari hasil jualanmu tetap di kantongmu — di mana memang seharusnya."
         },
         "expensiveSlow": {
-          "title": "Bikin website sendiri mahal & ribet",
-          "description": "Quote mulai Rp 5 juta dan butuh berminggu-minggu. Tren keburu lewat."
+          "title": "Buka dalam menit, bukan bulan",
+          "description": "Tanpa quote panjang, tanpa nunggu developer berminggu-minggu. Setup hari ini, mulai jualan malam ini juga."
         },
         "notLocal": {
-          "title": "Tools yang ada nggak dibikin untuk Indonesia",
-          "description": "Platform luar minta bayar dolar, nggak kenal WhatsApp, dan nggak ngomong bahasa pelanggan kamu."
+          "title": "Dirancang khusus untuk Indonesia",
+          "description": "Harga dalam Rupiah, order via WhatsApp, dan alur yang pas dengan cara pembeli Indonesia belanja sehari-hari."
         }
       }
     },
     "features": {
       "eyebrow": "Fitur",
       "headline": "Semua yang kamu butuhin buat mulai jualan.",
-      "subheadline": "Empat fondasi yang bawa ide kamu ke jualan pertama hari ini juga. Tanpa basa-basi, tanpa ribet.",
+      "subheadline": "Empat fondasi yang bawa ide kamu ke jualan pertama hari ini juga — jelas, fokus, siap pakai.",
       "cta": "Pelajari lebih lanjut",
       "items": {
         "studio": {
@@ -216,7 +198,7 @@
     "scale": {
       "eyebrow": "Dibuat buat tumbuh",
       "headline": "Tumbuh bareng kamu.",
-      "subheadline": "Dari penjualan pertama sampai toko ke-seratus. Infrastruktur Fibidy tumbuh barengan kamu — nggak ada server yang harus diurus, nggak ada sertifikat yang harus diperpanjang, nggak ada kejutan.",
+      "subheadline": "Dari penjualan pertama sampai toko ke-seratus. Infrastruktur Fibidy tumbuh barengan kamu — tanpa server yang harus diurus, tanpa sertifikat yang harus diperpanjang, tanpa kejutan.",
       "features": {
         "infiniteDomains": {
           "title": "Domain tanpa batas",
@@ -228,19 +210,19 @@
         },
         "zeroMaintenance": {
           "title": "Tanpa perawatan",
-          "description": "Lupakan urusan perpanjangan sertifikat, patch server, atau bayar hosting. Bagian repotnya kami yang pegang — kamu fokus jualan aja."
+          "description": "Lupakan urusan perpanjangan sertifikat, patch server, atau bayar hosting. Bagian teknisnya kami yang pegang — kamu fokus jualan aja."
         }
       }
     },
     "howItWorks": {
       "eyebrow": "Cara kerjanya",
       "headline": "Dari ide ke jualan pertama, 5 menit.",
-      "subheadline": "Tiga langkah simpel. Nggak perlu coding. Nggak ada platform yang nyampur.",
+      "subheadline": "Tiga langkah simpel. Tanpa coding, tanpa setup yang ribet.",
       "steps": {
         "build": {
           "eyebrow": "Bikin",
           "title": "Pilih template, jadikan punya kamu",
-          "description": "Pilih dari template toko yang udah dikurasi tim desain. Ubah warnanya, ganti teksnya — perubahan langsung kelihatan. Nggak ada drag-drop yang mumetin, nggak ada kanvas kosong."
+          "description": "Pilih dari template toko yang udah dikurasi tim desain. Ubah warnanya, ganti teksnya — perubahan langsung kelihatan. Simpel, visual, dan terasa familier."
         },
         "share": {
           "eyebrow": "Share",
@@ -250,21 +232,21 @@
         "sell": {
           "eyebrow": "Jualan",
           "title": "Terima orderan langsung di WhatsApp",
-          "description": "Pelanggan tap Order, kamu balas detail pembayaran, kirim barangnya. Nggak ribet kartu, nggak ada platform yang nyampur — kamu yang ngobrol, kamu yang pegang duitnya."
+          "description": "Pelanggan tap Order, kamu balas detail pembayaran, kirim barangnya. Kamu yang pegang kendali — dari obrolan sampai transaksinya."
         }
       }
     },
     "pricing": {
       "eyebrow": "Harga",
       "headline": "Tiga paket. Satu tangga. Pricing jujur.",
-      "subheadline": "Mulai dari gratis, upgrade kalau udah siap. Sama persis kayak yang kamu liat setelah daftar — nggak ada upsell mendadak.",
+      "subheadline": "Mulai dari gratis, upgrade kalau udah siap. Sama persis kayak yang kamu lihat setelah daftar — jelas, predictable, gampang dibandingin.",
       "popularBadge": "Populer",
       "roadmapNote": "Download digital, payout, dan platform fee masih dipoles — ditandai 'Coming Soon' di bawah. Semua aktif barengan pas fitur-fitur itu rilis."
     },
     "storeBuilder": {
       "eyebrow": "Coba dulu, daftar kemudian",
       "headline": "Toko kamu, dalam 30 detik. Lihat sendiri.",
-      "subheadline": "Pilih kategori, klaim alamat toko kamu, lihat tokonya kebentuk sendiri. Nggak perlu daftar dulu — daftar pas kamu udah suka.",
+      "subheadline": "Pilih kategori, klaim alamat toko kamu, lihat tokonya kebentuk sendiri. Daftar pas kamu udah suka.",
       "categoryStep": {
         "label": "Kamu jualan apa?",
         "categories": {
@@ -273,7 +255,7 @@
           "fashion": "Fashion",
           "beautySalon": "Beauty Salon",
           "cleaning": "Jasa Cleaning",
-          "retail": "Toko Retail"
+          "other": "Lainnya"
         }
       },
       "subdomainStep": {
@@ -349,7 +331,7 @@
         }
       },
       "ctaPrimary": "Buka Toko Gratis Sekarang",
-      "trustLine": "Daftar 2 menit · Tanpa kartu kredit"
+      "trustLine": "Daftar 2 menit · Cepat dan gampang"
     },
     "faq": {
       "eyebrow": "Tanya jawab",
@@ -357,41 +339,41 @@
       "items": {
         "isFree": {
           "q": "Beneran gratis nih Fibidy?",
-          "a": "Iya — paket Free gratis selamanya, nggak butuh kartu, nggak ada trial yang habis. Kamu bisa jalanin toko beneran di sini tanpa batas waktu. Paket berbayar (Starter / Business) buat unlock limit lebih tinggi dan platform fee lebih rendah pas kamu udah siap scale."
+          "a": "Iya — paket Free gratis selamanya, tanpa kartu, tanpa trial yang habis. Kamu bisa jalanin toko beneran di sini tanpa batas waktu. Paket berbayar (Starter dan Business) buat unlock limit lebih tinggi dan platform fee lebih rendah pas kamu udah siap scale."
         },
         "paymentNoStripe": {
           "q": "Pelanggan bayar gimana?",
-          "a": "Pelanggan tap 'Order via WhatsApp' di toko kamu — sisanya di tangan kamu. Transfer bank, OVO, GoPay, COD — bebas. Fibidy nggak nyentuh duitnya. Payout langsung via Stripe IDR jadi bagian dari roadmap paket Business."
+          "a": "Pelanggan tap 'Order via WhatsApp' di toko kamu, sisanya kamu yang pegang. Transfer bank, OVO, GoPay, COD — pilih yang paling pas buat kamu dan pelanggan. Kamu yang kontrol penuh transaksinya. Payout langsung via Stripe IDR jadi bagian dari roadmap paket Business."
         },
         "customDomain": {
           "q": "Bisa pakai domain sendiri?",
-          "a": "Bisa — Fibidy support custom domain. Tinggal arahin tokomu.com ke kami, sisanya kami yang urus. Mau tetep di nama-kamu.fibidy.com juga bebas."
+          "a": "Bisa — Fibidy support custom domain. Tinggal arahin tokomu.com ke kami, sisanya kami yang urus. Mau tetap di nama-kamu.fibidy.com juga bebas, sepenuhnya pilihan kamu."
         },
         "paidPlans": {
           "q": "Paket berbayar dapet apa?",
           "a": "Starter (Rp 35.000/bulan) kasih kamu 20 produk, 3 foto per produk, dan platform fee 5%. Business (Rp 149.000/bulan) naik jadi 50 produk, 5 foto per produk, dan fee 2%. Payout langsung via Stripe IDR sama download produk digital lagi disiapin."
         },
         "fibidyVsLinktree": {
-          "q": "Bedanya sama Linktree apa?",
-          "a": "Linktree itu cuma list link. Fibidy itu katalog beneran: foto produk, harga, kategori, search, custom domain — semua siap pakai. Plus pelanggan bisa order langsung via WA, nggak nyasar ke situs lain."
+          "q": "Apa yang bikin Fibidy beda?",
+          "a": "Fibidy itu storefront lengkap, bukan sekadar halaman link. Foto produk, harga, kategori, search, dan custom domain udah siap pakai. Pelanggan bisa order langsung via WhatsApp tanpa harus loncat ke situs lain — pengalaman belanja jadi mulus dari awal sampai akhir."
         },
         "whatToSell": {
           "q": "Bisa jual apa aja di Fibidy?",
-          "a": "Barang fisik (fashion, makanan, kerajinan), jasa (coaching, konsultasi, salon, sewa studio) — apa pun yang biasa pelanggan beli dari kamu via WA. Produk digital (template, ebook, kursus) ikut paket berbayar nanti."
+          "a": "Barang fisik (fashion, makanan, kerajinan) dan jasa (coaching, konsultasi, salon, sewa studio) — apa pun yang biasa pelanggan beli dari kamu via WhatsApp. Produk digital (template, ebook, kursus) ikut paket berbayar nanti."
         },
         "dataExport": {
           "q": "Kalau mau pindah, bisa export data?",
-          "a": "Bisa. Data toko kamu ya punya kamu. Export CSV semua produk lagi disiapin; sementara ini, tim kami bantu seller mana pun yang mau pindahan manual — tinggal chat aja."
+          "a": "Bisa. Data toko kamu ya punya kamu. Export CSV semua produk lagi disiapin; sementara ini, tim kami siap bantu seller yang mau pindahan manual — silakan hubungi kami, kami yang urus."
         },
         "migrate": {
           "q": "Bisa pindah dari platform lain?",
-          "a": "Bisa. Foto produk, deskripsi, harga — bawa semua ke sini, Fibidy nggak ngunci kamu. Seller dapet bantuan migrasi langsung: kirim ping ke kami, beres."
+          "a": "Bisa. Bawa foto produk, deskripsi, harga — semua pindah ke sini, kami siapin. Seller juga dapet bantuan migrasi langsung dari tim kami — tinggal kirim pesan, kami yang kerjain bagian beratnya."
         }
       }
     },
     "finalCta": {
       "headline": "Mulai hari ini. Toko siap dalam 5 menit.",
-      "subheadline": "Gratis selamanya buat mulai. Tanpa kartu kredit. Order via WhatsApp dari hari pertama.",
+      "subheadline": "Gratis selamanya buat mulai. Daftar dalam hitungan detik. Order via WhatsApp dari hari pertama.",
       "ctaPrimary": "Buka Toko Gratis",
       "trustLine": "Udah punya akun? Masuk lewat menu di atas."
     },
@@ -422,6 +404,8 @@
           "links": {
             "terms": "Syarat",
             "privacy": "Privasi",
+            "cookies": "Cookies",
+            "copyright": "Hak Cipta",
             "refund": "Refund",
             "sellerAgreement": "Perjanjian seller"
           }

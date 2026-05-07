@@ -7,7 +7,6 @@ import {
   Globe,
   Lock,
   Sparkles,
-  HardDrive,
   BarChart3,
   HelpCircle,
   Mail,
@@ -18,32 +17,17 @@ import {
   BadgeCheck,
   Newspaper,
   History,
-  BookOpen,
   UtensilsCrossed,
   Coffee,
   Shirt,
   Scissors,
   ShoppingBasket,
   SprayCan,
-  Building2,
-  Handshake,
-  ScrollText,
   Server,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────
  * Mega-menu data model
- *
- * Each top-level entry is either:
- *   - { kind: "link" }   → direct anchor/link, no dropdown (e.g. Pricing)
- *   - { kind: "menu" }   → trigger with dropdown content (Vercel pattern)
- *
- * Items inside a menu group carry:
- *   - labelKey / descKey → i18n keys under `marketing.header.nav.items.*`
- *   - href               → final URL (locale-aware Link handles prefix)
- *   - icon               → Lucide icon component
- *   - soon?              → if true, render with "Soon" badge + non-clickable
- *   - external?          → opens in new tab
  * ────────────────────────────────────────────────────────────────── */
 
 export type NavItem = {
@@ -56,16 +40,13 @@ export type NavItem = {
 };
 
 export type NavColumn = {
-  /** i18n key under `marketing.header.nav.columns.*` — optional column heading */
   headingKey?: string;
   items: NavItem[];
 };
 
 export type NavMenuEntry = {
   kind: "menu";
-  /** i18n key under `marketing.header.nav.triggers.*` */
   labelKey: string;
-  /** unique slug used as React key + a11y id */
   id: string;
   columns: NavColumn[];
 };
@@ -82,32 +63,15 @@ export type NavEntry = NavMenuEntry | NavLinkEntry;
 /* ──────────────────────────────────────────────────────────────────
  * Solutions → category mapping
  *
- * Codes mirror registry keys validated at module-load time in
- * `src/lib/data/marketing/store-builder.ts` (which in turn validates
- * against `src/lib/constants/shared/categories.ts`).
- *
- * Hrefs use `/#store-builder?preselect=<code>` so the StoreBuilder
- * section can read the query param and pre-select the chip on landing.
- * If StoreBuilder doesn't yet implement `?preselect` parsing, the
- * anchor still works — visitor lands on the section, just without
- * auto-pick. Backward-compatible by design.
- *
- * Inline string-literal union avoids a bogus type import — the
- * store-builder module exports `BuilderCategoryData` (with field
- * `categoryKey: string`), NOT a `CategoryCode` type. Listing the 6
- * valid codes here gives autocomplete + compile-time check anyway.
+ * [v15.4 cleanup] Hrefs simplified to plain `/#store-builder` —
+ * dropped the `?preselect=<code>` query param. The StoreBuilder
+ * section doesn't read `preselect` yet, so the param was a false
+ * promise (visitor clicks "Restaurant" → just scrolls, chip stays
+ * unselected). When `?preselect=` reading lands in StoreBuilder,
+ * re-add the param here.
  * ────────────────────────────────────────────────────────────────── */
 
-type SolutionCategoryCode =
-  | "RESTAURANT"
-  | "CAFE"
-  | "FASHION_APPAREL"
-  | "HAIR_SALON"
-  | "CLEANING_SERVICE"
-  | "GROCERY_CONVENIENCE";
-
 type SolutionItem = {
-  code: SolutionCategoryCode;
   labelKey: string;
   descKey: string;
   icon: LucideIcon;
@@ -115,37 +79,31 @@ type SolutionItem = {
 
 const SOLUTION_ITEMS: SolutionItem[] = [
   {
-    code: "RESTAURANT",
     labelKey: "restaurant.label",
     descKey: "restaurant.desc",
     icon: UtensilsCrossed,
   },
   {
-    code: "CAFE",
     labelKey: "coffeeshop.label",
     descKey: "coffeeshop.desc",
     icon: Coffee,
   },
   {
-    code: "FASHION_APPAREL",
     labelKey: "fashion.label",
     descKey: "fashion.desc",
     icon: Shirt,
   },
   {
-    code: "HAIR_SALON",
     labelKey: "beautySalon.label",
     descKey: "beautySalon.desc",
     icon: Scissors,
   },
   {
-    code: "CLEANING_SERVICE",
     labelKey: "cleaning.label",
     descKey: "cleaning.desc",
     icon: SprayCan,
   },
   {
-    code: "GROCERY_CONVENIENCE",
     labelKey: "retail.label",
     descKey: "retail.desc",
     icon: ShoppingBasket,
@@ -155,31 +113,25 @@ const SOLUTION_ITEMS: SolutionItem[] = [
 const solutionItem = (s: SolutionItem): NavItem => ({
   labelKey: `solutions.${s.labelKey}`,
   descKey: `solutions.${s.descKey}`,
-  href: `/#store-builder?preselect=${s.code}`,
+  href: "/#store-builder",
   icon: s.icon,
 });
 
 /* ══════════════════════════════════════════════════════════════════
- * MAIN MEGA-MENU STRUCTURE — Route-complete coverage (May 2026)
+ * MAIN MEGA-MENU STRUCTURE — v15.4 cleanup (May 2026)
  *
- * 5 triggers (Vercel parity):
+ * 5 triggers:
  *   1. PRODUCT     — features (3 cols × 3 items = 9)
- *   2. RESOURCES   — help, money/trust, updates (3 cols, 3-4-3)
- *                    → covers /legal/{faq,contact,fees,payment,payout,kyc}
- *                    → covers /discover
- *   3. SOLUTIONS   — 6 industry verticals (3 cols × 2 items = 6)
- *                    → covers /#store-builder?preselect=<code>
- *   4. ENTERPRISE  — scale + B2B legal (1 col × 3 items)
- *                    → covers /legal/{seller-agreement,acceptable-use}
- *   5. PRICING     — direct anchor link to /#pricing
- *
- * Routes deliberately covered in footer.ts instead of header:
- *   - /legal/terms, /legal/privacy, /legal/refund
- *
- * Routes intentionally OMITTED (not visitor-facing):
- *   - /admin/*, /dashboard/*, /checkout/*, /onboard/*, /store/*
- *   - /register, /login, /forgot-password (handled via header CTAs)
- *   - All [id], [slug] dynamic routes (rendered from data, not nav)
+ *   2. RESOURCES   — help, money/trust, updates (3 cols, 3-4-2)
+ *                    "Stay Updated" trimmed from 3 → 2 items
+ *                    (Blog + Changelog only; Docs removed).
+ *   3. SOLUTIONS   — 6 verticals (3 cols × 2 = 6)
+ *                    Hrefs no longer carry ?preselect= query (false
+ *                    promise — see SOLUTION_ITEMS comment above).
+ *   4. ENTERPRISE  — direct link to /legal/seller-agreement.
+ *                    Demoted from mega-menu (was 1 col × 3 items —
+ *                    too thin to justify a panel).
+ *   5. PRICING     — direct link to /#pricing
  * ══════════════════════════════════════════════════════════════════ */
 
 export const headerNav: NavEntry[] = [
@@ -263,9 +215,9 @@ export const headerNav: NavEntry[] = [
   },
 
   /* ════ RESOURCES ══════════════════════════════════════════════
-   * Covers: /legal/faq, /legal/contact, /discover (col 1)
-   *         /legal/fees, /legal/payment, /legal/payout, /legal/kyc (col 2)
-   *         soon-flagged blog/changelog/docs (col 3)
+   * v15.4: "Stay Updated" trimmed to 2 items (Blog + Changelog).
+   * Docs removed — was a third Soon-flag with no concrete launch
+   * plan, made the column feel like filler.
    * ──────────────────────────────────────────────────────────── */
   {
     kind: "menu",
@@ -341,13 +293,6 @@ export const headerNav: NavEntry[] = [
             icon: History,
             soon: true,
           },
-          {
-            labelKey: "resources.docs.label",
-            descKey: "resources.docs.desc",
-            href: "#",
-            icon: BookOpen,
-            soon: true,
-          },
         ],
       },
     ],
@@ -383,39 +328,17 @@ export const headerNav: NavEntry[] = [
     ],
   },
 
-  /* ════ ENTERPRISE ═════════════════════════════════════════════
-   * Covers: /legal/seller-agreement, /legal/acceptable-use,
-   *         and the /#scale section (multi-tenant proof point)
+  /* ════ ENTERPRISE (direct link, no dropdown) ══════════════════
+   * v15.4: demoted from mega-menu. Was 1 col × 3 items — visually
+   * thin and inconsistent with the other 3-col mega-menus.
+   * Routes /legal/acceptable-use moved to footer Legal column.
+   * /#scale already exposed via Product > Scale Infrastructure.
    * ──────────────────────────────────────────────────────────── */
   {
-    kind: "menu",
+    kind: "link",
     id: "enterprise",
     labelKey: "triggers.enterprise",
-    columns: [
-      {
-        headingKey: "columns.scale",
-        items: [
-          {
-            labelKey: "enterprise.bulkDomain.label",
-            descKey: "enterprise.bulkDomain.desc",
-            href: "/#scale",
-            icon: Building2,
-          },
-          {
-            labelKey: "enterprise.whitelabel.label",
-            descKey: "enterprise.whitelabel.desc",
-            href: "/legal/seller-agreement",
-            icon: Handshake,
-          },
-          {
-            labelKey: "enterprise.acceptableUse.label",
-            descKey: "enterprise.acceptableUse.desc",
-            href: "/legal/acceptable-use",
-            icon: ScrollText,
-          },
-        ],
-      },
-    ],
+    href: "/legal/seller-agreement",
   },
 
   /* ════ PRICING (direct link, no dropdown) ════════════════════ */

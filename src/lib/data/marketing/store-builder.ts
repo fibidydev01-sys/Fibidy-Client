@@ -11,32 +11,41 @@
 //
 // Q5 = C decision RECONFIRMED: specific labels (not broad groups).
 //
-// CHANGED:
-//   - DROPPED: 'other' chip with categoryKey: null escape hatch.
-//     Per CEO directive — every chip routes the visitor to a real
-//     subcategory. Cleaner mental model + cleaner auto-skip path.
-//   - ADDED: 'coffeeshop' chip mapping to existing CAFE registry key.
-//     Coffee shop is the highest-volume sub-segment of the food
-//     vertical for Indonesian UMKM, deserves first-class real estate.
-//   - REVISION: every entry now carries `bannerImage` (Unsplash URL)
-//     instead of gradient + accent icon. The builder preview is now a
-//     full-bleed e-commerce banner, NOT a stub product grid — so the
-//     dynamic-visual contract is "the banner photo follows the
-//     category".
-//   - bannerEyebrowKey + bannerTaglineKey point at i18n keys so
-//     every locale gets natural copy under the banner image.
+// CHANGED v15.6 (May 2026 — "Lainnya" escape hatch RESTORED):
+//   - REPLACED: 'retail' chip → 'other' chip.
+//     Per CEO directive: 6th chip is now "Lainnya" / "Other" — an
+//     escape hatch for visitors whose business doesn't fit the 5
+//     primary verticals. Tapping it bypasses the builder entirely
+//     and routes the user straight to /register (handled in
+//     store-builder-section.tsx).
+//   - The 'other' entry carries `isOther: true` flag so the section
+//     handler can detect it without string-matching on `id`.
+//   - `categoryKey` + `visualKey` are kept as `'GROCERY_CONVENIENCE'`
+//     and `'retail'` respectively — they're load-bearing for the
+//     Q17 SoT guard below AND for the type system (`BuilderVisualKey`
+//     union). Neither value is ever consumed at runtime for the
+//     'other' chip because the section handler intercepts the
+//     click before slug-claim / preview render. Treat them as
+//     "type-system noise" for this single entry.
 //
-// Final 6 chips:
+// PREVIOUS CHANGED notes (preserved for context):
+//   - DROPPED: 'other' chip with categoryKey: null escape hatch.
+//     [v15.6: undone — see above]
+//   - ADDED: 'coffeeshop' chip mapping to existing CAFE registry key.
+//   - REVISION: every entry now carries `bannerImage` (Unsplash URL)
+//     instead of gradient + accent icon.
+//   - bannerEyebrowKey + bannerTaglineKey point at i18n keys.
+//
+// Final 6 chips (v15.6):
 //   - RESTAURANT          → broadest food category
 //   - CAFE                → coffee shop / cafe / tea house
 //   - FASHION_APPAREL     → highest IG-driven UMKM segment
 //   - HAIR_SALON          → service-based businesses anchor
 //   - CLEANING_SERVICE    → home-services anchor
-//   - GROCERY_CONVENIENCE → traditional retail anchor
+//   - OTHER               → escape hatch → /register
 //
 // Copy lives at `marketing.storeBuilder.categoryStep.categories.{id}`
-// and `marketing.storeBuilder.preview.banners.{visualKey}.*` in
-// marketing.json. Icon + categoryKey + visualKey + bannerImage are
+// in marketing.json. Icon + categoryKey + visualKey + bannerImage are
 // non-translatable, so they live here.
 //
 // [Q17 SoT] Categories are VALIDATED at module-load time against the
@@ -51,7 +60,7 @@ import {
   Shirt,
   Scissors,
   Sparkles,
-  ShoppingBasket,
+  MoreHorizontal,
 } from 'lucide-react';
 import type {
   BuilderCategoryData,
@@ -59,7 +68,19 @@ import type {
 } from '@/types/marketing';
 import { getCategoryConfig } from '@/lib/constants/shared/categories';
 
-const builderCategoriesRaw: BuilderCategoryData[] = [
+// v15.6: BuilderCategoryData augmented with optional `isOther` flag.
+// Type lives in @/types/marketing — if TS complains about this prop
+// being unknown, ensure the type definition has been updated to
+// include `isOther?: boolean`. (See bottom of this file for an
+// inline interface extension as a defensive fallback.)
+type BuilderCategoryDataExt = BuilderCategoryData & {
+  /** True ONLY for the "Lainnya" / "Other" escape-hatch chip.
+   *  When set, the section handler intercepts the click and
+   *  redirects to /register instead of running normal selection. */
+  isOther?: boolean;
+};
+
+const builderCategoriesRaw: BuilderCategoryDataExt[] = [
   {
     id: 'restaurant',
     icon: UtensilsCrossed,
@@ -91,10 +112,15 @@ const builderCategoriesRaw: BuilderCategoryData[] = [
     visualKey: 'cleaning',
   },
   {
-    id: 'retail',
-    icon: ShoppingBasket,
+    id: 'other',
+    icon: MoreHorizontal,
+    // categoryKey + visualKey are required by the type system but
+    // never consumed for this chip — section handler intercepts
+    // the click before any selection state is set. Both fields
+    // point at safe, real values to keep the Q17 SoT guard happy.
     categoryKey: 'GROCERY_CONVENIENCE',
     visualKey: 'retail',
+    isOther: true,
   },
 ];
 
@@ -105,15 +131,15 @@ for (const entry of builderCategoriesRaw) {
   if (!getCategoryConfig(entry.categoryKey)) {
     throw new Error(
       `[marketing/store-builder] categoryKey "${entry.categoryKey}" ` +
-        `(builder id "${entry.id}") not found in ` +
-        `lib/constants/shared/categories.ts. ` +
-        `Marketing category curation must reference real registry keys — ` +
-        `update the registry or fix the typo.`,
+      `(builder id "${entry.id}") not found in ` +
+      `lib/constants/shared/categories.ts. ` +
+      `Marketing category curation must reference real registry keys — ` +
+      `update the registry or fix the typo.`,
     );
   }
 }
 
-export const builderCategories: readonly BuilderCategoryData[] =
+export const builderCategories: readonly BuilderCategoryDataExt[] =
   builderCategoriesRaw;
 
 // ==========================================
@@ -127,8 +153,15 @@ export const builderCategories: readonly BuilderCategoryData[] =
 //
 // The image is the centerpiece. Visitor picks "Fashion" → preview
 // banner becomes a fashion storefront. Picks "Cleaning Service" →
-// banner becomes a cleaning service. Etc. This is what a real
-// Shopify/Squarespace template demo feels like.
+// banner becomes a cleaning service. Etc.
+//
+// v15.6: 'retail' visual entry KEPT here even though no chip uses
+// it directly anymore. Reasons:
+//   1. The 'other' chip's `visualKey` points at it (defensive — even
+//      though the click is intercepted, having the lookup return a
+//      valid object prevents crashes if intercept logic ever drifts).
+//   2. BuilderVisualKey union still contains 'retail' — removing it
+//      would force changes in @/types/marketing as well.
 // ==========================================
 
 export interface CategoryVisual {

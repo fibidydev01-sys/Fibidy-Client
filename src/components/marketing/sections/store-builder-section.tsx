@@ -4,25 +4,32 @@
 // STORE BUILDER SECTION
 // File: src/components/marketing/sections/store-builder-section.tsx
 //
-// Phase 5 polish v4 (May 2026 — non-interactive onboarding):
+// Phase 5 polish v6 (May 2026 — "Lainnya" escape hatch):
 //
-// CHANGED in v4:
-//   - handleCategoryGuidance() now fires the tour AND schedules an
-//     auto-dismiss after 2 seconds. Drops the user-clicks-Show-me
-//     interaction model from v3.
-//   - Re-entry guard: if the tour is already visible (e.g. user
-//     hammers the input), additional fires are no-ops to avoid
-//     stacking timers / overlay flashing.
-//   - SubdomainInput's onCategoryRequested now fires automatically
-//     on every threshold-breach attempt (no toast action button to
-//     click) — see subdomain-input.tsx v4 header.
+// CHANGED in v6:
+//   - CategoryPicker `onSelect` now wrapped in `handleCategorySelect`.
+//     When the picked category carries `isOther: true` (the "Lainnya"
+//     chip from store-builder.ts v15.6), we bypass the entire builder
+//     flow and `router.push('/register')` immediately.
+//     For every other category, behavior is unchanged — `setCategoryId`
+//     fires and the inline preview / subdomain claim continues normally.
+//   - The redirect target is plain `/register` (no query params). The
+//     wizard lands on the Welcome step (currentStep=1). Users who
+//     pick a real category continue using the bridge URL contract
+//     (?slug=...&category=...&agreement=accepted) via handleSubmit.
 //
-// PRESERVED from v3:
-//   - useNextStep() hook for tour control
+// PRESERVED from v5:
+//   - Agreement checkbox pre-checked (`agreed = true`).
+//   - Submit buttons not DOM-disabled — handleSubmit guard is the gate.
+//
+// PRESERVED from v4:
+//   - Auto-fire NextStep tour on threshold-breach with 2s
+//     auto-dismiss (TOUR_AUTO_CLOSE_MS)
+//   - Re-entry guard via isNextStepVisible
 //   - useEffect that closes the tour when categoryId becomes non-null
 //   - CategoryPicker carries id="builder-category-picker" internally
 //
-// All Phase 3 + 5 v1/v2 invariants preserved: bridge URL contract,
+// All Phase 3 + 5 v1/v2/v3 invariants preserved: bridge URL contract,
 // sessionStorage `fibidy_builder_agreement` write, sticky CTA on
 // mobile, BrowserMockup wrap on the preview.
 // ==========================================
@@ -67,7 +74,8 @@ export function StoreBuilderSection() {
   const [slugStatus, setSlugStatus] = useState<SubdomainStatus>({
     kind: 'idle',
   });
-  const [agreed, setAgreed] = useState<boolean>(false);
+  // v5: pre-checked. Legally acceptable for ID-only deployment.
+  const [agreed, setAgreed] = useState<boolean>(true);
 
   // ── Refs ────────────────────────────────────────────────────────
   const inlineCtaRef = useRef<HTMLDivElement | null>(null);
@@ -140,6 +148,24 @@ export function StoreBuilderSection() {
     }
   }, [categoryId, isNextStepVisible, closeNextStep]);
 
+  // ── Category select handler — v6 ────────────────────────────────
+  // Intercepts clicks on the "Lainnya" / "Other" chip (carries
+  // `isOther: true` flag from store-builder.ts data) and bypasses
+  // the entire builder flow — straight to /register, no slug-claim,
+  // no agreement bridge. Wizard lands on Welcome (Step 1).
+  //
+  // For every other category, behavior is unchanged: state updates
+  // upstream → preview refreshes → slug claim → handleSubmit pushes
+  // the bridge URL with query params.
+  const handleCategorySelect = (id: string) => {
+    const picked = builderCategories.find((c) => c.id === id);
+    if (picked?.isOther) {
+      router.push('/register');
+      return;
+    }
+    setCategoryId(id);
+  };
+
   // ── Derived ─────────────────────────────────────────────────────
   const categorySelected = categoryId !== null;
   const canSubmit =
@@ -150,6 +176,8 @@ export function StoreBuilderSection() {
     : `${t('preview.placeholderSlug')}.fibidy.com`;
 
   // ── Submit handler ──────────────────────────────────────────────
+  // v5: buttons are no longer disabled at the DOM level, so this
+  // guard is the sole gate. Clicks while invalid are silent no-ops.
   const handleSubmit = () => {
     if (!canSubmit || categoryId === null) return;
 
@@ -188,10 +216,12 @@ export function StoreBuilderSection() {
         {/* LEFT — form column */}
         <div className="space-y-6">
           {/* CategoryPicker carries id="builder-category-picker" internally
-              — that's the selector NextStep uses for the category-gate tour. */}
+              — that's the selector NextStep uses for the category-gate tour.
+              v6: onSelect now goes through handleCategorySelect which
+              intercepts the "Lainnya" chip and redirects to /register. */}
           <CategoryPicker
             selectedId={categoryId}
-            onSelect={setCategoryId}
+            onSelect={handleCategorySelect}
           />
 
           <SubdomainInput
@@ -208,7 +238,7 @@ export function StoreBuilderSection() {
             onPick={(s) => setSlug(s)}
           />
 
-          {/* Agreement checkbox */}
+          {/* Agreement checkbox — pre-checked (v5) */}
           <div className="flex items-start gap-3 pt-2">
             <Checkbox
               id="builder-agreement"
@@ -244,12 +274,11 @@ export function StoreBuilderSection() {
             </label>
           </div>
 
-          {/* Inline CTA */}
+          {/* Inline CTA — v5: always enabled, gated only by handleSubmit */}
           <div ref={inlineCtaRef} className="space-y-3 pt-2">
             <Button
               size="lg"
               className="group w-full sm:w-auto sm:min-w-[260px]"
-              disabled={!canSubmit}
               onClick={handleSubmit}
             >
               {t('ctaPrimary')}
@@ -270,7 +299,7 @@ export function StoreBuilderSection() {
         </div>
       </div>
 
-      {/* Sticky bottom CTA (mobile only) */}
+      {/* Sticky bottom CTA (mobile only) — v5: always enabled */}
       <div
         className={cn(
           'fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 px-4 py-3 backdrop-blur-md transition-transform duration-200 lg:hidden',
@@ -282,7 +311,6 @@ export function StoreBuilderSection() {
         <Button
           size="lg"
           className="group w-full"
-          disabled={!canSubmit}
           onClick={handleSubmit}
         >
           {t('ctaPrimary')}

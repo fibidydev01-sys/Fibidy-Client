@@ -2,16 +2,12 @@
 // FOOTER DATA
 // File: src/lib/data/marketing/footer.ts
 //
-// Footer column structure. Each column has a title key + link list.
-// Copy at `marketing.footer.columns.{column}.title` and
-// `marketing.footer.columns.{column}.links.{key}` in marketing.json.
-//
-// Locale switcher + theme toggle live in the bottom-bar (rendered
-// directly by MarketingFooter, not data-driven). They're component
-// concerns, not content concerns.
-//
-// Social icons use siteConfig.links — already the source of truth
-// across the codebase. No need to duplicate URLs here.
+// v15.4 cleanup (May 2026):
+//   - Legal column: added `cookies` and `copyright` links.
+//     Both routes (/legal/cookies, /legal/copyright) existed in the
+//     build but had ZERO links from header or footer — true orphan
+//     pages. Now surfaced in the Legal column where users expect
+//     to find them.
 // ==========================================
 
 export interface FooterLink {
@@ -54,6 +50,8 @@ export const footerColumns: readonly FooterColumn[] = [
     links: [
       { key: 'terms', href: '/legal/terms' },
       { key: 'privacy', href: '/legal/privacy' },
+      { key: 'cookies', href: '/legal/cookies' },
+      { key: 'copyright', href: '/legal/copyright' },
       { key: 'refund', href: '/legal/refund' },
       { key: 'sellerAgreement', href: '/legal/seller-agreement' },
     ],
