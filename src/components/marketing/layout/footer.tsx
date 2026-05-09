@@ -1,6 +1,16 @@
 // ==========================================
 // MARKETING FOOTER
-// File: src/components/marketing/marketing-footer.tsx
+// File: src/components/marketing/layout/footer.tsx
+//
+// [PHASE 1 REFACTOR — May 2026]
+// Moved from src/components/marketing/marketing-footer.tsx → layout/footer.tsx
+// Behavior preserved verbatim. Only path + filename changed.
+//
+// Imports updated for sibling layout/* files:
+//   - LocaleSwitcher: was '@/components/marketing/shared/locale-switcher'
+//                     now  '@/components/marketing/layout/locale-switcher'
+//   - ThemeToggle:    was '@/components/marketing/shared/theme-toggle'
+//                     now  '@/components/marketing/layout/theme-toggle'
 //
 // [VERCEL-STYLE — May 2026 REBUILD]
 // Footer composition:

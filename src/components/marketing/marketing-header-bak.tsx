@@ -30,7 +30,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/shared/utils";
-import { headerNav, type NavItem, type NavMenuEntry } from "@/lib/data/marketing/nav";
+import { headerNav, type NavItem, type NavMenuEntry } from "@/lib/marketing/data/nav";
 
 /* ──────────────────────────────────────────────────────────────────
  * Shared "Soon" badge

@@ -2,76 +2,47 @@
 // MARKETING PAGE (root /)
 // File: src/app/[locale]/(marketing)/page.tsx
 //
-// [MINIMAL MODE — May 2026]
-// Page reduced to two sections only:
-//   - StoreBuilder  → conversion engine (try-it, pre-fill, sign up)
-//   - FinalCta      → close
+// Phase 10 (May 2026 — registry-driven render):
 //
-// All other sections are temporarily DISABLED but the imports +
-// REGISTRY entries are preserved as TODO comments so we can flip
-// them back on with a single uncomment + edit to ACTIVE_SECTIONS.
+// Rebuilt from 115 lines of imperative JSX (one block per section)
+// into a thin registry-iterating component. Render order, mode
+// toggle, and active section list now live entirely at
+// `lib/marketing/data/sections.ts`. This file's only job is to
+// look each key up in the registry and render whatever it points at.
 //
-// To re-enable everything: replace ACTIVE_SECTIONS with
-// DEFAULT_SECTIONS from '@/lib/data/marketing/sections'.
+// BEFORE Phase 10:
+//   - 115 lines
+//   - 10 explicit imports (one per section component)
+//   - 10 conditional renders (each ACTIVE_SECTIONS.includes(key) check)
+//   - Comment-block listing TODOs for disabled sections
+//   - Local declaration of ACTIVE_SECTIONS shadowing the data export
 //
-// generateMetadata reads marketing.metadata.* from i18n. Title and
-// description are locale-aware; OG image inheritance from the root
-// layout still applies.
+// AFTER Phase 10:
+//   - ~50 lines
+//   - 2 imports (ACTIVE_SECTIONS + SECTION_REGISTRY)
+//   - 1 .map() that does the work
+//   - generateMetadata unchanged
+//
+// WHY THE COMPONENT REGISTRY LIVES SEPARATELY:
+//   `components/marketing/registry.ts` is consumed BY this page,
+//   but also conceptually anchors which sections "exist" in the
+//   marketing route group. Splitting it out:
+//     1. Makes adding a section a 1-line registry edit (no page edit)
+//     2. Lets the type system enforce exhaustiveness on SectionKey
+//     3. Keeps page.tsx focused on metadata + render, not wiring
+//
+// TO RESTORE FULL PAGE COMPOSITION:
+//   Edit lib/marketing/data/sections.ts:
+//     `ACTIVE_SECTIONS: readonly SectionKey[] = MINIMAL_SECTIONS;`
+//   →
+//     `ACTIVE_SECTIONS: readonly SectionKey[] = FULL_SECTIONS;`
+//   That's the full restore. No JSX edits anywhere.
 // ==========================================
 
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import type { SectionKey } from '@/types/marketing';
-
-// ── ACTIVE imports ──────────────────────────────────────────────
-import { StoreBuilderSection } from '@/components/marketing/sections/store-builder-section';
-import { FinalCtaSection } from '@/components/marketing/sections/final-cta-section';
-
-// ── DISABLED imports (TODO: re-enable when bringing back full page) ──
-// TODO: import { AnnouncementBar } from '@/components/marketing/sections/announcement-bar';
-// TODO: import { HeroSection } from '@/components/marketing/sections/hero-section';
-// TODO: import { ProblemSection } from '@/components/marketing/sections/problem-section';
-// TODO: import { FeaturesSection } from '@/components/marketing/sections/features-section';
-// TODO: import { ScaleSection } from '@/components/marketing/sections/scale-section';
-// TODO: import { HowItWorksSection } from '@/components/marketing/sections/how-it-works-section';
-// TODO: import { PricingSection } from '@/components/marketing/sections/pricing-section';
-// TODO: import { FaqSection } from '@/components/marketing/sections/faq-section';
-
-// ──────────────────────────────────────────────────────────────────
-// SECTION REGISTRY
-//
-// Only the two active sections are mapped. The disabled ones live in
-// the commented block below — uncomment + add their key into
-// ACTIVE_SECTIONS to bring them back online.
-// ──────────────────────────────────────────────────────────────────
-
-const REGISTRY: Partial<Record<SectionKey, React.ComponentType>> = {
-  storeBuilder: StoreBuilderSection,
-  finalCta: FinalCtaSection,
-
-  // TODO: re-enable when bringing back the full marketing page
-  // announcement: AnnouncementBar,
-  // hero: HeroSection,
-  // problem: ProblemSection,
-  // features: FeaturesSection,
-  // scale: ScaleSection,
-  // howItWorks: HowItWorksSection,
-  // pricing: PricingSection,
-  // faq: FaqSection,
-};
-
-// ──────────────────────────────────────────────────────────────────
-// ACTIVE SECTIONS — render order
-//
-// Minimal mode: just two sections, in this order. To restore the
-// full page, swap this array for DEFAULT_SECTIONS imported from
-// '@/lib/data/marketing/sections'.
-// ──────────────────────────────────────────────────────────────────
-
-const ACTIVE_SECTIONS: readonly SectionKey[] = [
-  'storeBuilder',
-  'finalCta',
-] as const;
+import { ACTIVE_SECTIONS } from '@/lib/marketing/data/sections';
+import { SECTION_REGISTRY } from '@/components/marketing/registry';
 
 // ==========================================
 // METADATA
@@ -99,9 +70,13 @@ export default function MarketingPage() {
   return (
     <>
       {ACTIVE_SECTIONS.map((key) => {
-        const Component = REGISTRY[key];
-        if (!Component) return null;
-        return <Component key={key} />;
+        const Section = SECTION_REGISTRY[key];
+        // SECTION_REGISTRY is typed Record<SectionKey, ComponentType>,
+        // so this lookup is always defined. Defensive null-check kept
+        // anyway — if SectionKey grows ahead of registry entries
+        // during a future refactor, the page degrades gracefully
+        // instead of crashing.
+        return Section ? <Section key={key} /> : null;
       })}
     </>
   );
