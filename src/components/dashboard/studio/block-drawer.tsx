@@ -3,6 +3,18 @@
 // ==========================================
 // BLOCK DRAWER
 // File: src/components/dashboard/studio/block-drawer.tsx
+//
+// [PHASE 5 — 2026-05-13]
+// Drawer now hosts the primary action toolbar at the bottom:
+//   Left:  Preview  → opens /store/{slug} in a new tab
+//   Right: Publish  → triggers publish flow
+//
+// This replaces the floating BuilderHeader (removed in this phase).
+// The top bar of the studio is now empty — only the SaveStatusPill
+// floats top-center as a non-blocking status indicator.
+//
+// Mobile drawer (vaul, bottom sheet) and desktop sheet (shadcn, right
+// side) both render the same toolbar — different containers, same UX.
 // ==========================================
 
 import { useState, useEffect, memo, useCallback } from 'react';
@@ -20,7 +32,7 @@ import {
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
-import { Check, Crown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, Crown, ChevronLeft, ChevronRight, ExternalLink, Save } from 'lucide-react';
 import type { BlockOption } from './block-options';
 import { BLOCK_OPTIONS_MAP, isProBlock } from './block-options';
 
@@ -31,6 +43,12 @@ interface BlockDrawerProps {
   currentBlock?: string;
   onBlockSelect: (block: string) => void;
   blockVariantLimit?: number;
+  // ── Toolbar props (new in Phase 5) ─────────────────────────────────────
+  storeSlug: string;
+  hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  configHasProBlocks: boolean;
+  onPublish: () => void;
 }
 
 const MOBILE_QUERY = '(max-width: 768px)';
@@ -58,6 +76,59 @@ export function BlockDrawer(props: BlockDrawerProps) {
 }
 
 // ============================================================================
+// SHARED TOOLBAR
+// ============================================================================
+
+interface ToolbarProps {
+  storeSlug: string;
+  hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  configHasProBlocks: boolean;
+  onPublish: () => void;
+}
+
+function DrawerToolbar({
+  storeSlug,
+  hasUnsavedChanges,
+  isSaving,
+  configHasProBlocks,
+  onPublish,
+}: ToolbarProps) {
+  const t = useTranslations('studio.header');
+
+  return (
+    <div className="shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 py-2.5 flex items-center justify-between gap-2">
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="gap-1.5 h-9 text-xs flex-1"
+      >
+        <a
+          href={`/store/${storeSlug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          {t('preview')}
+        </a>
+      </Button>
+
+      <Button
+        size="sm"
+        onClick={onPublish}
+        disabled={isSaving || !hasUnsavedChanges}
+        className="gap-1.5 h-9 text-xs flex-1"
+      >
+        {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
+        <Save className="h-3.5 w-3.5" />
+        {isSaving ? t('publishing') : t('publish')}
+      </Button>
+    </div>
+  );
+}
+
+// ============================================================================
 // MOBILE
 // ============================================================================
 
@@ -66,6 +137,11 @@ function MobileDrawer({
   currentBlock,
   onBlockSelect,
   blockVariantLimit = 3,
+  storeSlug,
+  hasUnsavedChanges,
+  isSaving,
+  configHasProBlocks,
+  onPublish,
 }: BlockDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(false);
@@ -84,10 +160,11 @@ function MobileDrawer({
       )}
 
       <Drawer open={open} onOpenChange={setOpen} modal={true}>
-        <DrawerContent className="z-[60]">
+        <DrawerContent className="z-[60] flex flex-col max-h-[85vh]">
           <VisuallyHidden.Root>
             <DrawerTitle>{t('selectBlock', { section })}</DrawerTitle>
           </VisuallyHidden.Root>
+
           <div
             onClick={() => setOpen(false)}
             className="flex flex-col items-center pt-3 pb-2 cursor-pointer select-none shrink-0"
@@ -95,7 +172,8 @@ function MobileDrawer({
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <p className="text-xs text-muted-foreground mt-1">{t('close')}</p>
           </div>
-          <div className="overflow-y-auto pb-8">
+
+          <div className="overflow-y-auto flex-1">
             {blocks.map((block) => (
               <BlockListItem
                 key={block.value}
@@ -106,6 +184,14 @@ function MobileDrawer({
               />
             ))}
           </div>
+
+          <DrawerToolbar
+            storeSlug={storeSlug}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isSaving={isSaving}
+            configHasProBlocks={configHasProBlocks}
+            onPublish={onPublish}
+          />
         </DrawerContent>
       </Drawer>
     </>
@@ -121,6 +207,11 @@ function DesktopSheet({
   currentBlock,
   onBlockSelect,
   blockVariantLimit = 3,
+  storeSlug,
+  hasUnsavedChanges,
+  isSaving,
+  configHasProBlocks,
+  onPublish,
 }: BlockDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(true);
@@ -140,7 +231,7 @@ function DesktopSheet({
   return (
     <>
       {!open && !isClosing && (
-        <div className="fixed right-0 top-14 bottom-0 w-12 bg-background border-l shadow-lg z-40 flex items-center justify-center">
+        <div className="fixed right-0 top-0 bottom-0 w-12 bg-background border-l shadow-lg z-40 flex items-center justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -162,7 +253,7 @@ function DesktopSheet({
       >
         <SheetContent
           side="right"
-          className="top-14 z-40 w-[280px] p-0 flex flex-col"
+          className="top-0 z-40 w-[280px] p-0 flex flex-col"
           onInteractOutside={() => handleCollapse()}
         >
           <div className="px-4 py-3 border-b shrink-0">
@@ -177,7 +268,7 @@ function DesktopSheet({
             </Button>
           </div>
 
-          <div className="overflow-y-auto pb-4">
+          <div className="overflow-y-auto flex-1">
             {blocks.map((block) => (
               <BlockListItem
                 key={block.value}
@@ -188,6 +279,14 @@ function DesktopSheet({
               />
             ))}
           </div>
+
+          <DrawerToolbar
+            storeSlug={storeSlug}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isSaving={isSaving}
+            configHasProBlocks={configHasProBlocks}
+            onPublish={onPublish}
+          />
         </SheetContent>
       </Sheet>
     </>

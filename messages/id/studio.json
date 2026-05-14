@@ -3,11 +3,14 @@
     "loadingFailed": "Gagal memuat data toko",
     "header": {
       "preview": "Preview",
-      "fullPreview": "Preview Penuh",
       "unsaved": "Belum disimpan",
       "publish": "Publikasikan",
-      "publishing": "Menerbitkan...",
-      "openLandingPage": "Buka Landing Page"
+      "publishing": "Menerbitkan..."
+    },
+    "saveStatus": {
+      "unsaved": "Perubahan belum disimpan",
+      "saving": "Menerbitkan...",
+      "saved": "Tersimpan"
     },
     "drawer": {
       "open": "Buka",
@@ -50,7 +53,7 @@
       "retry": "Coba Lagi"
     },
     "blockOptions": {
-      "hero": "Hero {index}"
+      "hero": "Block {index}"
     },
     "fullPreview": {
       "ariaTitle": "Preview Halaman Penuh: {name}",

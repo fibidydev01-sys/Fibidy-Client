@@ -3,11 +3,14 @@
     "loadingFailed": "Failed to load store data",
     "header": {
       "preview": "Preview",
-      "fullPreview": "Full Preview",
       "unsaved": "Unsaved",
       "publish": "Publish",
-      "publishing": "Publishing...",
-      "openLandingPage": "Open Landing Page"
+      "publishing": "Publishing..."
+    },
+    "saveStatus": {
+      "unsaved": "Unsaved changes",
+      "saving": "Publishing...",
+      "saved": "Saved"
     },
     "drawer": {
       "open": "Open",
@@ -50,7 +53,7 @@
       "retry": "Try Again"
     },
     "blockOptions": {
-      "hero": "Hero {index}"
+      "hero": "Block {index}"
     },
     "fullPreview": {
       "ariaTitle": "Full Page Preview: {name}",

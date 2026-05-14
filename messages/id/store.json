@@ -12,13 +12,13 @@
     },
     "header": {
       "nav": {
-        "home": "Beranda",
-        "featured": "Unggulan",
+        "about": "Tentang",
         "products": "Produk",
-        "contact": "Kontak"
+        "contact": "Kontak",
+        "studio": "Studio"
       },
       "menuLabel": "Menu",
-      "reachUs": "Hubungi kami lewat:",
+      "reachUs": "Hubungi kami di",
       "whatsapp": "WhatsApp",
       "phone": "Telepon",
       "email": "Email",
@@ -26,14 +26,16 @@
       "viewContactPage": "Lihat halaman kontak"
     },
     "footer": {
+      "brandTitle": "Toko",
+      "navTitle": "Navigasi",
       "directContact": {
-        "eyebrow": "Kontak Langsung",
-        "description": "Respons WhatsApp cepat. Kami siap membantu pertanyaan kamu.",
+        "eyebrow": "Hubungi kami",
+        "description": "Ada pertanyaan? Mari kita ngobrol.",
         "cta": "Chat via WhatsApp"
       },
-      "socialTitle": "Media Sosial",
+      "socialTitle": "Ikuti Kami",
       "whatsappTemplate": "Halo {name}, saya tertarik dengan produk kamu.",
-      "copyright": "© {year} {name}. Hak cipta dilindungi."
+      "copyright": "© {year} {name}. Semua hak dilindungi."
     },
     "products": {
       "title": "Semua Produk",

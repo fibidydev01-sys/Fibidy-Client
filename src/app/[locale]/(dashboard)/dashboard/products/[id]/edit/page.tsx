@@ -1,64 +1,80 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { notFound } from 'next/navigation';
-import { productsApi } from '@/lib/api/products';
-import { getErrorMessage } from '@/lib/api/client';
+// ==========================================
+// EDIT PRODUCT PAGE
+// File: src/app/[locale]/(dashboard)/dashboard/products/[id]/edit/page.tsx
+//
+// [REALTIME REFRESH FIX — May 2026]
+//
+// Previously this page used `useState` + `useEffect` + raw API calls
+// for BOTH product detail AND categories, with duplicate fallback
+// logic that mirrored `useProductCategories()`. Result:
+//   - Product detail held as local state → stale after any mutation
+//     elsewhere (e.g. update from another tab, refund webhook).
+//   - Categories fetched once on mount, never invalidated.
+//   - Duplicated fallback logic (try /categories endpoint, fall
+//     back to extracting from /products) drifted from the hook
+//     version.
+//
+// Now backed entirely by TanStack hooks:
+//
+//   1. `useProduct(id)` — fetches the product. Returns the same
+//      cache slot used by any other consumer in the app, and is
+//      invalidated by useUpdateProduct / useUpdateProductFile.
+//
+//   2. `useProductCategories(product?.category)` — fetches the
+//      category list AND merges the current product's category in
+//      if it's not already there. This preserves the original
+//      "always show current category in datalist" behavior in a
+//      single line, instead of an imperative `.includes()` check
+//      + `.push()` + `.sort()`.
+//
+//   3. Loading & not-found state derived directly from useQuery —
+//      no manual `isLoading` / `isNotFound` state machines.
+//
+// Notes on edge cases:
+//   - `useProduct` retries 404s exactly zero times (see hook impl),
+//     so notFound() triggers quickly when an invalid id is in the URL.
+//   - Categories load lazily; the datalist may briefly show only
+//     the current product's category before the full list arrives.
+//     This is fine — the input is free-text anyway.
+// ==========================================
+
+import { useParams, notFound } from 'next/navigation';
+import {
+  useProduct,
+  useProductCategories,
+} from '@/hooks/dashboard/use-products';
 import { ProductForm } from '@/components/dashboard/product/form/product';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Product } from '@/types/product';
+import { ApiRequestError } from '@/lib/api/client';
 
 export default function EditProductPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isNotFound, setIsNotFound] = useState(false);
+  const {
+    data: product,
+    isLoading: isProductLoading,
+    error: productError,
+  } = useProduct(id);
 
-  useEffect(() => {
-    if (!id) return;
+  // Pass the product's current category so it's guaranteed to
+  // appear in the datalist even if the list endpoint hasn't
+  // returned it yet (or doesn't include it for any reason).
+  const { data: categories } = useProductCategories(
+    product?.category ?? undefined,
+  );
 
-    const fetchData = async () => {
-      try {
-        const productData = await productsApi.getById(id);
-        setProduct(productData);
+  // 404 → next/navigation notFound()
+  if (
+    productError instanceof ApiRequestError &&
+    productError.isNotFound()
+  ) {
+    return notFound();
+  }
 
-        let fetched: string[] = [];
-        try {
-          fetched = await productsApi.getCategories();
-        } catch {
-          try {
-            const all = await productsApi.getAll({ limit: 200 });
-            const unique = new Set<string>();
-            all.data.forEach((p) => { if (p.category) unique.add(p.category); });
-            fetched = Array.from(unique).sort();
-          } catch {
-            // Categories remain empty
-          }
-        }
-
-        if (productData.category && !fetched.includes(productData.category)) {
-          fetched = [productData.category, ...fetched].sort();
-        }
-
-        setCategories(fetched);
-      } catch (err) {
-        console.error('Failed to fetch product:', getErrorMessage(err));
-        setIsNotFound(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  if (isNotFound) return notFound();
-
-  if (isLoading) {
+  if (isProductLoading) {
     return (
       <div className="space-y-4 p-6">
         <Skeleton className="h-8 w-48" />
@@ -71,5 +87,5 @@ export default function EditProductPage() {
 
   if (!product) return null;
 
-  return <ProductForm product={product} categories={categories} />;
+  return <ProductForm product={product} categories={categories ?? []} />;
 }

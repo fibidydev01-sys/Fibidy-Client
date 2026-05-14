@@ -12,10 +12,10 @@
     },
     "header": {
       "nav": {
-        "home": "Home",
-        "featured": "Featured",
+        "about": "About",
         "products": "Products",
-        "contact": "Contact"
+        "contact": "Contact",
+        "studio": "Studio"
       },
       "menuLabel": "Menu",
       "reachUs": "Reach us through:",
@@ -26,12 +26,14 @@
       "viewContactPage": "View contact page"
     },
     "footer": {
+      "brandTitle": "Brand",
+      "navTitle": "Navigation",
       "directContact": {
-        "eyebrow": "Direct Contact",
-        "description": "Fast WhatsApp responses. We're here to help with your questions.",
-        "cta": "Chat via WhatsApp"
+        "eyebrow": "Get in touch",
+        "description": "Got a question? Let's talk.",
+        "cta": "Chat on WhatsApp"
       },
-      "socialTitle": "Social Media",
+      "socialTitle": "Follow Us",
       "whatsappTemplate": "Hi {name}, I'm interested in your products.",
       "copyright": "© {year} {name}. All rights reserved."
     },

@@ -1,10 +1,59 @@
 'use client';
 
+// ============================================================================
+// FILE: src/components/layout/store/store-footer.tsx
+// PURPOSE: Store footer — restructured to industry-standard layout
+//
+// [FOOTER RESTRUCTURE — 2026-05-13]
+//   OLD layout: Direct Contact card + Social card + Copyright
+//   NEW layout: Brand + Nav + Social + Copyright
+//
+//   Direct Contact card was REMOVED — its functionality merged into the
+//   pre-footer CTA section inside block1/2/3 (uses the same translation
+//   keys: store.footer.directContact.*). No duplication anymore.
+//
+// [CARD TREATMENT — 2026-05-13b]
+//   All three columns (Brand, Nav, Social) now share the same card
+//   wrapper: `border border-border rounded-2xl p-6 md:p-8`. Borrowed
+//   from the pre-restructure social card styling (which itself echoed
+//   the old Direct Contact card). Three reasons it works better here:
+//
+//     1. Symmetric — three cards of equal weight read as a deliberate
+//        composition rather than mixed plain/bordered hierarchy.
+//     2. Borders become natural section dividers, removing the need
+//        for visible separators between blocks at the desktop layout.
+//     3. Stays consistent with the original "card-system" footer
+//        language the previous design established.
+//
+//   Brand block keeps its horizontal logo+name layout so the card
+//   heights stay balanced across the row.
+//
+// STRUCTURE:
+//   1. Brand card       : logo + name (horizontal) + description below
+//   2. Nav card         : About | Products | Contact
+//                         - Labels: t('store.header.nav.*') (i18n)
+//                         - Links:  HARDCODED (sitemap structure)
+//   3. Social card      : tenant.socialLinks{} (13 platforms)
+//   4. Copyright        : © {year} {tenant.name} (i18n)
+//
+// HARDCODE POLICY:
+//   - Nav LINKS are hardcoded: "/", "/products", "/#contact"
+//     → These are sitemap structure, not user-editable content.
+//   - Nav LABELS use t() — multilingual support.
+//   - Social platform names ("Instagram", "Facebook"...) are hardcoded
+//     in SOCIAL_CONFIG — proper nouns, no translation needed.
+//
+// FIELD COVERAGE:
+//   tenant.logo, tenant.name, tenant.description, tenant.socialLinks{}
+// ============================================================================
+
 import * as React from 'react';
-import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useStoreUrls } from '@/lib/public/use-store-urls';
 import type { PublicTenant } from '@/types/tenant';
 
 // ==========================================
@@ -81,6 +130,7 @@ const SocialIcons = {
 
 // ==========================================
 // SOCIAL CONFIG
+// Platform names are proper nouns — hardcoded labels OK, no i18n needed.
 // ==========================================
 
 const SOCIAL_CONFIG = [
@@ -113,63 +163,104 @@ interface StoreFooterProps {
 
 export function StoreFooter({ tenant }: StoreFooterProps) {
   const t = useTranslations('store.footer');
+  const tNav = useTranslations('store.header.nav');
+  const urls = useStoreUrls(tenant.slug);
   const currentYear = new Date().getFullYear();
 
-  const whatsappLink = tenant.whatsapp
-    ? `https://wa.me/${tenant.whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: tenant.name }))}`
-    : null;
-
-  const hasSocial = SOCIAL_CONFIG.some(
-    ({ key }) => !!tenant.socialLinks?.[key as keyof typeof tenant.socialLinks]
-  );
+  // Nav: HARDCODED links (sitemap structure) + i18n labels.
+  // "About" → landing page root, "Products" → products list,
+  // "Contact" → anchor on landing page.
+  const navItems = [
+    { label: tNav('about'), href: urls.home },
+    { label: tNav('products'), href: urls.products() },
+    { label: tNav('contact'), href: `${urls.home}#contact` },
+  ];
 
   const activeSocialLinks = SOCIAL_CONFIG.filter(
     ({ key }) => !!tenant.socialLinks?.[key as keyof typeof tenant.socialLinks]
   );
+  const hasSocial = activeSocialLinks.length > 0;
 
-  if (!hasSocial && !whatsappLink) return null;
+  // Shared card class — keeps the three columns visually identical.
+  // Centralized here so future polish (shadow, hover, bg tweak) lands
+  // in one place instead of three.
+  const cardClass =
+    'border border-border rounded-2xl p-6 md:p-8 bg-card';
+
+  // Shared eyebrow class — small all-caps mono label above each card's content.
+  const eyebrowClass =
+    'text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground';
 
   return (
     <footer className="border-t bg-muted/30">
-      <div className="container px-4 py-8 md:py-12">
+      <div className="container px-4 py-12 md:py-16">
 
-        <div className="grid md:grid-cols-2 gap-6 items-stretch">
+        <div className="grid gap-6 md:grid-cols-3 md:gap-6 items-stretch">
 
-          {/* LEFT — Direct Contact */}
-          {whatsappLink && (
-            <div className="border-2 border-foreground rounded-2xl p-8 md:p-10 flex flex-col gap-6">
-              <div className="space-y-2">
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
-                  {t('directContact.eyebrow')}
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {t('directContact.description')}
-                </p>
-              </div>
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 text-sm font-medium text-foreground hover:text-foreground/60 transition-colors duration-200"
-              >
-                <span className="border-b border-foreground/30 group-hover:border-transparent transition-colors duration-200 pb-px">
-                  {t('directContact.cta')}
-                </span>
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-foreground/20 transition-all duration-200 group-hover:bg-foreground group-hover:border-foreground group-hover:text-background">
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </a>
+          {/* ── 1. BRAND CARD ──────────────────────────────────────────── */}
+          <div className={`${cardClass} flex flex-col gap-4`}>
+            <p className={eyebrowClass}>{t('brandTitle')}</p>
+            <div className="flex items-center gap-3">
+              {tenant.logo ? (
+                <div className="relative w-12 h-12 overflow-hidden border border-border rounded-xl shrink-0 bg-background">
+                  <Image
+                    src={tenant.logo}
+                    alt={tenant.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg font-bold text-primary">
+                    {tenant.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <h3 className="text-base font-semibold tracking-tight text-foreground leading-tight">
+                {tenant.name}
+              </h3>
             </div>
-          )}
-
-          {/* RIGHT — Social Links */}
-          {hasSocial && (
-            <div className="border border-border rounded-2xl p-6 md:p-8">
-              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-4">
-                {t('socialTitle')}
+            {tenant.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {tenant.description}
               </p>
-              <ScrollArea className="h-52">
-                <div className="space-y-0">
+            )}
+          </div>
+
+          {/* ── 2. NAV CARD (hardcoded links, i18n labels) ─────────────── */}
+          <div className={`${cardClass} flex flex-col gap-4`}>
+            <p className={eyebrowClass}>{t('navTitle')}</p>
+            <nav className="flex flex-col gap-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* ── 3. SOCIAL CARD ─────────────────────────────────────────── */}
+          {/*
+            Only renders when at least one social link exists. When absent,
+            the grid collapses to 2 columns at md and below — Tailwind's
+            `md:grid-cols-3` plus the omitted child means the last cell
+            simply doesn't fill, which is fine because all cards have the
+            same width and the row just ends at column 2. If you'd rather
+            keep a 3-col layout, swap `md:grid-cols-3` for a conditional
+            class based on `hasSocial` — but two cards in a 3-col grid
+            looks lopsided, so collapsing is the cleaner default.
+          */}
+          {hasSocial && (
+            <div className={`${cardClass} flex flex-col gap-4`}>
+              <p className={eyebrowClass}>{t('socialTitle')}</p>
+              <ScrollArea className="max-h-52">
+                <div className="flex flex-col gap-0">
                   {activeSocialLinks.map(({ key, label, color }, index) => {
                     const Icon = SocialIcons[key as keyof typeof SocialIcons];
                     const url = tenant.socialLinks?.[key as keyof typeof tenant.socialLinks];
@@ -198,6 +289,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
 
         <Separator className="my-8" />
 
+        {/* ── 4. COPYRIGHT ─────────────────────────────────────────────── */}
         <div className="text-center text-sm text-muted-foreground">
           <p>{t('copyright', { year: currentYear, name: tenant.name })}</p>
         </div>
