@@ -85,7 +85,6 @@
     "nextstepjs": "^2.2.0",
     "ogl": "^1.0.11",
     "pdfjs-dist": "^5.6.205",
-    "postprocessing": "^6.38.2",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-day-picker": "^9.14.0",
@@ -100,7 +99,6 @@
     "sonner": "^2.0.7",
     "svg-dotted-map": "^2.0.1",
     "tailwind-merge": "^3.4.0",
-    "three": "^0.167.1",
     "vaul": "^1.1.2",
     "zod": "^4.2.1",
     "zustand": "^5.0.9"
