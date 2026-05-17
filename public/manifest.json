@@ -76,6 +76,18 @@
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -116,7 +128,37 @@
       ]
     }
   ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Halaman utama Fibidy"
+    },
+    {
+      "src": "/screenshots/screenshot-mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard toko"
+    }
+  ],
   "launch_handler": {
     "client_mode": "navigate-existing"
+  },
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "related_applications": [],
+  "share_target": {
+    "action": "/dashboard/products/new",
+    "method": "GET",
+    "params": {
+      "title": "name",
+      "text": "description",
+      "url": "link"
+    }
   }
 }

@@ -12,6 +12,18 @@ import { StepIdentity } from './form/hero/step-identity';
 import { StepStory } from './form/hero/step-story';
 import { StepAppearance } from './form/hero/step-appearance';
 
+// ============================================================================
+// HERO SETTINGS SECTION
+// File: src/components/dashboard/settings/hero.tsx
+//
+// [v4 cleanup — 2026-05-15]
+//   - Removed `heroCtaLink` from form init and save payload.
+//     The CTA destination is hardcoded to '/products' in block dispatcher
+//     (landing → /products is the only journey). No server column existed
+//     for this field anyway — every save call was sending a value that the
+//     server's whitelist filter silently dropped.
+// ============================================================================
+
 interface HeroSectionProps {
   onBack?: () => void;
 }
@@ -46,7 +58,6 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         heroTitle: tenant.heroTitle || '',
         heroSubtitle: tenant.heroSubtitle || '',
         heroCtaText: tenant.heroCtaText || '',
-        heroCtaLink: tenant.heroCtaLink || '/products',
         heroBackgroundImage: tenant.heroBackgroundImage || '',
         logo: tenant.logo || '',
         primaryColor: themeData?.primaryColor || THEME_COLORS[0].value,
@@ -107,7 +118,6 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         heroTitle: formData.heroTitle,
         heroSubtitle: formData.heroSubtitle,
         heroCtaText: formData.heroCtaText,
-        heroCtaLink: formData.heroCtaLink || '/products',
         heroBackgroundImage: formData.heroBackgroundImage,
         logo: formData.logo || undefined,
         theme: { primaryColor: formData.primaryColor },

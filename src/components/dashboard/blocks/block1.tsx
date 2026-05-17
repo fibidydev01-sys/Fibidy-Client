@@ -1,63 +1,9 @@
 'use client';
 
-// ============================================================================
-// FILE: src/components/dashboard/blocks/block1.tsx
-// VARIANT: Editorial Minimal — FULL LANDING TEMPLATE (MASTER PATTERN v3)
-//
-// SECTIONS (in order):
-//   1. Hero            — banner carousel + split image card/text + CTA PRODUK
-//   2. Contact         — divide-y list (WA/phone/email/address) + form + map
-//
-// REMOVED in v3: Pre-footer CTA section (was duplicating contact heading).
-// After Contact section, layout goes directly to StoreFooter.
-//
-// STYLE LANGUAGE: editorial minimal
-//   - Thin separators
-//   - Lots of whitespace
-//   - Mono uppercase eyebrows
-//   - Clean borders, no heavy shadows
-//
-// ─── AUTO-HIDE POLICY (STRICT) ──────────────────────────────────────────
-//   Every editable element auto-hides when its source field is empty.
-//   No hardcoded fallback text on user-content. The only "always render"
-//   elements are decorative bits (separators).
-//
-//   Per-element rules:
-//     • Banner carousel    → hide if aboutFeatures[] empty
-//     • Hero entire        → hide if NOTHING to show
-//     • Hero logo badge    → hide if logo empty
-//     • Hero name badge    → hide if name empty
-//     • Hero eyebrow       → hide if category empty
-//     • Hero headline      → hide if heroTitle empty (NO fallback)
-//     • Hero subtitle      → hide if heroSubtitle empty
-//     • Hero tagline       → hide if description empty
-//     • Hero CTA button    → hide if heroCtaText empty OR showCta=false
-//     • Hero image card    → hide if no backgroundImage AND no logo
-//                            (NO "No Image" placeholder)
-//     • Contact section    → hide if ALL empty: contactTitle, contactSubtitle,
-//                            whatsapp, phone, email, address, form, map
-//     • Contact heading    → hide if contactTitle empty (NO fallback)
-//     • Contact subtitle   → hide if contactSubtitle empty
-//     • Per-row contact    → hide if value empty
-//     • Form               → hide if contactShowForm false
-//     • Map                → hide if contactShowMap false OR contactMapUrl empty
-//     • Map overlay        → hide if both address AND phone empty
-//
-//   CTA button label (hero) uses heroCtaText — user-edited but hides cleanly
-//   when empty.
-// ─────────────────────────────────────────────────────────────────────────
-//
-// FIELD COVERAGE — semua field wired:
-//   Hero:    name, category, description, logo, heroTitle, heroSubtitle,
-//            heroCtaText, heroBackgroundImage, aboutFeatures[]
-//   Contact: contactTitle, contactSubtitle, whatsapp, phone, email,
-//            address, contactMapUrl, contactShowMap, contactShowForm
-// ============================================================================
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Phone, MapPin, MessageCircle, Mail, Send } from 'lucide-react';
+import { ArrowRight, Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Badge } from '@/components/ui/badge';
@@ -68,10 +14,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
+
 import type { FeatureItem } from '@/types/tenant';
 
 interface Block1Props {
-  // Hero
   title?: string;
   subtitle?: string;
   description?: string;
@@ -84,7 +30,6 @@ interface Block1Props {
   logo?: string;
   storeName?: string;
   features?: FeatureItem[];
-  // Contact
   contactTitle?: string;
   contactSubtitle?: string;
   whatsapp?: string;
@@ -93,12 +38,7 @@ interface Block1Props {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
-  contactShowForm?: boolean;
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// BANNER 1 — CAROUSEL STANDARD
-// ────────────────────────────────────────────────────────────────────────────
 
 const AUTOPLAY_INTERVAL = 5000;
 const SWIPE_THRESHOLD = 50;
@@ -242,10 +182,6 @@ function CarouselStandard({ features }: { features: FeatureItem[] }) {
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — HERO
-// ────────────────────────────────────────────────────────────────────────────
-
 interface Block1HeroProps {
   title?: string;
   subtitle?: string;
@@ -285,24 +221,15 @@ function Block1HeroSection({
   const hasCta = showCta && !!ctaText;
 
   const hasAnyContent =
-    hasBanner ||
-    hasBadgeBlock ||
-    hasEyebrow ||
-    !!title ||
-    !!subtitle ||
-    !!description ||
-    hasCta ||
-    hasImage;
+    hasBanner || hasBadgeBlock || hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasImage;
 
   if (!hasAnyContent) return null;
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden bg-background flex flex-col">
-
       {hasBanner && <CarouselStandard features={validFeatures} />}
 
       <div className="flex flex-1 flex-col lg:grid lg:grid-cols-2 min-h-screen">
-
         {hasImage && (
           <div className="flex items-center justify-center px-8 sm:px-10 lg:px-12 py-12 lg:py-16 order-2 lg:order-1">
             <div className="w-full max-w-sm lg:max-w-none">
@@ -376,15 +303,10 @@ function Block1HeroSection({
             </div>
           )}
         </div>
-
       </div>
     </section>
   );
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — CONTACT (full merge: list + form + map)
-// ────────────────────────────────────────────────────────────────────────────
 
 interface Block1ContactProps {
   contactTitle?: string;
@@ -395,7 +317,6 @@ interface Block1ContactProps {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
-  contactShowForm?: boolean;
   storeName?: string;
 }
 
@@ -414,7 +335,6 @@ function Block1ContactSection({
   address,
   contactMapUrl,
   contactShowMap,
-  contactShowForm,
   storeName,
 }: Block1ContactProps) {
   const t = useTranslations('store.tenantContact');
@@ -428,16 +348,10 @@ function Block1ContactSection({
   });
 
   const showMap = !!(contactShowMap && contactMapUrl);
-  const showForm = !!contactShowForm;
-  const hasContactList = !!(whatsapp || phone || email || address);
-  const hasMapOverlay = !!(address || phone);
+  const showForm = !!whatsapp;
 
   const hasAnything =
-    !!contactTitle ||
-    !!contactSubtitle ||
-    hasContactList ||
-    showForm ||
-    showMap;
+    !!contactTitle || !!contactSubtitle || !!whatsapp || !!phone || !!email || !!address || showForm || showMap;
 
   if (!hasAnything) return null;
 
@@ -460,15 +374,11 @@ function Block1ContactSection({
     }
   };
 
-  const hasLeftCol = hasContactList || showForm;
-  const gridCols = hasLeftCol && showMap ? 'md:grid-cols-2' : 'md:grid-cols-1';
-
   return (
-    <section id="contact" className="container px-4 py-20 md:py-28">
+    <section id="contact" className="container px-4 py-20 md:py-28 space-y-12 md:space-y-16">
 
       {(contactTitle || contactSubtitle) && (
-        <div className="mb-10 md:mb-14 space-y-3">
-          <div className="w-8 h-px bg-foreground" />
+        <div className="space-y-3 text-center flex flex-col items-center">
           {contactTitle && (
             <h2 className="text-[36px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
               {contactTitle}
@@ -482,155 +392,166 @@ function Block1ContactSection({
         </div>
       )}
 
-      <div className={cn('grid gap-10 md:gap-16 items-start', gridCols)}>
 
-        {hasLeftCol && (
-          <div className="divide-y divide-border">
 
-            {whatsapp && whatsappLink && (
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between py-4 hover:text-green-600 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-green-600 transition-colors" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('whatsapp')}</p>
-                    <p className="text-sm font-medium text-foreground">+{whatsapp}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-green-600 group-hover:translate-x-0.5 transition-all duration-200" />
-              </a>
-            )}
 
-            {phone && (
-              <a
-                href={`tel:${phone}`}
-                className="group flex items-center justify-between py-4 hover:text-foreground/70 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('phone')}</p>
-                    <p className="text-sm font-medium text-foreground">{phone}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </a>
-            )}
 
-            {email && (
-              <a
-                href={`mailto:${email}`}
-                className="group flex items-center justify-between py-4 hover:text-foreground/70 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('email')}</p>
-                    <p className="text-sm font-medium text-foreground">{email}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </a>
-            )}
+      {/* LAYER 3: Map + Form dalam card 50/50 */}
+      {showMap && (
+        <div className="rounded-xl overflow-hidden border border-border grid grid-cols-1 md:grid-cols-2">
 
-            {address && (
-              <div className="flex items-start gap-3 py-4">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">{tHeader('address')}</p>
-                  <p className="text-sm font-medium text-foreground">{address}</p>
-                </div>
-              </div>
-            )}
-
-            {showForm && (
-              <form onSubmit={handleSubmit} className="space-y-5 pt-6">
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">{t('sectionEyebrow')}</p>
-                <div className="space-y-1.5">
-                  <Label htmlFor="block1-name" className="text-xs font-medium">{tForm('nameLabel')}</Label>
-                  <Input
-                    id="block1-name"
-                    placeholder={tForm('namePlaceholder')}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="block1-email" className="text-xs font-medium">{tForm('emailLabel')}</Label>
-                  <Input
-                    id="block1-email"
-                    type="email"
-                    placeholder={tForm('emailPlaceholder')}
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="block1-message" className="text-xs font-medium">{tForm('messageLabel')}</Label>
-                  <Textarea
-                    id="block1-message"
-                    placeholder={tForm('messagePlaceholder')}
-                    rows={4}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full gap-2">
-                  <Send className="h-4 w-4" />
-                  {tForm('sendButton')}
-                </Button>
-              </form>
-            )}
-          </div>
-        )}
-
-        {showMap && (
-          <div className="rounded-xl overflow-hidden border border-border">
+          {/* Kiri: iframe map — square */}
+          <div className="aspect-square w-full">
             <iframe
               src={contactMapUrl}
               width="100%"
-              height="400"
+              height="100%"
               style={{ border: 0, display: 'block' }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Google Maps"
             />
-            {hasMapOverlay && (
-              <div className="flex flex-col gap-2 px-5 py-4 border-t border-border text-sm text-muted-foreground">
-                {address && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>{address}</span>
-                  </div>
-                )}
-                {phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 shrink-0" />
-                    <span>{phone}</span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-        )}
+
+          {/* Kanan: form */}
+          {showForm && (
+            <form onSubmit={handleSubmit} className="p-6 flex flex-col justify-center space-y-5">
+              <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
+                {t('sectionEyebrow')}
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="block1-name" className="text-xs font-medium">
+                  {tForm('nameLabel')}
+                </Label>
+                <Input
+                  id="block1-name"
+                  placeholder={tForm('namePlaceholder')}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="block1-email" className="text-xs font-medium">
+                  {tForm('emailLabel')}
+                </Label>
+                <Input
+                  id="block1-email"
+                  type="email"
+                  placeholder={tForm('emailPlaceholder')}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="block1-message" className="text-xs font-medium">
+                  {tForm('messageLabel')}
+                </Label>
+                <Textarea
+                  id="block1-message"
+                  placeholder={tForm('messagePlaceholder')}
+                  rows={4}
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="mt-2 inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-primary text-primary-foreground text-sm font-semibold tracking-wide hover:bg-primary/85 transition-colors rounded-full"
+              >
+                <MessageCircle className="h-4 w-4" />
+                {tForm('sendButton')}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {/* Contact info rows — di bawah card, 2 kolom 50/50 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 border-y border-border divide-y md:divide-y-0 md:divide-x divide-border">
+
+        {/* Kiri: WhatsApp + Phone */}
+        <div className="divide-y divide-border">
+          {whatsapp && whatsappLink && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between px-5 py-4 hover:text-green-600 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-green-600 transition-colors shrink-0" />
+                <div>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('whatsapp')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">+{whatsapp}</p>
+                </div>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-green-600 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
+            </a>
+          )}
+
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('phone')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">{phone}</p>
+                </div>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+            </a>
+          )}
+        </div>
+
+        {/* Kanan: Email + Address */}
+        <div className="divide-y divide-border">
+          {email && (
+            <a
+              href={`mailto:${email}`}
+              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('email')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">{email}</p>
+                </div>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+            </a>
+          )}
+
+          {address && (
+            <div className="flex items-start gap-3 px-5 py-4">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                  {tHeader('address')}
+                </p>
+                <p className="text-sm font-medium text-foreground">{address}</p>
+              </div>
+            </div>
+          )}
+        </div>
 
       </div>
+
     </section>
   );
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// BLOCK 1 — Editorial Minimal — FULL LANDING TEMPLATE
-// Hero → Contact → (StoreFooter rendered by layout)
-// ────────────────────────────────────────────────────────────────────────────
 
 export function Block1(props: Block1Props) {
   return (
@@ -659,7 +580,6 @@ export function Block1(props: Block1Props) {
         address={props.address}
         contactMapUrl={props.contactMapUrl}
         contactShowMap={props.contactShowMap}
-        contactShowForm={props.contactShowForm}
         storeName={props.storeName}
       />
     </>

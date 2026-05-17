@@ -43,7 +43,7 @@ import { useTenant } from '@/hooks/shared/use-tenant';
 import { useLandingConfig } from '@/hooks/dashboard/use-landing-config';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { hasProBlocks } from '@/components/dashboard/studio/block-options';
-import { useBuilderStore } from '@/stores/use-builder-store';
+import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import {
   AlertDialog,
   AlertDialogAction,

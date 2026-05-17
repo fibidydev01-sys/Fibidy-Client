@@ -2,6 +2,14 @@
 // FILE: src/types/landing.ts
 // PURPOSE: Landing page type definitions (storefront-verified fields only)
 //
+// [v4 cleanup — 2026-05-15]
+//   - Removed `ProductsBlock`, `ProductsSectionConfig`, `ProductsSection`
+//   - Removed `products?: ProductsSection` from `TenantLandingConfig`
+//   - Rationale: products-on-landing was deprecated in Phase 3 (2026-05-13).
+//     `store/[slug]/page.tsx` only gates on `hero.enabled`. Products live
+//     at `/products` page only. The `products` branch was persisted in DB
+//     but never consumed by any render path.
+//
 // [BLOCK MIGRATION — 2026-05-13]
 //   - Renamed `HeroBlock` → `BlockId`
 //   - Accepts both `block${n}` (new) and `hero${n}` (legacy) as union type
@@ -10,6 +18,12 @@
 //
 // Backward-compat: legacy data in DB (e.g. "hero1") still validates and
 // renders correctly. Studio writes new value "block1" on next save.
+//
+// Note: `hero.title`, `hero.subtitle`, `hero.config.ctaText`, and
+// `hero.config.ctaLink` are RETAINED in `HeroSection` / `HeroSectionConfig`
+// because the block dispatcher uses them as a fallback chain when the
+// tenant-root fields are empty. They have no Studio UI but are still
+// rendered if present in legacy data.
 // ============================================================================
 
 // ==========================================
@@ -35,8 +49,6 @@ type LegacyBlockId = `hero${number}`;
  */
 export type BlockId = NewBlockId | LegacyBlockId;
 
-type ProductsBlock = `products${number}`;
-
 // ==========================================
 // SECTION CONFIG INTERFACES
 // ==========================================
@@ -44,11 +56,6 @@ type ProductsBlock = `products${number}`;
 interface HeroSectionConfig {
   ctaText?: string;
   ctaLink?: string;
-}
-
-interface ProductsSectionConfig {
-  limit?: number;
-  showViewAll?: boolean;
 }
 
 // ==========================================
@@ -64,12 +71,6 @@ export interface HeroSection {
   config?: HeroSectionConfig;
 }
 
-interface ProductsSection {
-  enabled?: boolean;
-  block?: ProductsBlock;
-  config?: ProductsSectionConfig;
-}
-
 // ==========================================
 // MAIN CONFIG
 // ==========================================
@@ -77,5 +78,4 @@ interface ProductsSection {
 export interface TenantLandingConfig {
   enabled: boolean;
   hero?: HeroSection;
-  products?: ProductsSection;
 }

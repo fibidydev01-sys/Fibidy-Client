@@ -13,16 +13,21 @@ import type { PublicTenant } from '@/types/tenant';
 // STORE LAYOUT
 // File: src/app/[locale]/store/[slug]/layout.tsx
 //
+// [v4 cleanup — 2026-05-15]
+//   - Removed `metaTitle` / `metaDescription` from createTenantMetadata
+//     payload. Those fields had no Prisma column, no server DTO, and no
+//     server SELECT entry — they were always undefined at runtime, so
+//     `createTenantMetadata` already fell through to defaults built from
+//     `name` + `description`. Stopping the pass keeps the contract honest.
+//
+//     If per-tenant SEO override is needed in the future, add columns to
+//     Prisma, DTO, and SELECT shape first, then reintroduce here.
+//
 // [i18n FIX — 2026-04-19]
 // The fallback metadata (shown when the tenant isn't found / slug 404s)
 // now pulls its copy from `store.metadata.notFoundTitle` and
 // `store.metadata.notFoundDescription` via `getTranslations`, so the
 // 404 page tab title respects the current locale.
-//
-// The happy-path `createTenantMetadata()` call is untouched — that helper
-// already composes title/description from tenant-authored fields
-// (`tenant.metaTitle`, `tenant.metaDescription`), which are user content
-// and shouldn't be translated by the platform.
 //
 // `robots: { index: false, follow: false }` on the 404 fallback stays
 // hardcoded — robots directives are protocol-level, not user-facing.
@@ -68,8 +73,6 @@ export async function generateMetadata({
       description: tenant.description,
       logo: tenant.logo,
       heroBackgroundImage: tenant.heroBackgroundImage,
-      metaTitle: tenant.metaTitle,
-      metaDescription: tenant.metaDescription,
     },
   });
 }

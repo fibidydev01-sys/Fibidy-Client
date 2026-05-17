@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
 import { useIsAuthenticated } from '@/stores/auth-store';
-import { useBuilderStore } from '@/stores/use-builder-store';
+import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import { SaveStatusPill } from '@/components/dashboard/studio/save-status-pill';
 import { cn } from '@/lib/shared/utils';
 import type { PublicTenant } from '@/types/tenant';

@@ -1,7 +1,15 @@
 // ============================================================================
 // FILE: src/types/tenant.ts
-// PURPOSE: Tenant type definitions — v3 unified
-// v3: paymentMethods + shippingMethods REMOVED from schema
+// PURPOSE: Tenant type definitions — v4 cleanup
+//
+// v4 (2026-05-15): dropped dead fields
+//   - currency       (was phantom: required on FE, never returned by server SELECT)
+//   - metaTitle      (was phantom: read for SEO but no DB column, no DTO)
+//   - metaDescription (was phantom: same as metaTitle)
+//   - heroCtaLink    (was dead: FE wrote it, server silently dropped, render
+//                     hardcodes '/products' in block dispatcher)
+//
+// v3 (prior): paymentMethods + shippingMethods REMOVED from schema
 // ============================================================================
 
 import type { TenantLandingConfig } from './landing';
@@ -44,7 +52,6 @@ export interface FeatureItem {
 
 // ==========================================
 // BASE TENANT (shared between Tenant & PublicTenant)
-// v3: paymentMethods + shippingMethods REMOVED
 // ==========================================
 
 interface BaseTenant {
@@ -62,16 +69,10 @@ interface BaseTenant {
   theme?: { primaryColor?: string };
   landingConfig?: TenantLandingConfig;
   socialLinks?: SocialLinks;
-  // Currency (display only)
-  currency: string;
-  // SEO
-  metaTitle?: string;
-  metaDescription?: string;
   // Hero Section
   heroTitle?: string;
   heroSubtitle?: string;
   heroCtaText?: string;
-  heroCtaLink?: string;
   heroBackgroundImage?: string;
   // About Section
   aboutFeatures?: FeatureItem[];
@@ -104,7 +105,6 @@ export interface PublicTenant extends BaseTenant {
 
 // ==========================================
 // UPDATE TENANT INPUT
-// v3: paymentMethods + shippingMethods REMOVED
 // ==========================================
 
 export interface UpdateTenantInput {
@@ -120,7 +120,6 @@ export interface UpdateTenantInput {
   heroTitle?: string;
   heroSubtitle?: string;
   heroCtaText?: string;
-  heroCtaLink?: string;
   heroBackgroundImage?: string;
   aboutFeatures?: FeatureItem[];
   contactTitle?: string;
@@ -151,7 +150,6 @@ export interface HeroFormData {
   heroTitle: string;
   heroSubtitle: string;
   heroCtaText: string;
-  heroCtaLink: string;
   heroBackgroundImage: string;
   logo: string;
   primaryColor: string;

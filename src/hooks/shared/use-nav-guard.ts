@@ -10,7 +10,7 @@
 // ==========================================
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/stores/use-builder-store';
+import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 
 interface UseNavGuardReturn {
   handleNavClick: (e: React.MouseEvent, href: string) => void;

@@ -2,6 +2,14 @@
 // FILE: src/hooks/dashboard/use-landing-config.ts
 // PURPOSE: Custom hook for managing Landing Page configuration
 //
+// [v4 cleanup — 2026-05-15]
+//   - Removed `products` section from DEFAULT_LANDING_CONFIG and
+//     `mergeLandingConfig()`. Products-on-landing was deprecated in Phase 3
+//     (`store/[slug]/page.tsx` only gates on `hero.enabled`). The `products`
+//     branch was being persisted to DB on save and reset, but never consumed
+//     by any render path. Removing it keeps the JSON payload tight and
+//     removes a misleading branch from the type contract.
+//
 // [i18n FIX — 2026-04-19]
 // Three categories of change:
 //
@@ -56,13 +64,6 @@ const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
       ctaLink: '/products',
     },
   },
-  products: {
-    enabled: false,
-    config: {
-      limit: 8,
-      showViewAll: false,
-    },
-  },
 };
 
 // ============================================================================
@@ -100,7 +101,6 @@ function mergeLandingConfig(
   tenant?: Partial<TenantLandingConfig> | null
 ): TenantLandingConfig {
   const dHero = DEFAULT_LANDING_CONFIG.hero!;
-  const dProducts = DEFAULT_LANDING_CONFIG.products!;
 
   if (!tenant) return deepClone(DEFAULT_LANDING_CONFIG);
 
@@ -112,11 +112,6 @@ function mergeLandingConfig(
       subtitle: tenant.hero?.subtitle ?? dHero.subtitle,
       block: tenant.hero?.block,
       config: { ...dHero.config, ...(tenant.hero?.config ?? {}) },
-    },
-    products: {
-      enabled: tenant.products?.enabled ?? dProducts.enabled,
-      block: tenant.products?.block,
-      config: { ...dProducts.config, ...(tenant.products?.config ?? {}) },
     },
   };
 }

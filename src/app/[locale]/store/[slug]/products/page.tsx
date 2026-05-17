@@ -4,10 +4,10 @@ import { getTranslations } from 'next-intl/server';
 import type { Product } from '@/types/product';
 import type { PaginatedResponse } from '@/types/api';
 import { productsApi } from '@/lib/api/products';
-import { CategoryList } from '@/components/store/showcase/category-list';
-import { ProductFilters } from '@/components/store/showcase/product-filters';
-import { ProductGrid } from '@/components/store/showcase/product-grid';
-import { ProductPagination } from '@/components/store/showcase/product-pagination';
+import { CategoryList } from '@/components/store/product/category-list';
+import { ProductFilters } from '@/components/store/product/product-filters';
+import { ProductGrid } from '@/components/store/product/product-grid';
+import { ProductPagination } from '@/components/store/product/product-pagination';
 import { ProductGridSkeleton } from '@/components/layout/store/store-skeleton';
 
 // ==========================================
