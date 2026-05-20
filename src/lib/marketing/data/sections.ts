@@ -28,15 +28,15 @@
 //   Removing = delete entry. Adding = add entry + add to registry.
 //   No JSX edits anywhere.
 //
-// Section order rationale (full page, for reference when restoring):
+// Section order rationale (full page — updated post-reorder):
 //   announcement   → optional banner
-//   hero           → grab attention, communicate value in <8s
+//   storeBuilder   → conversion engine — try it, pre-fill, sign up (MOVED TO TOP)
+//   hero           → grab attention, communicate value in <8s (MOVED BELOW storeBuilder)
 //   problem        → resonance, "this is me"
 //   features       → solution overview (Magic UI bento)
 //   scale          → multi-tenant proof point
 //   howItWorks     → Stripe-style 3-step narrative
 //   pricing        → objection killer #1 — affordability
-//   storeBuilder   → conversion engine — try it, pre-fill, sign up
 //   faq            → objection killer #2 — handle remaining doubts
 //   finalCta       → close
 // ==========================================
@@ -47,16 +47,22 @@ import type { SectionKey } from '@/types/marketing';
 // FULL: every marketing section in canonical render order.
 // Pre-defined here so MINIMAL_SECTIONS / ACTIVE_SECTIONS / future
 // experimental subsets all reference one source of truth for ordering.
+//
+// ORDER CHANGE (May 2026):
+//   storeBuilder moved to position 2 (after announcement).
+//   hero moved to position 3 (after storeBuilder).
+//   Rationale: lead with the conversion engine, let hero serve as
+//   an orienting section for visitors who scroll past the builder.
 // ──────────────────────────────────────────────────────────────────
 export const FULL_SECTIONS: readonly SectionKey[] = [
   'announcement',
+  'storeBuilder',
   'hero',
   'problem',
   'features',
   'scale',
   'howItWorks',
   'pricing',
-  'storeBuilder',
   'faq',
   'finalCta',
 ] as const;
@@ -72,12 +78,12 @@ export const MINIMAL_SECTIONS: readonly SectionKey[] = [
 ] as const;
 
 // ──────────────────────────────────────────────────────────────────
-// ACTIVE: the array page.tsx renders. Currently MINIMAL_SECTIONS.
+// ACTIVE: the array page.tsx renders. Now set to FULL_SECTIONS.
 //
-// To restore full page composition, swap the right-hand side to
-// FULL_SECTIONS — a single-token edit, no other file touched.
+// To revert to minimal mode, swap the right-hand side back to
+// MINIMAL_SECTIONS — a single-token edit, no other file touched.
 // ──────────────────────────────────────────────────────────────────
-export const ACTIVE_SECTIONS: readonly SectionKey[] = MINIMAL_SECTIONS;
+export const ACTIVE_SECTIONS: readonly SectionKey[] = FULL_SECTIONS;
 
 // ──────────────────────────────────────────────────────────────────
 // LEGACY: DEFAULT_SECTIONS retained as alias for backward compat.
