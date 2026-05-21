@@ -4,42 +4,38 @@
 // SUBDOMAIN INPUT (BUILDER)
 // File: src/components/marketing/sections/store-builder/subdomain-input.tsx
 //
-// [PHASE 3 REFACTOR — May 2026]
-// Moved from src/components/marketing/store-builder/subdomain-input.tsx
-//   → src/components/marketing/sections/store-builder/subdomain-input.tsx
-// Behavior preserved verbatim. Only path changed.
+// [PHASE 1 SLIM — May 2026 — category gate removed]
 //
-// ──────────────────────────────────────────────────────────────────
+// CHANGED:
+//   - The category gate is GONE. Previously this input soft-blocked
+//     typing past 2 chars until a category was picked, fired a sonner
+//     toast, and auto-triggered a NextStep spotlight via
+//     onCategoryRequested. With CategoryPicker removed from the
+//     builder, none of that applies.
+//   - Removed props: `categorySelected`, `onCategoryRequested`.
+//   - Removed: CATEGORY_GATE_THRESHOLD, TOAST_DEDUP_ID, the toast
+//     import, and the soft-block branch in handleChange.
+//   - The API availability check no longer guards on categorySelected —
+//     it runs whenever format + reserved checks pass.
 //
-// Phase 5 polish v2 (May 2026 — micro-interaction gate):
-//   - Input stays fully interactive — no `disabled` state.
-//   - 3rd character without category selected → silent cap at 2
-//     chars + sonner toast.
+// PRESERVED:
+//   - Local sanitize → format check → reserved-list check → debounced
+//     availability roundtrip.
+//   - Status union, status icon, helper text, char counter.
+//   - Composite address bar (https:// … .fibidy.com) styling.
 //
-// Phase 5 polish v3 (May 2026 — NextStep onboarding integration):
-//   - Toast had a "Show me" action button that fired a NextStep tour
-//     spotlighting CategoryPicker.
-//
-// Phase 5 polish v4 (May 2026 — drop interaction):
-//
-//   CHANGED: toast no longer carries an action button. Instead, the
-//   onCategoryRequested callback fires AUTOMATICALLY whenever the
-//   threshold is breached. Parent wires it to startNextStep(), the
-//   tour appears alongside the toast and auto-dismisses after ~2s.
-//   Zero clicks needed — the spotlight is informational, not
-//   interactive.
-//
-//   CEO direction: "GA PERLU ADA INTERAKSI" — the goal is to nudge
-//   the user toward the picker without making them work for it.
-//
-// All other behavior preserved: local sanitize → format check →
-// reserved-list check → debounced availability roundtrip.
+// [BORDER FIX — May 2026]
+// Address bar wrapper border diperkuat dari `border border-input`
+// (hampir invisible di light mode) ke `border-2 border-foreground/25`.
+// Alasan: `border-input` = oklch(0.922 0.01 340) → putih pucat di
+// background putih. `border-foreground/25` jauh lebih visible karena
+// mengikuti foreground token (hitam 25% di light, putih 25% di dark).
+// focus-within state tetap pakai border-primary seperti sebelumnya.
 // ==========================================
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2, Check, X } from 'lucide-react';
-import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 import { useCheckSlug } from '@/hooks/auth/use-auth';
@@ -49,14 +45,6 @@ import {
 } from '@/lib/constants/shared/slug.constants';
 import { isReservedSubdomain } from '@/lib/constants/shared/reserved-subdomains';
 import { cn } from '@/lib/shared/utils';
-
-// ==========================================
-// CONSTANTS
-// ==========================================
-
-/** Soft-block threshold — user can type up to (this - 1) chars without a category. */
-const CATEGORY_GATE_THRESHOLD = 3;
-const TOAST_DEDUP_ID = 'subdomain-needs-category';
 
 // ==========================================
 // STATUS UNION
@@ -79,19 +67,6 @@ interface SubdomainInputProps {
   value: string;
   onChange: (next: string) => void;
   onStatusChange: (status: SubdomainStatus) => void;
-  /** Whether the user has picked a category — gates typing past 2 chars. */
-  categorySelected: boolean;
-  /**
-   * Optional callback invoked AUTOMATICALLY whenever the user attempts
-   * to type past the threshold without picking a category.
-   *
-   * v4: was previously triggered by a "Show me" toast action button
-   * (interaction-gated). Now it fires immediately alongside the toast
-   * — no click needed. Parent wires this to NextStep.startNextStep()
-   * and adds a setTimeout to closeNextStep() after ~2s for an
-   * auto-dismissing flash spotlight.
-   */
-  onCategoryRequested?: () => void;
 }
 
 // ==========================================
@@ -102,8 +77,6 @@ export function SubdomainInput({
   value,
   onChange,
   onStatusChange,
-  categorySelected,
-  onCategoryRequested,
 }: SubdomainInputProps) {
   const t = useTranslations('marketing.storeBuilder.subdomainStep');
 
@@ -134,14 +107,8 @@ export function SubdomainInput({
     }
   }
 
-  // ── Fire API check (only when categorySelected AND validation passes) ──
+  // ── Fire API check (when validation passes) ─────────────────────
   useEffect(() => {
-    // Defensive: if the gate was bypassed somehow, never roundtrip
-    // without a category. Keeps BE throttle quota intact.
-    if (!categorySelected) {
-      reset();
-      return;
-    }
     if (debouncedSlug.length < 3) {
       reset();
       return;
@@ -156,7 +123,7 @@ export function SubdomainInput({
       return;
     }
     checkSlug(debouncedSlug);
-  }, [debouncedSlug, categorySelected, checkSlug, reset]);
+  }, [debouncedSlug, checkSlug, reset]);
 
   // ── Notify parent on status change ──────────────────────────────
   useEffect(() => {
@@ -164,42 +131,18 @@ export function SubdomainInput({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.kind]);
 
-  // ── Sanitize + soft-block ───────────────────────────────────────
+  // ── Sanitize ────────────────────────────────────────────────────
   const handleChange = (raw: string) => {
     const cleaned = raw
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, '')
       .slice(0, SLUG_MAX_LENGTH);
 
-    // Soft-block: typing past 2 chars without a category fires both
-    // the toast AND the onboarding spotlight (v4 — no interaction).
-    // Only triggers on actual NEW character entry (not on backspace).
-    if (!categorySelected && cleaned.length >= CATEGORY_GATE_THRESHOLD) {
-      const isAddingChars = cleaned.length > value.length;
-
-      if (isAddingChars) {
-        // Toast — informational only, no action button in v4
-        toast.warning(t('states.toastNeedCategory'), {
-          id: TOAST_DEDUP_ID,
-          duration: 2500,
-        });
-
-        // Onboarding spotlight — fires automatically. Parent gates
-        // re-fires via isNextStepVisible to avoid stacking.
-        onCategoryRequested?.();
-      }
-
-      // Cap value at threshold-1 chars regardless
-      onChange(cleaned.slice(0, CATEGORY_GATE_THRESHOLD - 1));
-      return;
-    }
-
     onChange(cleaned);
   };
 
   // ── Right-end status icon ───────────────────────────────────────
   const StatusIcon = (() => {
-    if (!categorySelected) return null;
     switch (status.kind) {
       case 'checking':
         return (
@@ -217,10 +160,6 @@ export function SubdomainInput({
 
   // ── Helper text + tone ──────────────────────────────────────────
   const statusMessage = (() => {
-    // No category → always show the gate hint
-    if (!categorySelected) {
-      return { text: t('states.lockedHint'), tone: 'muted' as const };
-    }
     switch (status.kind) {
       case 'tooShort':
         return { text: t('states.tooShort'), tone: 'muted' as const };
@@ -245,13 +184,10 @@ export function SubdomainInput({
         {t('label')}
       </p>
 
-      {/* Composite address bar — fully interactive, no disabled state */}
-      <div className="mt-3 flex items-stretch overflow-hidden rounded-lg border border-input bg-background transition-all duration-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
+      {/* Composite address bar */}
+      <div className="mt-3 flex items-stretch overflow-hidden rounded-lg border-2 border-zinc-300 dark:border-zinc-600 bg-background transition-all duration-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
         <span className="hidden items-center bg-muted/40 px-3 text-sm text-muted-foreground sm:inline-flex">
           https://
-        </span>
-        <span className="inline-flex items-center bg-muted/40 px-2 text-sm text-muted-foreground sm:hidden">
-          /
         </span>
 
         <div className="relative flex-1">
@@ -265,7 +201,7 @@ export function SubdomainInput({
             placeholder={t('placeholder')}
             value={value}
             onChange={(e) => handleChange(e.target.value)}
-            className="h-11 rounded-none border-0 px-3 text-sm shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0"
+            className="h-11 rounded-none border-0 px-3 text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
             maxLength={SLUG_MAX_LENGTH}
             aria-label={t('label')}
           />
@@ -288,7 +224,7 @@ export function SubdomainInput({
             'text-xs leading-tight transition-colors',
             statusMessage?.tone === 'destructive' && 'text-destructive',
             statusMessage?.tone === 'success' &&
-              'text-emerald-600 dark:text-emerald-400',
+            'text-emerald-600 dark:text-emerald-400',
             statusMessage?.tone === 'muted' && 'text-muted-foreground',
             !statusMessage && 'text-muted-foreground/0',
           )}

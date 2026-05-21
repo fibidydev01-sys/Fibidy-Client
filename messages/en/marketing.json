@@ -142,7 +142,7 @@
       "menuClose": "Close menu"
     },
     "hero": {
-      "eyebrow": "Built for Indonesian sellers",
+      "eyebrow": "Try it first, sign up later",
       "headline": "Open your store. Sell today.",
       "headlinePrefix": "Open your",
       "headlineMorph": [
@@ -155,7 +155,8 @@
       "subheadline": "Build your catalog, share your link, and take orders on WhatsApp.",
       "ctaPrimary": "Open your store",
       "ctaSecondary": "See the demo",
-      "trustLine": "Free forever to start · 5 minutes to launch · WhatsApp-first ordering"
+      "trustLine": "Free forever to start · 5 minutes to launch · WhatsApp-first ordering",
+      "videoPlaceholder": "Demo coming soon"
     },
     "problem": {
       "eyebrow": "We get it",
@@ -196,21 +197,21 @@
       }
     },
     "scale": {
-      "eyebrow": "Built to scale",
-      "headline": "Built to scale with you.",
-      "subheadline": "From your first sale to your hundredth store. Fibidy's infrastructure grows alongside you — no servers to manage, no certificates to renew, no surprises.",
+      "eyebrow": "Real stores, real sellers",
+      "headline": "Sellers are already open for business.",
+      "subheadline": "From coffee roasters to handmade studios — these are live Fibidy storefronts, each on its own address, each secured by default. Yours can be next.",
       "features": {
         "infiniteDomains": {
-          "title": "Unlimited domains",
-          "description": "Run as many storefronts as you need on Fibidy subdomains, and bring your own custom domain when you're ready. Every store is secured with free SSL, automatically."
+          "title": "One link per store",
+          "description": "Every seller gets a clean your-name.fibidy.com — or brings their own .com or .id. Run as many storefronts as you grow into."
         },
         "instantSsl": {
-          "title": "Instant SSL certificates",
-          "description": "Free SSL for every storefront in under five seconds — including your custom domains. HTTPS is active from the moment you press launch."
+          "title": "Secure from minute one",
+          "description": "Every store above is HTTPS by default — free SSL the second it goes live, custom domains included. Nothing to set up."
         },
         "zeroMaintenance": {
-          "title": "Zero maintenance",
-          "description": "Never worry about renewing a certificate, patching a server, or paying for hosting. We handle the boring parts so you can focus on selling."
+          "title": "Nothing to maintain",
+          "description": "No servers, no certificates to renew, no hosting bills. Sellers focus on selling; we keep the lights on."
         }
       }
     },
@@ -245,19 +246,8 @@
     },
     "storeBuilder": {
       "eyebrow": "Try it first, sign up later",
-      "headline": "Your store, in 30 seconds. See it live.",
-      "subheadline": "Pick a category, claim your address, watch your storefront build itself. Sign up only when you love what you see.",
-      "categoryStep": {
-        "label": "What are you selling?",
-        "categories": {
-          "restaurant": "Restaurant",
-          "coffeeshop": "Coffee Shop",
-          "fashion": "Fashion",
-          "beautySalon": "Beauty Salon",
-          "cleaning": "Cleaning Service",
-          "other": "Other"
-        }
-      },
+      "headline": "Grab your link before someone else does.",
+      "subheadline": "Claim your free your-name.fibidy.com address now. It's yours the moment you sign up — about a minute, no card needed.",
       "subdomainStep": {
         "label": "Your store address",
         "placeholder": "your-store",
@@ -268,67 +258,15 @@
           "taken": "Already taken. Try one of these:",
           "invalid": "Lowercase letters, numbers, and hyphens only.",
           "tooShort": "At least 3 characters.",
-          "reserved": "This name is reserved by the system.",
-          "lockedHint": "Pick a category first to claim your address.",
-          "toastNeedCategory": "Pick a category first to continue"
+          "reserved": "This name is reserved by the system."
         },
         "suggestionLabel": "Try one of these:"
-      },
-      "preview": {
-        "placeholderSlug": "your-store",
-        "placeholderName": "Your Store",
-        "placeholderCategory": "Pick a category",
-        "placeholderEyebrow": "Live preview",
-        "navHome": "Home",
-        "navProducts": "Products",
-        "navAbout": "About",
-        "storeTagline": "Order anything via WhatsApp.",
-        "ctaButton": "Order via WhatsApp",
-        "morph": [
-          "Open your cafe.",
-          "Open your salon.",
-          "Open your studio.",
-          "Open your kitchen.",
-          "Open your store."
-        ],
-        "banners": {
-          "restaurant": {
-            "eyebrow": "Restaurant",
-            "tagline": "Today's specials, delivered straight to your table or your door."
-          },
-          "coffeeshop": {
-            "eyebrow": "Coffee Shop",
-            "tagline": "Single-origin beans, brewed fresh and ready to ship."
-          },
-          "fashion": {
-            "eyebrow": "Fashion",
-            "tagline": "New drops every week, styled for the way you actually live."
-          },
-          "beautySalon": {
-            "eyebrow": "Beauty Salon",
-            "tagline": "Book your next look — hair, nails, glow, all in one place."
-          },
-          "cleaning": {
-            "eyebrow": "Cleaning Service",
-            "tagline": "A spotless home, on demand. Book a slot in under a minute."
-          },
-          "retail": {
-            "eyebrow": "Retail Shop",
-            "tagline": "Daily essentials, your favorite picks — delivered fast."
-          }
-        }
       },
       "agreement": {
         "prefix": "I agree to the",
         "termsLink": "Terms of Service",
         "and": "and",
         "privacyLink": "Privacy Policy"
-      },
-      "onboarding": {
-        "categoryGate": {
-          "title": "Pick a category first",
-          "content": "Then we can claim your store address."
-        }
       },
       "ctaPrimary": "Open your store now",
       "trustLine": "Sign up in 2 minutes · Quick and easy"

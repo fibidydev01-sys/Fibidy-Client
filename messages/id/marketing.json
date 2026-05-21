@@ -142,7 +142,7 @@
       "menuClose": "Tutup menu"
     },
     "hero": {
-      "eyebrow": "Dibuat untuk UMKM Indonesia",
+      "eyebrow": "Coba dulu, daftar kemudian",
       "headline": "Buka toko, langsung jualan.",
       "headlinePrefix": "Buka",
       "headlineMorph": [
@@ -155,7 +155,8 @@
       "subheadline": "Susun katalog, share link toko, terima orderan langsung di WhatsApp.",
       "ctaPrimary": "Buka Toko Gratis",
       "ctaSecondary": "Lihat demo",
-      "trustLine": "Gratis selamanya buat mulai · Bikin toko 5 menit · Jualan via WhatsApp"
+      "trustLine": "Gratis selamanya buat mulai · Bikin toko 5 menit · Jualan via WhatsApp",
+      "videoPlaceholder": "Demo segera hadir"
     },
     "problem": {
       "eyebrow": "Kami paham",
@@ -196,21 +197,21 @@
       }
     },
     "scale": {
-      "eyebrow": "Dibuat buat tumbuh",
-      "headline": "Tumbuh bareng kamu.",
-      "subheadline": "Dari penjualan pertama sampai toko ke-seratus. Infrastruktur Fibidy tumbuh barengan kamu — tanpa server yang harus diurus, tanpa sertifikat yang harus diperpanjang, tanpa kejutan.",
+      "eyebrow": "Toko nyata, seller nyata",
+      "headline": "Seller-seller ini udah buka toko.",
+      "subheadline": "Dari roaster kopi sampai studio handmade — ini storefront Fibidy yang beneran online, masing-masing punya alamat sendiri, aman by default. Toko kamu bisa jadi yang berikutnya.",
       "features": {
         "infiniteDomains": {
-          "title": "Domain tanpa batas",
-          "description": "Buka berapa pun toko di subdomain Fibidy, atau pakai custom domain sendiri kalau udah siap. Setiap toko aman dengan SSL gratis yang aktif otomatis."
+          "title": "Satu link per toko",
+          "description": "Tiap seller dapat alamat rapi nama-kamu.fibidy.com — atau pakai .com / .id sendiri. Buka sebanyak toko yang kamu butuhkan seiring tumbuh."
         },
         "instantSsl": {
-          "title": "SSL instan",
-          "description": "SSL gratis untuk setiap toko dalam hitungan detik — termasuk custom domain kamu. HTTPS aktif sejak detik kamu launch."
+          "title": "Aman sejak menit pertama",
+          "description": "Semua toko di atas HTTPS by default — SSL gratis aktif begitu launch, termasuk custom domain. Nggak ada yang perlu disetel."
         },
         "zeroMaintenance": {
           "title": "Tanpa perawatan",
-          "description": "Lupakan urusan perpanjangan sertifikat, patch server, atau bayar hosting. Bagian teknisnya kami yang pegang — kamu fokus jualan aja."
+          "description": "Nggak ada server, nggak ada sertifikat yang harus diperpanjang, nggak ada tagihan hosting. Seller fokus jualan; sisanya kami yang urus."
         }
       }
     },
@@ -245,19 +246,8 @@
     },
     "storeBuilder": {
       "eyebrow": "Coba dulu, daftar kemudian",
-      "headline": "Toko kamu, dalam 30 detik. Lihat sendiri.",
-      "subheadline": "Pilih kategori, klaim alamat toko kamu, lihat tokonya kebentuk sendiri. Daftar pas kamu udah suka.",
-      "categoryStep": {
-        "label": "Kamu jualan apa?",
-        "categories": {
-          "restaurant": "Restoran",
-          "coffeeshop": "Coffee Shop",
-          "fashion": "Fashion",
-          "beautySalon": "Beauty Salon",
-          "cleaning": "Jasa Cleaning",
-          "other": "Lainnya"
-        }
-      },
+      "headline": "Amankan link tokomu sebelum keduluan.",
+      "subheadline": "Klaim alamat gratis nama-kamu.fibidy.com sekarang. Jadi milikmu begitu daftar — sekitar semenit, tanpa kartu.",
       "subdomainStep": {
         "label": "Alamat toko kamu",
         "placeholder": "toko-kamu",
@@ -268,67 +258,15 @@
           "taken": "Sudah dipakai. Coba salah satu ini:",
           "invalid": "Hanya huruf kecil, angka, dan strip (-).",
           "tooShort": "Minimal 3 karakter.",
-          "reserved": "Nama ini di-reserve sistem.",
-          "lockedHint": "Pilih kategori dulu buat klaim alamat toko kamu.",
-          "toastNeedCategory": "Pilih kategori dulu untuk lanjut"
+          "reserved": "Nama ini di-reserve sistem."
         },
         "suggestionLabel": "Coba salah satu ini:"
-      },
-      "preview": {
-        "placeholderSlug": "toko-kamu",
-        "placeholderName": "Toko Kamu",
-        "placeholderCategory": "Pilih kategori",
-        "placeholderEyebrow": "Preview langsung",
-        "navHome": "Beranda",
-        "navProducts": "Produk",
-        "navAbout": "Tentang",
-        "storeTagline": "Order apa aja via WhatsApp.",
-        "ctaButton": "Order via WhatsApp",
-        "morph": [
-          "Buka kedai kopimu.",
-          "Buka salonmu.",
-          "Buka studiomu.",
-          "Buka warungmu.",
-          "Buka tokomu."
-        ],
-        "banners": {
-          "restaurant": {
-            "eyebrow": "Restoran",
-            "tagline": "Menu hari ini, langsung sampai meja kamu atau diantar ke rumah."
-          },
-          "coffeeshop": {
-            "eyebrow": "Coffee Shop",
-            "tagline": "Biji single-origin, di-roast fresh dan siap dikirim."
-          },
-          "fashion": {
-            "eyebrow": "Fashion",
-            "tagline": "Drop baru tiap minggu, gaya yang beneran kamu pakai sehari-hari."
-          },
-          "beautySalon": {
-            "eyebrow": "Beauty Salon",
-            "tagline": "Booking treatment kamu — rambut, kuku, glow, semua di satu tempat."
-          },
-          "cleaning": {
-            "eyebrow": "Jasa Cleaning",
-            "tagline": "Rumah bersih kinclong, on-demand. Booking slot kurang dari semenit."
-          },
-          "retail": {
-            "eyebrow": "Toko Retail",
-            "tagline": "Kebutuhan harian, pilihan favorit kamu — diantar cepet."
-          }
-        }
       },
       "agreement": {
         "prefix": "Saya menyetujui",
         "termsLink": "Syarat Layanan",
         "and": "dan",
         "privacyLink": "Kebijakan Privasi"
-      },
-      "onboarding": {
-        "categoryGate": {
-          "title": "Pilih kategori dulu",
-          "content": "Biar bisa klaim alamat toko."
-        }
       },
       "ctaPrimary": "Buka Toko Gratis Sekarang",
       "trustLine": "Daftar 2 menit · Cepat dan gampang"

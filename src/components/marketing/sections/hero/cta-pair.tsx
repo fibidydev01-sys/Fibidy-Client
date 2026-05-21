@@ -30,6 +30,13 @@
 //   - secondaryLabel: pre-translated secondary CTA text
 //   - primaryHref: target route for primary CTA (locale-aware)
 //   - secondaryHref: target anchor or path for secondary CTA
+//
+// [BORDER FIX — May 2026]
+// Secondary button border diperkuat dari `border-input` (hampir
+// invisible di light mode) ke `border-2 border-foreground/30`.
+// Alasan: `border-input` = oklch(0.922 0.01 340) → putih pucat di
+// background putih. `border-foreground/30` jauh lebih visible di
+// light maupun dark mode karena mengikuti foreground token.
 // ==========================================
 
 import { ArrowRight } from 'lucide-react';
@@ -69,7 +76,7 @@ export function CtaPair({
         asChild
         variant="outline"
         size="lg"
-        className="min-w-[180px]"
+        className="min-w-[180px] border-2 border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500"
       >
         {/*
           Plain <a> for same-page anchor. Lenis (mounted in marketing
