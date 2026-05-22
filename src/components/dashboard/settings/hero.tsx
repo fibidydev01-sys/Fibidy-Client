@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { useTenant } from '@/hooks/shared/use-tenant';
+import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';

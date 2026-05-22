@@ -25,7 +25,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
-import { useTenant } from '@/hooks/shared/use-tenant';
+import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { toast } from 'sonner';
 import { ChevronLeft } from 'lucide-react';
 

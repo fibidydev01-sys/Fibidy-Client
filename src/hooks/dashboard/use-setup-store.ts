@@ -1,13 +1,16 @@
 'use client';
 
 // ============================================================================
-// USE SETUP STORE — Updated Hook
+// USE SETUP STORE
 // File: src/hooks/dashboard/use-setup-store.ts
 //
-// [SETUP-GATE Phase A — May 2026]
-// Updated to match new CompleteSetupInput (14 mandatory fields).
-// Logic unchanged — just the type reference updates automatically
-// since CompleteSetupInput is imported from @/types/tenant.
+// [PHASE C — May 2026]
+// On completeSetup success → isDone:true → success screen shows.
+// Success screen CTA redirects to /dashboard/studio (NOT /products).
+// Flow: setup-store → studio (publish) → products (with empty state dialog).
+//
+// CompleteSetupInput now includes hasPhysicalLocation + locationLat/Lng
+// — type reference auto-updates via @/types/tenant import.
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -37,9 +40,11 @@ export function useCompleteSetup() {
         // This lifts the setup gate in dashboard-route-guard immediately.
         setTenant(response.tenant);
 
-        toast.success(tToast('success'), { description: tToast('successDetail') });
+        toast.success(tToast('success'), {
+          description: tToast('successDetail'),
+        });
 
-        // Signal done — component will show the success screen
+        // Signal done — component shows the success screen with CTA → studio
         setIsDone(true);
 
         return response;

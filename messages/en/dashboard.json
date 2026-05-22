@@ -33,6 +33,12 @@
       "addButton": "Add",
       "empty": "No products yet.",
       "emptyHint": "Click \"Add Product\" to start selling.",
+      "firstProductDialog": {
+        "title": "Your storefront is live! 🎉",
+        "description": "Now let's add your first product so customers can start ordering. It only takes a minute.",
+        "addNow": "Add first product",
+        "later": "Later"
+      },
       "card": {
         "draft": "Draft",
         "sold": "{count} sold",
@@ -479,6 +485,11 @@
           "logoLabel": "Store Logo",
           "logoHelper": "Square image, JPG/PNG, min 200×200 px. This is your brand — make it count.",
           "uploadLogo": "Upload Logo",
+          "logoGenerate": "Generate from store name",
+          "logoGenerating": "Generating...",
+          "logoGenerateOr": "or",
+          "logoGenerateSuccess": "Logo generated and uploaded",
+          "logoGenerateFailed": "Failed to generate logo. Try uploading instead.",
           "colorLabel": "Brand Color",
           "colorHelper": "Used for buttons, links, and accents across your store.",
           "heroBgLabel": "Hero Background",
@@ -517,6 +528,19 @@
           "whereWeAreHeading": "Where We Are",
           "addressLabel": "Full Address",
           "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
+          "addressOptional": "(optional)",
+          "hasPhysicalLocationLabel": "Do you have a physical location?",
+          "hasPhysicalLocationHelper": "Turn off if you only serve online or by appointment.",
+          "mapLabel": "Map location",
+          "geoUseMyLocation": "📍 Use my current location",
+          "geoLocating": "Getting your location...",
+          "geoSuccess": "Location captured",
+          "geoErrorPermission": "Location permission denied. Allow access in browser settings or paste a map URL below.",
+          "geoErrorUnavailable": "Couldn't get location. Try again or paste a map URL below.",
+          "geoShowManual": "Paste embed URL manually",
+          "geoHideManual": "Hide manual URL",
+          "geoQuickstartNote": "We'll generate an embed map from these coordinates. You can upgrade to a Google Business Profile later in Settings.",
+          "onlineNote": "Your business is online-only — no physical address needed. Customers reach you via the contact form and your social links.",
           "mapUrlLabel": "Google Maps Embed URL",
           "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
           "mapUrlHelper": "Open Google Maps → Share → Embed → copy the",
@@ -544,10 +568,15 @@
           "submitting": "Launching..."
         },
         "done": {
+          "title": "Setup complete! 🎉",
           "heading": "Your store is live! 🎉",
+          "subtitle": "Your store is ready. Next, design your storefront layout in Studio — then add your first products.",
           "subheading": "Start adding products so customers can discover you.",
+          "ctaBuildStore": "Build your storefront",
           "ctaAddProduct": "Add First Product",
-          "ctaViewStore": "Preview Store"
+          "ctaViewStore": "Preview Store",
+          "ctaPreview": "Preview store",
+          "helpFooter": "Need help? Visit our help center anytime from the dashboard."
         },
         "errors": {
           "logoRequired": "Please upload a store logo",
@@ -562,6 +591,7 @@
           "phoneRequired": "Phone number is required",
           "addressMin": "Address is too short (min 10 characters)",
           "mapUrlInvalid": "Please paste a valid Google Maps embed URL",
+          "mapRequired": "Please set your location — use the button or paste a map URL",
           "contactTitleMin": "Section title is too short (min 3 characters)",
           "contactSubtitleMin": "Section subtitle is too short (min 5 characters)",
           "atLeastOneSocial": "Add at least one social link to continue"

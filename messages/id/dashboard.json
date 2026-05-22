@@ -33,6 +33,12 @@
       "addButton": "Tambah",
       "empty": "Belum ada produk.",
       "emptyHint": "Klik \"Tambah Produk\" untuk mulai jualan.",
+      "firstProductDialog": {
+        "title": "Storefront Anda sudah live! 🎉",
+        "description": "Sekarang yuk tambahkan produk pertama biar pelanggan bisa mulai pesan. Cukup satu menit.",
+        "addNow": "Tambah produk pertama",
+        "later": "Nanti dulu"
+      },
       "card": {
         "draft": "Draft",
         "sold": "{count} terjual",
@@ -479,6 +485,11 @@
           "logoLabel": "Logo Toko",
           "logoHelper": "Gambar persegi, JPG/PNG, min 200×200 px. Ini brand kamu — bikin berkesan.",
           "uploadLogo": "Upload Logo",
+          "logoGenerate": "Buatkan dari nama toko",
+          "logoGenerating": "Membuat...",
+          "logoGenerateOr": "atau",
+          "logoGenerateSuccess": "Logo dibuat dan diunggah",
+          "logoGenerateFailed": "Gagal membuat logo. Coba unggah manual.",
           "colorLabel": "Warna Brand",
           "colorHelper": "Dipakai untuk tombol, link, dan aksen di seluruh toko kamu.",
           "heroBgLabel": "Gambar Hero",
@@ -517,6 +528,19 @@
           "whereWeAreHeading": "Lokasi Kami",
           "addressLabel": "Alamat Lengkap",
           "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
+          "addressOptional": "(opsional)",
+          "hasPhysicalLocationLabel": "Apakah punya lokasi fisik?",
+          "hasPhysicalLocationHelper": "Matikan jika hanya melayani online atau dengan janji temu.",
+          "mapLabel": "Lokasi peta",
+          "geoUseMyLocation": "📍 Gunakan lokasi saya saat ini",
+          "geoLocating": "Mengambil lokasi...",
+          "geoSuccess": "Lokasi tersimpan",
+          "geoErrorPermission": "Izin lokasi ditolak. Aktifkan di pengaturan browser atau tempel URL peta di bawah.",
+          "geoErrorUnavailable": "Tidak bisa mengambil lokasi. Coba lagi atau tempel URL peta di bawah.",
+          "geoShowManual": "Tempel URL embed manual",
+          "geoHideManual": "Sembunyikan URL manual",
+          "geoQuickstartNote": "Kami akan buatkan peta embed dari koordinat ini. Anda bisa upgrade ke Google Business Profile nanti di Settings.",
+          "onlineNote": "Bisnis Anda online-only — tidak perlu alamat fisik. Pelanggan menghubungi via form kontak dan media sosial.",
           "mapUrlLabel": "URL Embed Google Maps",
           "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
           "mapUrlHelper": "Buka Google Maps → Bagikan → Sematkan → salin nilai",
@@ -544,10 +568,15 @@
           "submitting": "Launching..."
         },
         "done": {
+          "title": "Setup selesai! 🎉",
           "heading": "Toko kamu sudah live! 🎉",
+          "subtitle": "Toko Anda siap. Selanjutnya, atur tampilan storefront di Studio — lalu tambahkan produk pertama.",
           "subheading": "Mulai tambah produk agar pelanggan bisa menemukan kamu.",
+          "ctaBuildStore": "Bangun storefront",
           "ctaAddProduct": "Tambah Produk Pertama",
-          "ctaViewStore": "Preview Toko"
+          "ctaViewStore": "Preview Toko",
+          "ctaPreview": "Lihat toko",
+          "helpFooter": "Butuh bantuan? Kunjungi help center kapan saja dari dashboard."
         },
         "errors": {
           "logoRequired": "Mohon upload logo toko",
@@ -562,6 +591,7 @@
           "phoneRequired": "Nomor telepon wajib diisi",
           "addressMin": "Alamat terlalu pendek (min 10 karakter)",
           "mapUrlInvalid": "Mohon tempel URL embed Google Maps yang valid",
+          "mapRequired": "Mohon atur lokasi — gunakan tombol atau tempel URL peta",
           "contactTitleMin": "Judul section terlalu pendek (min 3 karakter)",
           "contactSubtitleMin": "Subjudul section terlalu pendek (min 5 karakter)",
           "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan"

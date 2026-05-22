@@ -35,7 +35,7 @@ export function SetupStoreClient() {
 
   // SELLER + already complete → route guard handles this, but safe fallback
   if (tenant.role === 'SELLER' && tenant.isSetupComplete) {
-    router.replace('/dashboard/products');
+    router.replace('/dashboard/studio');
     return null;
   }
 

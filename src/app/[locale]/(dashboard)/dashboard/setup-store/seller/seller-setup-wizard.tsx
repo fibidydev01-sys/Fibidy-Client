@@ -4,398 +4,290 @@
 // SELLER SETUP WIZARD — Orchestrator
 // File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/seller-setup-wizard.tsx
 //
-// [SETUP-GATE Phase A — May 2026] — 6-step wizard, full state management
-// [SETUP-GATE Phase B — May 2026] — autofill hook wired + badge tracking
+// [PHASE C v2 — May 2026]
+// DIALOG STRATEGY:
+//   - Next/Submit: SELALU ENABLED
+//   - Klik dengan invalid → ValidationDialog (list errors)
+//   - Tidak ada toast, tidak ada silent disabled button
 //
-// Phase B changes vs Phase A:
-//   - useSellerSetupAutofill() called at top; its result seeds useState init
-//   - autofilledFields Set tracks which fields still hold autofill values
-//   - set() helper removes field from Set on every edit → badge disappears
-//   - isAutofilled() passed as prop to 4 step components
-//   - Skip list (logo, phone, address, contactMapUrl, socialLinks) stays empty
+// Soft alerts tetap inline:
+//   - Char counters di step-story.tsx
+//   - Icon URL hint di step-highlights.tsx
+//   - Map URL invalid hint di step-contact-location.tsx
+//   - Geolocation error di step-contact-location.tsx
 // ============================================================================
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Store } from 'lucide-react';
-import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { StepIndicator } from '@/components/dashboard/shared/step-wizard';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
-import { useCompleteSetup } from '@/hooks/dashboard/use-setup-store';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-
-// ── Phase B imports ──────────────────────────────────────────────────────────
+import { useCompleteSetup } from '@/hooks/dashboard/use-setup-store';
 import { useSellerSetupAutofill } from './use-seller-setup-autofill';
-
+import { getCategoryConfig } from '@/lib/constants/shared/categories';
+import { ValidationDialog } from '@/components/ui/validation-dialog';
 import { StepVisual } from './step-visual';
 import { StepStory } from './step-story';
 import { StepHighlights } from './step-highlights';
 import { StepContactLocation } from './step-contact-location';
 import { StepSocial } from './step-social';
-import { StepReview } from './step-review';
 import { SellerSetupDone } from './seller-setup-done';
+import { SetupStepIndicator } from '@/components/dashboard/setup-store/setup-step-indicator';
+import { SetupWizardNav } from '@/components/dashboard/setup-store/setup-wizard-nav';
+import type { CompleteSetupInput, FeatureItem, SocialLinks } from '@/types/tenant';
 
-import type { FeatureItem, SocialLinks } from '@/types/tenant';
+// ── Form State ────────────────────────────────────────────────────────────────
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function checkValidUrl(value: string): boolean {
-  if (!value) return false;
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// ─── Form State ───────────────────────────────────────────────────────────────
-
-interface FormState {
-  // Step 1: Visual
+interface SellerWizardFormState {
   logo: string;
   primaryColor: string;
   heroBackgroundImage: string;
-  // Step 2: Story
   heroTitle: string;
   heroSubtitle: string;
   heroCtaText: string;
-  // Step 3: Highlights
   aboutFeatures: FeatureItem[];
-  // Step 4: Contact
   phone: string;
-  address: string;
-  contactMapUrl: string;
   contactTitle: string;
   contactSubtitle: string;
-  // Step 5: Social
+  hasPhysicalLocation: boolean;
+  address: string;
+  contactMapUrl: string;
+  locationLat?: number;
+  locationLng?: number;
   socialLinks: SocialLinks;
 }
 
-const EMPTY_SOCIAL: SocialLinks = {
-  instagram: '',
-  facebook: '',
-  tiktok: '',
-  youtube: '',
-  twitter: '',
-  threads: '',
-  whatsapp: '',
-  telegram: '',
-  pinterest: '',
-  behance: '',
-  dribbble: '',
-  vimeo: '',
-  linkedin: '',
-};
+// ── Validation — returns array of error strings (empty = valid) ───────────────
 
-// ── Phase B: names of all autofillable fields ─────────────────────────────────
-// These are removed from the Set as the seller edits them.
-// Skip list (logo, phone, address, contactMapUrl, socialLinks) is never here.
+function getStepErrors(step: number, form: SellerWizardFormState): string[] {
+  const errors: string[] = [];
 
-const AUTOFILL_FIELD_NAMES = [
-  'primaryColor',
-  'heroBackgroundImage',
-  'heroTitle',
-  'heroSubtitle',
-  'heroCtaText',
-  'aboutFeatures',
-  'contactTitle',
-  'contactSubtitle',
-] as const;
+  switch (step) {
+    case 1:
+      if (!form.logo) errors.push('Upload atau generate logo toko dulu');
+      if (!form.primaryColor) errors.push('Pilih warna brand');
+      if (!form.heroBackgroundImage) errors.push('Upload gambar hero dulu');
+      break;
+    case 2:
+      if (form.heroTitle.trim().length < 5) errors.push('Headline minimal 5 karakter');
+      if (form.heroSubtitle.trim().length < 10) errors.push('Tagline minimal 10 karakter');
+      if (form.heroCtaText.trim().length < 2) errors.push('Teks tombol minimal 2 karakter');
+      break;
+    case 3:
+      if (form.aboutFeatures.length !== 3) errors.push('Isi tepat 3 highlight');
+      form.aboutFeatures.forEach((f, i) => {
+        if (!f.icon) errors.push(`Highlight ${i + 1}: icon URL wajib diisi`);
+        if (f.title.trim().length < 2) errors.push(`Highlight ${i + 1}: judul minimal 2 karakter`);
+        if ((f.description ?? '').trim().length < 10)
+          errors.push(`Highlight ${i + 1}: deskripsi minimal 10 karakter`);
+      });
+      break;
+    case 4:
+      if (!form.phone.trim()) errors.push('Nomor telepon wajib diisi');
+      if (form.contactTitle.trim().length < 3) errors.push('Judul section minimal 3 karakter');
+      if (form.contactSubtitle.trim().length < 5) errors.push('Subjudul section minimal 5 karakter');
+      if (form.hasPhysicalLocation) {
+        if (form.address.trim().length < 10) errors.push('Alamat minimal 10 karakter');
+        const hasMap =
+          form.contactMapUrl.trim().length > 0 ||
+          (form.locationLat !== undefined && form.locationLng !== undefined);
+        if (!hasMap) errors.push('Pin lokasi atau paste URL peta');
+      }
+      break;
+    case 5: {
+      const hasLink = Object.values(form.socialLinks).some(
+        (v) => typeof v === 'string' && v.trim().length > 0,
+      );
+      if (!hasLink) errors.push('Minimal 1 link sosial wajib diisi');
+      break;
+    }
+  }
 
-type AutofillFieldName = typeof AUTOFILL_FIELD_NAMES[number];
+  return errors;
+}
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function SellerSetupWizard() {
   const t = useTranslations('dashboard.setupStore.seller');
+  const router = useRouter();
   const tenant = useAuthStore((s) => s.tenant);
-  const { completeSetup, isLoading, error, isDone } = useCompleteSetup();
+  const { completeSetup, isLoading, isDone } = useCompleteSetup();
+
+  const locationType = useMemo(
+    () => getCategoryConfig(tenant?.category ?? '')?.locationType ?? 'PHYSICAL',
+    [tenant?.category],
+  );
+
+  const defaultHasPhysicalLocation = locationType !== 'ONLINE';
 
   const [currentStep, setCurrentStep] = useState(1);
-
-  // ── Phase B: autofill hook ────────────────────────────────────────────────
-  // Runs once on mount (useMemo — only recalcs if category/name change).
-  // Falls back to __default__ if category is unknown.
-  const autofill = useSellerSetupAutofill(
-    tenant?.category ?? '__default__',
-    tenant?.name ?? '',
-  );
-
-  // ── State — seeded from autofill (Phase B) ────────────────────────────────
-  // Skip list fields (logo, phone, address, contactMapUrl, socialLinks) are
-  // intentionally left empty — seller must fill these manually.
-  const [form, setForm] = useState<FormState>({
-    // ── SKIP LIST — always empty on mount ──────────────────────────────────
+  const [form, setForm] = useState<SellerWizardFormState>({
     logo: '',
+    primaryColor: '#8B4513',
+    heroBackgroundImage: '',
+    heroTitle: '',
+    heroSubtitle: '',
+    heroCtaText: '',
+    aboutFeatures: [],
     phone: '',
+    contactTitle: '',
+    contactSubtitle: '',
+    hasPhysicalLocation: defaultHasPhysicalLocation,
     address: '',
     contactMapUrl: '',
-    socialLinks: { ...EMPTY_SOCIAL },
-
-    // ── AUTOFILLED — pre-populated from category dataset ──────────────────
-    primaryColor: autofill.primaryColor,
-    heroBackgroundImage: autofill.heroBackgroundImage,
-    heroTitle: autofill.heroTitle,
-    heroSubtitle: autofill.heroSubtitle,
-    heroCtaText: autofill.heroCtaText,
-    aboutFeatures: autofill.aboutFeatures,
-    contactTitle: autofill.contactTitle,
-    contactSubtitle: autofill.contactSubtitle,
+    locationLat: undefined,
+    locationLng: undefined,
+    socialLinks: {},
   });
 
-  // ── Phase B: track which fields still hold autofill values ───────────────
-  // Seller editing a field removes it from this Set → badge disappears.
-  // Submitting with a field still in the Set is valid — seller chose the default.
-  const [autofilledFields, setAutofilledFields] = useState<Set<string>>(
-    () => new Set<string>(AUTOFILL_FIELD_NAMES),
-  );
+  // Validation dialog
+  const [validationOpen, setValidationOpen] = useState(false);
+  const [validationItems, setValidationItems] = useState<string[]>([]);
 
-  const STEPS = useMemo(
-    () => [
-      { title: t('steps.visual.title'), desc: t('steps.visual.desc') },
-      { title: t('steps.story.title'), desc: t('steps.story.desc') },
-      { title: t('steps.highlights.title'), desc: t('steps.highlights.desc') },
-      { title: t('steps.contact.title'), desc: t('steps.contact.desc') },
-      { title: t('steps.social.title'), desc: t('steps.social.desc') },
-      { title: t('steps.review.title'), desc: t('steps.review.desc') },
-    ] as const,
-    [t],
-  );
+  // ── Autofill ────────────────────────────────────────────────────────────
+  const autofill = useSellerSetupAutofill(tenant?.category ?? '', tenant?.name ?? '');
+  const [autofilledFields, setAutofilledFields] = useState<Set<string>>(new Set());
 
-  const TOTAL_STEPS = STEPS.length;
-  const stepIndex = currentStep - 1;
+  useEffect(() => {
+    if (!tenant?.category) return;
+    const fields = new Set<string>();
 
-  // ── Updaters ──────────────────────────────────────────────────────────────
-  //
-  // Phase B: set() also removes the key from autofilledFields so the badge
-  // disappears as soon as the seller touches the field.
+    setForm((prev) => {
+      const next = { ...prev };
 
-  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    // Remove from autofilled set — badge hides
-    setAutofilledFields((prev) => {
-      const next = new Set(prev);
-      next.delete(key as string);
+      if (!prev.primaryColor || prev.primaryColor === '#8B4513') {
+        next.primaryColor = autofill.primaryColor;
+        fields.add('primaryColor');
+      }
+      if (!prev.heroBackgroundImage) {
+        next.heroBackgroundImage = autofill.heroBackgroundImage;
+        fields.add('heroBackgroundImage');
+      }
+      if (!prev.heroTitle) {
+        next.heroTitle = autofill.heroTitle;
+        fields.add('heroTitle');
+      }
+      if (!prev.heroSubtitle) {
+        next.heroSubtitle = autofill.heroSubtitle;
+        fields.add('heroSubtitle');
+      }
+      if (!prev.heroCtaText) {
+        next.heroCtaText = autofill.heroCtaText;
+        fields.add('heroCtaText');
+      }
+      if (prev.aboutFeatures.length !== 3) {
+        next.aboutFeatures = autofill.aboutFeatures;
+        fields.add('aboutFeatures');
+      }
+      if (!prev.contactTitle) {
+        next.contactTitle = autofill.contactTitle;
+        fields.add('contactTitle');
+      }
+      if (!prev.contactSubtitle) {
+        next.contactSubtitle = autofill.contactSubtitle;
+        fields.add('contactSubtitle');
+      }
+
       return next;
     });
-  };
 
-  const setSocialLink = (key: keyof SocialLinks, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: { ...prev.socialLinks, [key]: value },
-    }));
-    // socialLinks is in the skip list — never in autofilledFields — no-op delete is fine
-  };
+    setAutofilledFields(fields);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenant?.category]);
 
-  // ── Phase B: badge helper — passed as prop to step components ─────────────
-  const isAutofilled = (field: string): boolean => autofilledFields.has(field);
+  const isAutofilled = (field: string) => autofilledFields.has(field);
 
-  // ── Validation — mirrors BE exactly ──────────────────────────────────────
+  // ── Field updater ────────────────────────────────────────────────────────
+  const update = <K extends keyof SellerWizardFormState>(
+    key: K,
+    value: SellerWizardFormState[K],
+  ) => setForm((p) => ({ ...p, [key]: value }));
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 1: {
-        if (!form.logo) {
-          toast.error(t('errors.logoRequired'));
-          return false;
-        }
-        if (!form.primaryColor || !/^#[0-9A-Fa-f]{6}$/.test(form.primaryColor)) {
-          toast.error(t('errors.colorRequired'));
-          return false;
-        }
-        if (!form.heroBackgroundImage) {
-          toast.error(t('errors.heroBgRequired'));
-          return false;
-        }
-        return true;
-      }
-      case 2: {
-        if (form.heroTitle.trim().length < 5) {
-          toast.error(t('errors.heroTitleMin'));
-          return false;
-        }
-        if (form.heroSubtitle.trim().length < 10) {
-          toast.error(t('errors.heroSubtitleMin'));
-          return false;
-        }
-        if (form.heroCtaText.trim().length < 2) {
-          toast.error(t('errors.heroCtaMin'));
-          return false;
-        }
-        if (form.heroCtaText.trim().split(/\s+/).filter(Boolean).length > 2) {
-          toast.error(t('errors.heroCtaTooManyWords'));
-          return false;
-        }
-        return true;
-      }
-      case 3: {
-        if (form.aboutFeatures.length !== 3) {
-          toast.error(t('errors.exactly3Highlights'));
-          return false;
-        }
-        const allValid = form.aboutFeatures.every(
-          (f) =>
-            f.icon &&
-            (f.title ?? '').trim().length >= 2 &&
-            (f.description ?? '').trim().length >= 10,
-        );
-        if (!allValid) {
-          toast.error(t('errors.allHighlightsRequired'));
-          return false;
-        }
-        return true;
-      }
-      case 4: {
-        if (!form.phone.trim()) {
-          toast.error(t('errors.phoneRequired'));
-          return false;
-        }
-        if (form.address.trim().length < 10) {
-          toast.error(t('errors.addressMin'));
-          return false;
-        }
-        if (!checkValidUrl(form.contactMapUrl)) {
-          toast.error(t('errors.mapUrlInvalid'));
-          return false;
-        }
-        if (form.contactTitle.trim().length < 3) {
-          toast.error(t('errors.contactTitleMin'));
-          return false;
-        }
-        if (form.contactSubtitle.trim().length < 5) {
-          toast.error(t('errors.contactSubtitleMin'));
-          return false;
-        }
-        return true;
-      }
-      case 5: {
-        const hasOne = Object.values(form.socialLinks).some(
-          (v) => typeof v === 'string' && v.trim().length > 0,
-        );
-        if (!hasOne) {
-          toast.error(t('errors.atLeastOneSocial'));
-          return false;
-        }
-        return true;
-      }
-      case 6:
-        return true;
-      default:
-        return true;
-    }
-  };
-
-  // ── Navigation ────────────────────────────────────────────────────────────
-
+  // ── Navigation — show dialog if invalid ─────────────────────────────────
   const handleNext = () => {
-    if (!validateStep(currentStep)) return;
-    if (currentStep < TOTAL_STEPS) setCurrentStep((s) => s + 1);
+    const errors = getStepErrors(currentStep, form);
+    if (errors.length > 0) {
+      setValidationItems(errors);
+      setValidationOpen(true);
+      return;
+    }
+    if (currentStep < 5) setCurrentStep((s) => s + 1);
   };
 
   const handlePrev = () => {
     if (currentStep > 1) setCurrentStep((s) => s - 1);
   };
 
-  const handleGoToStep = (step: number) => {
-    if (step < currentStep) setCurrentStep(step);
-  };
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-
+  // ── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    for (let s = 1; s <= TOTAL_STEPS - 1; s++) {
-      if (!validateStep(s)) {
-        setCurrentStep(s);
-        return;
-      }
+    const errors = getStepErrors(currentStep, form);
+    if (errors.length > 0) {
+      setValidationItems(errors);
+      setValidationOpen(true);
+      return;
     }
+
+    const payload: CompleteSetupInput = {
+      logo: form.logo,
+      primaryColor: form.primaryColor,
+      heroBackgroundImage: form.heroBackgroundImage,
+      heroTitle: form.heroTitle.trim(),
+      heroSubtitle: form.heroSubtitle.trim(),
+      heroCtaText: form.heroCtaText.trim(),
+      aboutFeatures: form.aboutFeatures,
+      phone: form.phone.trim(),
+      contactTitle: form.contactTitle.trim(),
+      contactSubtitle: form.contactSubtitle.trim(),
+      hasPhysicalLocation: form.hasPhysicalLocation,
+      ...(form.hasPhysicalLocation && {
+        address: form.address.trim(),
+        ...(form.contactMapUrl.trim() && { contactMapUrl: form.contactMapUrl.trim() }),
+        ...(form.locationLat !== undefined && { locationLat: form.locationLat }),
+        ...(form.locationLng !== undefined && { locationLng: form.locationLng }),
+      }),
+      socialLinks: form.socialLinks,
+    };
+
     try {
-      await completeSetup({
-        logo: form.logo,
-        primaryColor: form.primaryColor,
-        heroBackgroundImage: form.heroBackgroundImage,
-        heroTitle: form.heroTitle,
-        heroSubtitle: form.heroSubtitle,
-        heroCtaText: form.heroCtaText,
-        aboutFeatures: form.aboutFeatures,
-        phone: form.phone,
-        address: form.address,
-        contactMapUrl: form.contactMapUrl,
-        contactTitle: form.contactTitle,
-        contactSubtitle: form.contactSubtitle,
-        socialLinks: form.socialLinks,
-      });
+      await completeSetup(payload);
     } catch {
-      // Error handled in hook + toast
+      // Toast handled inside hook
     }
   };
 
-  // ── Done screen ───────────────────────────────────────────────────────────
-
+  // ── Done screen ──────────────────────────────────────────────────────────
   if (isDone) {
     return <SellerSetupDone />;
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  const STEPS = [
+    { title: t('steps.visual.title'), desc: t('steps.visual.desc') },
+    { title: t('steps.story.title'), desc: t('steps.story.desc') },
+    { title: t('steps.highlights.title'), desc: t('steps.highlights.desc') },
+    { title: t('steps.contact.title'), desc: t('steps.contact.desc') },
+    { title: t('steps.social.title'), desc: t('steps.social.desc') },
+  ];
 
   return (
-    <div className="w-full max-w-2xl mx-auto h-full flex flex-col">
-
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Store className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-        </div>
+    <div className="max-w-3xl mx-auto pb-32">
+      <div className="mb-8">
+        <SetupStepIndicator
+          steps={STEPS}
+          currentStep={currentStep - 1}
+          onStepClick={(idx: number) => setCurrentStep(idx + 1)}
+        />
       </div>
 
-      {/* Error alert */}
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Step indicator */}
-      <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
-        <div className="space-y-1">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('stepIndicator', { current: currentStep, total: TOTAL_STEPS })}
-          </p>
-          <h2 className="text-xl font-bold tracking-tight leading-none">
-            {STEPS[stepIndex]?.title}
-          </h2>
-          <p className="text-sm text-muted-foreground pt-0.5">
-            {STEPS[stepIndex]?.desc}
-          </p>
-        </div>
-        <div className="shrink-0 pt-0.5">
-          <StepIndicator
-            steps={STEPS}
-            currentStep={stepIndex}
-            onStepClick={(i) => handleGoToStep(i + 1)}
-            size="lg"
-          />
-        </div>
-      </div>
-
-      {/* Step content */}
-      <div className="flex-1 min-h-[300px] pb-24">
+      <div className="min-h-[400px]">
         {currentStep === 1 && (
           <StepVisual
             logo={form.logo}
             primaryColor={form.primaryColor}
             heroBackgroundImage={form.heroBackgroundImage}
-            onLogoChange={(v) => set('logo', v)}
-            onColorChange={(v) => set('primaryColor', v)}
-            onHeroBgChange={(v) => set('heroBackgroundImage', v)}
-            // Phase B: badge visibility
+            storeName={tenant?.name ?? ''}
+            onLogoChange={(v: string) => update('logo', v)}
+            onColorChange={(v: string) => update('primaryColor', v)}
+            onHeroBgChange={(v: string) => update('heroBackgroundImage', v)}
             isAutofilled={isAutofilled}
           />
         )}
@@ -404,18 +296,16 @@ export function SellerSetupWizard() {
             heroTitle={form.heroTitle}
             heroSubtitle={form.heroSubtitle}
             heroCtaText={form.heroCtaText}
-            onHeroTitleChange={(v) => set('heroTitle', v)}
-            onHeroSubtitleChange={(v) => set('heroSubtitle', v)}
-            onHeroCtaTextChange={(v) => set('heroCtaText', v)}
-            // Phase B: badge visibility
+            onHeroTitleChange={(v: string) => update('heroTitle', v)}
+            onHeroSubtitleChange={(v: string) => update('heroSubtitle', v)}
+            onHeroCtaTextChange={(v: string) => update('heroCtaText', v)}
             isAutofilled={isAutofilled}
           />
         )}
         {currentStep === 3 && (
           <StepHighlights
-            aboutFeatures={form.aboutFeatures}
-            onFeaturesChange={(v) => set('aboutFeatures', v)}
-            // Phase B: badge visibility
+            items={form.aboutFeatures}
+            onChange={(v: FeatureItem[]) => update('aboutFeatures', v)}
             isAutofilled={isAutofilled}
           />
         )}
@@ -427,54 +317,45 @@ export function SellerSetupWizard() {
             address={form.address}
             contactMapUrl={form.contactMapUrl}
             whatsappReadonly={tenant?.whatsapp}
-            onContactTitleChange={(v) => set('contactTitle', v)}
-            onContactSubtitleChange={(v) => set('contactSubtitle', v)}
-            onPhoneChange={(v) => set('phone', v)}
-            onAddressChange={(v) => set('address', v)}
-            onContactMapUrlChange={(v) => set('contactMapUrl', v)}
-            // Phase B: badge visibility
+            hasPhysicalLocation={form.hasPhysicalLocation}
+            locationLat={form.locationLat}
+            locationLng={form.locationLng}
+            locationType={locationType}
+            onContactTitleChange={(v: string) => update('contactTitle', v)}
+            onContactSubtitleChange={(v: string) => update('contactSubtitle', v)}
+            onPhoneChange={(v: string) => update('phone', v)}
+            onAddressChange={(v: string) => update('address', v)}
+            onContactMapUrlChange={(v: string) => update('contactMapUrl', v)}
+            onHasPhysicalLocationChange={(v: boolean) => update('hasPhysicalLocation', v)}
+            onLocationCoordsChange={(lat: number | undefined, lng: number | undefined) => {
+              setForm((p) => ({ ...p, locationLat: lat, locationLng: lng }));
+            }}
             isAutofilled={isAutofilled}
           />
         )}
         {currentStep === 5 && (
           <StepSocial
             socialLinks={form.socialLinks}
-            onSocialLinkChange={setSocialLink}
-          />
-        )}
-        {currentStep === 6 && (
-          <StepReview
-            logo={form.logo}
-            primaryColor={form.primaryColor}
-            heroBackgroundImage={form.heroBackgroundImage}
-            heroTitle={form.heroTitle}
-            heroSubtitle={form.heroSubtitle}
-            heroCtaText={form.heroCtaText}
-            aboutFeatures={form.aboutFeatures}
-            phone={form.phone}
-            address={form.address}
-            contactMapUrl={form.contactMapUrl}
-            contactTitle={form.contactTitle}
-            contactSubtitle={form.contactSubtitle}
-            socialLinks={form.socialLinks}
-            onEditStep={handleGoToStep}
+            onUpdate={(v: SocialLinks) => update('socialLinks', v)}
           />
         )}
       </div>
 
-      {/* Nav */}
-      <WizardNav
-        steps={STEPS}
-        currentStep={stepIndex}
+      <SetupWizardNav
+        currentStep={currentStep - 1}
+        totalSteps={5}
         onPrev={handlePrev}
         onNext={handleNext}
-        onSave={handleSubmit}
+        onSubmit={handleSubmit}
         isSaving={isLoading}
-        lastStepLabel={t('cta.submit')}
-        lastStepSavingLabel={t('cta.submitting')}
-        onLastStep={handleSubmit}
       />
 
+      {/* Validation Dialog */}
+      <ValidationDialog
+        open={validationOpen}
+        onClose={() => setValidationOpen(false)}
+        items={validationItems}
+      />
     </div>
   );
 }

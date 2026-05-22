@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTenant } from '@/hooks/shared/use-tenant';
+import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import type { SocialFormData, SocialLinks } from '@/types/tenant';

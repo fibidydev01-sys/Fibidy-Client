@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { useTenant } from '@/hooks/shared/use-tenant';
+import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { tenantsApi } from '@/lib/api/tenants';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';

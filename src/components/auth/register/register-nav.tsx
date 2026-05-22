@@ -1,39 +1,22 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // REGISTER NAV
 // File: src/components/auth/register/register-nav.tsx
 //
-// [VERCEL VIBES — May 2026]
-// Auth-page–specific wizard navigation. Duplicated and simplified from
-// the dashboard's shared `WizardNav`.
+// [PHASE C v2 — May 2026]
+// REMOVED: nextDisabled prop — button tidak pernah disabled/silent lagi.
+// Next dan Submit selalu enabled. Klik dengan kondisi invalid → parent
+// membuka ValidationDialog yang menjelaskan field mana yang kurang.
 //
-// What changed vs WizardNav:
-//   - INLINE, not fixed-bottom. The original WizardNav uses
-//     `position: fixed` + `left: var(--sidebar-width)` to sit above
-//     the dashboard sidebar. On the register page there is no sidebar,
-//     so `--sidebar-width` is undefined → falls back to 0 → nav misaligns
-//     with the centered form. Same story for the mobile `bottom-16`
-//     offset (designed for the dashboard tab bar that doesn't exist
-//     here). Going inline removes both bugs without sticky workarounds.
-//   - SINGLE render path. WizardNav has separate desktop/mobile blocks
-//     because of the fixed layout. Inline mode renders once and uses
-//     responsive utilities to adapt.
-//   - SAVE-ONLY mode dropped. Register only ever uses multi-step.
-//
-// Same prop names as WizardNav for the props register actually uses,
-// so the migration in register.tsx is a 1-line import swap + dropping
-// the `onSave` prop (which was unused in multi-step mode anyway).
-//
-// i18n: default labels (Save/Saving/Back/Previous/Next) resolved from
-// `common.actions.*` via useTranslations. Caller can override via props.
-// ==========================================
+// Filosofi: button disabled yang silent = user bingung kenapa tidak bisa lanjut.
+// Hard dialog = user tahu persis apa yang harus diperbaiki.
+// ============================================================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { RegisterStepDots } from './register-step-indicator';
-import { cn } from '@/lib/shared/utils';
 
 interface Step {
   title: string;
@@ -41,20 +24,13 @@ interface Step {
 }
 
 interface RegisterNavProps {
-  // Step navigation (required — register is always multi-step)
   steps: readonly Step[];
   currentStep: number;
   onPrev: () => void;
   onNext: () => void;
   onLastStep: () => void;
-
-  // Submit state
   isSaving?: boolean;
-
-  // Universal back — when on step 0, caller decides where back goes
   onBack?: () => void;
-
-  // Last step labels (e.g. "Submit" instead of generic "Save")
   lastStepIcon?: LucideIcon;
   lastStepLabel?: string;
   lastStepSavingLabel?: string;
@@ -89,7 +65,6 @@ export function RegisterNav({
     }
   };
 
-  // Hide the prev button on step 0 unless caller provided onBack
   const showPrevButton = !isFirstStep || !!onBack;
 
   return (
@@ -98,10 +73,7 @@ export function RegisterNav({
       <Button
         variant="outline"
         onClick={handlePrev}
-        className={cn(
-          'gap-1.5 h-9 text-sm sm:min-w-[120px]',
-          !showPrevButton && 'invisible',
-        )}
+        className={`gap-1.5 h-9 text-sm sm:min-w-[120px] ${!showPrevButton ? 'invisible' : ''}`}
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">
@@ -112,7 +84,7 @@ export function RegisterNav({
       {/* Step dots */}
       <RegisterStepDots steps={steps} currentStep={currentStep} />
 
-      {/* Next / Submit */}
+      {/* Next / Submit — ALWAYS ENABLED, validation via dialog */}
       {isLastStep ? (
         <Button
           onClick={onLastStep}

@@ -1,0 +1,56 @@
+{
+  "_comment": "PATCH ADDITIONS — merge keys ini ke dalam messages/en/dashboard.json dan messages/en/auth.json yang sudah ada",
+
+  "dashboard": {
+    "products": {
+      "empty": "No products yet",
+      "emptyHint": "Add your first product to start selling.",
+      "firstProductDialog": {
+        "title": "Ready to list your first product? 🎉",
+        "description": "Your store is set up. Add a product so customers can start ordering.",
+        "addNow": "Add first product",
+        "later": "Later"
+      }
+    },
+    "setupStore": {
+      "seller": {
+        "done": {
+          "title": "Setup complete! 🎉",
+          "subtitle": "Your store is ready. Next, choose your storefront look in Studio — then publish.",
+          "ctaBuildStore": "Choose Your Store Look",
+          "ctaPreview": "Preview store",
+          "helpFooter": "Need help? Visit guide.fibidy.com anytime.",
+          "goToStudioDialog": {
+            "title": "One more step!",
+            "description": "Pick your store layout in Studio, then publish — your store goes live instantly. Takes 1-2 minutes.",
+            "cta": "Go to Studio"
+          }
+        }
+      }
+    },
+    "studio": {
+      "onboardingDialog": {
+        "title": "Choose your store layout",
+        "step1": "Pick the block combination you like",
+        "step2": "Click Publish",
+        "step3": "Your store goes live! 🚀",
+        "cta": "Let's Go"
+      }
+    }
+  },
+
+  "auth": {
+    "register": {
+      "account": {
+        "whatsappLabel": "Phone / WhatsApp",
+        "whatsappPlaceholder": "81234567890",
+        "whatsappHelper": "Used for order notifications. Select your country code."
+      },
+      "errors": {
+        "emailInvalid": "Enter a valid email address",
+        "passwordWeak": "Password must meet all 4 requirements",
+        "whatsappRequired": "Phone number is required (min. 7 digits)"
+      }
+    }
+  }
+}

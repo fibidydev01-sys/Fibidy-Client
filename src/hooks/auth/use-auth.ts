@@ -4,37 +4,14 @@
 // USE AUTH
 // File: src/hooks/auth/use-auth.ts
 //
-// [i18n FIX — 2026-04-19]
-// All toast TITLES and hardcoded detail strings wired to `toast.auth.*`
-// via `useTranslations('toast.auth')`. JSON keys used:
-//   - loginSuccess + loginSuccessDetail ({name} interpolation)
-//   - loginFailed
-//   - registerSuccess + registerSuccessDetail ("Your store is ready to use")
-//   - registerFailed
-//   - logoutSuccess
-//
-// `setError(message)` remains passthrough — it's displayed in an inline
-// Alert component and carries backend-authored error text.
-//
-// `useCheckSlug` below has no user-facing strings — only boolean state
-// returned to callers. No translation needed.
-//
-// [PHASE 3 — DIGITAL PRODUCTS FLAG]
-// `useLogin` BUYER fallback: when digital is off, BUYERs login → straight
-// to /dashboard/setup-store (their only meaningful destination).
-//
-// [PHASE 3 — INTERACTIVE STORE BUILDER, May 2026]
-// `useRegister` now exposes `errorCode` alongside `error` so the register
-// form can detect specific BE error codes (Phase 1 BE handoff):
-//   - SLUG_TAKEN_AFTER_PREVIEW   → render AlertDialog + suggestion chips
-//   - EMAIL_TAKEN_AFTER_PREVIEW  → toast "use a different email"
-//   - SLUG_RESERVED              → toast (rare; FE should catch first)
+// [PHASE C — May 2026]
+// useRegister: redirect after success → /dashboard/setup-store
+//   (was /dashboard/studio — but studio without setup data has no context)
+// Setup gate flow now:
+//   Register → setup-store → studio → products
 //
 // [SETUP-GATE — May 2026]
-// `useLogin` now checks tenant.isSetupComplete for SELLER role:
-//   - SELLER + isSetupComplete=false → /dashboard/setup-store (mandatory)
-//   - SELLER + isSetupComplete=true  → /dashboard/products (normal flow)
-// `getPostLoginRedirect` helper is exported for reuse (e.g. after token refresh).
+// useLogin: checks tenant.isSetupComplete for SELLER routing.
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -50,17 +27,12 @@ import type { LoginInput, RegisterInput } from '@/types/auth';
 import type { Tenant } from '@/types/tenant';
 
 // ==========================================
-// [SETUP-GATE] POST-LOGIN REDIRECT HELPER
-//
-// Determines where to send the user after successful login.
-// SELLER: depends on isSetupComplete.
-// BUYER: depends on FEATURES.digitalProducts flag.
-//
-// Exported so it can be reused wherever a redirect decision is needed
-// (e.g. after token refresh, after /auth/status check).
+// POST-LOGIN REDIRECT HELPER
 // ==========================================
 
-export function getPostLoginRedirect(tenant: Pick<Tenant, 'role' | 'isSetupComplete'>): string {
+export function getPostLoginRedirect(
+  tenant: Pick<Tenant, 'role' | 'isSetupComplete'>,
+): string {
   if (tenant.role === 'SELLER') {
     return tenant.isSetupComplete
       ? '/dashboard/products'
@@ -97,8 +69,6 @@ export function useLogin() {
         );
 
         const from = searchParams.get('from');
-
-        // [SETUP-GATE] Use helper — SELLER routes to setup-store if not complete
         const defaultRedirect = getPostLoginRedirect(response.tenant);
 
         router.push(from || defaultRedirect);
@@ -125,8 +95,6 @@ export function useRegister() {
   const tToast = useTranslations('toast.auth');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Phase 3: capture structured BE error code so callers can branch
-  // on SLUG_TAKEN_AFTER_PREVIEW / EMAIL_TAKEN_AFTER_PREVIEW etc.
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const { setTenant, setChecked } = useAuthStore();
   const router = useRouter();
@@ -147,9 +115,12 @@ export function useRegister() {
           tToast('registerSuccess'),
           tToast('registerSuccessDetail'),
         );
-        // Post-register: always go to studio (store builder)
-        // isSetupComplete=false at this point, but studio is exempt from setup gate
-        router.push('/dashboard/studio');
+
+        // [PHASE C] Post-register → setup-store (was /studio)
+        // Studio without setup context has no useful state to show.
+        // Seller must complete setup wizard first, then proceed to studio
+        // via the success screen's CTA.
+        router.push('/dashboard/setup-store');
 
         return response;
       } catch (err) {
@@ -160,9 +131,6 @@ export function useRegister() {
           setErrorCode(err.code);
         }
 
-        // For SLUG_TAKEN_AFTER_PREVIEW we DON'T toast — caller will
-        // surface a richer AlertDialog with suggestion chips. All
-        // other errors get the standard toast.
         const code = err instanceof ApiRequestError ? err.code : undefined;
         if (code !== 'SLUG_TAKEN_AFTER_PREVIEW') {
           toast.error(tToast('registerFailed'), message);

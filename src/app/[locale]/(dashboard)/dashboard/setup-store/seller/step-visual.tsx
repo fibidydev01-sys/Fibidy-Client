@@ -6,9 +6,13 @@
 //
 // Fields: logo (required), primaryColor (required), heroBackgroundImage (required)
 //
-// [Phase B] isAutofilled prop added — renders AutofillBadge under label
-// for primaryColor and heroBackgroundImage (both are autofillable).
-// logo is in the skip list — never autofilled, no badge.
+// [PHASE C — May 2026]
+// Added LogoGenerator fallback button below logo upload slot.
+// If seller doesn't have a logo file, they can click "Generate from store name"
+// → initials SVG with primaryColor background → uploaded to Cloudinary.
+//
+// [Phase B] isAutofilled prop — renders AutofillBadge under label
+// for primaryColor and heroBackgroundImage.
 // ============================================================================
 
 import { Loader2, X } from 'lucide-react';
@@ -19,6 +23,7 @@ import { useCloudinaryUpload } from '@/hooks/shared/use-cloudinary-upload';
 import { EmptySlot } from '@/components/dashboard/shared/image-slot';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import { AutofillBadge } from './autofill-badge';
+import { LogoGenerator } from './logo-generator';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -26,10 +31,11 @@ interface StepVisualProps {
   logo: string;
   primaryColor: string;
   heroBackgroundImage: string;
+  /** [PHASE C] Used by LogoGenerator to derive initials */
+  storeName: string;
   onLogoChange: (url: string) => void;
   onColorChange: (hex: string) => void;
   onHeroBgChange: (url: string) => void;
-  /** Phase B — called with field name; returns true if still holding autofill value */
   isAutofilled: (field: string) => boolean;
 }
 
@@ -139,6 +145,7 @@ export function StepVisual({
   logo,
   primaryColor,
   heroBackgroundImage,
+  storeName,
   onLogoChange,
   onColorChange,
   onHeroBgChange,
@@ -179,23 +186,36 @@ export function StepVisual({
             onRemove={() => onLogoChange('')}
           />
         ) : (
-          <EmptySlot
-            index={0}
-            label={t('uploadLogo')}
-            onClick={() => openLogoWidget(1)}
-            isLoading={isUploadingLogo}
-          />
+          <>
+            <EmptySlot
+              index={0}
+              label={t('uploadLogo')}
+              onClick={() => openLogoWidget(1)}
+              isLoading={isUploadingLogo}
+            />
+            {/* [PHASE C] Logo generator fallback */}
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <span className="text-[11px] text-muted-foreground/50">
+                {t('logoGenerateOr')}
+              </span>
+              <LogoGenerator
+                storeName={storeName}
+                primaryColor={primaryColor}
+                onGenerated={onLogoChange}
+                disabled={isUploadingLogo}
+              />
+            </div>
+          </>
         )}
       </div>
 
-      {/* Brand Color — REQUIRED — autofillable, shows badge */}
+      {/* Brand Color — REQUIRED — autofillable */}
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
             {t('colorLabel')}{' '}
             <span className="text-destructive normal-case font-normal">*</span>
           </p>
-          {/* Phase B badge — visible until seller clicks a different color */}
           <AutofillBadge visible={isAutofilled('primaryColor')} />
           <p className="text-xs text-muted-foreground">{t('colorHelper')}</p>
         </div>
@@ -205,14 +225,13 @@ export function StepVisual({
         )}
       </div>
 
-      {/* Hero Background — REQUIRED — autofillable, shows badge */}
+      {/* Hero Background — REQUIRED — autofillable */}
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
             {t('heroBgLabel')}{' '}
             <span className="text-destructive normal-case font-normal">*</span>
           </p>
-          {/* Phase B badge — visible until seller uploads their own image */}
           <AutofillBadge visible={isAutofilled('heroBackgroundImage')} />
           <p className="text-xs text-muted-foreground">{t('heroBgHelper')}</p>
         </div>

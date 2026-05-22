@@ -8,18 +8,8 @@
 // at src/proxy.ts step 5. The client-side guard caused a flash where
 // the login form would briefly render before the redirect fired.
 //
-// GuestGuard component itself still exists in
-// `components/layout/auth/auth-guard.tsx` in case other surfaces need
-// client-side guarding, but it is no longer used by the auth pages.
-//
 // [i18n FIX — 2026-04-19]
-// Static `metadata` export replaced with async `generateMetadata` using
-// `getTranslations` (server-side next-intl API). Same pattern as
-// `(admin)/layout.tsx`.
-//
-// Requires JSON keys (already in lockfile from the i18n migration):
-//   - auth.metadata.layoutTemplate
-//   - auth.metadata.layoutDefault
+// Metadata via async generateMetadata using getTranslations.
 // ==========================================
 
 import type { Metadata } from 'next';

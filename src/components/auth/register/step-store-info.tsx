@@ -1,57 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+// ==========================================
+// STEP STORE INFO
+// File: src/components/auth/register/step-store-info.tsx
+//
+// [PHASE C UX FIX — May 2026]
+// Accepts isChecking + isAvailable props from parent (register.tsx).
+// Parent owns the slug-check state so it can drive the Next button's
+// disabled state in real-time.
+//
+// Previously: this component owned useCheckSlug() locally → parent
+// didn't know when slug was unavailable → user clicked Next on bad
+// slug → backend rejected → confusing.
+//
+// Now: parent's useCheckSlug() state is single source of truth.
+// ==========================================
+
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useCheckSlug } from '@/hooks/auth/use-auth';
-import { useDebounce } from '@/hooks/shared/use-debounce';
 import { Loader2, Check, X, Info } from 'lucide-react';
-
-// ==========================================
-// TYPES
-// ==========================================
 
 interface StepStoreInfoProps {
   name: string;
   slug: string;
   description: string;
   onUpdate: (data: { name?: string; slug?: string; description?: string }) => void;
+  /** [PHASE C UX FIX] Slug check state from parent */
+  isChecking: boolean;
+  isAvailable: boolean | null;
 }
 
-// ==========================================
-// COMPONENT — no header, no nav (handled by parent)
-// ==========================================
-
-export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreInfoProps) {
+export function StepStoreInfo({
+  name,
+  slug,
+  description,
+  onUpdate,
+  isChecking,
+  isAvailable,
+}: StepStoreInfoProps) {
   const t = useTranslations('auth.register.storeInfo');
-  const [localName, setLocalName] = useState(name);
-  const [localSlug, setLocalSlug] = useState(slug);
-  const [localDescription, setLocalDescription] = useState(description);
   const [hasManuallyEditedSlug, setHasManuallyEditedSlug] = useState(false);
 
-  const { checkSlug, isChecking, isAvailable, reset: resetSlug } = useCheckSlug();
-  const debouncedSlug = useDebounce(localSlug, 500);
-
-  useEffect(() => {
-    if (debouncedSlug && debouncedSlug.length >= 3) {
-      checkSlug(debouncedSlug);
-    } else {
-      resetSlug();
-    }
-  }, [debouncedSlug, checkSlug, resetSlug]);
-
-  // Sync up to parent on every change
   const handleNameChange = (value: string) => {
-    setLocalName(value);
     if (!hasManuallyEditedSlug) {
       const generated = value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '')
         .slice(0, 30);
-      setLocalSlug(generated);
       onUpdate({ name: value, slug: generated });
     } else {
       onUpdate({ name: value });
@@ -60,13 +59,11 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
 
   const handleSlugChange = (value: string) => {
     const cleaned = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    setLocalSlug(cleaned);
     setHasManuallyEditedSlug(true);
     onUpdate({ slug: cleaned });
   };
 
   const handleDescriptionChange = (value: string) => {
-    setLocalDescription(value);
     onUpdate({ description: value });
   };
 
@@ -81,7 +78,7 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
         <Input
           id="store-name"
           placeholder={t('namePlaceholder')}
-          value={localName}
+          value={name}
           onChange={(e) => handleNameChange(e.target.value)}
           className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
         />
@@ -101,11 +98,11 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
           <Input
             id="store-slug"
             placeholder={t('slugPlaceholder')}
-            value={localSlug}
+            value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
           />
-          {localSlug.length >= 3 && (
+          {slug.length >= 3 && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {isChecking ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -119,7 +116,7 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
         </div>
         <p className="text-xs text-muted-foreground flex items-center gap-1">
           <Info className="h-3 w-3" />
-          {t('slugSuffix', { slug: localSlug || t('slugDefault') })}
+          {t('slugSuffix', { slug: slug || t('slugDefault') })}
         </p>
         {isAvailable === false && (
           <p className="text-xs text-destructive">{t('slugTaken')}</p>
@@ -138,7 +135,7 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
           id="store-desc"
           placeholder={t('descriptionPlaceholder')}
           rows={3}
-          value={localDescription}
+          value={description}
           onChange={(e) => handleDescriptionChange(e.target.value)}
           maxLength={500}
           className="resize-none text-sm placeholder:text-muted-foreground/50"
@@ -146,7 +143,7 @@ export function StepStoreInfo({ name, slug, description, onUpdate }: StepStoreIn
         <div className="flex justify-between text-[11px] text-muted-foreground">
           <span>{t('descriptionHelper')}</span>
           <span className="font-mono tabular-nums">
-            {t('descriptionCount', { current: localDescription.length, max: 500 })}
+            {t('descriptionCount', { current: description.length, max: 500 })}
           </span>
         </div>
       </div>
