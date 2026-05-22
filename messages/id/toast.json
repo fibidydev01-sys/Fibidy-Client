@@ -29,6 +29,11 @@
       "whatsappRequired": "Nomor WhatsApp wajib diisi",
       "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
     },
+    "setup": {
+      "success": "Setup toko selesai!",
+      "successDetail": "Toko kamu sudah live. Mulai tambah produk sekarang!",
+      "failed": "Setup gagal"
+    },
     "refund": {
       "approved": "Refund disetujui! Dana akan kembali ke rekening kamu dalam 5-10 hari kerja.",
       "rejectedFileValid": "File bisa diakses dan valid. Refund tidak bisa diproses.",

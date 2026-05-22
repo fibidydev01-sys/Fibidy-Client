@@ -29,6 +29,11 @@
       "whatsappRequired": "WhatsApp number is required",
       "agreementRequired": "Please agree to the Terms of Service to continue"
     },
+    "setup": {
+      "success": "Store setup complete!",
+      "successDetail": "Your store is now live. Start adding products!",
+      "failed": "Setup failed"
+    },
     "refund": {
       "approved": "Refund approved! Funds will return to your account in 5-10 business days.",
       "rejectedFileValid": "File is accessible and valid. Refund cannot be processed.",

@@ -3,6 +3,7 @@ import type {
   Tenant,
   PublicTenant,
   UpdateTenantInput,
+  CompleteSetupInput,
   DashboardStats,
   UpgradeToSellerInput,
 } from '@/types/tenant';
@@ -53,6 +54,20 @@ export const tenantsApi = {
    */
   changePassword: (data: ChangePasswordInput): Promise<ChangePasswordResponse> =>
     api.patch<ChangePasswordResponse>('/tenants/me/password', data),
+
+  /**
+   * [SETUP-GATE]
+   * PATCH /tenants/me/complete-setup
+   *
+   * Called once after SELLER finishes the setup wizard.
+   * Sets isSetupComplete = true on the tenant.
+   * Also persists logo, name, description, whatsapp, address from the wizard.
+   *
+   * Returns the updated tenant — call setTenant() in the auth store after.
+   * BE enforces: SELLER only + idempotency (throws 400 if already done).
+   */
+  completeSetup: (data: CompleteSetupInput): Promise<{ message: string; tenant: Tenant }> =>
+    api.patch<{ message: string; tenant: Tenant }>('/tenants/me/complete-setup', data),
 };
 
 export { ApiRequestError, getErrorMessage };

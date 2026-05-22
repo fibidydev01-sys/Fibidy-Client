@@ -443,6 +443,129 @@
         "slugRequired": "URL toko wajib diisi",
         "whatsappRequired": "Nomor WhatsApp wajib diisi",
         "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
+      },
+      "seller": {
+        "title": "Bangun Toko Kamu",
+        "subtitle": "Hampir selesai — isi detailnya biar toko kamu siap tampil",
+        "autofillBadge": "Terisi otomatis — ketuk untuk edit",
+        "stepIndicator": "Langkah {current} dari {total}",
+        "steps": {
+          "visual": {
+            "title": "Tampilan",
+            "desc": "Logo, warna brand, gambar hero"
+          },
+          "story": {
+            "title": "Cerita Toko",
+            "desc": "Headline, tagline, teks tombol"
+          },
+          "highlights": {
+            "title": "Highlight",
+            "desc": "3 hal terbaik toko kamu"
+          },
+          "contact": {
+            "title": "Cara Menemukan",
+            "desc": "Telepon, alamat, peta"
+          },
+          "social": {
+            "title": "Media Sosial",
+            "desc": "Minimal satu platform"
+          },
+          "review": {
+            "title": "Review",
+            "desc": "Konfirmasi & launch"
+          }
+        },
+        "visual": {
+          "logoLabel": "Logo Toko",
+          "logoHelper": "Gambar persegi, JPG/PNG, min 200×200 px. Ini brand kamu — bikin berkesan.",
+          "uploadLogo": "Upload Logo",
+          "colorLabel": "Warna Brand",
+          "colorHelper": "Dipakai untuk tombol, link, dan aksen di seluruh toko kamu.",
+          "heroBgLabel": "Gambar Hero",
+          "heroBgHelper": "Gambar besar di bagian atas toko. Orientasi landscape paling cocok.",
+          "uploadHeroBg": "Upload Gambar"
+        },
+        "story": {
+          "heroTitleLabel": "Headline",
+          "heroTitlePlaceholder": "Selamat datang di toko saya",
+          "heroTitleHelper": "Hal pertama yang dibaca pengunjung. Singkat dan berkesan (5–200 karakter).",
+          "heroSubtitleLabel": "Tagline",
+          "heroSubtitlePlaceholder": "Ceritakan apa yang kamu jual dalam satu kalimat",
+          "heroSubtitleHelper": "Dukung headline — jelaskan apa yang kamu jual (10–300 karakter).",
+          "heroCtaLabel": "Teks Tombol",
+          "heroCtaPlaceholder": "Belanja Sekarang",
+          "heroCtaHelper": "Maks 2 kata, 15 karakter. Contoh: Belanja Sekarang, Pesan Di Sini, Mulai Sekarang."
+        },
+        "highlights": {
+          "intro": "Pilih 3 hal yang bikin toko kamu menonjol. Ini tampil di homepage sebagai kartu fitur.",
+          "iconLabel": "Ikon {index}",
+          "titlePlaceholder": "cth. Fresh Daily",
+          "descriptionPlaceholder": "cth. Bahan diambil setiap pagi dari petani lokal"
+        },
+        "contact": {
+          "sectionCopyHeading": "Heading Section",
+          "contactTitleLabel": "Judul Section",
+          "contactTitlePlaceholder": "Mampir Yuk",
+          "contactTitleHelper": "Judul untuk section kontak di halaman toko kamu.",
+          "contactSubtitleLabel": "Subjudul Section",
+          "contactSubtitlePlaceholder": "Buka setiap hari, drop by kapan saja",
+          "reachOutHeading": "Hubungi Kami",
+          "phoneLabel": "Nomor Telepon",
+          "phonePlaceholder": "+62 21 1234 5678",
+          "whatsappReadonly": "WhatsApp (dari registrasi)",
+          "whatsappReadonlyHelper": "WhatsApp kamu sudah tersimpan. Update di Pengaturan → Kontak.",
+          "whereWeAreHeading": "Lokasi Kami",
+          "addressLabel": "Alamat Lengkap",
+          "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
+          "mapUrlLabel": "URL Embed Google Maps",
+          "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
+          "mapUrlHelper": "Buka Google Maps → Bagikan → Sematkan → salin nilai",
+          "mapPreviewLabel": "Preview Peta",
+          "mapPreviewEmpty": "Tempel URL embed Google Maps di atas untuk preview",
+          "mapUrlInvalidHint": "Tempel URL embed lengkap yang dimulai dengan https://www.google.com/maps/embed"
+        },
+        "social": {
+          "intro": "Tambah minimal satu link sosial agar pengunjung bisa mengikuti toko kamu.",
+          "statusFilled": "{count} platform ditambahkan",
+          "statusEmpty": "Belum ada — minimal 1 harus diisi",
+          "emptyReminder": "Kamu perlu isi minimal satu link sosial sebelum bisa lanjut."
+        },
+        "review": {
+          "visual": "Tampilan",
+          "story": "Cerita Toko",
+          "highlights": "Highlight",
+          "contact": "Cara Menemukan",
+          "social": "Media Sosial",
+          "socialEmpty": "Belum ada link sosial — kembali dan tambah minimal satu.",
+          "launchNote": "Kelihatan oke! Setelah launch, toko kamu langsung live dan bisa ditemukan pembeli. Semuanya bisa diubah lagi di Pengaturan."
+        },
+        "cta": {
+          "submit": "Launch Toko Saya",
+          "submitting": "Launching..."
+        },
+        "done": {
+          "heading": "Toko kamu sudah live! 🎉",
+          "subheading": "Mulai tambah produk agar pelanggan bisa menemukan kamu.",
+          "ctaAddProduct": "Tambah Produk Pertama",
+          "ctaViewStore": "Preview Toko"
+        },
+        "errors": {
+          "logoRequired": "Mohon upload logo toko",
+          "colorRequired": "Mohon pilih warna brand",
+          "heroBgRequired": "Mohon upload gambar hero",
+          "heroTitleMin": "Headline terlalu pendek (min 5 karakter)",
+          "heroSubtitleMin": "Tagline terlalu pendek (min 10 karakter)",
+          "heroCtaMin": "Teks tombol terlalu pendek (min 2 karakter)",
+          "heroCtaTooManyWords": "Teks tombol maksimal 2 kata",
+          "exactly3Highlights": "Harus ada tepat 3 highlight",
+          "allHighlightsRequired": "Setiap highlight butuh ikon, judul (min 2 karakter), dan deskripsi (min 10 karakter)",
+          "phoneRequired": "Nomor telepon wajib diisi",
+          "addressMin": "Alamat terlalu pendek (min 10 karakter)",
+          "mapUrlInvalid": "Mohon tempel URL embed Google Maps yang valid",
+          "contactTitleMin": "Judul section terlalu pendek (min 3 karakter)",
+          "contactSubtitleMin": "Subjudul section terlalu pendek (min 5 karakter)",
+          "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan"
+        }
       }
     },
     "settings": {

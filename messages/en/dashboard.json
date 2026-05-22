@@ -443,6 +443,129 @@
         "slugRequired": "Store URL is required",
         "whatsappRequired": "WhatsApp number is required",
         "agreementRequired": "Please agree to the Terms of Service to continue"
+      },
+      "seller": {
+        "title": "Build Your Store",
+        "subtitle": "Almost there — fill in the details to make your store presentable",
+        "autofillBadge": "Autofilled — tap to edit",
+        "stepIndicator": "Step {current} of {total}",
+        "steps": {
+          "visual": {
+            "title": "Look & Feel",
+            "desc": "Logo, brand color, hero image"
+          },
+          "story": {
+            "title": "Your Story",
+            "desc": "Headline, tagline, button text"
+          },
+          "highlights": {
+            "title": "Highlights",
+            "desc": "3 things you do best"
+          },
+          "contact": {
+            "title": "Where to Find You",
+            "desc": "Phone, address, map"
+          },
+          "social": {
+            "title": "Social Reach",
+            "desc": "At least one platform"
+          },
+          "review": {
+            "title": "Review",
+            "desc": "Confirm & launch"
+          }
+        },
+        "visual": {
+          "logoLabel": "Store Logo",
+          "logoHelper": "Square image, JPG/PNG, min 200×200 px. This is your brand — make it count.",
+          "uploadLogo": "Upload Logo",
+          "colorLabel": "Brand Color",
+          "colorHelper": "Used for buttons, links, and accents across your store.",
+          "heroBgLabel": "Hero Background",
+          "heroBgHelper": "Big image at the top of your store. Landscape orientation works best.",
+          "uploadHeroBg": "Upload Background"
+        },
+        "story": {
+          "heroTitleLabel": "Headline",
+          "heroTitlePlaceholder": "Welcome to my store",
+          "heroTitleHelper": "The first thing visitors read. Keep it short and punchy (5–200 chars).",
+          "heroSubtitleLabel": "Tagline",
+          "heroSubtitlePlaceholder": "Tell visitors what you offer in one clear sentence",
+          "heroSubtitleHelper": "Support the headline — describe what you do or sell (10–300 chars).",
+          "heroCtaLabel": "Button Text",
+          "heroCtaPlaceholder": "Shop Now",
+          "heroCtaHelper": "Max 2 words, 15 characters. Examples: Shop Now, Order Here, Get Started."
+        },
+        "highlights": {
+          "intro": "Pick 3 things that make your store stand out. These appear on your homepage as feature cards.",
+          "iconLabel": "Icon {index}",
+          "titlePlaceholder": "e.g. Fresh Daily",
+          "descriptionPlaceholder": "e.g. Sourced every morning from local farms"
+        },
+        "contact": {
+          "sectionCopyHeading": "Section Heading",
+          "contactTitleLabel": "Section Title",
+          "contactTitlePlaceholder": "Visit Us",
+          "contactTitleHelper": "Heading for the contact section on your store page.",
+          "contactSubtitleLabel": "Section Subtitle",
+          "contactSubtitlePlaceholder": "Drop by anytime, we're open Mon–Sat",
+          "reachOutHeading": "Reach Out",
+          "phoneLabel": "Phone Number",
+          "phonePlaceholder": "+62 21 1234 5678",
+          "whatsappReadonly": "WhatsApp (from registration)",
+          "whatsappReadonlyHelper": "Your WhatsApp is already saved. Update it in Settings → Contact.",
+          "whereWeAreHeading": "Where We Are",
+          "addressLabel": "Full Address",
+          "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
+          "mapUrlLabel": "Google Maps Embed URL",
+          "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
+          "mapUrlHelper": "Open Google Maps → Share → Embed → copy the",
+          "mapPreviewLabel": "Map Preview",
+          "mapPreviewEmpty": "Paste a Google Maps embed URL above to preview",
+          "mapUrlInvalidHint": "Paste the full embed URL starting with https://www.google.com/maps/embed"
+        },
+        "social": {
+          "intro": "Add at least one social link so visitors can follow your store.",
+          "statusFilled": "{count} platform added",
+          "statusEmpty": "None added yet — at least 1 required",
+          "emptyReminder": "You need to fill in at least one social link before you can continue."
+        },
+        "review": {
+          "visual": "Look & Feel",
+          "story": "Your Story",
+          "highlights": "Highlights",
+          "contact": "Where to Find You",
+          "social": "Social Reach",
+          "socialEmpty": "No social links added — go back and add at least one.",
+          "launchNote": "Looks good! Once you launch, your store is live and visible to buyers. You can always update everything from Settings."
+        },
+        "cta": {
+          "submit": "Launch My Store",
+          "submitting": "Launching..."
+        },
+        "done": {
+          "heading": "Your store is live! 🎉",
+          "subheading": "Start adding products so customers can discover you.",
+          "ctaAddProduct": "Add First Product",
+          "ctaViewStore": "Preview Store"
+        },
+        "errors": {
+          "logoRequired": "Please upload a store logo",
+          "colorRequired": "Please pick a brand color",
+          "heroBgRequired": "Please upload a hero background image",
+          "heroTitleMin": "Headline is too short (min 5 characters)",
+          "heroSubtitleMin": "Tagline is too short (min 10 characters)",
+          "heroCtaMin": "Button text is too short (min 2 characters)",
+          "heroCtaTooManyWords": "Button text should be max 2 words",
+          "exactly3Highlights": "Exactly 3 highlights are required",
+          "allHighlightsRequired": "Each highlight needs an icon, a title (min 2 chars), and a description (min 10 chars)",
+          "phoneRequired": "Phone number is required",
+          "addressMin": "Address is too short (min 10 characters)",
+          "mapUrlInvalid": "Please paste a valid Google Maps embed URL",
+          "contactTitleMin": "Section title is too short (min 3 characters)",
+          "contactSubtitleMin": "Section subtitle is too short (min 5 characters)",
+          "atLeastOneSocial": "Add at least one social link to continue"
+        }
       }
     },
     "settings": {

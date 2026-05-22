@@ -19,6 +19,15 @@
 //   No redirect. The page itself renders <ComingSoonPage /> server-side.
 //   Avoids redirect flash + lets user see what's happening.
 //
+// [SETUP-GATE — May 2026]
+// Case D — SELLER + isSetupComplete=false:
+//   SELLER who hasn't finished the setup wizard is redirected to
+//   /dashboard/setup-store regardless of what route they requested.
+//   Exempt routes: /dashboard/setup-store (destination) + /dashboard/studio
+//   (post-registration store builder — intentionally exempt per spec).
+//   shouldHide() returns true while redirect is in flight so there's
+//   no content flash.
+//
 // Note: navigating to /dashboard/library directly with digital off will
 // hit Case C for SELLER (shows ComingSoonPage) or Case A for BUYER
 // (redirects to setup-store).
@@ -46,11 +55,20 @@ function stripLocalePrefix(pathname: string): string {
 }
 
 /**
- * Returns true if pathname matches /dashboard/setup-store (the only
- * destination BUYER + digital-off should be allowed to reach).
+ * Returns true if pathname is /dashboard/setup-store.
+ * Setup gate must NOT block this route — it's the destination.
  */
 function isSetupStorePath(pathname: string): boolean {
   return stripLocalePrefix(pathname) === '/dashboard/setup-store';
+}
+
+/**
+ * Returns true if pathname is /dashboard/studio.
+ * Studio is exempt from the setup gate — new SELLERs land here
+ * immediately after registration (before completing setup).
+ */
+function isStudioPath(pathname: string): boolean {
+  return stripLocalePrefix(pathname).startsWith('/dashboard/studio');
 }
 
 /**
@@ -59,10 +77,20 @@ function isSetupStorePath(pathname: string): boolean {
  * effect logic and render logic stay in sync.
  */
 function shouldHide(
-  tenant: { role: string } | null,
+  tenant: { role: string; isSetupComplete?: boolean } | null,
   pathname: string,
 ): boolean {
   if (!tenant) return false;
+
+  // Case D — SELLER + setup not complete → hide until redirect fires
+  if (
+    tenant.role === 'SELLER' &&
+    !tenant.isSetupComplete &&
+    !isSetupStorePath(pathname) &&
+    !isStudioPath(pathname)
+  ) {
+    return true;
+  }
 
   // Case A — Digital OFF + BUYER → only setup-store is allowed
   if (!FEATURES.digitalProducts && tenant.role === 'BUYER') {
@@ -86,6 +114,18 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
 
   useEffect(() => {
     if (!tenant) return;
+
+    // Case D — SELLER + isSetupComplete=false → must complete setup wizard
+    // Exempt: /dashboard/setup-store (destination) + /dashboard/studio
+    if (
+      tenant.role === 'SELLER' &&
+      !tenant.isSetupComplete &&
+      !isSetupStorePath(pathname) &&
+      !isStudioPath(pathname)
+    ) {
+      router.replace('/dashboard/setup-store');
+      return;
+    }
 
     // Case A
     if (!FEATURES.digitalProducts && tenant.role === 'BUYER') {

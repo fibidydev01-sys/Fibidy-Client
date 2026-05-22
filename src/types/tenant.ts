@@ -1,15 +1,13 @@
 // ============================================================================
-// FILE: src/types/tenant.ts
-// PURPOSE: Tenant type definitions — v4 cleanup
+// FILE: src/types/tenant.ts — FULL FILE REPLACEMENT
 //
-// v4 (2026-05-15): dropped dead fields
-//   - currency       (was phantom: required on FE, never returned by server SELECT)
-//   - metaTitle      (was phantom: read for SEO but no DB column, no DTO)
-//   - metaDescription (was phantom: same as metaTitle)
-//   - heroCtaLink    (was dead: FE wrote it, server silently dropped, render
-//                     hardcodes '/products' in block dispatcher)
+// [SETUP-GATE Phase A — May 2026]
+// CompleteSetupInput interface rewritten — 14 mandatory fields.
+// FeatureItem dan SocialLinks sudah ada di file ini, tidak perlu import baru.
 //
-// v3 (prior): paymentMethods + shippingMethods REMOVED from schema
+// PERUBAHAN vs versi lama:
+//   LAMA: logo?, name, description, whatsapp, address?  (5 field)
+//   BARU: 14 field mandatory (visual, story, highlights, contact, social)
 // ============================================================================
 
 import type { TenantLandingConfig } from './landing';
@@ -51,7 +49,7 @@ export interface FeatureItem {
 }
 
 // ==========================================
-// BASE TENANT (shared between Tenant & PublicTenant)
+// BASE TENANT
 // ==========================================
 
 interface BaseTenant {
@@ -69,20 +67,16 @@ interface BaseTenant {
   theme?: { primaryColor?: string };
   landingConfig?: TenantLandingConfig;
   socialLinks?: SocialLinks;
-  // Hero Section
   heroTitle?: string;
   heroSubtitle?: string;
   heroCtaText?: string;
   heroBackgroundImage?: string;
-  // About Section
   aboutFeatures?: FeatureItem[];
-  // Contact Section
   contactTitle?: string;
   contactSubtitle?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
   contactShowForm?: boolean;
-  // Status
   status: 'ACTIVE' | 'SUSPENDED';
   createdAt: string;
 }
@@ -93,10 +87,12 @@ interface BaseTenant {
 
 export interface Tenant extends BaseTenant {
   updatedAt?: string;
+  isSetupComplete: boolean;
+  setupCompletedAt?: string | null;
 }
 
 // ==========================================
-// PUBLIC TENANT (storefront - public access)
+// PUBLIC TENANT (storefront)
 // ==========================================
 
 export interface PublicTenant extends BaseTenant {
@@ -130,6 +126,37 @@ export interface UpdateTenantInput {
 }
 
 // ==========================================
+// COMPLETE SETUP INPUT
+// [SETUP-GATE Phase A] — 14 mandatory fields
+// ==========================================
+
+export interface CompleteSetupInput {
+  // ── Step 1: Visual Identity ───────────────────────────────────────────────
+  logo: string;
+  primaryColor: string;
+  heroBackgroundImage: string;
+
+  // ── Step 2: Store Story ───────────────────────────────────────────────────
+  heroTitle: string;
+  heroSubtitle: string;
+  /** Max 2 words, 15 chars */
+  heroCtaText: string;
+
+  // ── Step 3: Featured Highlights (exactly 3) ───────────────────────────────
+  aboutFeatures: FeatureItem[];
+
+  // ── Step 4: Contact & Location ────────────────────────────────────────────
+  phone: string;
+  address: string;
+  contactMapUrl: string;
+  contactTitle: string;
+  contactSubtitle: string;
+
+  // ── Step 5: Social Presence (at least 1) ─────────────────────────────────
+  socialLinks: SocialLinks;
+}
+
+// ==========================================
 // UPGRADE TO SELLER INPUT
 // ==========================================
 
@@ -141,7 +168,7 @@ export interface UpgradeToSellerInput {
 }
 
 // ==========================================
-// FORM DATA TYPES
+// FORM DATA TYPES (Settings pages)
 // ==========================================
 
 export interface HeroFormData {

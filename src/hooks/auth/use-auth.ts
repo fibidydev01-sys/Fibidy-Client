@@ -30,10 +30,11 @@
 //   - EMAIL_TAKEN_AFTER_PREVIEW  → toast "use a different email"
 //   - SLUG_RESERVED              → toast (rare; FE should catch first)
 //
-// Generic errors (no recognized code) still flow through `error` for
-// the inline Alert. Adding `errorCode` is purely additive — existing
-// callers that destructure `{ register, isLoading, error, reset }`
-// keep working unchanged.
+// [SETUP-GATE — May 2026]
+// `useLogin` now checks tenant.isSetupComplete for SELLER role:
+//   - SELLER + isSetupComplete=false → /dashboard/setup-store (mandatory)
+//   - SELLER + isSetupComplete=true  → /dashboard/products (normal flow)
+// `getPostLoginRedirect` helper is exported for reuse (e.g. after token refresh).
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -46,6 +47,30 @@ import { tenantsApi } from '@/lib/api/tenants';
 import { toast } from '@/lib/providers/root-provider';
 import { FEATURES } from '@/lib/config/features';
 import type { LoginInput, RegisterInput } from '@/types/auth';
+import type { Tenant } from '@/types/tenant';
+
+// ==========================================
+// [SETUP-GATE] POST-LOGIN REDIRECT HELPER
+//
+// Determines where to send the user after successful login.
+// SELLER: depends on isSetupComplete.
+// BUYER: depends on FEATURES.digitalProducts flag.
+//
+// Exported so it can be reused wherever a redirect decision is needed
+// (e.g. after token refresh, after /auth/status check).
+// ==========================================
+
+export function getPostLoginRedirect(tenant: Pick<Tenant, 'role' | 'isSetupComplete'>): string {
+  if (tenant.role === 'SELLER') {
+    return tenant.isSetupComplete
+      ? '/dashboard/products'
+      : '/dashboard/setup-store';
+  }
+  // BUYER
+  return FEATURES.digitalProducts
+    ? '/dashboard/library'
+    : '/dashboard/setup-store';
+}
 
 export function useLogin() {
   const tToast = useTranslations('toast.auth');
@@ -73,14 +98,9 @@ export function useLogin() {
 
         const from = searchParams.get('from');
 
-        const buyerFallback = FEATURES.digitalProducts
-          ? '/dashboard/library'
-          : '/dashboard/setup-store';
+        // [SETUP-GATE] Use helper — SELLER routes to setup-store if not complete
+        const defaultRedirect = getPostLoginRedirect(response.tenant);
 
-        const defaultRedirect =
-          response.tenant.role === 'SELLER'
-            ? '/dashboard/products'
-            : buyerFallback;
         router.push(from || defaultRedirect);
 
         return response;
@@ -127,6 +147,8 @@ export function useRegister() {
           tToast('registerSuccess'),
           tToast('registerSuccessDetail'),
         );
+        // Post-register: always go to studio (store builder)
+        // isSetupComplete=false at this point, but studio is exempt from setup gate
         router.push('/dashboard/studio');
 
         return response;
