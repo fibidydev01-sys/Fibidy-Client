@@ -1,20 +1,20 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // STEP REVIEW
 // File: src/components/auth/register/step-review.tsx
 //
-// [POLISH v15.4 — May 2026]
-// Category label/description now read from i18n via
-// `getCategoryLabelKey()` / `getCategoryDescriptionKey()` helpers.
-// Previously: registry shipped hardcoded EN labels — ID locale users
-// saw "Cafe & Coffee Shop" in their Indonesian register flow.
+// [PHASE D — May 2026]
+// +intent prop: 'BUYER' | 'SELLER' | 'EDU' | null
+//   - BUYER: skip store info section (no slug/name/category)
+//            show only email + password (masked)
+//   - EDU: show store info + account + edu note badge
+//   - SELLER: default — show all sections
 //
-// Phase 3 (Interactive Store Builder, May 2026):
-//
-// 🔵 Agreement state LIFTED to parent (register.tsx).
-// 🔵 NEW prop `cameFromBuilder` — renders badge when true
-// ==========================================
+// [PHASE C — May 2026]
+// Agreement state lifted to parent (register.tsx).
+// cameFromBuilder prop for builder badge.
+// ============================================================================
 
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
@@ -25,11 +25,20 @@ import {
   getCategoryLabelKey,
   getCategoryDescriptionKey,
 } from '@/lib/constants/shared/categories';
-import { Store, Mail, Lock, Phone, Edit2, CheckCircle2 } from 'lucide-react';
+import {
+  Store,
+  Mail,
+  Lock,
+  Phone,
+  Edit2,
+  CheckCircle2,
+  GraduationCap,
+} from 'lucide-react';
+import type { RegisterIntent } from '@/types/auth';
 
-// ==========================================
+// ============================================================================
 // TYPES
-// ==========================================
+// ============================================================================
 
 interface StepReviewProps {
   data: {
@@ -41,90 +50,114 @@ interface StepReviewProps {
     password?: string;
     whatsapp?: string;
   };
+  /**
+   * [PHASE D] intent determines which sections are shown:
+   *   BUYER  → only account section (no store info)
+   *   SELLER → all sections
+   *   EDU    → all sections + EDU badge
+   */
+  intent: RegisterIntent | null;
   onEdit: (step: number) => void;
-  /** Controlled — agreement state lifted to parent (register.tsx) */
   isAgreed: boolean;
-  /** Controlled — agreement state setter lifted to parent (register.tsx) */
   onAgreementChange: (agreed: boolean) => void;
-  /** True when user arrived from the marketing Interactive Store Builder */
   cameFromBuilder?: boolean;
 }
 
-// ==========================================
+// ============================================================================
 // COMPONENT
-// ==========================================
+// ============================================================================
 
 export function StepReview({
   data,
+  intent,
   onEdit,
   isAgreed,
   onAgreementChange,
   cameFromBuilder = false,
 }: StepReviewProps) {
   const t = useTranslations('auth.register.review');
-  // Root-level translator for cross-namespace lookups (categories live
-  // under common.*, not auth.*)
   const tRoot = useTranslations();
+
+  const isBuyer = intent === 'BUYER';
+  const isEdu = intent === 'EDU';
 
   const categoryConfig = data.category
     ? getCategoryConfig(data.category)
     : null;
 
-  // Resolve i18n label/description if category is valid. Fall back
-  // to the raw key if for some reason the i18n lookup fails (e.g.
-  // category from query param hasn't propagated to messages yet).
   const categoryLabel = categoryConfig
     ? tRoot(getCategoryLabelKey(categoryConfig.key))
     : data.category ?? t('dash');
+
   const categoryDescription = categoryConfig
     ? tRoot(getCategoryDescriptionKey(categoryConfig.key))
     : null;
 
+  // Step numbers differ per intent
+  // BUYER:        1=Intent, 2=Account, 3=Review
+  // SELLER/EDU:   1=Intent, 2=Category, 3=StoreInfo, 4=Account, 5=Review
+  const categoryStep = 2;
+  const storeInfoStep = 3;
+  const accountStep = isBuyer ? 2 : 4;
+
   return (
     <div className="space-y-3 max-w-md">
-      {/* Business Type */}
-      <ReviewCard label={t('businessType')} onEdit={() => onEdit(2)}>
-        <p className="text-sm font-medium">{categoryLabel}</p>
-        {categoryDescription && (
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {categoryDescription}
-          </p>
-        )}
-      </ReviewCard>
 
-      {/* Store Info */}
-      <ReviewCard
-        label={t('storeInfo')}
-        icon={<Store className="h-3.5 w-3.5 text-muted-foreground" />}
-        onEdit={() => onEdit(3)}
-      >
-        <div className="space-y-1.5">
-          <div>
-            <p className="text-xs text-muted-foreground">{t('storeName')}</p>
-            <p className="text-sm font-medium">{data.name || t('dash')}</p>
+      {/* EDU badge — hanya tampil untuk EDU intent */}
+      {isEdu && (
+        <div className="flex items-center gap-2 px-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
+            <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+            {t('eduNote')}
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">{t('storeUrl')}</p>
-            <p className="text-sm font-medium text-primary">
-              {t('storeUrlSuffix', { slug: data.slug || t('dash') })}
-            </p>
-          </div>
-          {data.description && (
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t('description')}
-              </p>
-              <p className="text-sm">{data.description}</p>
-            </div>
-          )}
         </div>
-      </ReviewCard>
+      )}
+
+      {/* Business Type — hanya untuk SELLER + EDU */}
+      {!isBuyer && (
+        <ReviewCard label={t('businessType')} onEdit={() => onEdit(categoryStep)}>
+          <p className="text-sm font-medium">{categoryLabel}</p>
+          {categoryDescription && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {categoryDescription}
+            </p>
+          )}
+        </ReviewCard>
+      )}
+
+      {/* Store Info — hanya untuk SELLER + EDU */}
+      {!isBuyer && (
+        <ReviewCard
+          label={t('storeInfo')}
+          icon={<Store className="h-3.5 w-3.5 text-muted-foreground" />}
+          onEdit={() => onEdit(storeInfoStep)}
+        >
+          <div className="space-y-1.5">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('storeName')}</p>
+              <p className="text-sm font-medium">{data.name || t('dash')}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">{t('storeUrl')}</p>
+              <p className="text-sm font-medium text-primary">
+                {t('storeUrlSuffix', { slug: data.slug || t('dash') })}
+              </p>
+            </div>
+            {data.description && (
+              <div>
+                <p className="text-xs text-muted-foreground">{t('description')}</p>
+                <p className="text-sm">{data.description}</p>
+              </div>
+            )}
+          </div>
+        </ReviewCard>
+      )}
 
       {/* Account */}
       <ReviewCard
         label={t('account')}
         icon={<Mail className="h-3.5 w-3.5 text-muted-foreground" />}
-        onEdit={() => onEdit(4)}
+        onEdit={() => onEdit(accountStep)}
       >
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
@@ -135,10 +168,13 @@ export function StepReview({
             <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <p className="text-sm">••••••••</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            <p className="text-sm">+{data.whatsapp || t('dash')}</p>
-          </div>
+          {/* WhatsApp hanya tampil untuk SELLER + EDU */}
+          {!isBuyer && data.whatsapp && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <p className="text-sm">+{data.whatsapp}</p>
+            </div>
+          )}
         </div>
       </ReviewCard>
 
@@ -154,9 +190,7 @@ export function StepReview({
           <Checkbox
             id="agreement"
             checked={isAgreed}
-            onCheckedChange={(checked) =>
-              onAgreementChange(checked === true)
-            }
+            onCheckedChange={(checked) => onAgreementChange(checked === true)}
             className="mt-0.5 shrink-0"
           />
           <label
@@ -191,9 +225,9 @@ export function StepReview({
   );
 }
 
-// ==========================================
+// ============================================================================
 // REVIEW CARD
-// ==========================================
+// ============================================================================
 
 function ReviewCard({
   label,

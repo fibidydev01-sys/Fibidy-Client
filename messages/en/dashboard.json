@@ -1,5 +1,11 @@
 {
   "dashboard": {
+    "edu": {
+      "badge": "Student Mode",
+      "sidebar": {
+        "tooltip": "This is a simulation account. Subscription and payment features are not available."
+      }
+    },
     "metadata": {
       "productsTitle": "Products",
       "productsDescription": "Manage your products",
@@ -576,7 +582,12 @@
           "ctaAddProduct": "Add First Product",
           "ctaViewStore": "Preview Store",
           "ctaPreview": "Preview store",
-          "helpFooter": "Need help? Visit our help center anytime from the dashboard."
+          "helpFooter": "Need help? Visit our help center anytime from the dashboard.",
+          "goToStudioDialog": {
+            "title": "Next up: Design your storefront",
+            "description": "You'll land in Studio where you can pick a layout and customize how your store looks. It only takes a minute.",
+            "cta": "Go to Studio"
+          }
         },
         "errors": {
           "logoRequired": "Please upload a store logo",

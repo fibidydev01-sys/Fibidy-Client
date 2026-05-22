@@ -1,16 +1,12 @@
-// ============================================================================
-// FILE: src/types/tenant.ts
+// src/types/tenant.ts
 //
-// [PHASE C — May 2026]
-// CompleteSetupInput: address/contactMapUrl made optional + added
-//   hasPhysicalLocation, locationLat, locationLng
-// Tenant + UpdateTenantInput: added locationLat/Lng for storefront fallback
+// [PHASE D — May 2026]
+// Tenant interface: +isEduMode?: boolean
+// PublicTenant interface: +isEduMode?: boolean (needed for EduBanner in storefront)
+// UpdateTenantInput: isEduMode NOT included — only admin/dedicated endpoint can change it
 //
 // [PHASE C v2 — May 2026]
-// Tenant: + hasPublishedOnce + dismissedFirstProductDialog
-// UpdateTenantInput: + dismissedFirstProductDialog
-// NOTE: hasPublishedOnce NOT in UpdateTenantInput — only BE sets it
-// ============================================================================
+// +hasPublishedOnce, +dismissedFirstProductDialog
 
 import type { TenantLandingConfig } from './landing';
 
@@ -63,7 +59,6 @@ interface BaseTenant {
   contactMapUrl?: string;
   contactShowMap?: boolean;
   contactShowForm?: boolean;
-  // [PHASE C] Location quickstart coordinates
   locationLat?: number | null;
   locationLng?: number | null;
   status: 'ACTIVE' | 'SUSPENDED';
@@ -75,19 +70,22 @@ export interface Tenant extends BaseTenant {
   updatedAt?: string;
   isSetupComplete: boolean;
   setupCompletedAt?: string | null;
-  // [PHASE C v2] Onboarding state — persisted in DB
-  // hasPublishedOnce: true setelah seller publish di Studio minimal 1x
-  // dismissedFirstProductDialog: true setelah seller dismiss dialog di /products
   hasPublishedOnce?: boolean;
   dismissedFirstProductDialog?: boolean;
+  // [PHASE D] EDU mode — true jika seller register sebagai Pelajar
+  // Tidak ada di UpdateTenantInput — hanya BE yang bisa set
+  isEduMode?: boolean;
 }
 
 // ── Storefront tenant (public access) ────────────────────────────────────────
+// [PHASE D] isEduMode diperlukan storefront untuk render EduBanner
 export interface PublicTenant extends BaseTenant {
   _count?: { products: number };
+  isEduMode?: boolean;
 }
 
 // ── Update input ──────────────────────────────────────────────────────────────
+// isEduMode TIDAK ada di sini — hanya admin atau dedicated upgrade endpoint
 export interface UpdateTenantInput {
   name?: string;
   description?: string;
@@ -108,38 +106,28 @@ export interface UpdateTenantInput {
   contactMapUrl?: string;
   contactShowMap?: boolean;
   contactShowForm?: boolean;
-  // [PHASE C] Location coordinates
   locationLat?: number | null;
   locationLng?: number | null;
-  // [PHASE C v2] FE-settable onboarding flag
-  // dismissedFirstProductDialog: seller klik "Nanti Saja" di FirstProductDialog
-  // hasPublishedOnce: TIDAK ada di sini — hanya BE yang set via publishLandingConfig
   dismissedFirstProductDialog?: boolean;
 }
 
 // ── Complete setup input (wizard submit) ──────────────────────────────────────
 export interface CompleteSetupInput {
-  // Step 1: Visual Identity
   logo: string;
   primaryColor: string;
   heroBackgroundImage: string;
-  // Step 2: Store Story
   heroTitle: string;
   heroSubtitle: string;
   heroCtaText: string;
-  // Step 3: Featured Highlights (exactly 3)
   aboutFeatures: FeatureItem[];
-  // Step 4: Contact (always mandatory)
   phone: string;
   contactTitle: string;
   contactSubtitle: string;
-  // Step 4: Location (CONDITIONAL on hasPhysicalLocation)
   hasPhysicalLocation: boolean;
   address?: string;
   contactMapUrl?: string;
   locationLat?: number;
   locationLng?: number;
-  // Step 5: Social Presence (at least 1)
   socialLinks: SocialLinks;
 }
 

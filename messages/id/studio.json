@@ -65,6 +65,13 @@
       "heroInactiveHint": "Aktifkan untuk melihat preview",
       "heroEnable": "Aktifkan"
     },
+    "onboardingDialog": {
+      "title": "Selamat datang di Studio!",
+      "step1": "Pilih layout hero dari panel di sebelah kanan",
+      "step2": "Sesuaikan warna, teks, dan gambar di Pengaturan",
+      "step3": "Tekan Publikasikan kalau sudah oke — toko langsung live",
+      "cta": "Siap, ayo mulai!"
+    },
     "upgradeModal": {
       "title": "Upgrade untuk publikasikan block Pro",
       "description": "Kamu memakai desain hero Pro (block 4+). Upgrade ke paket Business untuk mempublikasikan."

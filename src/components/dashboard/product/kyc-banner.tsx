@@ -1,35 +1,18 @@
 'use client';
 
-// KYC Banner — always visible, text changes per state.
+// ============================================================================
+// KYC BANNER
+// File: src/components/dashboard/product/kyc-banner.tsx
 //
-// State coverage:
-//   COMING_SOON (FEATURES.digitalProducts === false) → disabled "Coming Soon"
-//   NOT_STARTED (no account)    → Setup Payment
-//   NOT_STARTED (has account)   → Continue Setup
-//   PENDING                     → info, no action
-//   NEEDS_MORE_INFO (no errors) → warning, Complete Documents
-//   NEEDS_MORE_INFO (errors)    → warning, render error list
-//   PAST_DUE                    → red error, urgent
-//   CHARGES_ONLY                → warning, Activate Payout
-//   ACTIVE (no future req)      → green success, no action
-//   ACTIVE (has future req)     → info, View Updates
-//   REJECTED                    → red error, Contact Support
-//   isPolling                   → loading state after returning from Stripe
+// [PHASE D — May 2026]
+// Early return null jika tenant.isEduMode === true.
+// EDU seller tidak perlu KYC — fitur subscription + pembayaran disembunyikan.
 //
-// [PHASE 3 — DIGITAL PRODUCTS FLAG]
-// Previously this component returned `null` when
-// `FEATURES.digitalProducts === false`, which hid it entirely.
-// Per the May 2026 design feedback, the banner should still appear
-// when the feature is gated — but as a friendly, disabled
-// "Coming Soon" tile so sellers can SEE that payment verification
-// is on the roadmap without being able to act on it yet.
-//
-// useKycStatus() is also gated via React Query's `enabled` so this
-// component receives `kycStatus = undefined` when the flag is off —
-// the early-return below short-circuits BEFORE any of that matters,
-// so no spinner flash, no 503 noise.
+// [PHASE 3] Coming Soon state when FEATURES.digitalProducts === false
+// ============================================================================
 
 import { useTranslations } from 'next-intl';
+import { useAuthStore } from '@/stores/auth-store';
 import { useInitiateKyc } from '@/hooks/dashboard/use-products';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -68,19 +51,17 @@ export function KycBanner({
   const tActions = useTranslations('dashboard.kycBanner.actions');
   const { initiateKyc, isLoading } = useInitiateKyc();
 
+  // [PHASE D] EDU seller: hide KYC banner entirely
+  const tenant = useAuthStore((s) => s.tenant);
+  if (tenant?.isEduMode === true) return null;
+
   // ── Coming Soon — feature flag gated ─────────────────────────
-  // Replaces the old `if (!FEATURES.digitalProducts) return null`.
-  // We render a friendly amber tile + disabled "Coming Soon" button
-  // so the verification flow's existence is still visible.
   if (!FEATURES.digitalProducts) {
     return (
       <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
         <Rocket className="h-4 w-4 text-amber-600 dark:text-amber-400" />
         <AlertDescription className="space-y-2">
-          <Label
-            text={t('label')}
-            className="text-amber-700 dark:text-amber-400"
-          />
+          <Label text={t('label')} className="text-amber-700 dark:text-amber-400" />
           <p className="text-sm text-amber-800 dark:text-amber-300">
             {tStates('comingSoon')}
           </p>
@@ -93,7 +74,6 @@ export function KycBanner({
     );
   }
 
-  // ── isPolling — merchant just returned from Stripe ───────────
   if (isPolling) {
     return (
       <Alert>
@@ -108,21 +88,17 @@ export function KycBanner({
     );
   }
 
-  // ── No data from server yet ───────────────────────────────────
   if (!kycStatus) {
     return (
       <Alert>
         <AlertDescription>
           <Label text={t('label')} />
-          <p className="text-sm mt-1 text-muted-foreground">
-            {t('loading')}
-          </p>
+          <p className="text-sm mt-1 text-muted-foreground">{t('loading')}</p>
         </AlertDescription>
       </Alert>
     );
   }
 
-  // ── NOT_STARTED ───────────────────────────────────────────────
   if (kycStatus === 'NOT_STARTED') {
     const isReturning = hasStripeAccount;
     return (
@@ -130,9 +106,7 @@ export function KycBanner({
         <AlertDescription className="space-y-2">
           <Label text={t('label')} />
           <p className="text-sm">
-            {isReturning
-              ? tStates('notStartedReturning')
-              : tStates('notStartedFresh')}
+            {isReturning ? tStates('notStartedReturning') : tStates('notStartedFresh')}
           </p>
           <ActionButton
             onClick={() => initiateKyc()}
@@ -147,7 +121,6 @@ export function KycBanner({
     );
   }
 
-  // ── PENDING ───────────────────────────────────────────────────
   if (kycStatus === 'PENDING') {
     return (
       <Alert>
@@ -159,7 +132,6 @@ export function KycBanner({
     );
   }
 
-  // ── NEEDS_MORE_INFO ───────────────────────────────────────────
   if (kycStatus === 'NEEDS_MORE_INFO') {
     return (
       <Alert variant="destructive">
@@ -167,14 +139,10 @@ export function KycBanner({
           <Label text={t('label')} />
           {errors.length > 0 ? (
             <>
-              <p className="text-sm font-medium">
-                {tStates('needsMoreInfoTitle')}
-              </p>
+              <p className="text-sm font-medium">{tStates('needsMoreInfoTitle')}</p>
               <ul className="list-disc list-inside space-y-1">
                 {errors.map((err, i) => (
-                  <li key={i} className="text-sm">
-                    {err.message}
-                  </li>
+                  <li key={i} className="text-sm">{err.message}</li>
                 ))}
               </ul>
             </>
@@ -195,7 +163,6 @@ export function KycBanner({
     );
   }
 
-  // ── PAST_DUE ──────────────────────────────────────────────────
   if (kycStatus === 'PAST_DUE') {
     return (
       <Alert variant="destructive">
@@ -217,7 +184,6 @@ export function KycBanner({
     );
   }
 
-  // ── CHARGES_ONLY ──────────────────────────────────────────────
   if (kycStatus === 'CHARGES_ONLY') {
     return (
       <Alert>
@@ -237,7 +203,6 @@ export function KycBanner({
     );
   }
 
-  // ── ACTIVE ────────────────────────────────────────────────────
   if (kycStatus === 'ACTIVE') {
     if (hasFutureRequirements) {
       return (
@@ -247,9 +212,7 @@ export function KycBanner({
             <p className="text-sm">
               {tStates('activeWithFutureReq')}
               {futureRequirementsDeadline
-                ? tStates('activeWithFutureReqDeadline', {
-                    date: formatDate(futureRequirementsDeadline),
-                  })
+                ? tStates('activeWithFutureReqDeadline', { date: formatDate(futureRequirementsDeadline) })
                 : ''}
               .
             </p>
@@ -279,7 +242,6 @@ export function KycBanner({
     );
   }
 
-  // ── REJECTED ──────────────────────────────────────────────────
   if (kycStatus === 'REJECTED') {
     return (
       <Alert variant="destructive">
@@ -297,13 +259,9 @@ export function KycBanner({
   return null;
 }
 
-// ── Sub-components ────────────────────────────────────────────────
-
 function Label({ text, className }: { text: string; className?: string }) {
   return (
-    <p
-      className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${className ?? ''}`}
-    >
+    <p className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${className ?? ''}`}>
       {text}
     </p>
   );
@@ -325,13 +283,7 @@ function ActionButton({
   variant?: 'default' | 'outline';
 }) {
   return (
-    <Button
-      size="sm"
-      variant={variant}
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-1"
-    >
+    <Button size="sm" variant={variant} onClick={onClick} disabled={disabled} className="mt-1">
       {isLoading ? (
         <>
           <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />

@@ -1,40 +1,42 @@
-// ==========================================
-// AUTH TYPES
-// ==========================================
-/**
- * Login request payload
- */
+// src/types/auth.ts
+//
+// [PHASE D — May 2026]
+// +RegisterIntent = 'BUYER' | 'SELLER' | 'EDU'
+//   Used in FE wizard state only — not sent to BE directly.
+//   BUYER  → calls authApi.registerBuyer (separate endpoint)
+//   SELLER → calls authApi.register with intent: 'SELLER'
+//   EDU    → calls authApi.register with intent: 'EDU'
+//
+// RegisterInput: +intent field (SELLER | EDU only — BUYER uses RegisterBuyerInput)
+
+export type RegisterIntent = 'BUYER' | 'SELLER' | 'EDU';
+
 export interface LoginInput {
   email: string;
   password: string;
 }
+
 /**
- * Register (seller) request payload — wizard penuh /register
+ * Register (SELLER + EDU) request payload — full wizard /register
+ * intent: 'SELLER' | 'EDU' — determines isEduMode on BE
  */
 export interface RegisterInput {
+  intent: 'SELLER' | 'EDU';
   slug: string;
   name: string;
   category: string;
   email: string;
   password: string;
   whatsapp: string;
-  /**
-   * Phase 1 agreement audit — user must tick the Terms + Privacy checkbox
-   * at Review step. BE computes `agreementAcceptedAt` (timestamp) and
-   * stamps `agreementVersion` ('v1.0') based on this signal — the FE
-   * only carries the boolean consent flag.
-   *
-   * Required (not optional) because BE rejects registrations where
-   * agreement isn't explicitly accepted.
-   */
   agreementAccepted: boolean;
   description?: string;
   phone?: string;
   address?: string;
 }
+
 /**
- * Register buyer request payload — dialog di /discover
- * Hanya email + password. Role BUYER auto-set di server.
+ * Register buyer request payload — BUYER intent
+ * Hanya email + password. Role BUYER + slug auto-generated di server.
  */
 export interface RegisterBuyerInput {
   email: string;

@@ -1,5 +1,11 @@
 {
   "dashboard": {
+    "edu": {
+      "badge": "Mode Pelajar",
+      "sidebar": {
+        "tooltip": "Ini akun simulasi. Fitur langganan dan pembayaran tidak tersedia."
+      }
+    },
     "metadata": {
       "productsTitle": "Produk",
       "productsDescription": "Kelola produk kamu",
@@ -576,7 +582,12 @@
           "ctaAddProduct": "Tambah Produk Pertama",
           "ctaViewStore": "Preview Toko",
           "ctaPreview": "Lihat toko",
-          "helpFooter": "Butuh bantuan? Kunjungi help center kapan saja dari dashboard."
+          "helpFooter": "Butuh bantuan? Kunjungi help center kapan saja dari dashboard.",
+          "goToStudioDialog": {
+            "title": "Selanjutnya: Desain storefront kamu",
+            "description": "Kamu akan masuk ke Studio untuk pilih layout dan kustomisasi tampilan toko. Cukup semenit.",
+            "cta": "Ke Studio"
+          }
         },
         "errors": {
           "logoRequired": "Mohon upload logo toko",

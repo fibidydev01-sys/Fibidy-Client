@@ -1,5 +1,9 @@
 {
   "store": {
+    "eduBanner": {
+      "text": "This store was created for learning simulation. Products are not available for purchase.",
+      "learnMore": "Learn more"
+    },
     "metadata": {
       "notFoundTitle": "Store Not Found",
       "notFoundDescription": "The store you are looking for does not exist or is no longer active.",

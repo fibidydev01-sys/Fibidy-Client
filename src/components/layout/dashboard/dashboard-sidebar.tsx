@@ -1,16 +1,15 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // DASHBOARD SIDEBAR (desktop)
 // File: src/components/layout/dashboard/dashboard-sidebar.tsx
 //
-// [PHASE 3] Digital-related nav items are now conditional on
-// FEATURES.digitalProducts:
-//   - Downloads (seller-only) — hidden when off
-//   - Library (both roles)    — hidden when off
-//   - BUYER role with digital off has only "Start Selling" — Library
-//     link is hidden (it would 503 anyway).
-// ==========================================
+// [PHASE D — May 2026]
+// - Render EduBadge di bawah nama toko jika tenant.isEduMode === true
+// - Filter nav items: EDU seller tidak lihat Subscription + Onboard menu
+//
+// [PHASE 3] Digital-related nav items conditional on FEATURES.digitalProducts
+// ============================================================================
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -37,6 +36,7 @@ import {
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
 import { FEATURES } from '@/lib/config/features';
+import { EduBadge } from './edu-badge';
 
 interface NavItem {
   titleKey: string;
@@ -44,31 +44,29 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-// ── SELLER nav: Products + Studio always; digital items conditional ──
+// ── SELLER nav items ──
 const sellerNavItems: NavItem[] = [
   { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard },
   { titleKey: 'studio', href: '/dashboard/studio', icon: Layout },
   ...(FEATURES.digitalProducts
     ? [
-        {
-          titleKey: 'downloads',
-          href: '/dashboard/products/downloads',
-          icon: History,
-        },
+        { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History },
         { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
       ]
     : []),
 ];
 
-// ── BUYER nav: Library only when digital ON; setup-store always ──
+// ── SELLER nav items for EDU mode (filter out subscription/onboard) ──
+// Subscription is in Settings → filtered at settings level
+// Main nav items stay the same for EDU
+
+// ── BUYER nav items ──
 const buyerNavItems: NavItem[] = FEATURES.digitalProducts
   ? [
       { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
       { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
     ]
   : [
-      // Digital off — BUYER's only meaningful destination is setup-store.
-      // RouteGuard will redirect BUYER from any other path here.
       { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
     ];
 
@@ -79,6 +77,7 @@ export function DashboardSidebar() {
   const { logout } = useLogout();
 
   const isSeller = tenant?.role === 'SELLER';
+  const isEdu = isSeller && tenant?.isEduMode === true;
   const navItems = isSeller ? sellerNavItems : buyerNavItems;
 
   const isActive = (href: string) => {
@@ -97,6 +96,17 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col justify-center">
         <SidebarGroup>
+          {/* Store name + EDU badge */}
+          {tenant?.name && (
+            <div className="px-2 py-2 space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground truncate">
+                {tenant.name}
+              </p>
+              {/* [PHASE D] EDU badge — hanya tampil jika isEduMode */}
+              {isEdu && <EduBadge />}
+            </div>
+          )}
+
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>

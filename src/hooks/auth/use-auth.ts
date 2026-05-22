@@ -1,18 +1,18 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // USE AUTH
 // File: src/hooks/auth/use-auth.ts
 //
-// [PHASE C — May 2026]
-// useRegister: redirect after success → /dashboard/setup-store
-//   (was /dashboard/studio — but studio without setup data has no context)
-// Setup gate flow now:
-//   Register → setup-store → studio → products
+// [PHASE D — May 2026]
+// useRegister: intent-aware routing setelah register sukses
+//   - BUYER  → /dashboard/library (melalui authApi.registerBuyer)
+//   - SELLER → /dashboard/setup-store
+//   - EDU    → /dashboard/setup-store (sama dengan SELLER)
 //
-// [SETUP-GATE — May 2026]
+// [PHASE C — May 2026]
 // useLogin: checks tenant.isSetupComplete for SELLER routing.
-// ==========================================
+// ============================================================================
 
 import { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -23,12 +23,12 @@ import { authApi } from '@/lib/api/auth';
 import { tenantsApi } from '@/lib/api/tenants';
 import { toast } from '@/lib/providers/root-provider';
 import { FEATURES } from '@/lib/config/features';
-import type { LoginInput, RegisterInput } from '@/types/auth';
+import type { LoginInput, RegisterInput, RegisterBuyerInput } from '@/types/auth';
 import type { Tenant } from '@/types/tenant';
 
-// ==========================================
+// ============================================================
 // POST-LOGIN REDIRECT HELPER
-// ==========================================
+// ============================================================
 
 export function getPostLoginRedirect(
   tenant: Pick<Tenant, 'role' | 'isSetupComplete'>,
@@ -38,11 +38,14 @@ export function getPostLoginRedirect(
       ? '/dashboard/products'
       : '/dashboard/setup-store';
   }
-  // BUYER
   return FEATURES.digitalProducts
     ? '/dashboard/library'
     : '/dashboard/setup-store';
 }
+
+// ============================================================
+// USE LOGIN
+// ============================================================
 
 export function useLogin() {
   const tToast = useTranslations('toast.auth');
@@ -59,7 +62,6 @@ export function useLogin() {
 
       try {
         const response = await authApi.login(data);
-
         setTenant(response.tenant);
         setChecked(true);
 
@@ -70,7 +72,6 @@ export function useLogin() {
 
         const from = searchParams.get('from');
         const defaultRedirect = getPostLoginRedirect(response.tenant);
-
         router.push(from || defaultRedirect);
 
         return response;
@@ -91,6 +92,11 @@ export function useLogin() {
   return { login, isLoading, error, reset };
 }
 
+// ============================================================
+// USE REGISTER
+// [PHASE D] Handles both SELLER/EDU (full wizard) and BUYER (short form)
+// ============================================================
+
 export function useRegister() {
   const tToast = useTranslations('toast.auth');
   const [isLoading, setIsLoading] = useState(false);
@@ -99,6 +105,10 @@ export function useRegister() {
   const { setTenant, setChecked } = useAuthStore();
   const router = useRouter();
 
+  /**
+   * Register SELLER or EDU — full wizard payload.
+   * intent: 'SELLER' | 'EDU' determines isEduMode on BE.
+   */
   const register = useCallback(
     async (data: RegisterInput) => {
       setIsLoading(true);
@@ -107,7 +117,6 @@ export function useRegister() {
 
       try {
         const response = await authApi.register(data);
-
         setTenant(response.tenant);
         setChecked(true);
 
@@ -116,10 +125,7 @@ export function useRegister() {
           tToast('registerSuccessDetail'),
         );
 
-        // [PHASE C] Post-register → setup-store (was /studio)
-        // Studio without setup context has no useful state to show.
-        // Seller must complete setup wizard first, then proceed to studio
-        // via the success screen's CTA.
+        // Both SELLER and EDU → setup-store
         router.push('/dashboard/setup-store');
 
         return response;
@@ -144,13 +150,61 @@ export function useRegister() {
     [setTenant, setChecked, router, tToast],
   );
 
+  /**
+   * Register BUYER — short form, email + password only.
+   * Redirects to /dashboard/library (or setup-store if digital off).
+   */
+  const registerBuyer = useCallback(
+    async (data: RegisterBuyerInput) => {
+      setIsLoading(true);
+      setError(null);
+      setErrorCode(null);
+
+      try {
+        const response = await authApi.registerBuyer(data);
+        setTenant(response.tenant);
+        setChecked(true);
+
+        toast.success(
+          tToast('registerSuccess'),
+          tToast('registerBuyerSuccessDetail'),
+        );
+
+        const redirect = FEATURES.digitalProducts
+          ? '/dashboard/library'
+          : '/dashboard/setup-store';
+
+        router.push(redirect);
+
+        return response;
+      } catch (err) {
+        const message = getErrorMessage(err);
+        setError(message);
+
+        if (err instanceof ApiRequestError && err.code) {
+          setErrorCode(err.code);
+        }
+
+        toast.error(tToast('registerFailed'), message);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setTenant, setChecked, router, tToast],
+  );
+
   const reset = useCallback(() => {
     setError(null);
     setErrorCode(null);
   }, []);
 
-  return { register, isLoading, error, errorCode, reset };
+  return { register, registerBuyer, isLoading, error, errorCode, reset };
 }
+
+// ============================================================
+// USE LOGOUT
+// ============================================================
 
 export function useLogout() {
   const tToast = useTranslations('toast.auth');
@@ -163,7 +217,6 @@ export function useLogout() {
     } catch {
       // Ignore error
     }
-
     reset();
     toast.success(tToast('logoutSuccess'));
     router.push('/login');
@@ -171,6 +224,10 @@ export function useLogout() {
 
   return { logout };
 }
+
+// ============================================================
+// USE CHECK SLUG
+// ============================================================
 
 export function useCheckSlug() {
   const [isChecking, setIsChecking] = useState(false);
@@ -181,9 +238,7 @@ export function useCheckSlug() {
       setIsAvailable(null);
       return;
     }
-
     setIsChecking(true);
-
     try {
       const response = await tenantsApi.checkSlug(slug);
       setIsAvailable(response.available);

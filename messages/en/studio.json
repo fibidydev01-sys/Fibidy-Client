@@ -65,6 +65,13 @@
       "heroInactiveHint": "Enable it to see a preview",
       "heroEnable": "Enable"
     },
+    "onboardingDialog": {
+      "title": "Welcome to Studio!",
+      "step1": "Pick a hero layout from the panel on the right",
+      "step2": "Customize colors, text, and images in Settings",
+      "step3": "Hit Publish when you're happy — your store goes live instantly",
+      "cta": "Got it, let's go!"
+    },
     "upgradeModal": {
       "title": "Upgrade to publish Pro blocks",
       "description": "You're using a Pro hero design (block 4+). Upgrade to Business plan to publish."

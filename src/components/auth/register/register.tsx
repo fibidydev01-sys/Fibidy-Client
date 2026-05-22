@@ -4,20 +4,14 @@
 // REGISTER FORM
 // File: src/components/auth/register/register.tsx
 //
+// [PHASE D — May 2026]
+// - StepWelcome DIHAPUS, digantikan StepIntent (step 1)
+// - Dynamic step list per intent (BUYER: 3 steps, SELLER/EDU: 5 steps)
+// - handleSubmit routing: BUYER → registerBuyer(), SELLER/EDU → register()
+// - Step indicator menyesuaikan step count per intent
+//
 // [PHASE C v2 — May 2026]
-// DIALOG STRATEGY:
-//   - Next/Submit button: SELALU ENABLED (tidak pernah disabled/silent)
-//   - Klik Next dengan kondisi invalid → buka ValidationDialog
-//   - ValidationDialog menampilkan list field yang perlu diperbaiki
-//   - User HARUS klik "OK, saya perbaiki" sebelum bisa dismiss dialog
-//
-// Soft alerts tetap berjalan inline:
-//   - Password rules checklist (real-time)
-//   - Slug availability indicator (real-time)
-//   - Description char counter
-//
-// isStepValid() masih ada tapi HANYA untuk memutuskan apakah buka dialog
-// atau langsung lanjut — bukan untuk disable button.
+// - Next/Submit SELALU ENABLED — validasi via ValidationDialog
 // ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
@@ -35,22 +29,23 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
-import { useRegisterWizard } from '@/hooks/auth/use-register-wizard';
+import { useRegisterWizard, getTotalSteps, getAccountStep, getReviewStep } from '@/hooks/auth/use-register-wizard';
 import { useRegister, useCheckSlug } from '@/hooks/auth/use-auth';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 import { generateSlugSuggestions } from '@/lib/utils/slug-suggestions';
 import { validateSlugFormat } from '@/lib/constants/shared/slug.constants';
+import { StepIntent } from './step-intent';
 import { StepCategory } from './step-category';
 import { StepStoreInfo } from './step-store-info';
 import { StepAccount } from './step-account';
 import { StepReview } from './step-review';
-import { StepWelcome } from './step-welcome';
 import { RegisterStepIndicator } from './register-step-indicator';
 import { RegisterNav } from './register-nav';
+import type { RegisterIntent } from '@/types/auth';
 
-// ============================================================================
+// ============================================================
 // VALIDATION HELPERS
-// ============================================================================
+// ============================================================
 
 function isPasswordStrong(password: string): boolean {
   return (
@@ -66,28 +61,51 @@ function isEmailValid(email: string): boolean {
 }
 
 function isPhoneValid(whatsapp: string): boolean {
-  // Minimal 7 digit setelah kode negara
   const digits = whatsapp.replace(/\D/g, '');
   return digits.length >= 7;
 }
 
-// ============================================================================
+// ============================================================
+// STEP DEFINITIONS PER INTENT
+// ============================================================
+
+function getStepDefs(
+  intent: RegisterIntent | null,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (intent === 'BUYER') {
+    return [
+      { title: t('stepsMeta.whoAreYou.title'), desc: t('stepsMeta.whoAreYou.desc') },
+      { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
+      { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
+    ];
+  }
+  // SELLER / EDU / null (null = intent not yet selected, show full)
+  return [
+    { title: t('stepsMeta.whoAreYou.title'), desc: t('stepsMeta.whoAreYou.desc') },
+    { title: t('stepsMeta.businessType.title'), desc: t('stepsMeta.businessType.desc') },
+    { title: t('stepsMeta.storeDetails.title'), desc: t('stepsMeta.storeDetails.desc') },
+    { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
+    { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
+  ];
+}
+
+// ============================================================
 // COMPONENT
-// ============================================================================
+// ============================================================
 
 export function RegisterForm() {
   const t = useTranslations('auth.register');
   const wizard = useRegisterWizard();
-  const { register, isLoading, error, errorCode, reset: resetRegister } = useRegister();
+  const { register, registerBuyer, isLoading, error, errorCode, reset: resetRegister } = useRegister();
   const { checkSlug, isChecking, isAvailable, reset: resetSlug } = useCheckSlug();
 
   const [isAgreed, setIsAgreed] = useState(true);
-
-  // Validation dialog state
   const [validationOpen, setValidationOpen] = useState(false);
   const [validationItems, setValidationItems] = useState<string[]>([]);
+  const [slugConflictOpen, setSlugConflictOpen] = useState(false);
+  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
 
-  // Debounced slug check
   const debouncedSlug = useDebounce(wizard.state.slug || '', 500);
 
   useEffect(() => {
@@ -98,14 +116,9 @@ export function RegisterForm() {
     }
   }, [debouncedSlug, checkSlug, resetSlug]);
 
-  // Pre-tick agreement from builder
   useEffect(() => {
     if (wizard.cameFromBuilder) setIsAgreed(true);
   }, [wizard.cameFromBuilder]);
-
-  // Slug conflict dialog
-  const [slugConflictOpen, setSlugConflictOpen] = useState(false);
-  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!errorCode) return;
@@ -114,24 +127,18 @@ export function RegisterForm() {
       setSlugSuggestions(suggestions);
       setSlugConflictOpen(true);
     } else if (errorCode === 'EMAIL_TAKEN_AFTER_PREVIEW') {
-      wizard.goToStep(4);
+      wizard.goToStep(getAccountStep(wizard.state.intent));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorCode]);
 
-  const STEPS = [
-    { title: t('stepsMeta.businessType.title'), desc: t('stepsMeta.businessType.desc') },
-    { title: t('stepsMeta.storeDetails.title'), desc: t('stepsMeta.storeDetails.desc') },
-    { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
-    { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
-  ] as const;
+  const intent = wizard.state.intent;
+  const STEPS = useMemo(() => getStepDefs(intent, t), [intent, t]);
 
-  const isWelcome = wizard.state.currentStep === 1;
-  const indicatorStep = wizard.state.currentStep - 2;
+  // currentStep is 1-based; indicator is 0-based
+  const indicatorStep = wizard.state.currentStep - 1;
 
-  // ── Collect validation errors per step ──────────────────────────────────
-  // Returns array of human-readable error strings.
-  // Empty array = step valid.
+  // ── Validation errors per step ──────────────────────────────────────────
 
   const getStepErrors = useMemo(() => {
     return (step: number): string[] => {
@@ -139,30 +146,48 @@ export function RegisterForm() {
       const errors: string[] = [];
 
       switch (step) {
+        case 1: // Intent step
+          if (!s.intent) errors.push(t('errors.intentRequired'));
+          break;
         case 2:
-          if (!s.category?.trim()) errors.push(t('errors.categoryRequired'));
+          if (intent === 'BUYER') {
+            // Account step for buyer
+            if (!s.email || !isEmailValid(s.email)) errors.push(t('errors.emailInvalid'));
+            if (!s.password || !isPasswordStrong(s.password)) errors.push(t('errors.passwordWeak'));
+          } else {
+            // Category step for seller/edu
+            if (!s.category?.trim()) errors.push(t('errors.categoryRequired'));
+          }
           break;
         case 3:
-          if (!s.name || s.name.trim().length < 3) errors.push(t('errors.nameRequired'));
-          if (!s.slug || s.slug.length < 3 || !validateSlugFormat(s.slug).valid)
-            errors.push(t('errors.slugRequired'));
-          if (isChecking) errors.push(t('errors.slugChecking'));
-          if (isAvailable === false) errors.push(t('errors.slugTaken'));
+          if (intent === 'BUYER') {
+            // Review step for buyer
+            if (!isAgreed) errors.push(t('errors.agreementRequired'));
+          } else {
+            // StoreInfo step for seller/edu
+            if (!s.name || s.name.trim().length < 3) errors.push(t('errors.nameRequired'));
+            if (!s.slug || s.slug.length < 3 || !validateSlugFormat(s.slug).valid)
+              errors.push(t('errors.slugRequired'));
+            if (isChecking) errors.push(t('errors.slugChecking'));
+            if (isAvailable === false) errors.push(t('errors.slugTaken'));
+          }
           break;
         case 4:
+          // Account step for seller/edu
           if (!s.email || !isEmailValid(s.email)) errors.push(t('errors.emailInvalid'));
           if (!s.password || !isPasswordStrong(s.password)) errors.push(t('errors.passwordWeak'));
           if (!s.whatsapp || !isPhoneValid(s.whatsapp)) errors.push(t('errors.whatsappRequired'));
           break;
         case 5:
+          // Review step for seller/edu
           if (!isAgreed) errors.push(t('errors.agreementRequired'));
           break;
       }
       return errors;
     };
-  }, [wizard.state, isChecking, isAvailable, isAgreed, t]);
+  }, [wizard.state, intent, isChecking, isAvailable, isAgreed, t]);
 
-  // ── Handle Next — show dialog if invalid, else advance ──────────────────
+  // ── Navigation ──────────────────────────────────────────────────────────
 
   const handleNext = () => {
     const errors = getStepErrors(wizard.state.currentStep);
@@ -181,17 +206,26 @@ export function RegisterForm() {
       setValidationOpen(true);
       return;
     }
+
     try {
-      await register({
-        name: wizard.state.name!,
-        slug: wizard.state.slug!,
-        category: wizard.state.category!,
-        description: wizard.state.description || '',
-        email: wizard.state.email!,
-        password: wizard.state.password!,
-        whatsapp: wizard.state.whatsapp!,
-        agreementAccepted: true,
-      });
+      if (intent === 'BUYER') {
+        await registerBuyer({
+          email: wizard.state.email!,
+          password: wizard.state.password!,
+        });
+      } else {
+        await register({
+          intent: intent as 'SELLER' | 'EDU',
+          name: wizard.state.name!,
+          slug: wizard.state.slug!,
+          category: wizard.state.category!,
+          description: wizard.state.description || '',
+          email: wizard.state.email!,
+          password: wizard.state.password!,
+          whatsapp: wizard.state.whatsapp!,
+          agreementAccepted: true,
+        });
+      }
     } catch {
       // Error handled in hook + via errorCode effect
     }
@@ -204,20 +238,99 @@ export function RegisterForm() {
     resetRegister();
   };
 
-  // ── Welcome screen ───────────────────────────────────────────────────────
-  if (isWelcome) {
-    return (
-      <div className="w-full max-w-2xl mx-auto">
-        <StepWelcome onNext={wizard.nextStep} />
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          {t('alreadyHaveStore')}{' '}
-          <Link href="/login" className="text-primary hover:underline font-medium">
-            {t('signInLink')}
-          </Link>
-        </p>
-      </div>
-    );
-  }
+  // ── Step content rendering ──────────────────────────────────────────────
+
+  const renderStep = () => {
+    const { currentStep } = wizard.state;
+
+    // Step 1 = Intent (always)
+    if (currentStep === 1) {
+      return (
+        <StepIntent
+          selected={wizard.state.intent}
+          onSelect={(selectedIntent) => {
+            wizard.selectIntent(selectedIntent);
+          }}
+        />
+      );
+    }
+
+    // BUYER flow
+    if (intent === 'BUYER') {
+      if (currentStep === 2) {
+        return (
+          <StepAccount
+            email={wizard.state.email || ''}
+            password={wizard.state.password || ''}
+            whatsapp=""
+            hiddenFields={['whatsapp']}
+            onUpdate={wizard.updateState}
+          />
+        );
+      }
+      if (currentStep === 3) {
+        return (
+          <StepReview
+            data={wizard.state}
+            intent={intent}
+            onEdit={(step) => wizard.goToStep(step)}
+            isAgreed={isAgreed}
+            onAgreementChange={setIsAgreed}
+            cameFromBuilder={wizard.cameFromBuilder}
+          />
+        );
+      }
+    }
+
+    // SELLER / EDU flow
+    if (currentStep === 2) {
+      return (
+        <StepCategory
+          selectedCategory={wizard.state.category || ''}
+          onSelectCategory={(category) => wizard.updateState({ category })}
+        />
+      );
+    }
+    if (currentStep === 3) {
+      return (
+        <StepStoreInfo
+          name={wizard.state.name || ''}
+          slug={wizard.state.slug || ''}
+          description={wizard.state.description || ''}
+          onUpdate={wizard.updateState}
+          isChecking={isChecking}
+          isAvailable={isAvailable}
+        />
+      );
+    }
+    if (currentStep === 4) {
+      return (
+        <StepAccount
+          email={wizard.state.email || ''}
+          password={wizard.state.password || ''}
+          whatsapp={wizard.state.whatsapp || ''}
+          onUpdate={wizard.updateState}
+        />
+      );
+    }
+    if (currentStep === 5) {
+      return (
+        <StepReview
+          data={wizard.state}
+          intent={intent}
+          onEdit={(step) => wizard.goToStep(step)}
+          isAgreed={isAgreed}
+          onAgreementChange={setIsAgreed}
+          cameFromBuilder={wizard.cameFromBuilder}
+        />
+      );
+    }
+
+    return null;
+  };
+
+  const isLastStep = wizard.isLastStep;
+  const totalSteps = getTotalSteps(intent);
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col">
@@ -232,7 +345,7 @@ export function RegisterForm() {
         <div className="flex items-start justify-between gap-8 pb-6 border-b mb-8">
           <div className="space-y-1">
             <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-              {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
+              {t('stepCounter', { current: wizard.state.currentStep, total: totalSteps })}
             </p>
             <h2 className="text-2xl font-bold tracking-tight leading-none">
               {STEPS[indicatorStep]?.title}
@@ -245,7 +358,7 @@ export function RegisterForm() {
             <RegisterStepIndicator
               steps={STEPS}
               currentStep={indicatorStep}
-              onStepClick={(i) => wizard.goToStep(i + 2)}
+              onStepClick={(i) => wizard.goToStep(i + 1)}
               size="lg"
             />
           </div>
@@ -258,13 +371,13 @@ export function RegisterForm() {
           <RegisterStepIndicator
             steps={STEPS}
             currentStep={indicatorStep}
-            onStepClick={(i) => wizard.goToStep(i + 2)}
+            onStepClick={(i) => wizard.goToStep(i + 1)}
             size="sm"
           />
         </div>
         <div className="text-center space-y-0.5">
           <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('stepCounter', { current: wizard.state.currentStep - 1, total: STEPS.length })}
+            {t('stepCounter', { current: wizard.state.currentStep, total: totalSteps })}
           </p>
           <h3 className="text-base font-bold tracking-tight">{STEPS[indicatorStep]?.title}</h3>
           <p className="text-xs text-muted-foreground">{STEPS[indicatorStep]?.desc}</p>
@@ -273,42 +386,10 @@ export function RegisterForm() {
 
       {/* ── STEP CONTENT ───────────────────────────────────────────────── */}
       <div className="min-h-[300px]">
-        {wizard.state.currentStep === 2 && (
-          <StepCategory
-            selectedCategory={wizard.state.category || ''}
-            onSelectCategory={(category) => wizard.updateState({ category })}
-          />
-        )}
-        {wizard.state.currentStep === 3 && (
-          <StepStoreInfo
-            name={wizard.state.name || ''}
-            slug={wizard.state.slug || ''}
-            description={wizard.state.description || ''}
-            onUpdate={wizard.updateState}
-            isChecking={isChecking}
-            isAvailable={isAvailable}
-          />
-        )}
-        {wizard.state.currentStep === 4 && (
-          <StepAccount
-            email={wizard.state.email || ''}
-            password={wizard.state.password || ''}
-            whatsapp={wizard.state.whatsapp || ''}
-            onUpdate={wizard.updateState}
-          />
-        )}
-        {wizard.state.currentStep === 5 && (
-          <StepReview
-            data={wizard.state}
-            onEdit={(step) => wizard.goToStep(step)}
-            isAgreed={isAgreed}
-            onAgreementChange={setIsAgreed}
-            cameFromBuilder={wizard.cameFromBuilder}
-          />
-        )}
+        {renderStep()}
       </div>
 
-      {/* ── NAV — button selalu enabled ────────────────────────────────── */}
+      {/* ── NAV ────────────────────────────────────────────────────────── */}
       <RegisterNav
         steps={STEPS}
         currentStep={indicatorStep}
@@ -373,7 +454,7 @@ export function RegisterForm() {
               onClick={() => {
                 setSlugConflictOpen(false);
                 resetRegister();
-                wizard.goToStep(3);
+                wizard.goToStep(3); // StoreInfo step
               }}
             >
               {t('slugConflict.editManuallyButton')}

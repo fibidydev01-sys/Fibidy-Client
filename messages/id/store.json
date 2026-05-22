@@ -1,5 +1,9 @@
 {
   "store": {
+    "eduBanner": {
+      "text": "Toko ini dibuat untuk simulasi pembelajaran. Produk tidak tersedia untuk dibeli.",
+      "learnMore": "Pelajari"
+    },
     "metadata": {
       "notFoundTitle": "Toko Tidak Ditemukan",
       "notFoundDescription": "Toko yang kamu cari tidak ada atau sudah tidak aktif.",

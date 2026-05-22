@@ -1,36 +1,22 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // USE REGISTER WIZARD
 // File: src/hooks/auth/use-register-wizard.ts
 //
-// Phase 3 (Interactive Store Builder, May 2026):
+// [PHASE D — May 2026]
+// +intent: RegisterIntent | null di state
+// Dynamic step list per intent:
+//   BUYER:        Intent(1) → Account(2) → Review(3)
+//   SELLER / EDU: Intent(1) → Category(2) → StoreInfo(3) → Account(4) → Review(5)
 //
-// Auto-skip behavior on arrival from /register?slug=...&category=...
-// from the marketing builder. Pre-fills slug + category, auto-derives
-// name, lands on Account step (4).
+// StepWelcome dihapus — digantikan StepIntent sebagai entry point.
+// TOTAL_STEPS bersifat dynamic berdasarkan intent.
 //
-// Phase 5 (Magic UI polish, May 2026 — CEO unlock):
-//
-// CHANGED:
-//   - "Other" escape hatch in the marketing builder REMOVED. Every
-//     category from the query string now resolves to a real registry
-//     key (validated upstream at module-load time in store-builder.ts).
-//   - Hook still defensively validates the category param (defense in
-//     depth — query params can be hand-edited). If validation fails,
-//     falls back to landing on Category step instead of Account.
-//   - Behavior on slug-only (no category) query is preserved — was
-//     used for the legacy "Other" path, but a hand-crafted URL might
-//     still hit it, so the path stays.
-//
-// Edge cases handled:
-//   - Invalid slug format from query → ignored (lands on step 1 normally)
-//   - Reserved slug from query → ignored
-//   - Invalid category param → ignored, lands on Category step
-//   - Agreement acceptance: TWO sources, either qualifies as "from builder":
-//       a) Query string ?agreement=accepted
-//       b) sessionStorage 'fibidy_builder_agreement' === '1'
-// ==========================================
+// [PHASE C — May 2026]
+// Auto-skip dari builder query params (slug + category) masih berfungsi.
+// Jika ada query params, intent default ke SELLER.
+// ============================================================================
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -41,30 +27,43 @@ import {
 } from '@/lib/constants/shared/slug.constants';
 import { isReservedSubdomain } from '@/lib/constants/shared/reserved-subdomains';
 import { getCategoryConfig } from '@/lib/constants/shared/categories';
+import type { RegisterIntent } from '@/types/auth';
 
-// ==========================================
+// ============================================================
 // CONSTANTS
-// ==========================================
+// ============================================================
 
-const TOTAL_STEPS = 5;
 const AGREEMENT_BRIDGE_KEY = 'fibidy_builder_agreement';
 
-const STEP_WELCOME = 1;
-const STEP_CATEGORY = 2;
-const STEP_STORE_INFO = 3;
-const STEP_ACCOUNT = 4;
+// Step indexes — berbeda per intent
+// BUYER:        1=Intent, 2=Account, 3=Review
+// SELLER / EDU: 1=Intent, 2=Category, 3=StoreInfo, 4=Account, 5=Review
+const STEP_INTENT    = 1;
+const STEP_CATEGORY  = 2; // SELLER/EDU only
+const STEP_STORE_INFO = 3; // SELLER/EDU only
+const STEP_ACCOUNT_SELLER = 4; // SELLER/EDU
+const STEP_REVIEW_SELLER  = 5; // SELLER/EDU
+const STEP_ACCOUNT_BUYER  = 2; // BUYER
+const STEP_REVIEW_BUYER   = 3; // BUYER
 
-// ==========================================
+// ============================================================
 // TYPES
-// ==========================================
+// ============================================================
 
 interface WizardState extends Partial<RegisterFormData> {
   currentStep: number;
+  intent: RegisterIntent | null;
 }
 
-// ==========================================
+export interface StepDef {
+  id: string;
+  title: string;
+  desc: string;
+}
+
+// ============================================================
 // HELPERS — pure
-// ==========================================
+// ============================================================
 
 function deriveNameFromSlug(slug: string): string {
   return slug
@@ -88,18 +87,39 @@ function sanitizeCategoryFromQuery(raw: string | null): string | null {
   return getCategoryConfig(raw) ? raw : null;
 }
 
-// ==========================================
+/**
+ * Returns total steps for the given intent.
+ */
+export function getTotalSteps(intent: RegisterIntent | null): number {
+  return intent === 'BUYER' ? 3 : 5;
+}
+
+/**
+ * Returns the account step index for the given intent.
+ */
+export function getAccountStep(intent: RegisterIntent | null): number {
+  return intent === 'BUYER' ? STEP_ACCOUNT_BUYER : STEP_ACCOUNT_SELLER;
+}
+
+/**
+ * Returns the review step index for the given intent.
+ */
+export function getReviewStep(intent: RegisterIntent | null): number {
+  return intent === 'BUYER' ? STEP_REVIEW_BUYER : STEP_REVIEW_SELLER;
+}
+
+// ============================================================
 // HOOK
-// ==========================================
+// ============================================================
 
 export function useRegisterWizard() {
   const searchParams = useSearchParams();
   const [cameFromBuilder, setCameFromBuilder] = useState(false);
 
-  // Initial state computed lazily once on mount
   const [state, setState] = useState<WizardState>(() => {
     const base: WizardState = {
-      currentStep: STEP_WELCOME,
+      currentStep: STEP_INTENT,
+      intent: null,
       category: '',
       name: '',
       slug: '',
@@ -114,28 +134,27 @@ export function useRegisterWizard() {
     const slug = sanitizeSlugFromQuery(searchParams.get('slug'));
     const category = sanitizeCategoryFromQuery(searchParams.get('category'));
 
-    // No usable slug → render normally from step 1.
     if (!slug) return base;
 
     const name = deriveNameFromSlug(slug);
 
+    // Builder pre-fill → default intent SELLER, skip to account or category
     if (category) {
-      // Best case: both slug + category present → skip to Account
       return {
         ...base,
         slug,
         name,
         category,
-        currentStep: STEP_ACCOUNT,
+        intent: 'SELLER',
+        currentStep: STEP_ACCOUNT_SELLER,
       };
     }
 
-    // Slug only (rare in Phase 5 — every chip carries a category, so
-    // this only happens with hand-crafted URLs). Land on Category step.
     return {
       ...base,
       slug,
       name,
+      intent: 'SELLER',
       currentStep: STEP_CATEGORY,
     };
   });
@@ -143,17 +162,13 @@ export function useRegisterWizard() {
   // Read agreement bridge (browser only)
   useEffect(() => {
     if (!searchParams) return;
-
     const queryAgreement = searchParams.get('agreement') === 'accepted';
-
     let storageAgreement = false;
     try {
-      storageAgreement =
-        sessionStorage.getItem(AGREEMENT_BRIDGE_KEY) === '1';
+      storageAgreement = sessionStorage.getItem(AGREEMENT_BRIDGE_KEY) === '1';
     } catch {
-      // Private tab or storage disabled — query is the fallback
+      // Private tab or storage disabled
     }
-
     setCameFromBuilder(queryAgreement || storageAgreement);
   }, [searchParams]);
 
@@ -161,27 +176,65 @@ export function useRegisterWizard() {
     setState((prev) => ({ ...prev, ...data }));
   };
 
+  /**
+   * Select intent — also resets step to STEP_INTENT+1 if intent changes
+   * to avoid stale step position.
+   */
+  const selectIntent = (intent: RegisterIntent) => {
+    setState((prev) => ({
+      ...prev,
+      intent,
+      // If buyer, skip directly to account; else go to category
+      currentStep: STEP_INTENT,
+    }));
+  };
+
   const nextStep = () => {
-    if (state.currentStep < TOTAL_STEPS) {
-      setState((prev) => ({ ...prev, currentStep: prev.currentStep + 1 }));
-    }
+    const total = getTotalSteps(state.intent);
+    const intent = state.intent;
+
+    setState((prev) => {
+      const next = prev.currentStep + 1;
+
+      // BUYER skips category + storeInfo
+      if (intent === 'BUYER' && prev.currentStep === STEP_INTENT) {
+        return { ...prev, currentStep: STEP_ACCOUNT_BUYER };
+      }
+
+      if (next <= total + 1) {
+        return { ...prev, currentStep: next };
+      }
+      return prev;
+    });
   };
 
   const prevStep = () => {
-    if (state.currentStep > 1) {
-      setState((prev) => ({ ...prev, currentStep: prev.currentStep - 1 }));
-    }
+    const intent = state.intent;
+
+    setState((prev) => {
+      // BUYER going back from account → back to intent
+      if (intent === 'BUYER' && prev.currentStep === STEP_ACCOUNT_BUYER) {
+        return { ...prev, currentStep: STEP_INTENT };
+      }
+
+      if (prev.currentStep > 1) {
+        return { ...prev, currentStep: prev.currentStep - 1 };
+      }
+      return prev;
+    });
   };
 
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= TOTAL_STEPS) {
+    const total = getTotalSteps(state.intent);
+    if (step >= 1 && step <= total + 1) {
       setState((prev) => ({ ...prev, currentStep: step }));
     }
   };
 
   const reset = () => {
     setState({
-      currentStep: STEP_WELCOME,
+      currentStep: STEP_INTENT,
+      intent: null,
       category: '',
       name: '',
       slug: '',
@@ -198,17 +251,28 @@ export function useRegisterWizard() {
     }
   };
 
+  const totalSteps = getTotalSteps(state.intent);
+  const isLastStep = state.intent === 'BUYER'
+    ? state.currentStep === STEP_REVIEW_BUYER
+    : state.currentStep === STEP_REVIEW_SELLER;
+
   return {
     state,
     updateState,
+    selectIntent,
     nextStep,
     prevStep,
     goToStep,
     reset,
-    progress: (state.currentStep / TOTAL_STEPS) * 100,
+    totalSteps,
     isFirstStep: state.currentStep === 1,
-    isLastStep: state.currentStep === TOTAL_STEPS,
-    totalSteps: TOTAL_STEPS,
+    isLastStep,
     cameFromBuilder,
+    // Helpers for consumers
+    STEP_INTENT,
+    STEP_CATEGORY,
+    STEP_STORE_INFO,
+    getAccountStep,
+    getReviewStep,
   };
 }

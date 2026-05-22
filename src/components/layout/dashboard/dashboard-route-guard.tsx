@@ -1,37 +1,24 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // DASHBOARD ROUTE GUARD
 // File: src/components/layout/dashboard/dashboard-route-guard.tsx
 //
-// Handles client-side role-based + feature-flag-based redirects.
-//
-// [PHASE 3] Logic now flag-aware:
-//
-// Case A — Digital OFF + BUYER:
-//   BUYER has practically zero useful destinations. Redirect everything
-//   to /dashboard/setup-store so they can upgrade to seller.
-//
-// Case B — Digital ON + BUYER on seller-only route:
-//   Existing behavior. Redirect to /dashboard/library (their main hub).
-//
-// Case C — Digital OFF + SELLER on a digital route:
-//   No redirect. The page itself renders <ComingSoonPage /> server-side.
-//   Avoids redirect flash + lets user see what's happening.
+// [PHASE D — May 2026]
+// Case E — EDU seller tidak boleh akses KYC + Subscription:
+//   - /dashboard/subscription → redirect /dashboard/products
+//   - /onboard → redirect /dashboard/products
+//   - KYC banner: early return null (handled in kyc-banner.tsx)
+//   - Subscription menu: filtered in sidebar-nav + mobile-navbar
 //
 // [SETUP-GATE — May 2026]
-// Case D — SELLER + isSetupComplete=false:
-//   SELLER who hasn't finished the setup wizard is redirected to
-//   /dashboard/setup-store regardless of what route they requested.
-//   Exempt routes: /dashboard/setup-store (destination) + /dashboard/studio
-//   (post-registration store builder — intentionally exempt per spec).
-//   shouldHide() returns true while redirect is in flight so there's
-//   no content flash.
+// Case D — SELLER + isSetupComplete=false → redirect /dashboard/setup-store
 //
-// Note: navigating to /dashboard/library directly with digital off will
-// hit Case C for SELLER (shows ComingSoonPage) or Case A for BUYER
-// (redirects to setup-store).
-// ==========================================
+// [PHASE 3]
+// Case A — Digital OFF + BUYER → redirect /dashboard/setup-store
+// Case B — Digital ON + BUYER on seller-only route → redirect /dashboard/library
+// Case C — Digital OFF + SELLER on digital route → page shows ComingSoonPage
+// ============================================================================
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -43,46 +30,48 @@ interface DashboardRouteGuardProps {
   children: React.ReactNode;
 }
 
-/**
- * Strip a leading 2-letter locale prefix from pathname.
- * Mirrors the helper in lib/constants/shared/route-guard.ts which is
- * private to that file. Re-defined here to avoid coupling.
- */
 function stripLocalePrefix(pathname: string): string {
   const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
   if (!match) return pathname;
   return match[2] || '/';
 }
 
-/**
- * Returns true if pathname is /dashboard/setup-store.
- * Setup gate must NOT block this route — it's the destination.
- */
 function isSetupStorePath(pathname: string): boolean {
   return stripLocalePrefix(pathname) === '/dashboard/setup-store';
 }
 
-/**
- * Returns true if pathname is /dashboard/studio.
- * Studio is exempt from the setup gate — new SELLERs land here
- * immediately after registration (before completing setup).
- */
 function isStudioPath(pathname: string): boolean {
   return stripLocalePrefix(pathname).startsWith('/dashboard/studio');
 }
 
 /**
- * Should the guard hide content while a redirect is in flight?
- * Pure function — used by both the effect and the render guard so
- * effect logic and render logic stay in sync.
+ * [PHASE D] Returns true if pathname is an EDU-restricted path.
+ * EDU sellers cannot access subscription or KYC onboarding pages.
  */
+function isEduRestrictedPath(pathname: string): boolean {
+  const clean = stripLocalePrefix(pathname);
+  return (
+    clean.startsWith('/dashboard/subscription') ||
+    clean.startsWith('/onboard')
+  );
+}
+
 function shouldHide(
-  tenant: { role: string; isSetupComplete?: boolean } | null,
+  tenant: { role: string; isSetupComplete?: boolean; isEduMode?: boolean } | null,
   pathname: string,
 ): boolean {
   if (!tenant) return false;
 
-  // Case D — SELLER + setup not complete → hide until redirect fires
+  // Case E — EDU: hide while redirect in-flight
+  if (
+    tenant.role === 'SELLER' &&
+    tenant.isEduMode === true &&
+    isEduRestrictedPath(pathname)
+  ) {
+    return true;
+  }
+
+  // Case D — SELLER setup not complete → hide until redirect fires
   if (
     tenant.role === 'SELLER' &&
     !tenant.isSetupComplete &&
@@ -103,7 +92,6 @@ function shouldHide(
   }
 
   // Case C — Digital OFF + SELLER on digital route → DO NOT hide
-  // The page itself renders <ComingSoonPage />. We want users to see it.
   return false;
 }
 
@@ -115,8 +103,17 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
   useEffect(() => {
     if (!tenant) return;
 
+    // Case E — EDU seller: redirect from subscription + onboard
+    if (
+      tenant.role === 'SELLER' &&
+      tenant.isEduMode === true &&
+      isEduRestrictedPath(pathname)
+    ) {
+      router.replace('/dashboard/products');
+      return;
+    }
+
     // Case D — SELLER + isSetupComplete=false → must complete setup wizard
-    // Exempt: /dashboard/setup-store (destination) + /dashboard/studio
     if (
       tenant.role === 'SELLER' &&
       !tenant.isSetupComplete &&
@@ -135,13 +132,13 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
       return;
     }
 
-    // Case B (existing — digital ON, BUYER on seller route)
+    // Case B
     if (tenant.role === 'BUYER' && isBuyerRestrictedRoute(pathname)) {
       router.replace('/dashboard/library');
       return;
     }
 
-    // Case C is intentionally a no-op — page-level ComingSoonPage handles it.
+    // Case C — no-op
   }, [tenant, pathname, router]);
 
   if (shouldHide(tenant, pathname)) {

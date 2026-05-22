@@ -4,14 +4,13 @@
 // STEP ACCOUNT
 // File: src/components/auth/register/step-account.tsx
 //
+// [PHASE D — May 2026]
+// +hiddenFields prop: array of field names to hide for BUYER flow.
+// BUYER register tidak perlu WhatsApp — pass hiddenFields={['whatsapp']}.
+// Jika hiddenFields tidak dipass, semua field tampil normal (SELLER/EDU).
+//
 // [PHASE C v2 — May 2026]
 // WhatsApp field diganti dengan phone number dropdown global.
-// Default: +62 (Indonesia). Dropdown DropdownMenu shadcn untuk pilih negara.
-// Format disimpan sebagai kode negara + nomor lokal.
-// Validasi: minimal 7 digit setelah kode negara.
-//
-// Props-driven (no local state untuk values) — setiap keystroke update parent
-// langsung sehingga parent's validation logic selalu aktual.
 // ============================================================================
 
 import { useState, useMemo } from 'react';
@@ -32,18 +31,17 @@ import { Eye, EyeOff, Check, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 
 // ============================================================================
-// COUNTRY CODES — Global dengan +62 sebagai default
+// COUNTRY CODES
 // ============================================================================
 
 interface CountryCode {
-  code: string;    // dial code e.g. "+62"
-  iso: string;     // ISO 3166-1 alpha-2 e.g. "ID"
-  name: string;    // display name
-  flag: string;    // emoji flag
+  code: string;
+  iso: string;
+  name: string;
+  flag: string;
 }
 
 const COUNTRY_CODES: CountryCode[] = [
-  // ── Asia Tenggara (prioritas untuk UMKM Indonesia) ──────────────────────
   { code: '+62', iso: 'ID', name: 'Indonesia', flag: '🇮🇩' },
   { code: '+60', iso: 'MY', name: 'Malaysia', flag: '🇲🇾' },
   { code: '+65', iso: 'SG', name: 'Singapura', flag: '🇸🇬' },
@@ -54,31 +52,25 @@ const COUNTRY_CODES: CountryCode[] = [
   { code: '+856', iso: 'LA', name: 'Laos', flag: '🇱🇦' },
   { code: '+95', iso: 'MM', name: 'Myanmar', flag: '🇲🇲' },
   { code: '+673', iso: 'BN', name: 'Brunei', flag: '🇧🇳' },
-  // ── Asia Timur ───────────────────────────────────────────────────────────
   { code: '+81', iso: 'JP', name: 'Jepang', flag: '🇯🇵' },
   { code: '+82', iso: 'KR', name: 'Korea Selatan', flag: '🇰🇷' },
   { code: '+86', iso: 'CN', name: 'Tiongkok', flag: '🇨🇳' },
   { code: '+886', iso: 'TW', name: 'Taiwan', flag: '🇹🇼' },
   { code: '+852', iso: 'HK', name: 'Hong Kong', flag: '🇭🇰' },
-  // ── Asia Selatan ─────────────────────────────────────────────────────────
   { code: '+91', iso: 'IN', name: 'India', flag: '🇮🇳' },
   { code: '+92', iso: 'PK', name: 'Pakistan', flag: '🇵🇰' },
   { code: '+880', iso: 'BD', name: 'Bangladesh', flag: '🇧🇩' },
-  // ── Timur Tengah ─────────────────────────────────────────────────────────
   { code: '+966', iso: 'SA', name: 'Arab Saudi', flag: '🇸🇦' },
   { code: '+971', iso: 'AE', name: 'UAE', flag: '🇦🇪' },
   { code: '+974', iso: 'QA', name: 'Qatar', flag: '🇶🇦' },
-  // ── Australia & Pasifik ──────────────────────────────────────────────────
   { code: '+61', iso: 'AU', name: 'Australia', flag: '🇦🇺' },
   { code: '+64', iso: 'NZ', name: 'Selandia Baru', flag: '🇳🇿' },
-  // ── Eropa ────────────────────────────────────────────────────────────────
   { code: '+44', iso: 'GB', name: 'Inggris', flag: '🇬🇧' },
   { code: '+49', iso: 'DE', name: 'Jerman', flag: '🇩🇪' },
   { code: '+33', iso: 'FR', name: 'Prancis', flag: '🇫🇷' },
   { code: '+31', iso: 'NL', name: 'Belanda', flag: '🇳🇱' },
   { code: '+39', iso: 'IT', name: 'Italia', flag: '🇮🇹' },
   { code: '+34', iso: 'ES', name: 'Spanyol', flag: '🇪🇸' },
-  // ── Amerika ──────────────────────────────────────────────────────────────
   { code: '+1', iso: 'US', name: 'Amerika Serikat', flag: '🇺🇸' },
   { code: '+1', iso: 'CA', name: 'Kanada', flag: '🇨🇦' },
   { code: '+55', iso: 'BR', name: 'Brasil', flag: '🇧🇷' },
@@ -186,39 +178,47 @@ interface StepAccountProps {
   password: string;
   whatsapp: string;
   onUpdate: (data: { email?: string; password?: string; whatsapp?: string }) => void;
+  /**
+   * [PHASE D] Fields to hide for specific intents.
+   * BUYER intent: hiddenFields={['whatsapp']} — no WhatsApp needed
+   * SELLER/EDU: omit or pass empty array — all fields shown
+   */
+  hiddenFields?: Array<'whatsapp'>;
 }
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
 
-export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccountProps) {
+export function StepAccount({
+  email,
+  password,
+  whatsapp,
+  onUpdate,
+  hiddenFields = [],
+}: StepAccountProps) {
   const t = useTranslations('auth.register.account');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [localPhone, setLocalPhone] = useState(() => {
-    // Kalau whatsapp sudah ada, strip kode negara default +62
     if (whatsapp.startsWith('62')) return whatsapp.slice(2);
     return whatsapp;
   });
 
+  const showWhatsapp = !hiddenFields.includes('whatsapp');
+
   const handleCountryChange = (country: CountryCode) => {
     setSelectedCountry(country);
-    // Recompose whatsapp dengan kode negara baru
     const dialDigits = country.code.replace('+', '');
     onUpdate({ whatsapp: dialDigits + localPhone });
   };
 
   const handlePhoneChange = (value: string) => {
-    // Hanya digit
     const cleaned = value.replace(/\D/g, '');
     setLocalPhone(cleaned);
     const dialDigits = selectedCountry.code.replace('+', '');
     onUpdate({ whatsapp: dialDigits + cleaned });
   };
-
-  // Untuk tampilan di input — strip kode negara jika ada
-  const displayPhone = localPhone;
 
   return (
     <div className="space-y-5 max-w-md">
@@ -280,89 +280,90 @@ export function StepAccount({ email, password, whatsapp, onUpdate }: StepAccount
         <PasswordStrength password={password} />
       </div>
 
-      <div className="border-t" />
+      {/* WhatsApp — hidden for BUYER intent */}
+      {showWhatsapp && (
+        <>
+          <div className="border-t" />
 
-      {/* WhatsApp / Phone — Global dropdown */}
-      <div className="space-y-1.5">
-        <Label
-          htmlFor="acc-whatsapp"
-          className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
-        >
-          {t('whatsappLabel')}
-        </Label>
-        <div className="flex gap-2">
-          {/* Country code dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-11 gap-1.5 px-3 shrink-0 font-normal text-sm"
-                type="button"
-              >
-                <span>{selectedCountry.flag}</span>
-                <span className="text-muted-foreground">{selectedCountry.code}</span>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-64 max-h-72 overflow-y-auto"
-              align="start"
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="acc-whatsapp"
+              className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
             >
-              <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
-                Asia Tenggara
-              </DropdownMenuLabel>
-              <DropdownMenuGroup>
-                {COUNTRY_CODES.slice(0, 10).map((country) => (
-                  <DropdownMenuItem
-                    key={`${country.iso}-${country.code}`}
-                    onClick={() => handleCountryChange(country)}
-                    className="gap-2 cursor-pointer"
+              {t('whatsappLabel')}
+            </Label>
+            <div className="flex gap-2">
+              {/* Country code dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-11 gap-1.5 px-3 shrink-0 font-normal text-sm"
+                    type="button"
                   >
-                    <span className="text-base">{country.flag}</span>
-                    <span className="flex-1 text-sm">{country.name}</span>
-                    <span className="text-xs text-muted-foreground font-mono">{country.code}</span>
-                    {selectedCountry.iso === country.iso && (
-                      <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
-                Asia & Lainnya
-              </DropdownMenuLabel>
-              <DropdownMenuGroup>
-                {COUNTRY_CODES.slice(10).map((country) => (
-                  <DropdownMenuItem
-                    key={`${country.iso}-${country.code}`}
-                    onClick={() => handleCountryChange(country)}
-                    className="gap-2 cursor-pointer"
-                  >
-                    <span className="text-base">{country.flag}</span>
-                    <span className="flex-1 text-sm">{country.name}</span>
-                    <span className="text-xs text-muted-foreground font-mono">{country.code}</span>
-                    {selectedCountry.iso === country.iso && (
-                      <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    <span>{selectedCountry.flag}</span>
+                    <span className="text-muted-foreground">{selectedCountry.code}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 max-h-72 overflow-y-auto" align="start">
+                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+                    Asia Tenggara
+                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    {COUNTRY_CODES.slice(0, 10).map((country) => (
+                      <DropdownMenuItem
+                        key={`${country.iso}-${country.code}`}
+                        onClick={() => handleCountryChange(country)}
+                        className="gap-2 cursor-pointer"
+                      >
+                        <span className="text-base">{country.flag}</span>
+                        <span className="flex-1 text-sm">{country.name}</span>
+                        <span className="text-xs text-muted-foreground font-mono">{country.code}</span>
+                        {selectedCountry.iso === country.iso && (
+                          <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+                    Asia & Lainnya
+                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    {COUNTRY_CODES.slice(10).map((country) => (
+                      <DropdownMenuItem
+                        key={`${country.iso}-${country.code}`}
+                        onClick={() => handleCountryChange(country)}
+                        className="gap-2 cursor-pointer"
+                      >
+                        <span className="text-base">{country.flag}</span>
+                        <span className="flex-1 text-sm">{country.name}</span>
+                        <span className="text-xs text-muted-foreground font-mono">{country.code}</span>
+                        {selectedCountry.iso === country.iso && (
+                          <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          {/* Phone number input */}
-          <Input
-            id="acc-whatsapp"
-            type="tel"
-            inputMode="numeric"
-            placeholder={t('whatsappPlaceholder')}
-            className="h-11 flex-1 text-sm placeholder:text-muted-foreground/50"
-            value={displayPhone}
-            onChange={(e) => handlePhoneChange(e.target.value)}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">{t('whatsappHelper')}</p>
-      </div>
+              {/* Phone number input */}
+              <Input
+                id="acc-whatsapp"
+                type="tel"
+                inputMode="numeric"
+                placeholder={t('whatsappPlaceholder')}
+                className="h-11 flex-1 text-sm placeholder:text-muted-foreground/50"
+                value={localPhone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{t('whatsappHelper')}</p>
+          </div>
+        </>
+      )}
 
     </div>
   );
