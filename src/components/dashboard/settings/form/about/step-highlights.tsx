@@ -4,16 +4,19 @@
 // STEP HIGHLIGHTS — Settings About Form
 // File: src/components/dashboard/settings/form/about/step-highlights.tsx
 //
+// [BACKPORT — 2026-05-28]
+// Tambah prop onUploadStateChange(slotId, active) agar parent (AboutSection)
+// bisa track upload in-progress dan guard save button.
+// Pattern identik dengan StepHighlights di Setup wizard (G1 fix).
+//
 // [FIX — May 2026]
-// image-slot.tsx (Sprint 1.3 refactor) no longer exports FilledSlot or
-// LockedSlot. Updated API usage accordingly.
+// image-slot.tsx no longer exports FilledSlot or LockedSlot.
 //
 // [RENAME — May 2026]
 // item.icon → item.image (FeatureItem.icon removed)
-// icon: url  → image: url  (saat add new item)
 // ============================================================================
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Crown, Lock, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -36,6 +39,8 @@ interface StepHighlightsProps {
   updateFormData: <K extends keyof AboutFormData>(key: K, value: AboutFormData[K]) => void;
   isBusiness?: boolean;
   onUpgrade?: () => void;
+  /** [BACKPORT] Callback untuk track upload in-progress ke parent */
+  onUploadStateChange?: (slotId: string, active: boolean) => void;
 }
 
 // ─── Inline LockedSlot ────────────────────────────────────────────────────
@@ -79,7 +84,6 @@ function HighlightCard({
       {/* Image thumbnail + remove button */}
       <div className="flex items-center gap-3">
         <div className="relative w-12 h-12 rounded-lg overflow-hidden border bg-muted shrink-0">
-          {/* [RENAME] item.icon → item.image */}
           {item.image && (
             <Image
               src={item.image}
@@ -155,6 +159,7 @@ export function StepHighlights({
   updateFormData,
   isBusiness = false,
   onUpgrade,
+  onUploadStateChange,
 }: StepHighlightsProps) {
   const t = useTranslations('settings.about');
   const itemsRef = useRef<FeatureItem[]>([]);
@@ -170,11 +175,15 @@ export function StepHighlights({
     maxFiles: 1,
     onSuccess: (url) => {
       const cur = itemsRef.current;
-      // [RENAME] icon: url → image: url
       const newItem: FeatureItem = { image: url, title: '', description: '' };
       updateFormData('aboutFeatures', [...cur, newItem]);
     },
   });
+
+  // [BACKPORT] Report upload state ke parent
+  useEffect(() => {
+    onUploadStateChange?.('highlights-new', isUploading);
+  }, [isUploading, onUploadStateChange]);
 
   const handleOpen = () => {
     if (items.length >= maxSlots) return;

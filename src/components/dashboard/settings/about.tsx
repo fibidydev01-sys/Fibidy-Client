@@ -1,15 +1,31 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
+import { useAuthStore } from '@/stores/auth-store';
 import { tenantsApi } from '@/lib/api/tenants';
+import { getErrorMessage } from '@/lib/api/client';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { AboutFormData, FeatureItem } from '@/types/tenant';
 import { StepHighlights } from './form/about/step-highlights';
+
+// ============================================================================
+// ABOUT SETTINGS SECTION
+// File: src/components/dashboard/settings/about.tsx
+//
+// [BACKPORT — 2026-05-28]
+// Sync dengan pola terbaru dari Setup wizard:
+//
+//   1. Upload-in-progress guard sebelum save (SETTINGS-N2)
+//      — track isUploading dari StepHighlights via onUploadStateChange callback
+//   2. ValidationDialog hard gate menggantikan inline toast (SETTINGS-N1)
+//   3. setTenant() via useAuthStore setelah save agar auth store sync (SETTINGS-N6)
+// ============================================================================
 
 interface AboutSectionProps {
   onBack?: () => void;
@@ -18,10 +34,24 @@ interface AboutSectionProps {
 export function AboutSection({ onBack }: AboutSectionProps) {
   const t = useTranslations('settings.about');
   const tToast = useTranslations('toast.settings');
+  const tAll = useTranslations();
   const { tenant, refresh } = useTenant();
+
+  // [SETTINGS-N6] Akses setTenant untuk sync auth store setelah save
+  const { setTenant } = useAuthStore();
+
   const { isBusiness } = useSubscriptionPlan();
   const [isSaving, setIsSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+
+  // [SETTINGS-N2] Track active upload slots dari StepHighlights
+  const activeUploadsRef = useRef<Set<string>>(new Set());
+  const [hasActiveUploads, setHasActiveUploads] = useState(false);
+
+  // [SETTINGS-N1] ValidationDialog state
+  const [validationOpen, setValidationOpen] = useState(false);
+  const [validationItems, setValidationItems] = useState<string[]>([]);
+
   const [formData, setFormData] = useState<AboutFormData | null>(null);
   const isInitialized = useRef(false);
 
@@ -41,33 +71,61 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     if (formData) setFormData({ ...formData, [key]: value });
   };
 
-  const validate = (): boolean => {
-    if (!formData) return false;
+  // [SETTINGS-N2] Callback dari StepHighlights untuk track upload state
+  const handleUploadStateChange = useCallback((slotId: string, active: boolean) => {
+    if (active) {
+      activeUploadsRef.current.add(slotId);
+    } else {
+      activeUploadsRef.current.delete(slotId);
+    }
+    setHasActiveUploads(activeUploadsRef.current.size > 0);
+  }, []);
+
+  // [SETTINGS-N1] Compute validation errors
+  const computeValidationErrors = useCallback((): string[] => {
+    if (!formData) return [];
+    const errors: string[] = [];
     const features = formData.aboutFeatures;
-    if (features.length === 0) return true;
+    if (features.length === 0) return errors;
     for (let i = 0; i < features.length; i++) {
       const f = features[i];
       if (!f.title?.trim()) {
-        toast.error(t('validation.titleRequired', { index: i + 1 }));
-        return false;
+        errors.push(t('validation.titleRequired', { index: i + 1 }));
       }
       if (!f.description?.trim()) {
-        toast.error(t('validation.descriptionRequired', { index: i + 1 }));
-        return false;
+        errors.push(t('validation.descriptionRequired', { index: i + 1 }));
       }
     }
-    return true;
-  };
+    return errors;
+  }, [formData, t]);
 
   const handleSave = async () => {
-    if (!tenant || !formData || !validate()) return;
+    if (!tenant || !formData) return;
+
+    // [SETTINGS-N2] Upload guard
+    if (hasActiveUploads) {
+      setValidationItems([t('validation.uploadInProgress')]);
+      setValidationOpen(true);
+      return;
+    }
+
+    // [SETTINGS-N1] Validation hard gate
+    const errors = computeValidationErrors();
+    if (errors.length > 0) {
+      setValidationItems(errors);
+      setValidationOpen(true);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await tenantsApi.update({ aboutFeatures: formData.aboutFeatures });
+      const result = await tenantsApi.update({ aboutFeatures: formData.aboutFeatures });
+      // [SETTINGS-N6] Sync auth store
+      setTenant(result.tenant);
       await refresh();
       toast.success(tToast('aboutSaved'));
-    } catch {
-      toast.error(tToast('aboutFailed'));
+    } catch (err) {
+      toast.error(tToast('aboutFailed'), { description: getErrorMessage(err, tAll) });
     } finally {
       setIsSaving(false);
     }
@@ -91,10 +149,18 @@ export function AboutSection({ onBack }: AboutSectionProps) {
           updateFormData={updateFormData}
           isBusiness={isBusiness}
           onUpgrade={() => setUpgradeModalOpen(true)}
+          onUploadStateChange={handleUploadStateChange}
         />
       </div>
 
       <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
+
+      {/* [SETTINGS-N1] ValidationDialog hard gate */}
+      <ValidationDialog
+        open={validationOpen}
+        onClose={() => setValidationOpen(false)}
+        items={validationItems}
+      />
     </div>
   );
 }

@@ -12,23 +12,13 @@
 // Fix: tampilkan secondary CTA "Lihat toko dulu" HANYA jika tenant
 // sudah pernah publish (hasPublishedOnce === true).
 //
-// Untuk tenant baru (hasPublishedOnce belum true atau undefined):
-//   - Secondary CTA disembunyikan
-//   - Primary CTA "Lanjut ke Studio" tetap ditampilkan
-//   - Setelah user tambah produk dan publish dari Studio → store siap dilihat
-//
-// Kenapa pakai hasPublishedOnce bukan products.total > 0:
-//   - hasPublishedOnce sudah tersedia di tenant object dari auth store
-//   - Tidak perlu fetch tambahan untuk data ini
-//   - Semantiknya tepat: "pernah publish" = store pernah aktif = layak dilihat
-//
-// [PHASE D · POST-AUDIT carry-forward — May 2026]
-// Shell dikonsolidasi ke MandatoryDialog.
+// [TYPECHECK FIX — May 2026]
+// Hapus prop icon dan iconTone — MandatoryDialog sudah tidak terima props ini
+// setelah Lottie update (icon digantikan Lottie animation).
 // ============================================================================
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Palette } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
 
@@ -49,11 +39,8 @@ export function SellerSetupDone() {
   return (
     <MandatoryDialog
       open={true}
-      icon={Palette}
-      iconTone="primary"
       title={t('title')}
       description={t('description')}
-      // [U10 FIX] Secondary CTA kondisional — hanya muncul jika store sudah pernah publish
       secondaryCta={
         showPreviewCta
           ? {

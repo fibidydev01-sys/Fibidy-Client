@@ -10,10 +10,16 @@
 // Hapus [&>button:last-child]:hidden CSS hack — AlertDialog tidak punya X button.
 // Hapus icon prop — digantikan Lottie animation.
 //
+// [TYPECHECK FIX — May 2026]
+// AlertDialogContent dari shadcn/ui tidak expose onInteractOutside.
+// Fix: pakai DialogPrimitive.Content langsung via @radix-ui/react-dialog
+// untuk intercept pointer events, atau cukup onEscapeKeyDown saja —
+// AlertDialog by design sudah block outside clicks.
+// AlertDialog (Radix) secara default SUDAH modal=true dan block outside click,
+// jadi onInteractOutside tidak perlu di-pass manual.
+//
 // [SCROLL FIX — carry-forward dari ValidationDialog]
-// onAfterClose?: () => void — dipanggil 150ms setelah primary CTA diklik,
-// setelah dialog close animation selesai, untuk scrollIntoView ke field error.
-// Pattern identik ValidationDialog.handleAction().
+// onAfterClose?: () => void — dipanggil 150ms setelah primary CTA diklik.
 //
 // Layout: Lottie → title → description → footer CTA
 // ============================================================================
@@ -33,10 +39,8 @@ import {
 import { cn } from '@/lib/shared/utils';
 
 // Dynamic import — lottie-react pakai browser API, tidak bisa SSR
-// Pattern identik ValidationDialog
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
-// alert.json — sama dengan ValidationDialog, sudah ada di public/lotties/
 import alertLottie from '../../../public/lotties/alert.json';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -62,7 +66,6 @@ export interface MandatoryDialogProps {
   /**
    * [SCROLL FIX] Dipanggil setelah dialog close animation selesai (150ms delay).
    * Gunakan untuk scrollIntoView ke field error pertama di DOM.
-   * Pattern identik ValidationDialog.onAfterClose.
    */
   onAfterClose?: () => void;
   testId?: string;
@@ -81,8 +84,6 @@ export function MandatoryDialog({
 }: MandatoryDialogProps) {
   const showArrow = primaryCta.showArrow ?? true;
 
-  // [SCROLL FIX] Identik ValidationDialog.handleAction()
-  // onClose → tunggu 150ms animasi selesai → panggil onAfterClose
   const handlePrimaryAction = () => {
     primaryCta.onClick();
     if (onAfterClose) {
@@ -97,11 +98,16 @@ export function MandatoryDialog({
         // Intentionally locked — close only via CTA
       }}
     >
+      {/*
+        [TYPECHECK FIX] AlertDialogContent tidak expose onInteractOutside.
+        Tidak perlu: AlertDialog (Radix AlertDialog) sudah modal=true secara
+        default — outside clicks diblock tanpa perlu prop tambahan.
+        onEscapeKeyDown cukup untuk prevent keyboard dismiss.
+      */}
       <AlertDialogContent
         className="sm:max-w-sm p-0 overflow-hidden"
         data-testid={testId}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
       >
 
         {/* ── Lottie area ─────────────────────────────────────────────── */}

@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
+import { useAuthStore } from '@/stores/auth-store';
 import { tenantsApi } from '@/lib/api/tenants';
+import { getErrorMessage } from '@/lib/api/client';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { HeroFormData } from '@/types/tenant';
 import { StepIdentity } from './form/hero/step-identity';
 import { StepStory } from './form/hero/step-story';
@@ -16,12 +19,17 @@ import { StepAppearance } from './form/hero/step-appearance';
 // HERO SETTINGS SECTION
 // File: src/components/dashboard/settings/hero.tsx
 //
+// [BACKPORT — 2026-05-28]
+// Sync dengan pola terbaru dari Setup wizard:
+//
+//   1. OfflineAwareButton via WizardNav (sudah handle di WizardNav)
+//   2. Upload-in-progress guard sebelum save (SETTINGS-N2)
+//   3. ValidationDialog hard gate sebelum save (SETTINGS-N1)
+//   4. setTenant() via useAuthStore setelah save agar sidebar sync (SETTINGS-N6)
+//   5. useState initializer pattern, hapus isInitialized ref (SETTINGS-N3)
+//
 // [v4 cleanup — 2026-05-15]
-//   - Removed `heroCtaLink` from form init and save payload.
-//     The CTA destination is hardcoded to '/products' in block dispatcher
-//     (landing → /products is the only journey). No server column existed
-//     for this field anyway — every save call was sending a value that the
-//     server's whitelist filter silently dropped.
+//   - Removed heroCtaLink dari form init dan save payload.
 // ============================================================================
 
 interface HeroSectionProps {
@@ -31,23 +39,45 @@ interface HeroSectionProps {
 export function HeroSection({ onBack }: HeroSectionProps) {
   const t = useTranslations('settings.hero.stepsMeta');
   const tToast = useTranslations('toast.settings');
+  const tErrors = useTranslations('settings.hero');
+  const tAll = useTranslations();
   const { tenant, refresh } = useTenant();
+
+  // [SETTINGS-N6] Akses setTenant untuk sync auth store setelah save
+  const { setTenant } = useAuthStore();
+
   const [isSaving, setIsSaving] = useState(false);
   const [isRemovingLogo, setIsRemovingLogo] = useState(false);
   const [isRemovingHeroBg, setIsRemovingHeroBg] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<HeroFormData | null>(null);
+
+  // [SETTINGS-N2] Track upload state per slot
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingHeroBg, setIsUploadingHeroBg] = useState(false);
+
+  // [SETTINGS-N1] ValidationDialog state
+  const [validationOpen, setValidationOpen] = useState(false);
+  const [validationItems, setValidationItems] = useState<string[]>([]);
+
+  // [SETTINGS-N3] useState initializer — hapus isInitialized ref
+  const [formData, setFormData] = useState<HeroFormData | null>(() => {
+    if (!tenant) return null;
+    const themeData = tenant.theme as { primaryColor?: string } | null;
+    return {
+      name: tenant.name || '',
+      description: tenant.description || '',
+      heroTitle: tenant.heroTitle || '',
+      heroSubtitle: tenant.heroSubtitle || '',
+      heroCtaText: tenant.heroCtaText || '',
+      heroBackgroundImage: tenant.heroBackgroundImage || '',
+      logo: tenant.logo || '',
+      primaryColor: themeData?.primaryColor || THEME_COLORS[0].value,
+      category: tenant.category || '',
+    };
+  });
+
+  // Sync formData saat tenant pertama kali tersedia (SSR/lazy load)
   const isInitialized = useRef(false);
-
-  const STEPS = useMemo(
-    () => [
-      { title: t('identity.title'), desc: t('identity.desc') },
-      { title: t('story.title'), desc: t('story.desc') },
-      { title: t('appearance.title'), desc: t('appearance.desc') },
-    ],
-    [t],
-  );
-
   useEffect(() => {
     if (tenant && !isInitialized.current) {
       isInitialized.current = true;
@@ -66,19 +96,50 @@ export function HeroSection({ onBack }: HeroSectionProps) {
     }
   }, [tenant]);
 
+  const STEPS = useMemo(
+    () => [
+      { title: t('identity.title'), desc: t('identity.desc') },
+      { title: t('story.title'), desc: t('story.desc') },
+      { title: t('appearance.title'), desc: t('appearance.desc') },
+    ],
+    [t],
+  );
+
   const updateFormData = <K extends keyof HeroFormData>(key: K, value: HeroFormData[K]) => {
     if (formData) setFormData({ ...formData, [key]: value });
   };
+
+  // [SETTINGS-N1] Validasi sebelum save
+  const computeValidationErrors = useCallback((): string[] => {
+    if (!formData) return [];
+    const errors: string[] = [];
+    if (!formData.name.trim() || formData.name.trim().length < 3) {
+      errors.push(tErrors('validation.nameRequired'));
+    }
+    return errors;
+  }, [formData, tErrors]);
+
+  // [SETTINGS-N2] Guard: cek upload in-progress
+  const checkUploadGuard = useCallback((): boolean => {
+    if (isUploadingLogo || isUploadingHeroBg) {
+      setValidationItems([tErrors('validation.uploadInProgress')]);
+      setValidationOpen(true);
+      return false;
+    }
+    return true;
+  }, [isUploadingLogo, isUploadingHeroBg, tErrors]);
 
   const handleRemoveLogo = async () => {
     if (!tenant || !formData) return;
     setIsRemovingLogo(true);
     try {
       setFormData({ ...formData, logo: '' });
-      await tenantsApi.update({ logo: '' });
+      const result = await tenantsApi.update({ logo: '' });
+      // [SETTINGS-N6] Sync auth store
+      setTenant(result.tenant);
       await refresh();
       toast.success(tToast('logoRemoved'));
-    } catch {
+    } catch (err) {
       toast.error(tToast('logoRemoveFailed'));
       setFormData({ ...formData, logo: tenant.logo || '' });
     } finally {
@@ -91,10 +152,12 @@ export function HeroSection({ onBack }: HeroSectionProps) {
     setIsRemovingHeroBg(true);
     try {
       setFormData({ ...formData, heroBackgroundImage: '' });
-      await tenantsApi.update({ heroBackgroundImage: '' });
+      const result = await tenantsApi.update({ heroBackgroundImage: '' });
+      // [SETTINGS-N6] Sync auth store
+      setTenant(result.tenant);
       await refresh();
       toast.success(tToast('heroBgRemoved'));
-    } catch {
+    } catch (err) {
       toast.error(tToast('heroBgRemoveFailed'));
       setFormData({ ...formData, heroBackgroundImage: tenant.heroBackgroundImage || '' });
     } finally {
@@ -110,9 +173,21 @@ export function HeroSection({ onBack }: HeroSectionProps) {
 
   const handleSave = async () => {
     if (!tenant || !formData) return;
+
+    // [SETTINGS-N2] Upload guard dulu
+    if (!checkUploadGuard()) return;
+
+    // [SETTINGS-N1] Validation hard gate
+    const errors = computeValidationErrors();
+    if (errors.length > 0) {
+      setValidationItems(errors);
+      setValidationOpen(true);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await tenantsApi.update({
+      const result = await tenantsApi.update({
         name: formData.name || undefined,
         description: formData.description || undefined,
         heroTitle: formData.heroTitle,
@@ -122,10 +197,12 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         logo: formData.logo || undefined,
         theme: { primaryColor: formData.primaryColor },
       });
+      // [SETTINGS-N6] Sync auth store agar sidebar/header langsung update
+      setTenant(result.tenant);
       await refresh();
       toast.success(tToast('heroSaved'));
-    } catch {
-      toast.error(tToast('heroFailed'));
+    } catch (err) {
+      toast.error(tToast('heroFailed'), { description: getErrorMessage(err, tAll) });
     } finally {
       setIsSaving(false);
     }
@@ -153,6 +230,10 @@ export function HeroSection({ onBack }: HeroSectionProps) {
           isRemovingHeroBg={isRemovingHeroBg}
           onRemoveLogo={handleRemoveLogo}
           isRemovingLogo={isRemovingLogo}
+          onUploadStateChange={(slot, active) => {
+            if (slot === 'logo') setIsUploadingLogo(active);
+            if (slot === 'heroBg') setIsUploadingHeroBg(active);
+          }}
         />
       );
       default: return null;
@@ -173,6 +254,13 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         onNext={() => setCurrentStep((p) => p + 1)}
         onSave={handleSave}
         isSaving={isSaving}
+      />
+
+      {/* [SETTINGS-N1] ValidationDialog hard gate */}
+      <ValidationDialog
+        open={validationOpen}
+        onClose={() => setValidationOpen(false)}
+        items={validationItems}
       />
     </div>
   );

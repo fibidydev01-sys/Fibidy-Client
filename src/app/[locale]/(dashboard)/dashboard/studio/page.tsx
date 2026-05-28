@@ -18,13 +18,11 @@
 //   3. Tambah `isPrivateTenantLoading` check di `isStillLoading` gate —
 //      BuilderLoadingSteps tetap tampil sampai privateTenant selesai.
 //
-// Dengan fix ini:
-//   - Returning user (hasPublishedOnce=true): studio langsung tampil tanpa dialog
-//   - First-time user (hasPublishedOnce=false): dialog muncul TEPAT setelah
-//     loading selesai, tidak ada flash studio dulu
-//
-// [STUDIO FLOW v3 FIX — May 2026]
-// [SPRINT 1.2 — May 2026] carry-forward semua fix sebelumnya.
+// [TYPECHECK FIX — May 2026]
+// AlertDialogContent dari shadcn/ui tidak expose onInteractOutside prop.
+// Fix: hapus onInteractOutside — AlertDialog (Radix) sudah modal=true secara
+// default dan block outside clicks tanpa prop tambahan.
+// onEscapeKeyDown tetap dipertahankan untuk prevent keyboard dismiss.
 // ============================================================================
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -203,37 +201,14 @@ export default function LandingBuilderPage() {
   const hasPublishedOnce = privateTenant?.hasPublishedOnce === true;
 
   // ── [RACE CONDITION FIX] Onboarding trigger ───────────────────────────────
-  //
-  // SEBELUMNYA:
-  //   loadingComplete → privateTenant (mungkin belum ada) → setTimeout 400ms
-  //   → dialog muncul SETELAH studio sudah tampil = ngeflix
-  //
-  // SEKARANG:
-  //   Gate: loadingComplete AND !isPrivateTenantLoading AND privateTenant resolved
-  //   → kedua loading selesai dulu baru decide phase
-  //   → Hapus setTimeout — tidak perlu delay, BuilderLoadingSteps sudah buffer
-  //
-  // Hasilnya:
-  //   - First-time user: dialog muncul LANGSUNG setelah loading, studio tidak flash
-  //   - Returning user: studio tampil langsung tanpa dialog sama sekali
-
   useEffect(() => {
-    // Gate 1: builder loading steps belum selesai
     if (!loadingComplete) return;
-
-    // Gate 2: privateTenant masih loading — tunggu sampai resolved
-    // Ini kunci fix — jangan decide phase sampai data ada
     if (isPrivateTenantLoading) return;
-
-    // Gate 3: sudah di done phase (first publish dialog terbuka)
     if (firstPublishDialogOpen) return;
 
     if (privateTenant?.hasPublishedOnce === false) {
-      // First-time user — langsung show dialog, tanpa delay
-      // BuilderLoadingSteps sudah cukup sebagai visual buffer
       setOnboardingPhase('welcome');
     } else {
-      // Returning user atau hasPublishedOnce = true/undefined
       setOnboardingPhase('idle');
     }
   }, [loadingComplete, isPrivateTenantLoading, privateTenant, firstPublishDialogOpen]);
@@ -338,8 +313,6 @@ export default function LandingBuilderPage() {
   const configReady = landingConfig !== null && landingConfig !== undefined;
 
   // [RACE CONDITION FIX] Tambah isPrivateTenantLoading ke gate
-  // BuilderLoadingSteps tampil sampai privateTenant resolved
-  // Mencegah studio flash sebelum onboarding phase diketahui
   const isStillLoading =
     tenantLoading ||
     !configReady ||
@@ -424,10 +397,14 @@ export default function LandingBuilderPage() {
       />
 
       {/* Dialog 2: Enable Hero */}
+      {/*
+        [TYPECHECK FIX] Hapus onInteractOutside dari AlertDialogContent.
+        AlertDialog (Radix) sudah modal=true secara default — outside clicks
+        diblock tanpa prop tambahan. onEscapeKeyDown cukup.
+      */}
       <AlertDialog open={onboardingPhase === 'enable'}>
         <AlertDialogContent
           onEscapeKeyDown={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
         >
           <AlertDialogHeader>
             <div className="flex justify-center mb-3">

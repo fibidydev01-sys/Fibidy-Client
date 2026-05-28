@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -9,6 +10,16 @@ import { EmptySlot } from '@/components/dashboard/shared/image-slot';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import type { HeroFormData } from '@/types/tenant';
 
+// ============================================================================
+// STEP APPEARANCE — Settings Hero Form
+// File: src/components/dashboard/settings/form/hero/step-appearance.tsx
+//
+// [BACKPORT — 2026-05-28]
+// Tambah prop onUploadStateChange(slot, active) agar parent (HeroSection)
+// bisa track upload in-progress dan guard save button.
+// Pattern identik dengan StepVisual di Setup wizard (G1 fix).
+// ============================================================================
+
 interface StepAppearanceProps {
   formData: HeroFormData;
   updateFormData: <K extends keyof HeroFormData>(key: K, value: HeroFormData[K]) => void;
@@ -16,6 +27,8 @@ interface StepAppearanceProps {
   isRemovingHeroBg: boolean;
   onRemoveLogo: () => void;
   isRemovingLogo: boolean;
+  /** [BACKPORT] Callback untuk track upload in-progress ke parent */
+  onUploadStateChange?: (slot: 'logo' | 'heroBg', active: boolean) => void;
 }
 
 function AppearanceFilledSlot({
@@ -63,7 +76,6 @@ function ColorPicker({
   onChange: (v: string) => void;
 }) {
   return (
-
     <div className="flex items-center justify-center gap-2">
       {THEME_COLORS.map((color) => {
         const active = value === color.value;
@@ -77,7 +89,7 @@ function ColorPicker({
               'rounded-full transition-all duration-150 focus-visible:outline-none p-1',
               active && 'ring-2 ring-offset-2 ring-offset-background'
             )}
-            style={active ? { ['--tw-ring-color' as string]: color.value } : undefined}
+            style={active ? ({ ['--tw-ring-color' as string]: color.value } as React.CSSProperties) : undefined}
           >
             <div
               className={cn(
@@ -106,6 +118,7 @@ export function StepAppearance({
   isRemovingHeroBg,
   onRemoveLogo,
   isRemovingLogo,
+  onUploadStateChange,
 }: StepAppearanceProps) {
   const t = useTranslations('settings.hero.appearance');
 
@@ -120,6 +133,15 @@ export function StepAppearance({
     maxFiles: 1,
     onSuccess: (url) => updateFormData('heroBackgroundImage', url),
   });
+
+  // [BACKPORT] Report upload state ke parent agar bisa guard save
+  useEffect(() => {
+    onUploadStateChange?.('logo', isUploadingLogo);
+  }, [isUploadingLogo, onUploadStateChange]);
+
+  useEffect(() => {
+    onUploadStateChange?.('heroBg', isUploadingHeroBg);
+  }, [isUploadingHeroBg, onUploadStateChange]);
 
   return (
     <div className="space-y-8 max-w-sm mx-auto text-center">
