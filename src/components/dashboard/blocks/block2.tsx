@@ -2,33 +2,26 @@
 
 // ============================================================================
 // FILE: src/components/dashboard/blocks/block2.tsx
-// VARIANT: Elegant Minimal — FULL LANDING TEMPLATE
 //
-// SECTIONS:
-//   1. Hero          — split frame banner + 2-col image/text layout
-//   2. Contact       — clean card panel + optional map
-//   3. Pre-footer CTA — centered CTA panel
+// STYLE: Linear / Notion / Vercel — "Centered Hero + Bento Grid"
+// - Hero: Centered composition, subtle dot-grid background, eyebrow pill,
+//         large bold headline, CTA below
+// - Features: Bento grid below hero (mixed card sizes 1 large + smalls)
+//             features[].image, .title, .description → card content
+// - Contact: Chess alternating layout (left/right) + map + form
 //
-// STYLE LANGUAGE: elegant minimal
-//   - Clean white/surface panels
-//   - Subtle border separators
-//   - Refined typography, no oversized type
-//   - Consistent with Block1 design system
-//
-// [RENAME — May 2026]
-//   feature.icon → feature.image (FeatureItem.icon removed)
-//   Lokasi: SplitFrame filter + image render
+// Props: identical to BlockComponentProps (block.tsx)
 // ============================================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
+import { ArrowRight, Phone, MapPin, MessageCircle, Mail, ArrowUpRight } from 'lucide-react';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/shared/utils';
 import type { FeatureItem } from '@/types/tenant';
 
@@ -53,169 +46,150 @@ interface Block2Props {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
+  contactShowForm?: boolean;
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// BANNER 2 — SPLIT FRAME
-// ────────────────────────────────────────────────────────────────────────────
+// ─── Dot Grid Background SVG ────────────────────────────────────────────────
+function DotGrid() {
+  return (
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <pattern id="b2-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="1" className="fill-border" style={{ opacity: 0.5 }} />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#b2-dots)" />
+    </svg>
+  );
+}
 
-const AUTOPLAY_INTERVAL = 5000;
-const SWIPE_THRESHOLD = 50;
+// ─── Bento Grid ─────────────────────────────────────────────────────────────
+function BentoGrid({ features }: { features: FeatureItem[] }) {
+  const items = features.slice(0, 7); // max 7 tiles
+  if (items.length === 0) return null;
 
-function SplitFrame({ features }: { features: FeatureItem[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  // Layout patterns by count
+  // 1 → 1 full-width
+  // 2 → 1 large + 1 small
+  // 3 → 1 large + 2 small
+  // 4 → 1 large + 3 small
+  // 5+ → 1 large + 2 small row + 2+ bottom row
 
-  const total = features.length;
-  const hasMultiple = total > 1;
+  const [first, ...rest] = items;
 
-  const scrollToIndex = useCallback((index: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ left: el.clientWidth * index, behavior: 'smooth' });
-  }, []);
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[220px] md:auto-rows-[200px]">
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      const slideWidth = el.clientWidth;
-      if (slideWidth === 0) return;
-      const idx = Math.round(el.scrollLeft / slideWidth);
-      setActiveIndex(Math.max(0, Math.min(idx, total - 1)));
-    };
-    el.addEventListener('scroll', update, { passive: true });
-    return () => el.removeEventListener('scroll', update);
-  }, [total]);
+        {/* Large card — always spans 2 cols & 2 rows */}
+        <BentoCard
+          item={first}
+          className="col-span-2 row-span-2 md:col-span-2 md:row-span-2"
+          large
+        />
 
-  useEffect(() => {
-    if (!hasMultiple || isPaused) return;
-    const interval = setInterval(() => {
-      scrollToIndex((activeIndex + 1) % total);
-    }, AUTOPLAY_INTERVAL);
-    return () => clearInterval(interval);
-  }, [activeIndex, total, hasMultiple, isPaused, scrollToIndex]);
+        {/* Remaining cards */}
+        {rest.map((item, i) => (
+          <BentoCard key={i} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchEndX.current = null;
-    setIsPaused(true);
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = () => {
-    if (touchStartX.current === null || touchEndX.current === null) {
-      setIsPaused(false);
-      return;
-    }
-    const delta = touchStartX.current - touchEndX.current;
-    if (Math.abs(delta) > SWIPE_THRESHOLD) {
-      const next = delta > 0
-        ? Math.min(activeIndex + 1, total - 1)
-        : Math.max(activeIndex - 1, 0);
-      scrollToIndex(next);
-    }
-    touchStartX.current = null;
-    touchEndX.current = null;
-    setTimeout(() => setIsPaused(false), 3000);
-  };
+function BentoCard({
+  item,
+  className,
+  large = false,
+}: {
+  item: FeatureItem;
+  className?: string;
+  large?: boolean;
+}) {
+  const hasImage = !!item.image;
+  const hasText = !!(item.title || item.description);
 
   return (
     <div
-      className="banner-full-bleed relative bg-muted"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      className={cn(
+        'group relative overflow-hidden rounded-2xl border border-border bg-card',
+        'transition-all duration-300 hover:border-foreground/20 hover:shadow-lg hover:shadow-foreground/5',
+        className,
+      )}
     >
-      <div
-        ref={scrollRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex"
-        style={{ scrollBehavior: 'smooth' }}
-      >
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="shrink-0 w-full snap-start flex flex-col md:flex-row"
-          >
-            {/* [RENAME] feature.icon → feature.image */}
-            <div className="relative w-full md:w-1/2 aspect-square md:aspect-auto md:min-h-[420px] lg:min-h-[520px] bg-muted shrink-0">
-              {feature.image ? (
-                <OptimizedImage
-                  src={feature.image}
-                  alt={feature.title ?? `Banner ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  priority={index === 0}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs uppercase tracking-widest text-muted-foreground">
-                    Banner {index + 1}
-                  </span>
-                </div>
-              )}
-            </div>
+      {/* Background image */}
+      {hasImage && (
+        <div className="absolute inset-0">
+          <OptimizedImage
+            src={item.image!}
+            alt={item.title ?? ''}
+            fill
+            className={cn(
+              'object-cover transition-transform duration-500 group-hover:scale-[1.03]',
+              hasText && 'brightness-[0.45]',
+            )}
+          />
+        </div>
+      )}
 
-            <div className="relative flex-1 flex flex-col justify-center px-8 sm:px-12 md:px-16 lg:px-20 py-10 md:py-12 bg-foreground text-background">
-              <div className="absolute top-8 md:top-12 left-8 sm:left-12 md:left-16 lg:left-20 w-12 h-px bg-background/40" />
-              <span className="absolute top-6 md:top-10 right-8 sm:right-12 md:right-16 lg:right-20 text-[10px] font-mono tracking-[0.3em] text-background/50 uppercase">
-                {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-              </span>
+      {/* No-image bg gradient */}
+      {!hasImage && (
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/60 to-muted/20" />
+      )}
 
-              <div className="mt-8 md:mt-12">
-                {feature.title && (
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-[1.05] mb-4 max-w-md">
-                    {feature.title}
-                  </h3>
-                )}
-                {feature.description && (
-                  <p className="text-sm md:text-base text-background/70 leading-relaxed max-w-md">
-                    {feature.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {hasMultiple && (
-        <div className="absolute top-1/2 right-2 md:right-4 -translate-y-1/2 flex flex-col gap-1.5 z-10">
-          {features.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => {
-                scrollToIndex(index);
-                setIsPaused(true);
-                setTimeout(() => setIsPaused(false), 5000);
-              }}
-              aria-label={`Go to slide ${index + 1}`}
+      {/* Text content */}
+      {hasText && (
+        <div
+          className={cn(
+            'relative z-10 flex flex-col justify-end h-full p-5 md:p-6',
+            !hasImage && 'justify-start pt-6',
+          )}
+        >
+          {item.title && (
+            <p
               className={cn(
-                'w-1 transition-all duration-300',
-                index === activeIndex
-                  ? 'h-10 bg-background'
-                  : 'h-4 bg-background/40 hover:bg-background/70 hover:h-6',
+                'font-semibold leading-snug',
+                hasImage ? 'text-white' : 'text-foreground',
+                large ? 'text-xl md:text-2xl mb-2' : 'text-sm md:text-base mb-1',
               )}
-            />
-          ))}
+            >
+              {item.title}
+            </p>
+          )}
+          {item.description && (
+            <p
+              className={cn(
+                'leading-relaxed',
+                hasImage ? 'text-white/75' : 'text-muted-foreground',
+                large ? 'text-sm md:text-base line-clamp-3' : 'text-xs line-clamp-2',
+              )}
+            >
+              {item.description}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Corner arrow — large card only */}
+      {large && (
+        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className={cn(
+            'w-8 h-8 rounded-full flex items-center justify-center',
+            hasImage ? 'bg-white/20 backdrop-blur-sm' : 'bg-foreground/10',
+          )}>
+            <ArrowUpRight className={cn('w-4 h-4', hasImage ? 'text-white' : 'text-foreground')} />
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — HERO
-// ────────────────────────────────────────────────────────────────────────────
-
+// ─── Hero Section ────────────────────────────────────────────────────────────
 interface Block2HeroProps {
   title?: string;
   subtitle?: string;
@@ -225,7 +199,6 @@ interface Block2HeroProps {
   ctaText?: string;
   ctaLink?: string;
   showCta?: boolean;
-  backgroundImage?: string;
   logo?: string;
   storeName?: string;
   features?: FeatureItem[];
@@ -240,113 +213,104 @@ function Block2HeroSection({
   ctaText,
   ctaLink = '/products',
   showCta = true,
-  backgroundImage,
   logo,
   storeName,
   features,
 }: Block2HeroProps) {
-  // [RENAME] f.icon → f.image
   const validFeatures = (features || []).filter(
-    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image)
+    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image),
   );
-  const hasBanner = validFeatures.length > 0;
-  const hasEyebrow = !!(eyebrow ?? category);
-  const hasImage = !!(backgroundImage || logo);
-  const hasBadgeBlock = !!(storeName || logo);
+  const hasBento = validFeatures.length > 0;
+  const hasEyebrow = !!(eyebrow ?? category ?? storeName);
   const hasCta = showCta && !!ctaText;
-
-  const hasAnyContent =
-    hasBanner || hasBadgeBlock || hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasImage;
+  const hasAnyContent = hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasBento;
 
   if (!hasAnyContent) return null;
 
   return (
-    <section id="hero" className="relative min-h-screen overflow-hidden bg-background flex flex-col">
-      {hasBanner && <SplitFrame features={validFeatures} />}
+    <section id="hero" className="relative overflow-hidden bg-background">
+      {/* Dot grid background */}
+      <DotGrid />
 
-      <div className="flex flex-1 flex-col lg:grid lg:grid-cols-2 min-h-screen">
-        {hasImage && (
-          <div className="flex items-center justify-center px-8 sm:px-10 lg:px-12 py-12 lg:py-16 order-2 lg:order-1">
-            <div className="w-full max-w-sm lg:max-w-none">
-              <div className="overflow-hidden border border-border rounded-2xl">
-                <div className="aspect-[3/4] relative w-full">
-                  {backgroundImage ? (
-                    <OptimizedImage src={backgroundImage} alt={title ?? ''} fill priority className="object-cover" />
-                  ) : logo ? (
-                    <OptimizedImage src={logo} alt={title ?? ''} fill className="object-contain p-12" />
-                  ) : null}
-                </div>
-              </div>
-            </div>
+      {/* Radial fade — center glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 70% 50% at 50% 0%, hsl(var(--primary)/0.08) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Hero content — centered */}
+      <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-16 md:pt-32 md:pb-20">
+        {/* Eyebrow / store badge */}
+        {hasEyebrow && (
+          <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-border bg-background/80 backdrop-blur-sm px-4 py-1.5">
+            {logo && (
+              <span className="relative w-4 h-4 rounded-full overflow-hidden shrink-0">
+                <OptimizedImage src={logo} alt={storeName ?? ''} fill className="object-cover" />
+              </span>
+            )}
+            <span className="text-[11px] font-medium tracking-[0.18em] uppercase text-muted-foreground">
+              {eyebrow ?? category ?? storeName}
+            </span>
           </div>
         )}
 
-        <div
-          className={cn(
-            'flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-16 lg:py-24 order-1 lg:order-2',
-            !hasImage && 'lg:col-span-2 lg:items-center lg:text-center',
-          )}
-        >
-          {hasBadgeBlock && (
-            <div className="mb-8 flex items-center gap-3">
-              {logo && (
-                <Card className="relative w-14 h-14 overflow-hidden border border-border bg-card rounded-xl shrink-0">
-                  <OptimizedImage src={logo} alt={storeName ?? title ?? ''} fill className="object-cover" />
-                </Card>
-              )}
-              {storeName && (
-                <Badge variant="outline" className="rounded-sm px-3 py-1 text-[10px] tracking-[0.2em] uppercase font-medium border-border text-muted-foreground bg-transparent">
-                  {storeName}
-                </Badge>
-              )}
-            </div>
-          )}
+        {/* Title */}
+        {title && (
+          <h1
+            className="max-w-3xl text-[40px] sm:text-[52px] md:text-[64px] lg:text-[72px] font-black leading-[0.95] tracking-tight text-foreground mb-5"
+            style={{ letterSpacing: '-0.03em' }}
+          >
+            {title}
+          </h1>
+        )}
 
-          {hasEyebrow && (
-            <div className="mb-5 flex items-center gap-3 max-w-[260px]">
-              <Separator className="flex-1 bg-border" />
-              <span className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground whitespace-nowrap font-medium">
-                {eyebrow ?? category}
-              </span>
-              <Separator className="flex-1 bg-border" />
-            </div>
-          )}
+        {/* Subtitle */}
+        {subtitle && (
+          <p className="max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed mb-2">
+            {subtitle}
+          </p>
+        )}
 
-          {title && (
-            <h1 className="text-[36px] sm:text-[42px] md:text-[48px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground mb-4 max-w-lg">
-              {title}
-            </h1>
-          )}
+        {/* Description */}
+        {description && (
+          <p className="max-w-md text-sm text-muted-foreground/75 leading-relaxed mb-8">
+            {description}
+          </p>
+        )}
 
-          {subtitle && (
-            <p className="text-base font-medium text-foreground/80 leading-snug max-w-sm mb-3">{subtitle}</p>
-          )}
-
-          {description && (
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-10">{description}</p>
-          )}
-
-          {!description && hasCta && <div className="mb-10" />}
-
-          {hasCta && (
-            <div>
-              <Link href={ctaLink}>
-                <InteractiveHoverButton className="px-9 py-4 text-sm font-semibold tracking-wide">
-                  {ctaText}
-                </InteractiveHoverButton>
-              </Link>
-            </div>
-          )}
-        </div>
+        {/* CTA */}
+        {hasCta && (
+          <div className="mt-8 flex items-center gap-3">
+            <Link href={ctaLink}>
+              <InteractiveHoverButton className="px-8 py-3.5 text-sm font-semibold tracking-wide">
+                {ctaText}
+              </InteractiveHoverButton>
+            </Link>
+          </div>
+        )}
       </div>
+
+      {/* Bento grid — directly below hero text */}
+      {hasBento && (
+        <div className="relative z-10 pb-20 md:pb-28">
+          <BentoGrid features={validFeatures} />
+        </div>
+      )}
+
+      {/* Bottom fade out into next section */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"
+      />
     </section>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — CONTACT
-// ────────────────────────────────────────────────────────────────────────────
-
+// ─── Contact Section ─────────────────────────────────────────────────────────
 interface Block2ContactProps {
   contactTitle?: string;
   contactSubtitle?: string;
@@ -356,7 +320,14 @@ interface Block2ContactProps {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
+  contactShowForm?: boolean;
   storeName?: string;
+}
+
+interface Block2FormData {
+  name: string;
+  email: string;
+  message: string;
 }
 
 function Block2ContactSection({
@@ -368,177 +339,203 @@ function Block2ContactSection({
   address,
   contactMapUrl,
   contactShowMap,
+  contactShowForm,
   storeName,
 }: Block2ContactProps) {
   const t = useTranslations('store.tenantContact');
   const tHeader = useTranslations('store.header');
+  const tForm = useTranslations('store.contactForm');
 
-  const hasAnyContact = !!(whatsapp || phone || email || address);
-  if (!hasAnyContact) return null;
+  const [formData, setFormData] = useState<Block2FormData>({ name: '', email: '', message: '' });
 
   const showMap = !!(contactShowMap && contactMapUrl);
+  const showForm = !!(contactShowForm && whatsapp);
+
+  const contactItems = [
+    whatsapp && { icon: MessageCircle, label: tHeader('whatsapp'), value: `+${whatsapp}`, href: `https://wa.me/${whatsapp}`, color: 'hover:text-green-600' },
+    phone && { icon: Phone, label: tHeader('phone'), value: phone, href: `tel:${phone}`, color: 'hover:text-foreground/70' },
+    email && { icon: Mail, label: tHeader('email'), value: email, href: `mailto:${email}`, color: 'hover:text-foreground/70' },
+    address && { icon: MapPin, label: tHeader('address'), value: address, href: null, color: '' },
+  ].filter(Boolean) as Array<{ icon: React.ElementType; label: string; value: string; href: string | null; color: string }>;
+
+  const hasAnything = !!contactTitle || !!contactSubtitle || contactItems.length > 0 || showMap || showForm;
+  if (!hasAnything) return null;
 
   const whatsappLink = whatsapp && storeName
     ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: storeName }))}`
-    : whatsapp
-      ? `https://wa.me/${whatsapp}`
-      : null;
+    : whatsapp ? `https://wa.me/${whatsapp}` : null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (whatsapp) {
+      const message = tForm('whatsappTemplate', {
+        name: storeName ?? '',
+        senderName: formData.name,
+        senderEmail: formData.email,
+        message: formData.message,
+      });
+      window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+  };
 
   return (
-    <section id="contact" className="container px-4 py-20 md:py-28 space-y-12 md:space-y-16">
-      {(contactTitle || contactSubtitle) && (
-        <div className="space-y-3 text-center flex flex-col items-center">
-          {contactTitle && (
-            <h2 className="text-[36px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
-              {contactTitle}
-            </h2>
-          )}
-          {contactSubtitle && (
-            <p className="text-base text-muted-foreground max-w-xl leading-relaxed">
-              {contactSubtitle}
-            </p>
-          )}
-        </div>
-      )}
+    <section id="contact" className="bg-background border-t border-border">
+      <div className="container max-w-5xl px-4 py-20 md:py-28">
 
-      {showMap && (
-        <div className="rounded-xl overflow-hidden border border-border">
-          <iframe
-            src={contactMapUrl}
-            width="100%"
-            height="400"
-            style={{ border: 0, display: 'block' }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Google Maps"
-          />
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 border-y border-border divide-y md:divide-y-0 md:divide-x divide-border">
-        <div className="divide-y divide-border">
-          {whatsapp && whatsappLink && (
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center justify-between px-5 py-4 hover:text-green-600 transition-colors duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-green-600 transition-colors shrink-0" />
-                <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
-                    {tHeader('whatsapp')}
-                  </p>
-                  <p className="text-sm font-medium text-foreground">+{whatsapp}</p>
-                </div>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-green-600 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
-            </a>
-          )}
-          {phone && (
-            <a
-              href={`tel:${phone}`}
-              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
-                    {tHeader('phone')}
-                  </p>
-                  <p className="text-sm font-medium text-foreground">{phone}</p>
-                </div>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
-            </a>
-          )}
-        </div>
-        <div className="divide-y divide-border">
-          {email && (
-            <a
-              href={`mailto:${email}`}
-              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
-                    {tHeader('email')}
-                  </p>
-                  <p className="text-sm font-medium text-foreground">{email}</p>
-                </div>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
-            </a>
-          )}
-          {address && (
-            <div className="flex items-start gap-3 px-5 py-4">
-              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
-                  {tHeader('address')}
-                </p>
-                <p className="text-sm font-medium text-foreground">{address}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 3 — PRE-FOOTER CTA
-// ────────────────────────────────────────────────────────────────────────────
-
-interface Block2PrefooterProps {
-  whatsapp?: string;
-  storeName?: string;
-}
-
-function Block2PrefooterCTA({ whatsapp, storeName }: Block2PrefooterProps) {
-  const t = useTranslations('store.tenantContact');
-
-  if (!whatsapp) return null;
-
-  const message = storeName ? t('whatsappTemplate', { name: storeName }) : '';
-  const link = `https://wa.me/${whatsapp}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
-
-  return (
-    <section className="border-t border-border bg-muted/30 py-20 md:py-28">
-      <div className="container px-4">
-        <div className="max-w-2xl mx-auto text-center space-y-6">
-          <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted-foreground">
-            {t('sectionEyebrow')}
-          </p>
-          <h2 className="text-[32px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
-            {t('ctaHeading', { name: storeName ?? '' })}
-          </h2>
-          <div className="pt-2">
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 px-7 py-3.5 bg-foreground text-background text-sm font-semibold tracking-wide hover:bg-foreground/85 transition-colors rounded-full"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span>{t('whatsappCta')}</span>
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </a>
+        {/* Section header */}
+        {(contactTitle || contactSubtitle) && (
+          <div className="mb-16 md:mb-20">
+            {contactTitle && (
+              <h2
+                className="text-[32px] sm:text-[40px] md:text-[52px] font-black tracking-tight text-foreground leading-[0.95] mb-4"
+                style={{ letterSpacing: '-0.03em' }}
+              >
+                {contactTitle}
+              </h2>
+            )}
+            {contactSubtitle && (
+              <p className="text-base text-muted-foreground max-w-md leading-relaxed">
+                {contactSubtitle}
+              </p>
+            )}
           </div>
+        )}
+
+        {/* Chess layout — contact items alternating */}
+        <div className="space-y-0 divide-y divide-border border-y border-border mb-12">
+          {contactItems.map(({ icon: Icon, label, value, href, color }, i) => {
+            const isEven = i % 2 === 0;
+            const inner = (
+              <div
+                className={cn(
+                  'group flex items-center gap-6 py-7 md:py-8',
+                  'transition-colors duration-200',
+                  href && color,
+                  isEven ? 'flex-row' : 'flex-row-reverse text-right',
+                )}
+              >
+                {/* Icon block */}
+                <div className={cn(
+                  'w-12 h-12 rounded-xl border border-border bg-muted/50 flex items-center justify-center shrink-0',
+                  'transition-colors duration-200 group-hover:border-foreground/20 group-hover:bg-muted',
+                )}>
+                  <Icon className="w-5 h-5 text-muted-foreground" />
+                </div>
+
+                {/* Text */}
+                <div className={cn('flex-1 min-w-0', !isEven && 'items-end')}>
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    {label}
+                  </p>
+                  <p className="text-base font-semibold text-foreground truncate">{value}</p>
+                </div>
+
+                {/* Arrow */}
+                {href && (
+                  <ArrowRight
+                    className={cn(
+                      'w-4 h-4 text-muted-foreground/30 shrink-0 transition-all duration-200',
+                      'group-hover:text-current group-hover:translate-x-1',
+                      !isEven && '-scale-x-100 group-hover:-translate-x-1 group-hover:translate-x-0',
+                    )}
+                  />
+                )}
+              </div>
+            );
+
+            return href ? (
+              <a
+                key={i}
+                href={href}
+                target={href.startsWith('https://wa.me') ? '_blank' : undefined}
+                rel={href.startsWith('https://wa.me') ? 'noopener noreferrer' : undefined}
+              >
+                {inner}
+              </a>
+            ) : (
+              <div key={i}>{inner}</div>
+            );
+          })}
         </div>
+
+        {/* Map + Form — side by side */}
+        {(showMap || showForm) && (
+          <div className={cn(
+            'rounded-2xl border border-border overflow-hidden',
+            showMap && showForm ? 'grid grid-cols-1 md:grid-cols-2' : '',
+          )}>
+            {showMap && (
+              <div className="aspect-square md:aspect-auto md:min-h-[400px]">
+                <iframe
+                  src={contactMapUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, display: 'block', minHeight: '400px' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Maps"
+                />
+              </div>
+            )}
+
+            {showForm && (
+              <form onSubmit={handleSubmit} className="p-8 md:p-10 flex flex-col justify-center gap-5 bg-muted/20">
+                <div>
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    {t('sectionEyebrow')}
+                  </p>
+                  <p className="text-lg font-bold text-foreground">{storeName}</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b2-name" className="text-xs font-medium">{tForm('nameLabel')}</Label>
+                  <Input
+                    id="b2-name"
+                    placeholder={tForm('namePlaceholder')}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b2-email" className="text-xs font-medium">{tForm('emailLabel')}</Label>
+                  <Input
+                    id="b2-email"
+                    type="email"
+                    placeholder={tForm('emailPlaceholder')}
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b2-message" className="text-xs font-medium">{tForm('messageLabel')}</Label>
+                  <Textarea
+                    id="b2-message"
+                    placeholder={tForm('messagePlaceholder')}
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/85 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {tForm('sendButton')}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// BLOCK 2 — Elegant Minimal — FULL LANDING TEMPLATE
-// ────────────────────────────────────────────────────────────────────────────
-
+// ─── Export ──────────────────────────────────────────────────────────────────
 export function Block2(props: Block2Props) {
   return (
     <>
@@ -551,7 +548,6 @@ export function Block2(props: Block2Props) {
         ctaText={props.ctaText}
         ctaLink={props.ctaLink}
         showCta={props.showCta}
-        backgroundImage={props.backgroundImage}
         logo={props.logo}
         storeName={props.storeName}
         features={props.features}
@@ -565,10 +561,7 @@ export function Block2(props: Block2Props) {
         address={props.address}
         contactMapUrl={props.contactMapUrl}
         contactShowMap={props.contactShowMap}
-        storeName={props.storeName}
-      />
-      <Block2PrefooterCTA
-        whatsapp={props.whatsapp}
+        contactShowForm={props.contactShowForm}
         storeName={props.storeName}
       />
     </>

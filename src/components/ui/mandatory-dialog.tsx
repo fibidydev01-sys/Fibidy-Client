@@ -1,29 +1,5 @@
 'use client';
 
-// ============================================================================
-// MANDATORY DIALOG — Shared Shell
-// File: src/components/ui/mandatory-dialog.tsx
-//
-// [LOTTIE UPDATE — May 2026]
-// Migrate dari Dialog → AlertDialog (pattern identik ValidationDialog).
-// Tambah Lottie animation (alert.json) di atas title.
-// Hapus [&>button:last-child]:hidden CSS hack — AlertDialog tidak punya X button.
-// Hapus icon prop — digantikan Lottie animation.
-//
-// [TYPECHECK FIX — May 2026]
-// AlertDialogContent dari shadcn/ui tidak expose onInteractOutside.
-// Fix: pakai DialogPrimitive.Content langsung via @radix-ui/react-dialog
-// untuk intercept pointer events, atau cukup onEscapeKeyDown saja —
-// AlertDialog by design sudah block outside clicks.
-// AlertDialog (Radix) secara default SUDAH modal=true dan block outside click,
-// jadi onInteractOutside tidak perlu di-pass manual.
-//
-// [SCROLL FIX — carry-forward dari ValidationDialog]
-// onAfterClose?: () => void — dipanggil 150ms setelah primary CTA diklik.
-//
-// Layout: Lottie → title → description → footer CTA
-// ============================================================================
-
 import dynamic from 'next/dynamic';
 import { ArrowRight } from 'lucide-react';
 import {
@@ -38,12 +14,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/shared/utils';
 
-// Dynamic import — lottie-react pakai browser API, tidak bisa SSR
+// ============================================================================
+// MANDATORY DIALOG — Shared Shell
+// File: src/components/ui/mandatory-dialog.tsx
+//
+// [LOTTIE UPDATE — May 2026] AlertDialog + Lottie, hapus icon prop.
+// [TYPECHECK FIX — May 2026] Hapus onInteractOutside — AlertDialogContent
+// tidak expose prop ini. AlertDialog (Radix) sudah modal=true by default,
+// outside clicks diblock tanpa prop tambahan.
+// ============================================================================
+
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
-
 import alertLottie from '../../../public/lotties/alert.json';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface MandatoryDialogCta {
   label: string;
@@ -63,15 +45,9 @@ export interface MandatoryDialogProps {
   description: React.ReactNode;
   primaryCta: PrimaryCta;
   secondaryCta?: MandatoryDialogCta;
-  /**
-   * [SCROLL FIX] Dipanggil setelah dialog close animation selesai (150ms delay).
-   * Gunakan untuk scrollIntoView ke field error pertama di DOM.
-   */
   onAfterClose?: () => void;
   testId?: string;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function MandatoryDialog({
   open,
@@ -86,44 +62,26 @@ export function MandatoryDialog({
 
   const handlePrimaryAction = () => {
     primaryCta.onClick();
-    if (onAfterClose) {
-      setTimeout(onAfterClose, 150);
-    }
+    if (onAfterClose) setTimeout(onAfterClose, 150);
   };
 
   return (
-    <AlertDialog
-      open={open}
-      onOpenChange={() => {
-        // Intentionally locked — close only via CTA
-      }}
-    >
-      {/*
-        [TYPECHECK FIX] AlertDialogContent tidak expose onInteractOutside.
-        Tidak perlu: AlertDialog (Radix AlertDialog) sudah modal=true secara
-        default — outside clicks diblock tanpa perlu prop tambahan.
-        onEscapeKeyDown cukup untuk prevent keyboard dismiss.
-      */}
+    <AlertDialog open={open} onOpenChange={() => {}}>
       <AlertDialogContent
         className="sm:max-w-sm p-0 overflow-hidden"
         data-testid={testId}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-
-        {/* ── Lottie area ─────────────────────────────────────────────── */}
         <div className="flex justify-center items-center pt-6 pb-2">
           <Lottie
             animationData={alertLottie}
             loop={true}
             autoplay={true}
             style={{ width: 160, height: 160 }}
-            rendererSettings={{
-              viewBoxOnly: true,
-            }}
+            rendererSettings={{ viewBoxOnly: true }}
           />
         </div>
 
-        {/* ── Title + Description ──────────────────────────────────────── */}
         <AlertDialogHeader className="px-6 pb-2">
           <AlertDialogTitle className="text-base font-semibold text-center">
             {title}
@@ -132,17 +90,11 @@ export function MandatoryDialog({
             asChild={typeof description !== 'string'}
             className="text-sm text-center pt-1 leading-relaxed"
           >
-            {typeof description === 'string' ? (
-              description
-            ) : (
-              <div>{description}</div>
-            )}
+            {typeof description === 'string' ? description : <div>{description}</div>}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* ── Footer ───────────────────────────────────────────────────── */}
         <AlertDialogFooter className="px-6 pb-6 pt-2 flex-col gap-2 sm:flex-col">
-          {/* Primary CTA */}
           <AlertDialogAction
             onClick={handlePrimaryAction}
             className={cn('w-full', showArrow && 'gap-2')}
@@ -151,29 +103,20 @@ export function MandatoryDialog({
             {showArrow && <ArrowRight className="h-4 w-4" aria-hidden />}
           </AlertDialogAction>
 
-          {/* Secondary CTA — optional */}
           {secondaryCta && (
             secondaryCta.href ? (
               <AlertDialogCancel asChild className="w-full mt-0">
-                <a
-                  href={secondaryCta.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={secondaryCta.href} target="_blank" rel="noopener noreferrer">
                   {secondaryCta.label}
                 </a>
               </AlertDialogCancel>
             ) : (
-              <AlertDialogCancel
-                onClick={secondaryCta.onClick}
-                className="w-full mt-0"
-              >
+              <AlertDialogCancel onClick={secondaryCta.onClick} className="w-full mt-0">
                 {secondaryCta.label}
               </AlertDialogCancel>
             )
           )}
         </AlertDialogFooter>
-
       </AlertDialogContent>
     </AlertDialog>
   );

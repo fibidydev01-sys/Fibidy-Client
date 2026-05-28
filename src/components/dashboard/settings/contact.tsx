@@ -19,11 +19,9 @@ import { StepSectionHeading } from './form/contact/step-section-heading';
 // File: src/components/dashboard/settings/contact.tsx
 //
 // [BACKPORT — 2026-05-28]
-// Sync dengan pola terbaru dari Setup wizard:
-//
-//   1. ValidationDialog hard gate menggantikan inline toast (SETTINGS-N1)
-//   2. setTenant() via useAuthStore setelah save agar auth store sync (SETTINGS-N6)
-//   3. Tidak ada upload di Contact, jadi tidak perlu upload guard (SETTINGS-N2 N/A)
+//   1. ValidationDialog hard gate (SETTINGS-N1)
+//   2. setTenant() setelah save (SETTINGS-N6)
+//   3. Map URL validation check sebelum save
 // ============================================================================
 
 interface ContactSectionProps {
@@ -36,14 +34,11 @@ export function ContactSection({ onBack }: ContactSectionProps) {
   const tToast = useTranslations('toast.settings');
   const tAll = useTranslations();
   const { tenant, refresh } = useTenant();
-
-  // [SETTINGS-N6] Akses setTenant untuk sync auth store setelah save
   const { setTenant } = useAuthStore();
 
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // [SETTINGS-N1] ValidationDialog state
   const [validationOpen, setValidationOpen] = useState(false);
   const [validationItems, setValidationItems] = useState<string[]>([]);
 
@@ -52,7 +47,7 @@ export function ContactSection({ onBack }: ContactSectionProps) {
 
   const STEPS = useMemo(
     () => [
-      { title: t('info.title'), desc: t('info.desc') },
+      { title: t('info.title'),    desc: t('info.desc')    },
       { title: t('location.title'), desc: t('location.desc') },
       { title: t('heading.title'), desc: t('heading.desc') },
     ],
@@ -79,11 +74,9 @@ export function ContactSection({ onBack }: ContactSectionProps) {
     if (formData) setFormData({ ...formData, [key]: value });
   };
 
-  // [SETTINGS-N1] Compute validation errors — minimal check untuk contact
   const computeValidationErrors = useCallback((): string[] => {
     if (!formData) return [];
     const errors: string[] = [];
-    // Map URL: jika diisi harus format embed yang valid
     if (
       formData.contactMapUrl.trim().length > 0 &&
       !formData.contactMapUrl.startsWith('https://www.google.com/maps/embed')
@@ -96,7 +89,6 @@ export function ContactSection({ onBack }: ContactSectionProps) {
   const handleSave = async () => {
     if (!tenant || !formData) return;
 
-    // [SETTINGS-N1] Validation hard gate
     const errors = computeValidationErrors();
     if (errors.length > 0) {
       setValidationItems(errors);
@@ -116,7 +108,6 @@ export function ContactSection({ onBack }: ContactSectionProps) {
         whatsapp: formData.whatsapp || undefined,
         address: formData.address || undefined,
       });
-      // [SETTINGS-N6] Sync auth store
       setTenant(result.tenant);
       await refresh();
       toast.success(tToast('contactSaved'));
@@ -133,7 +124,6 @@ export function ContactSection({ onBack }: ContactSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-
       {/* DESKTOP */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
         <div className="flex-1 min-h-[340px] pb-20">
@@ -162,7 +152,6 @@ export function ContactSection({ onBack }: ContactSectionProps) {
         isSaving={isSaving}
       />
 
-      {/* [SETTINGS-N1] ValidationDialog hard gate */}
       <ValidationDialog
         open={validationOpen}
         onClose={() => setValidationOpen(false)}

@@ -2,31 +2,26 @@
 
 // ============================================================================
 // FILE: src/components/dashboard/blocks/block3.tsx
-// VARIANT: Editorial Dark — FULL LANDING TEMPLATE
 //
-// SECTIONS:
-//   1. Hero          — film strip banner + asymmetric 60/40 dark panel
-//   2. Contact       — dark panel + numbered contact list + optional map
-//   3. Pre-footer CTA — full-bleed dark band + strong CTA
+// STYLE: Supabase / Stripe — "Dark Full-bleed + Scrolling Belt"
+// - Hero: Dark background, left-aligned headline, full-bleed bg image/overlay
+//         gradient glow accent, badge pill top-left
+// - Features: Horizontal auto-scrolling marquee belt below hero
+//             features[].image + .title + .description → pill/card in belt
+// - Contact: Dark card grid, 2-col, bold section header
 //
-// STYLE LANGUAGE: editorial dark
-//   - Dark foreground panels with high contrast
-//   - Numbered mono counters "01 / 04"
-//   - Sharp, confident typography (capped at readable sizes)
-//   - No decorative geometry noise
-//   - Consistent with Block1 design system
-//
-// [RENAME — May 2026]
-//   feature.icon → feature.image (FeatureItem.icon removed)
-//   Lokasi: FilmStripPeek filter + image render
+// Props: identical to BlockComponentProps (block.tsx)
 // ============================================================================
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
+import { ArrowRight, Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/shared/utils';
 import type { FeatureItem } from '@/types/tenant';
 
@@ -51,179 +46,69 @@ interface Block3Props {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
+  contactShowForm?: boolean;
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// BANNER 3 — FILM STRIP PEEK
-// ────────────────────────────────────────────────────────────────────────────
+// ─── Marquee Belt ────────────────────────────────────────────────────────────
+function MarqueeBelt({ features }: { features: FeatureItem[] }) {
+  if (features.length === 0) return null;
 
-const AUTOPLAY_INTERVAL = 4000;
-const SWIPE_THRESHOLD = 50;
-
-function FilmStripPeek({ features }: { features: FeatureItem[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
-
-  const total = features.length;
-  const hasMultiple = total > 1;
-
-  const scrollToIndex = useCallback((index: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const slideWidth = el.clientWidth * 0.8;
-    el.scrollTo({ left: slideWidth * index, behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const update = () => {
-      const slideWidth = el.clientWidth * 0.8;
-      if (slideWidth === 0) return;
-      const idx = Math.round(el.scrollLeft / slideWidth);
-      setActiveIndex(Math.max(0, Math.min(idx, total - 1)));
-    };
-    el.addEventListener('scroll', update, { passive: true });
-    return () => el.removeEventListener('scroll', update);
-  }, [total]);
-
-  useEffect(() => {
-    if (!hasMultiple || isPaused) return;
-    const interval = setInterval(() => {
-      scrollToIndex((activeIndex + 1) % total);
-    }, AUTOPLAY_INTERVAL);
-    return () => clearInterval(interval);
-  }, [activeIndex, total, hasMultiple, isPaused, scrollToIndex]);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchEndX.current = null;
-    setIsPaused(true);
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = () => {
-    if (touchStartX.current === null || touchEndX.current === null) {
-      setIsPaused(false);
-      return;
-    }
-    const delta = touchStartX.current - touchEndX.current;
-    if (Math.abs(delta) > SWIPE_THRESHOLD) {
-      const next = delta > 0
-        ? Math.min(activeIndex + 1, total - 1)
-        : Math.max(activeIndex - 1, 0);
-      scrollToIndex(next);
-    }
-    touchStartX.current = null;
-    touchEndX.current = null;
-    setTimeout(() => setIsPaused(false), 3000);
-  };
+  // Duplicate for seamless loop
+  const items = [...features, ...features, ...features];
 
   return (
-    <div
-      className="banner-full-bleed relative bg-foreground"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <div className="relative w-full overflow-hidden border-y border-white/10 bg-white/[0.03]">
+      {/* Left/right fade masks */}
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-[#0a0a0a] to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-[#0a0a0a] to-transparent" />
+
       <div
-        ref={scrollRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex gap-4 px-8 py-6"
-        style={{ scrollBehavior: 'smooth' }}
+        className="flex gap-0 animate-[b3-marquee_40s_linear_infinite]"
+        style={{ width: 'max-content' }}
       >
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="shrink-0 snap-start relative aspect-[3/2] md:aspect-[21/9] bg-background border border-background/20"
-            style={{ width: 'calc(80vw - 64px)' }}
-          >
-            {/* [RENAME] feature.icon → feature.image */}
-            {feature.image ? (
-              <OptimizedImage
-                src={feature.image}
-                alt={feature.title ?? `Banner ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="80vw"
-                priority={index === 0}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                  Banner {String(index + 1).padStart(2, '0')}
-                </span>
-              </div>
-            )}
-
-            <div className="absolute top-3 right-3 px-2 py-1 bg-background/90 backdrop-blur-sm text-[10px] font-mono tracking-widest text-foreground">
-              {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-            </div>
-
-            {(feature.title || feature.description) && (
-              <>
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
-                />
-                <div className="absolute inset-x-0 bottom-0 p-6 md:p-10 max-w-3xl">
-                  {feature.title && (
-                    <h3 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.0] mb-2 md:mb-3">
-                      {feature.title}
-                    </h3>
-                  )}
-                  {feature.description && (
-                    <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed line-clamp-2 max-w-md">
-                      {feature.description}
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+        {items.map((item, i) => (
+          <MarqueeCard key={i} item={item} />
         ))}
       </div>
 
-      {hasMultiple && (
-        <div className="flex items-center justify-between px-8 pb-5 -mt-2">
-          <span className="text-[10px] font-mono tracking-[0.3em] text-background/60 uppercase">
-            {String(activeIndex + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
-          </span>
-          <div className="flex gap-1">
-            {features.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => {
-                  scrollToIndex(index);
-                  setIsPaused(true);
-                  setTimeout(() => setIsPaused(false), 5000);
-                }}
-                aria-label={`Go to slide ${index + 1}`}
-                className={cn(
-                  'h-0.5 transition-all duration-300',
-                  index === activeIndex
-                    ? 'w-10 bg-background'
-                    : 'w-6 bg-background/30 hover:bg-background/60',
-                )}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <style>{`
+        @keyframes b3-marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% / 3)); }
+        }
+      `}</style>
     </div>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — HERO
-// ────────────────────────────────────────────────────────────────────────────
+function MarqueeCard({ item }: { item: FeatureItem }) {
+  const hasImage = !!item.image;
 
+  return (
+    <div className="flex items-center gap-4 px-6 py-5 border-r border-white/10 shrink-0 min-w-[240px] max-w-[300px] group">
+      {hasImage && (
+        <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/5 border border-white/10">
+          <OptimizedImage
+            src={item.image!}
+            alt={item.title ?? ''}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="min-w-0">
+        {item.title && (
+          <p className="text-sm font-semibold text-white/90 truncate">{item.title}</p>
+        )}
+        {item.description && (
+          <p className="text-xs text-white/40 truncate mt-0.5">{item.description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero Section ─────────────────────────────────────────────────────────────
 interface Block3HeroProps {
   title?: string;
   subtitle?: string;
@@ -253,112 +138,132 @@ function Block3HeroSection({
   storeName,
   features,
 }: Block3HeroProps) {
-  // [RENAME] f.icon → f.image
   const validFeatures = (features || []).filter(
-    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image)
+    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image),
   );
-  const hasBanner = validFeatures.length > 0;
-  const hasEyebrow = !!(eyebrow ?? category);
-  const hasImage = !!(backgroundImage || logo);
-  const hasBadgeBlock = !!(storeName || logo);
+  const hasMarquee = validFeatures.length > 0;
+  const hasEyebrow = !!(eyebrow ?? category ?? storeName);
   const hasCta = showCta && !!ctaText;
+  const hasAny = hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasMarquee || !!backgroundImage;
 
-  const hasAnyContent =
-    hasBanner || hasBadgeBlock || hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasImage;
-
-  if (!hasAnyContent) return null;
+  if (!hasAny) return null;
 
   return (
-    <section id="hero" className="relative min-h-screen overflow-hidden bg-background flex flex-col">
-      {hasBanner && <FilmStripPeek features={validFeatures} />}
+    <section
+      id="hero"
+      className="relative overflow-hidden flex flex-col"
+      style={{ background: '#0a0a0a' }}
+    >
+      {/* Full-bleed background image */}
+      {backgroundImage && (
+        <div className="absolute inset-0">
+          <OptimizedImage
+            src={backgroundImage}
+            alt={title ?? ''}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/70" />
+        </div>
+      )}
 
-      <div className="flex flex-1 flex-col lg:grid lg:grid-cols-[3fr_2fr] min-h-screen">
-        {/* LEFT — Dark content panel */}
-        <div className="relative flex flex-col justify-center px-8 sm:px-12 lg:px-20 py-16 lg:py-24 order-1 lg:order-1 bg-foreground text-background">
+      {/* Glow accent — top-right */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, hsl(var(--primary)/0.15) 0%, transparent 65%)',
+        }}
+      />
+      {/* Glow accent — bottom-left */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, hsl(var(--primary)/0.08) 0%, transparent 65%)',
+        }}
+      />
 
-          {hasBadgeBlock && (
-            <div className="mb-10 flex items-center gap-3">
-              {logo && (
-                <div className="relative w-12 h-12 overflow-hidden border border-background/20 rounded-sm shrink-0">
-                  <OptimizedImage src={logo} alt={storeName ?? title ?? ''} fill className="object-cover" />
-                </div>
-              )}
-              {storeName && (
-                <Badge
-                  variant="outline"
-                  className="rounded-none px-2.5 py-1 text-[10px] tracking-[0.3em] uppercase font-mono border-background/30 text-background/60 bg-transparent"
-                >
-                  {storeName}
-                </Badge>
-              )}
-            </div>
-          )}
+      {/* Grid lines overlay */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.04]"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <pattern id="b3-grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#b3-grid)" />
+      </svg>
 
+      {/* Hero content — left aligned */}
+      <div className="relative z-10 flex flex-col justify-center min-h-screen px-6 sm:px-10 md:px-16 lg:px-24 py-24">
+        <div className="max-w-2xl">
+
+          {/* Eyebrow badge */}
           {hasEyebrow && (
-            <div className="mb-6 flex items-center gap-3">
-              <div className="w-8 h-px bg-background/40" />
-              <span className="text-[11px] uppercase tracking-[0.4em] text-background/60 whitespace-nowrap font-mono">
-                {eyebrow ?? category}
+            <div className="mb-8 inline-flex items-center gap-2.5">
+              {logo && (
+                <span className="relative w-5 h-5 rounded-full overflow-hidden shrink-0">
+                  <OptimizedImage src={logo} alt={storeName ?? ''} fill className="object-cover" />
+                </span>
+              )}
+              <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-white/50">
+                {eyebrow ?? category ?? storeName}
               </span>
+              <span className="text-white/20">—</span>
             </div>
           )}
 
+          {/* Title */}
           {title && (
-            <h1 className="text-[36px] sm:text-[48px] md:text-[56px] lg:text-[68px] font-black leading-[0.95] tracking-tight text-background mb-6">
+            <h1
+              className="text-[44px] sm:text-[56px] md:text-[68px] lg:text-[80px] font-black leading-[0.92] tracking-tight text-white mb-6"
+              style={{ letterSpacing: '-0.04em' }}
+            >
               {title}
             </h1>
           )}
 
+          {/* Subtitle */}
           {subtitle && (
-            <p className="text-base md:text-lg font-medium text-background/80 leading-snug max-w-md mb-3">
+            <p className="text-base sm:text-lg text-white/60 leading-relaxed max-w-lg mb-3">
               {subtitle}
             </p>
           )}
 
+          {/* Description */}
           {description && (
-            <p className="text-sm md:text-base text-background/55 leading-relaxed max-w-md mb-10">
+            <p className="text-sm text-white/40 leading-relaxed max-w-md mb-10">
               {description}
             </p>
           )}
 
-          {!description && hasCta && <div className="mb-10" />}
-
+          {/* CTA */}
           {hasCta && (
-            <div>
-              <Link
-                href={ctaLink}
-                className="group inline-flex items-center gap-3 px-8 py-4 bg-background text-foreground text-sm font-bold tracking-[0.12em] uppercase hover:bg-background/90 transition-colors"
-              >
-                <span>{ctaText}</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link href={ctaLink}>
+                <InteractiveHoverButton className="px-8 py-3.5 text-sm font-semibold tracking-wide">
+                  {ctaText}
+                </InteractiveHoverButton>
               </Link>
             </div>
           )}
         </div>
-
-        {/* RIGHT — Image panel */}
-        <div className="relative order-2 lg:order-2 min-h-[400px] lg:min-h-0">
-          {backgroundImage ? (
-            <OptimizedImage src={backgroundImage} alt={title ?? ''} fill priority className="object-cover" />
-          ) : logo ? (
-            <div className="absolute inset-0 bg-muted flex items-center justify-center">
-              <div className="relative w-1/2 h-1/2">
-                <OptimizedImage src={logo} alt={title ?? ''} fill className="object-contain" />
-              </div>
-            </div>
-          ) : (
-            <div className="absolute inset-0 bg-muted" />
-          )}
-        </div>
       </div>
+
+      {/* Marquee belt — bottom of hero */}
+      {hasMarquee && <MarqueeBelt features={validFeatures} />}
     </section>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — CONTACT
-// ────────────────────────────────────────────────────────────────────────────
-
+// ─── Contact Section ─────────────────────────────────────────────────────────
 interface Block3ContactProps {
   contactTitle?: string;
   contactSubtitle?: string;
@@ -368,7 +273,14 @@ interface Block3ContactProps {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
+  contactShowForm?: boolean;
   storeName?: string;
+}
+
+interface Block3FormData {
+  name: string;
+  email: string;
+  message: string;
 }
 
 function Block3ContactSection({
@@ -380,176 +292,233 @@ function Block3ContactSection({
   address,
   contactMapUrl,
   contactShowMap,
+  contactShowForm,
   storeName,
 }: Block3ContactProps) {
   const t = useTranslations('store.tenantContact');
   const tHeader = useTranslations('store.header');
+  const tForm = useTranslations('store.contactForm');
 
-  const hasAnyContact = !!(whatsapp || phone || email || address);
-  if (!hasAnyContact) return null;
+  const [formData, setFormData] = useState<Block3FormData>({ name: '', email: '', message: '' });
 
   const showMap = !!(contactShowMap && contactMapUrl);
+  const showForm = !!(contactShowForm && whatsapp);
 
-  const whatsappLink = whatsapp && storeName
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: storeName }))}`
-    : whatsapp
-      ? `https://wa.me/${whatsapp}`
-      : null;
+  const contactItems = [
+    whatsapp && {
+      icon: MessageCircle,
+      label: tHeader('whatsapp'),
+      value: `+${whatsapp}`,
+      href: `https://wa.me/${whatsapp}${storeName ? `?text=${encodeURIComponent(t('whatsappTemplate', { name: storeName }))}` : ''}`,
+      accent: 'hover:border-green-500/40 hover:bg-green-500/5',
+      iconColor: 'text-green-400',
+    },
+    phone && {
+      icon: Phone,
+      label: tHeader('phone'),
+      value: phone,
+      href: `tel:${phone}`,
+      accent: 'hover:border-white/20 hover:bg-white/5',
+      iconColor: 'text-white/50',
+    },
+    email && {
+      icon: Mail,
+      label: tHeader('email'),
+      value: email,
+      href: `mailto:${email}`,
+      accent: 'hover:border-white/20 hover:bg-white/5',
+      iconColor: 'text-white/50',
+    },
+    address && {
+      icon: MapPin,
+      label: tHeader('address'),
+      value: address,
+      href: null,
+      accent: '',
+      iconColor: 'text-white/50',
+    },
+  ].filter(Boolean) as Array<{
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    href: string | null;
+    accent: string;
+    iconColor: string;
+  }>;
 
-  const items: Array<{ icon: typeof Phone; label: string; value: string; href?: string }> = [];
-  if (whatsapp && whatsappLink) items.push({ icon: MessageCircle, label: tHeader('whatsapp'), value: `+${whatsapp}`, href: whatsappLink });
-  if (phone) items.push({ icon: Phone, label: tHeader('phone'), value: phone, href: `tel:${phone}` });
-  if (email) items.push({ icon: Mail, label: tHeader('email'), value: email, href: `mailto:${email}` });
-  if (address) items.push({ icon: MapPin, label: tHeader('address'), value: address });
+  const hasAnything = !!contactTitle || !!contactSubtitle || contactItems.length > 0 || showMap || showForm;
+  if (!hasAnything) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (whatsapp) {
+      const message = tForm('whatsappTemplate', {
+        name: storeName ?? '',
+        senderName: formData.name,
+        senderEmail: formData.email,
+        message: formData.message,
+      });
+      window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+  };
 
   return (
-    <section id="contact" className="relative bg-foreground text-background py-20 md:py-28">
-      <div className="container px-4">
+    <section
+      id="contact"
+      className="relative"
+      style={{ background: '#0f0f0f' }}
+    >
+      {/* Top border with glow */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
+      <div className="container max-w-5xl px-4 py-20 md:py-28">
+
+        {/* Section header */}
         {(contactTitle || contactSubtitle) && (
-          <div className="mb-12 md:mb-16 max-w-2xl">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="w-8 h-px bg-background/40" />
-              <span className="text-[11px] uppercase tracking-[0.4em] text-background/50 whitespace-nowrap font-mono">
-                {t('sectionEyebrow')}
-              </span>
-            </div>
+          <div className="mb-16">
             {contactTitle && (
-              <h2 className="text-[36px] sm:text-[48px] lg:text-[56px] font-black leading-[0.95] tracking-tight">
+              <h2
+                className="text-[32px] sm:text-[44px] md:text-[56px] font-black tracking-tight text-white leading-[0.92] mb-4"
+                style={{ letterSpacing: '-0.04em' }}
+              >
                 {contactTitle}
               </h2>
             )}
             {contactSubtitle && (
-              <p className="text-base text-background/60 max-w-xl leading-relaxed mt-4">
-                {contactSubtitle}
-              </p>
+              <p className="text-base text-white/40 max-w-md leading-relaxed">{contactSubtitle}</p>
             )}
           </div>
         )}
 
-        <div className="grid lg:grid-cols-[3fr_2fr] gap-10 md:gap-16 items-start">
-
-          {/* LEFT — Numbered contact list */}
-          <div className="border-t border-background/20">
-            {items.map((item, idx) => {
-              const Icon = item.icon;
+        {/* Contact cards grid */}
+        {contactItems.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+            {contactItems.map(({ icon: Icon, label, value, href, accent, iconColor }, i) => {
               const inner = (
-                <div className="group flex items-center justify-between py-5 border-b border-background/15 hover:bg-background/5 px-2 -mx-2 transition-colors">
-                  <div className="flex items-center gap-5">
-                    <span className="text-[10px] font-mono tracking-[0.3em] text-background/30 w-5 shrink-0">
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <Icon className="h-4 w-4 text-background/50 shrink-0" />
-                    <div>
-                      <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-background/40 mb-0.5">
-                        {item.label}
-                      </p>
-                      <p className="text-sm md:text-base font-semibold text-background">
-                        {item.value}
-                      </p>
-                    </div>
+                <div
+                  className={cn(
+                    'group flex items-center gap-4 p-5 rounded-xl',
+                    'border border-white/10 bg-white/[0.03]',
+                    'transition-all duration-200',
+                    href ? accent : '',
+                  )}
+                >
+                  <div className={cn(
+                    'w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0',
+                    'transition-colors duration-200 group-hover:bg-white/10',
+                  )}>
+                    <Icon className={cn('w-4 h-4', iconColor)} />
                   </div>
-                  {item.href && (
-                    <span className="text-background/30 group-hover:text-background group-hover:translate-x-0.5 transition-all text-lg">
-                      →
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-1">{label}</p>
+                    <p className="text-sm font-semibold text-white/80 truncate">{value}</p>
+                  </div>
+                  {href && (
+                    <ArrowRight className="w-4 h-4 text-white/20 shrink-0 transition-all duration-200 group-hover:text-white/50 group-hover:translate-x-0.5" />
                   )}
                 </div>
               );
-              return item.href ? (
+
+              return href ? (
                 <a
-                  key={idx}
-                  href={item.href}
-                  target={item.href.startsWith('http') ? '_blank' : undefined}
-                  rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  key={i}
+                  href={href}
+                  target={href.startsWith('https://') ? '_blank' : undefined}
+                  rel={href.startsWith('https://') ? 'noopener noreferrer' : undefined}
                 >
                   {inner}
                 </a>
               ) : (
-                <div key={idx}>{inner}</div>
+                <div key={i}>{inner}</div>
               );
             })}
           </div>
+        )}
 
-          {/* RIGHT — Map */}
-          {showMap && (
-            <div className="border border-background/20 overflow-hidden">
-              <iframe
-                src={contactMapUrl}
-                width="100%"
-                height="360"
-                style={{ border: 0, display: 'block' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Google Maps"
-              />
-              <div className="px-4 py-3 border-t border-background/20">
-                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-background/40">
-                  {tHeader('address')}
-                </p>
+        {/* Map + Form */}
+        {(showMap || showForm) && (
+          <div className={cn(
+            'rounded-2xl border border-white/10 overflow-hidden',
+            showMap && showForm ? 'grid grid-cols-1 md:grid-cols-2' : '',
+          )}>
+            {showMap && (
+              <div className="min-h-[380px]">
+                <iframe
+                  src={contactMapUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, display: 'block', minHeight: '380px' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Maps"
+                />
               </div>
-            </div>
-          )}
+            )}
 
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// SECTION 3 — PRE-FOOTER CTA
-// ────────────────────────────────────────────────────────────────────────────
-
-interface Block3PrefooterProps {
-  whatsapp?: string;
-  storeName?: string;
-}
-
-function Block3PrefooterCTA({ whatsapp, storeName }: Block3PrefooterProps) {
-  const t = useTranslations('store.tenantContact');
-
-  if (!whatsapp) return null;
-
-  const message = storeName ? t('whatsappTemplate', { name: storeName }) : '';
-  const link = `https://wa.me/${whatsapp}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
-
-  return (
-    <section className="bg-background border-t border-border py-20 md:py-28">
-      <div className="container px-4">
-        <div className="max-w-3xl">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="w-8 h-px bg-foreground/30" />
-            <span className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground whitespace-nowrap font-mono">
-              {t('sectionEyebrow')}
-            </span>
+            {showForm && (
+              <form
+                onSubmit={handleSubmit}
+                className="p-8 md:p-10 flex flex-col justify-center gap-5 bg-white/[0.02]"
+              >
+                <div>
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-1">
+                    {t('sectionEyebrow')}
+                  </p>
+                  <p className="text-lg font-bold text-white/90">{storeName}</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b3-name" className="text-xs font-medium text-white/60">{tForm('nameLabel')}</Label>
+                  <Input
+                    id="b3-name"
+                    placeholder={tForm('namePlaceholder')}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-white/30"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b3-email" className="text-xs font-medium text-white/60">{tForm('emailLabel')}</Label>
+                  <Input
+                    id="b3-email"
+                    type="email"
+                    placeholder={tForm('emailPlaceholder')}
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-white/30"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="b3-message" className="text-xs font-medium text-white/60">{tForm('messageLabel')}</Label>
+                  <Textarea
+                    id="b3-message"
+                    placeholder={tForm('messagePlaceholder')}
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-white/30"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-black text-sm font-semibold hover:bg-white/90 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {tForm('sendButton')}
+                </button>
+              </form>
+            )}
           </div>
-
-          <h2 className="text-[36px] sm:text-[48px] lg:text-[56px] font-black leading-[0.95] tracking-tight text-foreground mb-10">
-            {t('ctaHeading', { name: storeName ?? '' })}
-          </h2>
-
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background text-sm font-bold tracking-[0.12em] uppercase hover:bg-foreground/85 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span>{t('whatsappCta')}</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </a>
-        </div>
+        )}
       </div>
     </section>
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// BLOCK 3 — Editorial Dark — FULL LANDING TEMPLATE
-// ────────────────────────────────────────────────────────────────────────────
-
+// ─── Export ──────────────────────────────────────────────────────────────────
 export function Block3(props: Block3Props) {
   return (
     <>
@@ -576,10 +545,7 @@ export function Block3(props: Block3Props) {
         address={props.address}
         contactMapUrl={props.contactMapUrl}
         contactShowMap={props.contactShowMap}
-        storeName={props.storeName}
-      />
-      <Block3PrefooterCTA
-        whatsapp={props.whatsapp}
+        contactShowForm={props.contactShowForm}
         storeName={props.storeName}
       />
     </>

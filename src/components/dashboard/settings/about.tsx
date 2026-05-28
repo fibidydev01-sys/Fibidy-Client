@@ -19,12 +19,9 @@ import { StepHighlights } from './form/about/step-highlights';
 // File: src/components/dashboard/settings/about.tsx
 //
 // [BACKPORT — 2026-05-28]
-// Sync dengan pola terbaru dari Setup wizard:
-//
-//   1. Upload-in-progress guard sebelum save (SETTINGS-N2)
-//      — track isUploading dari StepHighlights via onUploadStateChange callback
-//   2. ValidationDialog hard gate menggantikan inline toast (SETTINGS-N1)
-//   3. setTenant() via useAuthStore setelah save agar auth store sync (SETTINGS-N6)
+//   1. Upload guard via onUploadStateChange dari StepHighlights (SETTINGS-N2)
+//   2. ValidationDialog hard gate (SETTINGS-N1)
+//   3. setTenant() setelah save (SETTINGS-N6)
 // ============================================================================
 
 interface AboutSectionProps {
@@ -36,19 +33,16 @@ export function AboutSection({ onBack }: AboutSectionProps) {
   const tToast = useTranslations('toast.settings');
   const tAll = useTranslations();
   const { tenant, refresh } = useTenant();
-
-  // [SETTINGS-N6] Akses setTenant untuk sync auth store setelah save
   const { setTenant } = useAuthStore();
-
   const { isBusiness } = useSubscriptionPlan();
+
   const [isSaving, setIsSaving] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
-  // [SETTINGS-N2] Track active upload slots dari StepHighlights
+  // Upload guard — track semua slot aktif dari StepHighlights
   const activeUploadsRef = useRef<Set<string>>(new Set());
   const [hasActiveUploads, setHasActiveUploads] = useState(false);
 
-  // [SETTINGS-N1] ValidationDialog state
   const [validationOpen, setValidationOpen] = useState(false);
   const [validationItems, setValidationItems] = useState<string[]>([]);
 
@@ -61,7 +55,7 @@ export function AboutSection({ onBack }: AboutSectionProps) {
       const features = (tenant.aboutFeatures as FeatureItem[]) || [];
       setFormData({
         aboutFeatures: features.filter(
-          (f) => f && typeof f === 'object' && !Array.isArray(f)
+          (f) => f && typeof f === 'object' && !Array.isArray(f),
         ),
       });
     }
@@ -71,7 +65,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     if (formData) setFormData({ ...formData, [key]: value });
   };
 
-  // [SETTINGS-N2] Callback dari StepHighlights untuk track upload state
   const handleUploadStateChange = useCallback((slotId: string, active: boolean) => {
     if (active) {
       activeUploadsRef.current.add(slotId);
@@ -81,7 +74,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     setHasActiveUploads(activeUploadsRef.current.size > 0);
   }, []);
 
-  // [SETTINGS-N1] Compute validation errors
   const computeValidationErrors = useCallback((): string[] => {
     if (!formData) return [];
     const errors: string[] = [];
@@ -102,14 +94,12 @@ export function AboutSection({ onBack }: AboutSectionProps) {
   const handleSave = async () => {
     if (!tenant || !formData) return;
 
-    // [SETTINGS-N2] Upload guard
     if (hasActiveUploads) {
       setValidationItems([t('validation.uploadInProgress')]);
       setValidationOpen(true);
       return;
     }
 
-    // [SETTINGS-N1] Validation hard gate
     const errors = computeValidationErrors();
     if (errors.length > 0) {
       setValidationItems(errors);
@@ -120,7 +110,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
     setIsSaving(true);
     try {
       const result = await tenantsApi.update({ aboutFeatures: formData.aboutFeatures });
-      // [SETTINGS-N6] Sync auth store
       setTenant(result.tenant);
       await refresh();
       toast.success(tToast('aboutSaved'));
@@ -135,7 +124,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
@@ -155,7 +143,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
 
       <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
 
-      {/* [SETTINGS-N1] ValidationDialog hard gate */}
       <ValidationDialog
         open={validationOpen}
         onClose={() => setValidationOpen(false)}

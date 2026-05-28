@@ -18,12 +18,9 @@ import { StepSocialLinks } from './form/social/step-social-links';
 // File: src/components/dashboard/settings/social.tsx
 //
 // [BACKPORT — 2026-05-28]
-// Sync dengan pola terbaru dari Setup wizard:
-//
-//   1. ValidationDialog hard gate — at least 1 social link required (SETTINGS-N1)
-//   2. setTenant() via useAuthStore setelah save agar auth store sync (SETTINGS-N6)
-//   3. useState initializer pattern sudah benar di file ini — dipertahankan (SETTINGS-N3 ✅)
-//   4. getErrorMessage(err, tAll) untuk translasi error dari BE (SETTINGS consistency)
+//   1. ValidationDialog hard gate — min 1 social link (SETTINGS-N1)
+//   2. setTenant() setelah save (SETTINGS-N6)
+//   3. getErrorMessage(err, tAll)
 // ============================================================================
 
 const DEFAULT_SOCIAL_LINKS: SocialLinks = {
@@ -51,17 +48,13 @@ export function SocialSection({ onBack }: SocialSectionProps) {
   const tValidation = useTranslations('settings.social');
   const tAll = useTranslations();
   const { tenant, refresh } = useTenant();
-
-  // [SETTINGS-N6] Akses setTenant untuk sync auth store setelah save
   const { setTenant } = useAuthStore();
 
   const [isSaving, setIsSaving] = useState(false);
 
-  // [SETTINGS-N1] ValidationDialog state
   const [validationOpen, setValidationOpen] = useState(false);
   const [validationItems, setValidationItems] = useState<string[]>([]);
 
-  // useState initializer pattern — sudah benar, dipertahankan
   const [formData, setFormData] = useState<SocialFormData>(() => ({
     socialLinks: {
       ...DEFAULT_SOCIAL_LINKS,
@@ -76,7 +69,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
     }));
   };
 
-  // [SETTINGS-N1] Compute validation errors
   const computeValidationErrors = useCallback((): string[] => {
     const errors: string[] = [];
     const hasLink = Object.values(formData.socialLinks).some(
@@ -91,7 +83,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
   const handleSave = async () => {
     if (!tenant) return;
 
-    // [SETTINGS-N1] Validation hard gate — minimal 1 social link
     const errors = computeValidationErrors();
     if (errors.length > 0) {
       setValidationItems(errors);
@@ -102,7 +93,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
     setIsSaving(true);
     try {
       const result = await tenantsApi.update({ socialLinks: formData.socialLinks });
-      // [SETTINGS-N6] Sync auth store
       setTenant(result.tenant);
       await refresh();
       toast.success(tToast('socialSaved'));
@@ -113,7 +103,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
     }
   };
 
-  // Loading state
   if (tenant === null) {
     return (
       <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
@@ -157,7 +146,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-
       {/* DESKTOP */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
         <div className="flex-1 pb-20 min-h-[280px]">
@@ -174,7 +162,6 @@ export function SocialSection({ onBack }: SocialSectionProps) {
 
       <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
 
-      {/* [SETTINGS-N1] ValidationDialog hard gate */}
       <ValidationDialog
         open={validationOpen}
         onClose={() => setValidationOpen(false)}
