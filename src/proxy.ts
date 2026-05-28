@@ -13,58 +13,20 @@
 //
 // [PHASE 4 — May 2026]
 // Reserved-subdomain list + slug regex now imported from shared
-// constants instead of being inlined here. Three-way drift between
-// proxy.ts, FE shared constant, and BE shared constant is now zero —
-// they ALL point at the same definitions. Updating reserved entries
-// or slug rules now requires touching ONE file (per side, mirrored).
-//
-// What this fix prevents:
-//   - FE register form rejecting `admin` while proxy still routes
-//     `admin.fibidy.com` to a tenant lookup
-//   - Loose subdomain regex here permitting `a--b` while strict regex
-//     in DTO rejects it (or vice versa)
+// constants instead of being inlined here.
 //
 // [404-HARDENING — May 2026]
 // Two skip-list expansions to prevent middleware from intercepting
-// public/* assets and causing 404s under specific edge cases:
-//
-//   1. MATCHER negative-lookahead now excludes:
-//        xml | json | txt | map | woff | woff2 | ttf | css | js
-//      (was only image extensions).
-//      Effect: middleware never runs for these. Faster + safer.
-//
-//   2. HANDLER skip list now explicitly catches:
-//        - /sitemap-N.xml (next-sitemap output, e.g. sitemap-0.xml)
-//        - /manifest.json (PWA manifest)
-//      Old code only matched exact /sitemap.xml. With sitemapSize=45000
-//      and growing product catalog, sitemap-1.xml etc. would slip
-//      through and risk next-intl rewrite → 404.
+// public/* assets and causing 404s under specific edge cases.
 //
 // [VERCEL VIBES — May 2026]
-// Step 5: edge-level auth gate. Reads the fibidy_auth cookie and
-// makes routing decisions BEFORE the page renders. This eliminates the
-// client-side flash where the login form would render briefly while
-// `useAuthCheck` fetched /auth/status, then redirect to /dashboard.
+// Step 5: edge-level auth gate.
 //
-// Rules:
-//   - /dashboard/*     + no cookie  → 307 to /<locale>/login?from=...
-//   - /login | /register | /forgot-password + cookie → 307 to /<locale>/dashboard/products
-//   - /                + cookie     → 307 to /<locale>/dashboard/products
-//   - /                + no cookie  → fall through (renders marketing page)
-//
-// Stale-cookie escape hatch: when /login is accessed with a `?reason=`
-// query (set by the 401 handler in lib/api/client.ts when BE invalidates
-// a session), the gate allows the user through even if the stale cookie
-// is still in the browser. This breaks the otherwise-infinite loop
-// between /dashboard (401s) and /login (gate redirects back).
-//
-// Open-redirect protection: when honoring `?from=` after a guest-only
-// redirect, paths are validated as internal (start with `/` but not
-// `//`). Anything else falls back to the default dashboard URL.
-//
-// Security: middleware is for routing UX, NOT a security boundary. The
-// NestJS backend validates the cookie on every API call. CVE-2025-29927
-// note: this codebase is on Next 16.1.1 (well above patched versions).
+// [SPRINT 4 — E1 FIX: NEXT_PUBLIC_ROOT_DOMAIN vs NEXT_PUBLIC_APP_URL drift]
+// PROD_DOMAIN sekarang di-derive dari ROOT_DOMAIN yang ada di constants.ts.
+// ROOT_DOMAIN memprioritaskan NEXT_PUBLIC_ROOT_DOMAIN (explicit override),
+// lalu fallback ke derive dari NEXT_PUBLIC_APP_URL, lalu hardcode 'fibidy.com'.
+// Satu env var sebagai source of truth — tidak ada lagi kemungkinan drift.
 // ==========================================
 
 import { NextResponse } from 'next/server';
@@ -73,8 +35,13 @@ import createMiddleware from 'next-intl/middleware';
 import { routing } from '@/i18n/routing';
 import { isReservedSubdomain } from '@/lib/constants/shared/reserved-subdomains';
 import { SLUG_REGEX } from '@/lib/constants/shared/slug.constants';
+// [E1 FIX] Import ROOT_DOMAIN dari constants — single source of truth
+import { ROOT_DOMAIN } from '@/lib/constants/shared/constants';
 
-const PROD_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'fibidy.com';
+// [E1 FIX] Ganti dari:
+//   const PROD_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'fibidy.com';
+// Menjadi ROOT_DOMAIN yang sudah handle priority chain di constants.ts
+const PROD_DOMAIN = ROOT_DOMAIN;
 const DEBUG = process.env.NODE_ENV === 'development';
 
 // ==========================================
@@ -103,13 +70,10 @@ function extractSubdomain(hostname: string): string | null {
   if (hostname.endsWith(`.${PROD_DOMAIN}`)) {
     const subdomain = hostname.replace(`.${PROD_DOMAIN}`, '');
 
-    // Phase 4: shared constant — drift-proof with FE register + BE auth.
     if (isReservedSubdomain(subdomain)) {
       return null;
     }
 
-    // Phase 4: shared regex — drift-proof with register.dto.ts + FE shared.
-    // Strict version: no consecutive hyphens (was looser before).
     if (SLUG_REGEX.test(subdomain.toLowerCase())) {
       return subdomain;
     }
@@ -151,13 +115,6 @@ async function resolveCustomDomain(
   }
 }
 
-/**
- * Defensive: strip a leading locale prefix from the pathname before we
- * inject our own. Covers `tokoA.fibidy.com/en/products` edge case —
- * without this, we'd get `/en/store/tokoA/en/products` (broken).
- *
- * With Phase 1 having only 'en', this is mostly future-proofing.
- */
 function stripLocalePrefix(pathname: string): string {
   for (const loc of routing.locales) {
     if (pathname.startsWith(`/${loc}/`)) {
@@ -170,19 +127,6 @@ function stripLocalePrefix(pathname: string): string {
   return pathname;
 }
 
-/**
- * [VERCEL VIBES] Return the locale prefix present in `pathname`, or empty
- * string if none. Used to construct redirect URLs that preserve the
- * user's URL style (don't bounce a `/login` user to `/en/login` if their
- * URL didn't have the prefix to begin with).
- *
- * Examples:
- *   /login        → ''
- *   /en/login     → '/en'
- *   /en           → '/en'
- *   /en/          → '/en'
- *   /             → ''
- */
 function getLocalePrefix(pathname: string): string {
   for (const loc of routing.locales) {
     if (pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)) {
@@ -192,10 +136,6 @@ function getLocalePrefix(pathname: string): string {
   return '';
 }
 
-/**
- * [VERCEL VIBES] Open-redirect guard. A `from` query is only honored if
- * it's a same-origin path: starts with `/` but not `//`.
- */
 function isInternalPath(path: string | null): path is string {
   if (!path) return false;
   return path.startsWith('/') && !path.startsWith('//');
@@ -211,11 +151,6 @@ export async function proxy(request: NextRequest) {
 
   // ==========================================
   // 1. SKIP: Static files, API routes, OG images, public assets
-  //
-  // [404-HARDENING] Expanded extension regex to include xml/json/txt/map.
-  // Explicit catches added for /sitemap-N.xml (next-sitemap output) and
-  // /manifest.json (PWA). The matcher config below ALSO excludes these,
-  // so this is defense-in-depth — if matcher ever drifts, handler catches.
   // ==========================================
   if (
     pathname.startsWith('/_next') ||
@@ -224,8 +159,8 @@ export async function proxy(request: NextRequest) {
     pathname.includes('/opengraph-image') ||
     pathname.includes('/twitter-image') ||
     pathname === '/sitemap.xml' ||
-    /^\/sitemap-\d+\.xml$/.test(pathname) || // [404-HARDENING] sitemap-0.xml, sitemap-1.xml, ...
-    pathname === '/manifest.json' ||         // [404-HARDENING] PWA manifest
+    /^\/sitemap-\d+\.xml$/.test(pathname) ||
+    pathname === '/manifest.json' ||
     pathname === '/robots.txt' ||
     pathname.startsWith('/server-sitemap') ||
     pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|xml|json|txt|map)$/)
@@ -243,7 +178,7 @@ export async function proxy(request: NextRequest) {
 
   if (subdomain) {
     const url = request.nextUrl.clone();
-    const locale = routing.defaultLocale; // Phase 1: always 'en'
+    const locale = routing.defaultLocale;
     const cleanPath = stripLocalePrefix(pathname);
 
     url.pathname = cleanPath === '/'
@@ -262,7 +197,7 @@ export async function proxy(request: NextRequest) {
 
     if (slug) {
       const url = request.nextUrl.clone();
-      const locale = routing.defaultLocale; // Phase 1: always 'en'
+      const locale = routing.defaultLocale;
       const cleanPath = stripLocalePrefix(pathname);
 
       url.pathname = cleanPath === '/'
@@ -283,7 +218,7 @@ export async function proxy(request: NextRequest) {
   // ==========================================
   if (pathname.startsWith('/store/')) {
     const url = request.nextUrl.clone();
-    const locale = routing.defaultLocale; // Phase 1: always 'en'
+    const locale = routing.defaultLocale;
     const cleanPath = stripLocalePrefix(pathname);
 
     url.pathname = `/${locale}${cleanPath}`;
@@ -294,15 +229,6 @@ export async function proxy(request: NextRequest) {
 
   // ==========================================
   // 5. AUTH GATE — [VERCEL VIBES — May 2026]
-  //
-  // Edge-level routing decisions for main app routes. Storefront routes
-  // (handled in steps 2–4 above) are public regardless of auth state, so
-  // they bypass this gate entirely.
-  //
-  // Cookie presence is "optimistic" — middleware can't validate session
-  // without a BE round-trip (defeats the purpose). If the cookie is stale,
-  // the dashboard's first API call will 401 → 401 handler redirects to
-  // /login?reason=... → escape hatch below allows access.
   // ==========================================
   const cleanPath = stripLocalePrefix(pathname);
   const localePrefix = getLocalePrefix(pathname);
@@ -314,9 +240,6 @@ export async function proxy(request: NextRequest) {
   );
   const isRoot = cleanPath === '/' || cleanPath === '';
 
-  // Stale-cookie escape hatch: allow access to /login when ?reason= is
-  // set (e.g. session_expired, password_changed). Without this, a stale
-  // cookie would loop the user back to /dashboard before BE can clear it.
   const hasAuthReason =
     cleanPath === '/login' && request.nextUrl.searchParams.has('reason');
 
@@ -360,22 +283,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (extension whitelist)
-     *
-     * [404-HARDENING] Extension list expanded from
-     * (svg|png|jpg|jpeg|gif|webp|ico) to include:
-     *   - xml  → sitemap-0.xml, sitemap-1.xml, ...
-     *   - json → manifest.json
-     *   - txt  → robots.txt (defense; was already exact-matched in handler)
-     *   - map  → source maps
-     *   - woff, woff2, ttf → font files
-     *   - css, js → catches any root-level static like /sw.js
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|xml|json|txt|map|woff|woff2|ttf|css|js)$).*)',
   ],
 };

@@ -1,34 +1,41 @@
 'use client';
 
 // ============================================================================
-// LANDING BUILDER PAGE
+// LANDING BUILDER PAGE — Studio Flow v3 Fix
 // File: src/app/[locale]/(dashboard)/dashboard/studio/page.tsx
 //
-// [PHASE C v2 — May 2026]
-// ONBOARDING DIALOG:
-//   StudioOnboardingDialog muncul otomatis saat mount jika
-//   tenant.hasPublishedOnce === false (400ms delay).
-//   Dialog bisa ditutup (seller bisa explore dulu).
-//   Re-appear setiap visit Studio sampai seller Publish.
-//   Hilang permanen setelah publish (hasPublishedOnce = true di DB via BE).
+// [RACE CONDITION FIX — May 2026]
+// Root cause: privateTenant fetch lambat → loadingComplete sudah true tapi
+// privateTenant masih undefined → studio content tampil → privateTenant datang
+// → hasPublishedOnce = false → 400ms delay → StudioOnboardingDialog muncul
+// SETELAH user sudah lihat studio = ngeflix / dialog agresif.
 //
-// PUBLISH FLOW:
-//   publishToServer() sukses → BE set hasPublishedOnce = true
-//   → router.push('/dashboard/products')
-//   - sessionStorage DIHAPUS — state di DB sekarang
+// Fix strategy:
+//   1. Gabungkan gate: loadingComplete DAN privateTenant sudah resolved
+//      sebelum render studio content atau trigger onboarding.
+//   2. Hapus setTimeout 400ms — BuilderLoadingSteps sudah jadi natural buffer,
+//      tidak perlu delay tambahan.
+//   3. Tambah `isPrivateTenantLoading` check di `isStillLoading` gate —
+//      BuilderLoadingSteps tetap tampil sampai privateTenant selesai.
 //
-// LAYOUT: Tidak berubah — dialog adalah overlay saja.
+// Dengan fix ini:
+//   - Returning user (hasPublishedOnce=true): studio langsung tampil tanpa dialog
+//   - First-time user (hasPublishedOnce=false): dialog muncul TEPAT setelah
+//     loading selesai, tidak ada flash studio dulu
+//
+// [STUDIO FLOW v3 FIX — May 2026]
+// [SPRINT 1.2 — May 2026] carry-forward semua fix sebelumnya.
 // ============================================================================
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Zap } from 'lucide-react';
 import { LivePreview } from '@/components/dashboard/studio/live-preview';
 import { LandingErrorBoundary } from '@/components/dashboard/studio/landing-error-boundary';
 import { BlockDrawer } from '@/components/dashboard/studio/block-drawer';
 import { BuilderLoadingSteps } from '@/components/dashboard/studio/builder-loading-steps';
 import { SaveStatusPill } from '@/components/dashboard/studio/save-status-pill';
+import { FirstPublishDialog } from '@/components/dashboard/studio/first-publish-dialog';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { usePrivateTenant } from '@/hooks/dashboard/use-tenant';
@@ -39,7 +46,6 @@ import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -55,47 +61,61 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/shared/utils';
 import type { TenantLandingConfig } from '@/types/landing';
 
+// ── Onboarding Phase ──────────────────────────────────────────────────────────
+
+type OnboardingPhase =
+  | 'idle'
+  | 'welcome'
+  | 'enable'
+  | 'drawer'
+  | 'done';
+
 // ── StudioOnboardingDialog ────────────────────────────────────────────────────
-// Muncul setiap visit Studio selama hasPublishedOnce === false.
-// Bisa ditutup (seller mungkin sudah familiar di visit berikutnya).
-// Hilang permanen setelah Publish pertama.
 
 function StudioOnboardingDialog({
   open,
-  onClose,
+  onStart,
 }: {
   open: boolean;
-  onClose: () => void;
+  onStart: () => void;
 }) {
   const t = useTranslations('studio.onboardingDialog');
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-sm">
+    <Dialog open={open} onOpenChange={() => { }}>
+      <DialogContent
+        className="sm:max-w-sm [&>button:last-child]:hidden"
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle className="text-base leading-snug">{t('title')}</DialogTitle>
+            <DialogTitle className="text-base leading-snug">
+              {t('title')}
+            </DialogTitle>
           </div>
           <DialogDescription asChild>
             <div className="space-y-2 pt-1 pl-[52px]">
-              {['step1', 'step2', 'step3'].map((key, i) => (
+              {(['step1', 'step2', 'step3'] as const).map((key, i) => (
                 <div key={key} className="flex items-start gap-2">
                   <span className="mt-0.5 text-sm font-semibold text-primary shrink-0">
                     {i + 1}.
                   </span>
-                  <p className="text-sm text-muted-foreground">{t(key as 'step1' | 'step2' | 'step3')}</p>
+                  <p className="text-sm text-muted-foreground">{t(key)}</p>
                 </div>
               ))}
             </div>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-2">
-          <Button onClick={onClose} className="w-full">
+          <Button onClick={onStart} className="w-full gap-2">
+            <Sparkles className="h-4 w-4" />
             {t('cta')}
           </Button>
         </DialogFooter>
@@ -106,12 +126,8 @@ function StudioOnboardingDialog({
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-type HeroWithRequiredEnabled = NonNullable<TenantLandingConfig['hero']> & {
-  enabled: boolean;
-};
-
 type NormalizedConfig = Omit<TenantLandingConfig, 'hero'> & {
-  hero?: HeroWithRequiredEnabled;
+  hero?: NonNullable<TenantLandingConfig['hero']> & { enabled: boolean };
 };
 
 function normalizeLandingConfig(
@@ -121,10 +137,7 @@ function normalizeLandingConfig(
   if (!config.hero) return config as NormalizedConfig;
   return {
     ...config,
-    hero: {
-      ...config.hero,
-      enabled: config.hero.enabled === true,
-    },
+    hero: { ...config.hero, enabled: config.hero.enabled === true },
   };
 }
 
@@ -137,18 +150,20 @@ export default function LandingBuilderPage() {
   const tUnsaved = useTranslations('studio.unsavedModal');
 
   const { tenant, refresh } = useTenant();
-  const { data: privateTenant } = usePrivateTenant();
-  const router = useRouter();
+  const {
+    data: privateTenant,
+    isLoading: isPrivateTenantLoading,
+    refetch: refetchPrivateTenant,
+  } = usePrivateTenant();
 
   const { blockVariantLimit, isBusiness } = useSubscriptionPlan();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
-  const [enableModalOpen, setEnableModalOpen] = useState(false);
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
-
-  // [PHASE C v2] Onboarding dialog state
-  const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
+  const [firstPublishDialogOpen, setFirstPublishDialogOpen] = useState(false);
+  const [onboardingPhase, setOnboardingPhase] = useState<OnboardingPhase>('idle');
+  const [drawerAutoOpen, setDrawerAutoOpen] = useState(false);
 
   const {
     setHasUnsavedChanges,
@@ -162,13 +177,15 @@ export default function LandingBuilderPage() {
     isSaving,
     updateConfig: setLandingConfig,
     publishChanges: publishToServer,
+    publishWithOverride,
   } = useLandingConfig({
     initialConfig: tenant?.landingConfig,
-    onSaveSuccess: () => {
-      refresh();
-      // [PHASE C v2] After publish → redirect to products
-      // BE handles hasPublishedOnce = true via updateMe(landingConfig)
-      router.push('/dashboard/products');
+    onSaveSuccess: async ({ wasFirstPublish }) => {
+      await Promise.all([refresh(), refetchPrivateTenant()]);
+      if (wasFirstPublish) {
+        setOnboardingPhase('done');
+        setFirstPublishDialogOpen(true);
+      }
     },
   });
 
@@ -183,51 +200,58 @@ export default function LandingBuilderPage() {
     hasProBlocks(normalizedConfig, blockVariantLimit);
 
   const heroEnabled = landingConfig?.hero?.enabled === true;
+  const hasPublishedOnce = privateTenant?.hasPublishedOnce === true;
 
-  // [PHASE C v2] Show onboarding dialog if not yet published
-  // Delay 400ms — let Studio render first before dialog pops
+  // ── [RACE CONDITION FIX] Onboarding trigger ───────────────────────────────
+  //
+  // SEBELUMNYA:
+  //   loadingComplete → privateTenant (mungkin belum ada) → setTimeout 400ms
+  //   → dialog muncul SETELAH studio sudah tampil = ngeflix
+  //
+  // SEKARANG:
+  //   Gate: loadingComplete AND !isPrivateTenantLoading AND privateTenant resolved
+  //   → kedua loading selesai dulu baru decide phase
+  //   → Hapus setTimeout — tidak perlu delay, BuilderLoadingSteps sudah buffer
+  //
+  // Hasilnya:
+  //   - First-time user: dialog muncul LANGSUNG setelah loading, studio tidak flash
+  //   - Returning user: studio tampil langsung tanpa dialog sama sekali
+
   useEffect(() => {
+    // Gate 1: builder loading steps belum selesai
     if (!loadingComplete) return;
-    if (!privateTenant) return;
-    if (privateTenant.hasPublishedOnce === false) {
-      const timer = setTimeout(() => setOnboardingDialogOpen(true), 400);
-      return () => clearTimeout(timer);
+
+    // Gate 2: privateTenant masih loading — tunggu sampai resolved
+    // Ini kunci fix — jangan decide phase sampai data ada
+    if (isPrivateTenantLoading) return;
+
+    // Gate 3: sudah di done phase (first publish dialog terbuka)
+    if (firstPublishDialogOpen) return;
+
+    if (privateTenant?.hasPublishedOnce === false) {
+      // First-time user — langsung show dialog, tanpa delay
+      // BuilderLoadingSteps sudah cukup sebagai visual buffer
+      setOnboardingPhase('welcome');
+    } else {
+      // Returning user atau hasPublishedOnce = true/undefined
+      setOnboardingPhase('idle');
     }
-  }, [loadingComplete, privateTenant]);
+  }, [loadingComplete, isPrivateTenantLoading, privateTenant, firstPublishDialogOpen]);
 
   useEffect(() => {
     document.body.classList.add('landing-builder-active');
-    return () => {
-      document.body.classList.remove('landing-builder-active');
-    };
+    return () => { document.body.classList.remove('landing-builder-active'); };
   }, []);
 
-  useEffect(() => {
-    setHasUnsavedChanges(hasUnsavedChanges);
-  }, [hasUnsavedChanges, setHasUnsavedChanges]);
-
-  useEffect(() => {
-    setHeroEnabled(heroEnabled);
-  }, [heroEnabled, setHeroEnabled]);
-
-  useEffect(() => {
-    return () => resetBuilderStore();
-  }, [resetBuilderStore]);
-
-  useEffect(() => {
-    if (loadingComplete && !heroEnabled) {
-      setEnableModalOpen(true);
-    }
-  }, [loadingComplete, heroEnabled]);
+  useEffect(() => { setHasUnsavedChanges(hasUnsavedChanges); }, [hasUnsavedChanges, setHasUnsavedChanges]);
+  useEffect(() => { setHeroEnabled(heroEnabled); }, [heroEnabled, setHeroEnabled]);
+  useEffect(() => { return () => resetBuilderStore(); }, [resetBuilderStore]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
   }, [hasUnsavedChanges]);
 
   const handleNavigateAway = useCallback(
@@ -237,67 +261,99 @@ export default function LandingBuilderPage() {
         setUnsavedModalOpen(true);
         return;
       }
-      router.push(href);
+      window.location.assign(href);
     },
-    [hasUnsavedChanges, router],
+    [hasUnsavedChanges],
   );
 
   useEffect(() => {
     useBuilderStore.setState({ onNavigateAway: handleNavigateAway });
   }, [handleNavigateAway]);
 
+  // ── Onboarding handlers ───────────────────────────────────────────────────
+
+  const handleOnboardingStart = useCallback(() => {
+    setOnboardingPhase('enable');
+  }, []);
+
+  const handleEnableAndPublish = useCallback(async () => {
+    if (!landingConfig) return;
+
+    const overrideConfig: TenantLandingConfig = {
+      ...landingConfig,
+      hero: {
+        ...landingConfig.hero,
+        enabled: true,
+        block: landingConfig.hero?.block ?? 'block1',
+      },
+    };
+
+    setOnboardingPhase('drawer');
+    setDrawerAutoOpen(true);
+
+    await publishWithOverride(overrideConfig);
+  }, [landingConfig, publishWithOverride]);
+
+  // ── Returning user handlers ───────────────────────────────────────────────
+
   const handlePublish = useCallback(async () => {
-    if (configHasProBlocks) {
-      setUpgradeModalOpen(true);
+    if (configHasProBlocks) { setUpgradeModalOpen(true); return; }
+    if (!heroEnabled) {
+      setOnboardingPhase('enable');
       return;
     }
     await publishToServer();
-    // Redirect handled in onSaveSuccess above
-  }, [configHasProBlocks, publishToServer]);
+  }, [configHasProBlocks, heroEnabled, publishToServer]);
 
   const handleBlockSelect = useCallback(
     (block: string) => {
       if (!landingConfig) return;
-      const currentHero = landingConfig.hero || {};
       setLandingConfig({
         ...landingConfig,
-        hero: { ...currentHero, block },
+        hero: { ...landingConfig.hero, block },
       } as TenantLandingConfig);
     },
     [landingConfig, setLandingConfig],
   );
 
-  const handleEnableHero = useCallback(() => {
-    if (!landingConfig) return;
-    setLandingConfig({
-      ...landingConfig,
-      hero: { ...landingConfig.hero, enabled: true },
-    } as TenantLandingConfig);
-    setEnableModalOpen(false);
-  }, [landingConfig, setLandingConfig]);
+  // ── UnsavedModal handlers ─────────────────────────────────────────────────
 
   const handlePublishAndLeave = useCallback(async () => {
-    await handlePublish();
+    const result = await publishToServer();
+    if (!result.ok) return;
     setUnsavedModalOpen(false);
-    if (pendingRoute) router.push(pendingRoute);
+    if (!result.wasFirstPublish && pendingRoute) window.location.assign(pendingRoute);
     setPendingRoute(null);
-  }, [handlePublish, pendingRoute, router]);
+  }, [publishToServer, pendingRoute]);
 
   const handleLeaveAnyway = useCallback(() => {
     setUnsavedModalOpen(false);
-    if (pendingRoute) router.push(pendingRoute);
+    if (pendingRoute) window.location.assign(pendingRoute);
     setPendingRoute(null);
-  }, [pendingRoute, router]);
+  }, [pendingRoute]);
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   const tenantLoading = tenant === null;
   const configReady = landingConfig !== null && landingConfig !== undefined;
-  const isStillLoading = tenantLoading || !configReady;
+
+  // [RACE CONDITION FIX] Tambah isPrivateTenantLoading ke gate
+  // BuilderLoadingSteps tampil sampai privateTenant resolved
+  // Mencegah studio flash sebelum onboarding phase diketahui
+  const isStillLoading =
+    tenantLoading ||
+    !configReady ||
+    isPrivateTenantLoading;
 
   if (isStillLoading || !loadingComplete) {
     return (
       <BuilderLoadingSteps
         key="builder-loading"
-        loadingStates={{ tenantLoading, productsLoading: false, configReady }}
+        loadingStates={{
+          tenantLoading,
+          productsLoading: isPrivateTenantLoading,
+          configReady,
+        }}
         onComplete={() => setLoadingComplete(true)}
       />
     );
@@ -311,40 +367,111 @@ export default function LandingBuilderPage() {
     );
   }
 
+  const isOnboardingPhase =
+    onboardingPhase === 'welcome' || onboardingPhase === 'enable';
+
   return (
     <>
       <SaveStatusPill hasUnsavedChanges={hasUnsavedChanges} isSaving={isSaving} />
 
-      {/* Preview surface */}
       <div className="fixed inset-0 overflow-y-auto overscroll-contain bg-background">
-        <LandingErrorBoundary>
-          <LivePreview
-            config={landingConfig}
-            tenant={tenant}
-            onEnableHero={handleEnableHero}
-          />
-        </LandingErrorBoundary>
+        {isOnboardingPhase ? (
+          <div className={cn(
+            'w-full h-full flex items-center justify-center',
+            'bg-gradient-to-br from-background via-muted/20 to-background',
+          )}>
+            <div
+              className="absolute inset-0 opacity-[0.03] pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+                backgroundSize: '32px 32px',
+              }}
+            />
+          </div>
+        ) : (
+          <LandingErrorBoundary>
+            <LivePreview
+              config={landingConfig}
+              tenant={tenant}
+              onEnableHero={() => setOnboardingPhase('enable')}
+            />
+          </LandingErrorBoundary>
+        )}
       </div>
 
-      {/* Block selector + toolbar */}
-      <BlockDrawer
-        section="hero"
-        currentBlock={landingConfig?.hero?.block}
-        onBlockSelect={handleBlockSelect}
-        blockVariantLimit={blockVariantLimit}
-        storeSlug={tenant.slug}
-        hasUnsavedChanges={hasUnsavedChanges}
-        isSaving={isSaving}
-        configHasProBlocks={configHasProBlocks}
-        onPublish={handlePublish}
-      />
+      {(onboardingPhase === 'idle' || onboardingPhase === 'drawer' || onboardingPhase === 'done') && (
+        <BlockDrawer
+          section="hero"
+          currentBlock={landingConfig?.hero?.block}
+          onBlockSelect={handleBlockSelect}
+          blockVariantLimit={blockVariantLimit}
+          storeSlug={tenant.slug}
+          hasUnsavedChanges={hasUnsavedChanges}
+          isSaving={isSaving}
+          configHasProBlocks={configHasProBlocks}
+          heroEnabled={heroEnabled}
+          hasPublishedOnce={hasPublishedOnce}
+          onPublish={handlePublish}
+          autoOpen={drawerAutoOpen}
+          onAutoOpenConsumed={() => setDrawerAutoOpen(false)}
+        />
+      )}
 
-      {/* [PHASE C v2] Onboarding dialog — overlay, re-appears until publish */}
+      {/* Dialog 1: Onboarding */}
       <StudioOnboardingDialog
-        open={onboardingDialogOpen}
-        onClose={() => setOnboardingDialogOpen(false)}
+        open={onboardingPhase === 'welcome'}
+        onStart={handleOnboardingStart}
       />
 
+      {/* Dialog 2: Enable Hero */}
+      <AlertDialog open={onboardingPhase === 'enable'}>
+        <AlertDialogContent
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">
+              {tEnable('title')}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              {tEnable('description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="justify-center">
+            <AlertDialogAction
+              onClick={handleEnableAndPublish}
+              disabled={isSaving}
+              className="gap-2 min-w-[220px]"
+            >
+              {isSaving ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  {tEnable('publishing')}
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  {tEnable('enableAndPublish')}
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog 3: First Publish Celebration */}
+      <FirstPublishDialog
+        open={firstPublishDialogOpen}
+        storeSlug={tenant.slug}
+        onContinue={() => setFirstPublishDialogOpen(false)}
+      />
+
+      {/* Upgrade Modal */}
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
@@ -352,28 +479,28 @@ export default function LandingBuilderPage() {
         description={tUpgrade('description')}
       />
 
-      <AlertDialog open={enableModalOpen} onOpenChange={setEnableModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tEnable('title')}</AlertDialogTitle>
-            <AlertDialogDescription>{tEnable('description')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tEnable('later')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleEnableHero}>{tEnable('enableNow')}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={unsavedModalOpen} onOpenChange={setUnsavedModalOpen}>
+      {/* Unsaved Modal */}
+      <AlertDialog
+        open={unsavedModalOpen}
+        onOpenChange={(next) => {
+          if (!next && isSaving) return;
+          setUnsavedModalOpen(next);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{tUnsaved('title')}</AlertDialogTitle>
             <AlertDialogDescription>{tUnsaved('description')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-            <AlertDialogCancel>{tUnsaved('back')}</AlertDialogCancel>
-            <Button variant="outline" onClick={handleLeaveAnyway}>
+            <AlertDialogAction
+              onClick={() => setUnsavedModalOpen(false)}
+              disabled={isSaving}
+              className="bg-transparent text-foreground border hover:bg-muted"
+            >
+              {tUnsaved('back')}
+            </AlertDialogAction>
+            <Button variant="outline" onClick={handleLeaveAnyway} disabled={isSaving}>
               {tUnsaved('leaveWithout')}
             </Button>
             <AlertDialogAction onClick={handlePublishAndLeave} disabled={isSaving}>

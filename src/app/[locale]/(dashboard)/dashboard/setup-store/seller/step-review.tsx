@@ -4,9 +4,8 @@
 // STEP REVIEW — Setup Wizard Step 6
 // File: src/app/[locale]/(dashboard)/dashboard/setup-store/seller/step-review.tsx
 //
-// Summary of all 5 previous steps before final submit.
-// No new fields — just confirmation.
-// Each section has an Edit button that jumps back to the relevant step.
+// [RENAME — May 2026]
+// f.icon → f.image (FeatureItem.icon removed, .image is the correct field)
 // ============================================================================
 
 import Image from 'next/image';
@@ -16,32 +15,22 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { FeatureItem, SocialLinks } from '@/types/tenant';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 interface StepReviewProps {
-  // Step 1
   logo: string;
   primaryColor: string;
   heroBackgroundImage: string;
-  // Step 2
   heroTitle: string;
   heroSubtitle: string;
   heroCtaText: string;
-  // Step 3
   aboutFeatures: FeatureItem[];
-  // Step 4
   phone: string;
   address: string;
   contactMapUrl: string;
   contactTitle: string;
   contactSubtitle: string;
-  // Step 5
   socialLinks: SocialLinks;
-  // Nav
   onEditStep: (step: number) => void;
 }
-
-// ─── Review Card ──────────────────────────────────────────────────────────────
 
 function ReviewCard({
   label,
@@ -76,8 +65,6 @@ function ReviewCard({
     </Card>
   );
 }
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function StepReview({
   logo,
@@ -155,9 +142,10 @@ export function StepReview({
         <div className="space-y-1.5">
           {aboutFeatures.map((f, i) => (
             <div key={i} className="flex items-start gap-2">
-              {f.icon && (
+              {/* [RENAME] f.icon → f.image */}
+              {f.image && (
                 <div className="relative w-5 h-5 rounded overflow-hidden border shrink-0 mt-0.5">
-                  <Image src={f.icon} alt={f.title} fill className="object-cover" sizes="20px" />
+                  <Image src={f.image} alt={f.title} fill className="object-cover" sizes="20px" />
                 </div>
               )}
               <div className="min-w-0">

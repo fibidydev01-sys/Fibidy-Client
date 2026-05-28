@@ -27,6 +27,10 @@
       "viewAll": "View All",
       "or": "or"
     },
+    "validationDialog": {
+      "title": "Please complete",
+      "cta": "OK"
+    },
     "state": {
       "loading": "Loading...",
       "notFound": "Not found",
@@ -253,6 +257,17 @@
     "price": {
       "discountBadge": "-{percent}%",
       "currencyUsd": "USD"
+    },
+    "offline": {
+      "bannerTitle": "You're offline",
+      "bannerDescription": "Some actions are unavailable. Your local work is safe — we'll reconnect automatically.",
+      "checking": "Reconnecting…",
+      "backOnlineTitle": "Back online",
+      "backOnlineDescription": "Connection restored. You can continue where you left off.",
+      "submitDisabled": "You're offline. Reconnect to submit.",
+      "uploadDisabled": "You're offline. Reconnect to upload.",
+      "publishDisabled": "You're offline. Reconnect to publish.",
+      "saveDisabled": "You're offline. Reconnect to save."
     }
   }
 }

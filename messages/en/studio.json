@@ -13,12 +13,13 @@
       "saved": "Saved"
     },
     "drawer": {
-      "open": "Open",
+      "open": "Choose Layout",
       "close": "Close",
       "proBadge": "Pro",
       "selectBlock": "Select {section} block",
       "openTooltip": "Open block selector",
-      "closeTooltip": "Close block selector"
+      "closeTooltip": "Close block selector",
+      "startHere": "Start here"
     },
     "preview": {
       "heroInactive": "\"Hero\" section is not active",
@@ -66,11 +67,23 @@
       "heroEnable": "Enable"
     },
     "onboardingDialog": {
-      "title": "Welcome to Studio!",
-      "step1": "Pick a hero layout from the panel on the right",
-      "step2": "Customize colors, text, and images in Settings",
-      "step3": "Hit Publish when you're happy — your store goes live instantly",
-      "cta": "Got it, let's go!"
+      "title": "Choose your store layout",
+      "step1": "Pick the block combination you like",
+      "step2": "Click Publish",
+      "step3": "Your store goes live! 🚀",
+      "cta": "Let's Go"
+    },
+    "firstPublishDialog": {
+      "title": "Your store is now live! 🎉",
+      "description": "Your storefront is live at {slug}.fibidy.com. Time to add your first products so customers can start shopping.",
+      "exploreHint": "Want a different look? You can switch block styles anytime from Studio — changes go live instantly.",
+      "ctaPreview": "View My Store",
+      "ctaContinue": "Add Your First Product"
+    },
+    "publishDisabled": {
+      "heroOff": "Enable Hero first — your storefront needs a hero to publish.",
+      "nothingToSave": "Nothing to publish — make a change first.",
+      "offline": "You're offline. Reconnect to publish your changes."
     },
     "upgradeModal": {
       "title": "Upgrade to publish Pro blocks",
@@ -80,7 +93,10 @@
       "title": "Enable Hero Section",
       "description": "The hero section is not active yet. Enable it now so your landing page is visible to customers.",
       "later": "Later",
-      "enableNow": "Enable now"
+      "enableNow": "Enable now",
+      "enableOnly": "Enable Only",
+      "enableAndPublish": "Enable & Publish Now",
+      "publishing": "Publishing your store..."
     },
     "unsavedModal": {
       "title": "Unpublished changes",

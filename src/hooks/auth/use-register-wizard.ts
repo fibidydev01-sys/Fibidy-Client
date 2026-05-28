@@ -4,18 +4,18 @@
 // USE REGISTER WIZARD
 // File: src/hooks/auth/use-register-wizard.ts
 //
-// [PHASE D — May 2026]
-// +intent: RegisterIntent | null di state
-// Dynamic step list per intent:
-//   BUYER:        Intent(1) → Account(2) → Review(3)
-//   SELLER / EDU: Intent(1) → Category(2) → StoreInfo(3) → Account(4) → Review(5)
+// [SPRINT 2 — A-H4 FIX: cameFromBuilder sessionStorage cleanup on success]
+// sessionStorage 'fibidy_builder_agreement' sebelumnya hanya di-clear di
+// reset() — yang hanya dipanggil manual, BUKAN di success path register.
+// Akibatnya: orphaned entry tersisa di sessionStorage untuk visit berikutnya.
 //
-// StepWelcome dihapus — digantikan StepIntent sebagai entry point.
-// TOTAL_STEPS bersifat dynamic berdasarkan intent.
+// Fix: export helper clearBuilderBridge() yang dipanggil dari useRegister
+// success path di use-auth.ts Sprint 2.
+// Nama export sengaja di-expose agar consumer (use-auth.ts) bisa import
+// tanpa perlu import seluruh hook (circular dependency avoided).
 //
-// [PHASE C — May 2026]
-// Auto-skip dari builder query params (slug + category) masih berfungsi.
-// Jika ada query params, intent default ke SELLER.
+// [STEP WELCOME — May 2026]
+// Step 0 (Welcome) sebagai entry point sebelum StepIntent.
 // ============================================================================
 
 import { useEffect, useState } from 'react';
@@ -35,16 +35,14 @@ import type { RegisterIntent } from '@/types/auth';
 
 const AGREEMENT_BRIDGE_KEY = 'fibidy_builder_agreement';
 
-// Step indexes — berbeda per intent
-// BUYER:        1=Intent, 2=Account, 3=Review
-// SELLER / EDU: 1=Intent, 2=Category, 3=StoreInfo, 4=Account, 5=Review
-const STEP_INTENT    = 1;
-const STEP_CATEGORY  = 2; // SELLER/EDU only
-const STEP_STORE_INFO = 3; // SELLER/EDU only
-const STEP_ACCOUNT_SELLER = 4; // SELLER/EDU
-const STEP_REVIEW_SELLER  = 5; // SELLER/EDU
-const STEP_ACCOUNT_BUYER  = 2; // BUYER
-const STEP_REVIEW_BUYER   = 3; // BUYER
+const STEP_WELCOME = 0;
+const STEP_INTENT = 1;
+const STEP_CATEGORY = 2;
+const STEP_STORE_INFO = 3;
+const STEP_ACCOUNT_SELLER = 4;
+const STEP_REVIEW_SELLER = 5;
+const STEP_ACCOUNT_BUYER = 2;
+const STEP_REVIEW_BUYER = 3;
 
 // ============================================================
 // TYPES
@@ -59,6 +57,25 @@ export interface StepDef {
   id: string;
   title: string;
   desc: string;
+}
+
+// ============================================================
+// [A-H4 FIX] PUBLIC HELPER — clear builder bridge sessionStorage
+//
+// Dipanggil dari use-auth.ts useRegister success path agar tidak
+// ada orphaned entry di sessionStorage setelah register berhasil.
+// ============================================================
+
+/**
+ * Clear fibidy_builder_agreement dari sessionStorage.
+ * Dipanggil setelah register berhasil ATAU saat wizard di-reset.
+ */
+export function clearBuilderBridge(): void {
+  try {
+    sessionStorage.removeItem(AGREEMENT_BRIDGE_KEY);
+  } catch {
+    // Private tab atau storage disabled — ignore
+  }
 }
 
 // ============================================================
@@ -87,23 +104,14 @@ function sanitizeCategoryFromQuery(raw: string | null): string | null {
   return getCategoryConfig(raw) ? raw : null;
 }
 
-/**
- * Returns total steps for the given intent.
- */
 export function getTotalSteps(intent: RegisterIntent | null): number {
   return intent === 'BUYER' ? 3 : 5;
 }
 
-/**
- * Returns the account step index for the given intent.
- */
 export function getAccountStep(intent: RegisterIntent | null): number {
   return intent === 'BUYER' ? STEP_ACCOUNT_BUYER : STEP_ACCOUNT_SELLER;
 }
 
-/**
- * Returns the review step index for the given intent.
- */
 export function getReviewStep(intent: RegisterIntent | null): number {
   return intent === 'BUYER' ? STEP_REVIEW_BUYER : STEP_REVIEW_SELLER;
 }
@@ -118,7 +126,7 @@ export function useRegisterWizard() {
 
   const [state, setState] = useState<WizardState>(() => {
     const base: WizardState = {
-      currentStep: STEP_INTENT,
+      currentStep: STEP_WELCOME,
       intent: null,
       category: '',
       name: '',
@@ -138,7 +146,6 @@ export function useRegisterWizard() {
 
     const name = deriveNameFromSlug(slug);
 
-    // Builder pre-fill → default intent SELLER, skip to account or category
     if (category) {
       return {
         ...base,
@@ -159,7 +166,6 @@ export function useRegisterWizard() {
     };
   });
 
-  // Read agreement bridge (browser only)
   useEffect(() => {
     if (!searchParams) return;
     const queryAgreement = searchParams.get('agreement') === 'accepted';
@@ -176,31 +182,30 @@ export function useRegisterWizard() {
     setState((prev) => ({ ...prev, ...data }));
   };
 
-  /**
-   * Select intent — also resets step to STEP_INTENT+1 if intent changes
-   * to avoid stale step position.
-   */
   const selectIntent = (intent: RegisterIntent) => {
     setState((prev) => ({
       ...prev,
       intent,
-      // If buyer, skip directly to account; else go to category
       currentStep: STEP_INTENT,
     }));
   };
 
   const nextStep = () => {
-    const total = getTotalSteps(state.intent);
     const intent = state.intent;
 
     setState((prev) => {
-      const next = prev.currentStep + 1;
+      const cur = prev.currentStep;
 
-      // BUYER skips category + storeInfo
-      if (intent === 'BUYER' && prev.currentStep === STEP_INTENT) {
+      if (cur === STEP_WELCOME) {
+        return { ...prev, currentStep: STEP_INTENT };
+      }
+
+      if (intent === 'BUYER' && cur === STEP_INTENT) {
         return { ...prev, currentStep: STEP_ACCOUNT_BUYER };
       }
 
+      const total = getTotalSteps(intent);
+      const next = cur + 1;
       if (next <= total + 1) {
         return { ...prev, currentStep: next };
       }
@@ -212,13 +217,18 @@ export function useRegisterWizard() {
     const intent = state.intent;
 
     setState((prev) => {
-      // BUYER going back from account → back to intent
-      if (intent === 'BUYER' && prev.currentStep === STEP_ACCOUNT_BUYER) {
+      const cur = prev.currentStep;
+
+      if (cur === STEP_INTENT) {
+        return { ...prev, currentStep: STEP_WELCOME };
+      }
+
+      if (intent === 'BUYER' && cur === STEP_ACCOUNT_BUYER) {
         return { ...prev, currentStep: STEP_INTENT };
       }
 
-      if (prev.currentStep > 1) {
-        return { ...prev, currentStep: prev.currentStep - 1 };
+      if (cur > STEP_WELCOME) {
+        return { ...prev, currentStep: cur - 1 };
       }
       return prev;
     });
@@ -226,14 +236,14 @@ export function useRegisterWizard() {
 
   const goToStep = (step: number) => {
     const total = getTotalSteps(state.intent);
-    if (step >= 1 && step <= total + 1) {
+    if (step >= STEP_WELCOME && step <= total + 1) {
       setState((prev) => ({ ...prev, currentStep: step }));
     }
   };
 
   const reset = () => {
     setState({
-      currentStep: STEP_INTENT,
+      currentStep: STEP_WELCOME,
       intent: null,
       category: '',
       name: '',
@@ -244,11 +254,8 @@ export function useRegisterWizard() {
       whatsapp: '',
     });
     setCameFromBuilder(false);
-    try {
-      sessionStorage.removeItem(AGREEMENT_BRIDGE_KEY);
-    } catch {
-      // ignore
-    }
+    // [A-H4 FIX] Pakai shared helper untuk clear sessionStorage
+    clearBuilderBridge();
   };
 
   const totalSteps = getTotalSteps(state.intent);
@@ -265,10 +272,10 @@ export function useRegisterWizard() {
     goToStep,
     reset,
     totalSteps,
-    isFirstStep: state.currentStep === 1,
+    isFirstStep: state.currentStep === STEP_WELCOME,
     isLastStep,
     cameFromBuilder,
-    // Helpers for consumers
+    STEP_WELCOME,
     STEP_INTENT,
     STEP_CATEGORY,
     STEP_STORE_INFO,

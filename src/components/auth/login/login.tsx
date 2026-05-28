@@ -1,9 +1,27 @@
 'use client';
 
+// ============================================================================
+// LOGIN FORM
+// File: src/components/auth/login/login.tsx
+//
+// [SPRINT 2 — I1 FIX: loginSchema pindah ke dalam komponen]
+// Sebelumnya: loginSchema di-define di module level (luar komponen) —
+// useTranslations tidak bisa dipanggil di module level (Rules of Hooks),
+// sehingga Zod error messages hardcoded EN dan tidak akan pernah ditranslate
+// bahkan setelah locale 'id' aktif.
+//
+// Fix: pindah loginSchema ke dalam LoginForm() agar bisa akses useTranslations.
+// Pattern ini sudah dipakai di:
+//   - forgot-password.tsx ✅
+//   - dialog-login-form.tsx ✅
+//   - dialog-register-form.tsx ✅
+// ============================================================================
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
@@ -11,14 +29,24 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useLogin } from '@/hooks/auth/use-auth';
-import { loginSchema, type LoginFormData } from '@/lib/shared/validations';
 
-// ==========================================
-// LOGIN FORM COMPONENT
-// ==========================================
+// [I1 FIX] Schema TIDAK lagi di-define di module level.
+// Dipindah ke dalam komponen agar bisa pakai useTranslations.
+// type LoginFormData sekarang di-infer di dalam komponen.
 
 export function LoginForm() {
   const t = useTranslations('auth.login');
+  // [I1 FIX] useTranslations untuk Zod error messages
+  const tValidation = useTranslations('validation');
+
+  // [I1 FIX] Schema di-define di dalam komponen — bisa akses tValidation
+  const loginSchema = z.object({
+    email: z.string().email(tValidation('email.invalid')),
+    password: z.string().min(1, tValidation('password.empty')),
+  });
+
+  type LoginFormData = z.infer<typeof loginSchema>;
+
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useLogin();
 

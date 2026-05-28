@@ -145,7 +145,7 @@ export function DialogRegisterForm() {
 
         <p className="text-xs text-center text-muted-foreground">
           {t('agreementPrefix')}{' '}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          <a href="/legal/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
             {t('termsLink')}
           </a>
         </p>

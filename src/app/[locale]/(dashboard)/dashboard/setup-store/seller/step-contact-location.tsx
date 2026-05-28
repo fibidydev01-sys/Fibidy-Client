@@ -1,27 +1,19 @@
 'use client';
 
 // ============================================================================
-// STEP CONTACT LOCATION — Setup Wizard Step 4 (Phase C Full Rewrite)
+// STEP CONTACT LOCATION — Setup Wizard Step 4
 // File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/step-contact-location.tsx
 //
-// Adaptive per locationType:
-//   PHYSICAL   → address wajib + map wajib (embed URL atau geolocation)
-//   HOME_BASED → toggle "Apakah punya lokasi fisik?" (default ON), bisa skip
-//   ONLINE     → address hidden + map hidden (no physical location at all)
-//   HYBRID     → toggle "Apakah punya lokasi fisik?" (default ON)
+// [SPRINT 5 — SCROLL FIX]
+// Tambah data-field-error="true" ke wrapper setiap field yang error.
+// Field keys: phone, contactTitle, contactSubtitle, address, map
 //
-// Map input — DUAL PATH:
-//   Path A: [ 📍 Use My Current Location ] → browser geolocation → lat/lng → iframe preview
-//   Path B: Manual paste Google Maps embed URL → iframe preview
-//
-// Render priority at storefront:
-//   contactMapUrl > lat/lng > hide section
-//
-// Skip list (no autofill badge): phone, address, contactMapUrl, lat/lng, whatsapp
-// Autofill badge: contactTitle, contactSubtitle
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// [Phase C Full Rewrite] Adaptive per locationType
+// [I18N FIX — May 2026] namespace → contactSection
 // ============================================================================
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -31,9 +23,8 @@ import { Switch } from '@/components/ui/switch';
 import { MapPin, Navigation, Loader2, X, AlertCircle } from 'lucide-react';
 import { AutofillBadge } from './autofill-badge';
 import { useLocationPicker } from './use-location-picker';
+import { cn } from '@/lib/shared/utils';
 import type { LocationType } from '@/lib/constants/shared/categories';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface StepContactLocationProps {
   contactTitle: string;
@@ -54,6 +45,8 @@ interface StepContactLocationProps {
   onHasPhysicalLocationChange: (v: boolean) => void;
   onLocationCoordsChange: (lat: number | undefined, lng: number | undefined) => void;
   isAutofilled: (field: string) => boolean;
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 // ─── Map Preview ─────────────────────────────────────────────────────────────
@@ -76,7 +69,7 @@ function MapPreview({ url }: { url: string }) {
   );
 }
 
-// ─── Location Picker Section (dual path) ─────────────────────────────────────
+// ─── Location Picker Section ──────────────────────────────────────────────────
 
 function LocationPickerSection({
   contactMapUrl,
@@ -84,15 +77,16 @@ function LocationPickerSection({
   locationLng,
   onContactMapUrlChange,
   onLocationCoordsChange,
+  hasMapError,
+  onClearMapError,
 }: {
   contactMapUrl: string;
   locationLat?: number;
   locationLng?: number;
   onContactMapUrlChange: (v: string) => void;
-  onLocationCoordsChange: (
-    lat: number | undefined,
-    lng: number | undefined,
-  ) => void;
+  onLocationCoordsChange: (lat: number | undefined, lng: number | undefined) => void;
+  hasMapError?: boolean;
+  onClearMapError?: () => void;
 }) {
   const t = useTranslations('dashboard.setupStore.seller.contact');
 
@@ -102,12 +96,10 @@ function LocationPickerSection({
   const { coords, isLoading, error, requestLocation, clearLocation, getEmbedUrl } =
     useLocationPicker(initialCoords);
 
-  const [showManual, setShowManual] = useState(!!contactMapUrl);
-
-  // Sync coords change back to parent
   useEffect(() => {
     if (coords) {
       onLocationCoordsChange(coords.lat, coords.lng);
+      onClearMapError?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coords]);
@@ -121,10 +113,12 @@ function LocationPickerSection({
   };
 
   return (
-    <div className="space-y-3">
+    <div className={cn(
+      'space-y-4 rounded-lg border p-4 transition-colors',
+      hasMapError && 'border-destructive ring-2 ring-destructive/20',
+    )}>
 
-      {/* Option A — Geolocation quickstart */}
-      {!hasCoords && !contactMapUrl && (
+      {!hasCoords ? (
         <Button
           type="button"
           variant="outline"
@@ -141,10 +135,7 @@ function LocationPickerSection({
             {isLoading ? t('geoLocating') : t('geoUseMyLocation')}
           </span>
         </Button>
-      )}
-
-      {/* Geolocation success */}
-      {hasCoords && !contactMapUrl && (
+      ) : (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/20 px-4 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -168,7 +159,6 @@ function LocationPickerSection({
         </div>
       )}
 
-      {/* Geolocation error */}
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20 px-3 py-2 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
@@ -180,45 +170,13 @@ function LocationPickerSection({
         </div>
       )}
 
-      {/* Separator / toggle manual */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-border" />
-        <button
-          type="button"
-          onClick={() => setShowManual((p) => !p)}
-          className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {showManual ? t('geoHideManual') : t('geoShowManual')}
-        </button>
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      {/* Option B — Manual embed URL */}
-      {showManual && (
+      {previewUrl ? (
         <div className="space-y-1.5">
-          <Input
-            type="url"
-            placeholder={t('mapUrlPlaceholder')}
-            value={contactMapUrl}
-            onChange={(e) => onContactMapUrlChange(e.target.value)}
-            className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
-          />
-          <div className="border-l-2 border-muted-foreground/20 pl-3 py-0.5">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {t('mapUrlHelper')}{' '}
-              <code className="font-mono text-primary text-[11px]">src=&quot;...&quot;</code>
-            </p>
-          </div>
-          {contactMapUrl && !contactMapUrl.startsWith('https://www.google.com/maps') && (
-            <p className="text-xs text-amber-600">{t('mapUrlInvalidHint')}</p>
-          )}
-        </div>
-      )}
-
-      {/* Map preview */}
-      {previewUrl && (
-        <div className="space-y-1.5 pt-1">
-          <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
+          <p className="text-[10px] font-medium tracking-widests uppercase text-muted-foreground">
             {t('mapPreviewLabel')}
           </p>
           <MapPreview url={previewUrl} />
@@ -228,15 +186,41 @@ function LocationPickerSection({
             </p>
           )}
         </div>
-      )}
-
-      {/* Empty state */}
-      {!previewUrl && (
-        <div className="flex flex-col items-center gap-2 py-4 text-muted-foreground/40">
+      ) : (
+        <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground/40">
           <MapPin className="h-8 w-8 opacity-30" />
           <p className="text-xs">{t('mapPreviewEmpty')}</p>
         </div>
       )}
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
+      <div className="space-y-1.5">
+        <Input
+          type="url"
+          placeholder={t('mapUrlPlaceholder')}
+          value={contactMapUrl}
+          onChange={(e) => {
+            const raw = e.target.value;
+            const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/);
+            const parsed = iframeSrcMatch ? iframeSrcMatch[1] : raw;
+            onContactMapUrlChange(parsed);
+            onClearMapError?.();
+          }}
+          className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
+        />
+        <div className="border-l-2 border-muted-foreground/20 pl-3 py-0.5">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {t('mapUrlHelper')}
+          </p>
+        </div>
+        {contactMapUrl && !contactMapUrl.startsWith('https://www.google.com/maps') && (
+          <p className="text-xs text-amber-600">{t('mapUrlInvalidHint')}</p>
+        )}
+      </div>
+
     </div>
   );
 }
@@ -262,29 +246,42 @@ export function StepContactLocation({
   onHasPhysicalLocationChange,
   onLocationCoordsChange,
   isAutofilled,
+  fieldErrors = new Set(),
+  onClearFieldError,
 }: StepContactLocationProps) {
   const t = useTranslations('dashboard.setupStore.seller.contact');
 
-  // Show toggle for HYBRID + HOME_BASED (seller decides)
   const showPhysicalToggle = locationType === 'HYBRID' || locationType === 'HOME_BASED';
-  // ONLINE: hide all location fields completely
   const isOnline = locationType === 'ONLINE';
-  // Show location fields only if not ONLINE AND seller has physical location
   const showLocationFields = !isOnline && hasPhysicalLocation;
-  // PHYSICAL: address mandatory; HOME_BASED/HYBRID with toggle on: optional
   const isAddressMandatory = locationType === 'PHYSICAL';
+
+  const hasPhoneError = fieldErrors.has('phone');
+  const hasContactTitleError = fieldErrors.has('contactTitle');
+  const hasContactSubtitleError = fieldErrors.has('contactSubtitle');
+  const hasAddressError = fieldErrors.has('address');
+  const hasMapError = fieldErrors.has('map');
 
   return (
     <div className="space-y-8 max-w-lg mx-auto">
 
-      {/* ── SECTION COPY ─────────────────────────────────────────────── */}
+      {/* ── SECTION COPY ─────────────────────────────────────────────────── */}
       <div className="space-y-5">
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground border-b pb-2">
+        <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
           {t('sectionCopyHeading')}
         </p>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="wizard-contactTitle" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        {/*
+          [SCROLL FIX] data-field-error di wrapper contactTitle
+        */}
+        <div
+          className="space-y-1.5"
+          data-field-error={hasContactTitleError ? 'true' : undefined}
+        >
+          <Label
+            htmlFor="wizard-contactTitle"
+            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+          >
             {t('contactTitleLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
           <AutofillBadge visible={isAutofilled('contactTitle')} />
@@ -293,13 +290,28 @@ export function StepContactLocation({
             placeholder={t('contactTitlePlaceholder')}
             value={contactTitle}
             onChange={(e) => onContactTitleChange(e.target.value)}
-            className="h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
+            className={cn(
+              'h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
+              hasContactTitleError && 'border-destructive focus-visible:ring-destructive',
+            )}
             maxLength={200}
           />
+          {hasContactTitleError && (
+            <p className="text-xs text-destructive font-medium">{t('contactTitleRequired')}</p>
+          )}
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="wizard-contactSubtitle" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        {/*
+          [SCROLL FIX] data-field-error di wrapper contactSubtitle
+        */}
+        <div
+          className="space-y-1.5"
+          data-field-error={hasContactSubtitleError ? 'true' : undefined}
+        >
+          <Label
+            htmlFor="wizard-contactSubtitle"
+            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+          >
             {t('contactSubtitleLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
           <AutofillBadge visible={isAutofilled('contactSubtitle')} />
@@ -308,20 +320,35 @@ export function StepContactLocation({
             placeholder={t('contactSubtitlePlaceholder')}
             value={contactSubtitle}
             onChange={(e) => onContactSubtitleChange(e.target.value)}
-            className="h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
+            className={cn(
+              'h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
+              hasContactSubtitleError && 'border-destructive focus-visible:ring-destructive',
+            )}
             maxLength={300}
           />
+          {hasContactSubtitleError && (
+            <p className="text-xs text-destructive font-medium">{t('contactSubtitleRequired')}</p>
+          )}
         </div>
       </div>
 
-      {/* ── REACH OUT ────────────────────────────────────────────────── */}
+      {/* ── REACH OUT ──────────────────────────────────────────────────────── */}
       <div className="space-y-5">
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground border-b pb-2">
+        <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
           {t('reachOutHeading')}
         </p>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="wizard-phone" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        {/*
+          [SCROLL FIX] data-field-error di wrapper phone
+        */}
+        <div
+          className="space-y-1.5"
+          data-field-error={hasPhoneError ? 'true' : undefined}
+        >
+          <Label
+            htmlFor="wizard-phone"
+            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+          >
             {t('phoneLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
           <Input
@@ -330,13 +357,22 @@ export function StepContactLocation({
             placeholder={t('phonePlaceholder')}
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
-            className="h-11 text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/50"
+            className={cn(
+              'h-11 text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/50',
+              hasPhoneError && 'border-destructive focus-visible:ring-destructive',
+            )}
           />
+          {hasPhoneError && (
+            <p className="flex items-center gap-1 text-xs text-destructive font-medium">
+              <AlertCircle className="h-3 w-3 shrink-0" />
+              {t('phoneRequired')}
+            </p>
+          )}
         </div>
 
         {whatsappReadonly && (
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+            <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
               {t('whatsappReadonly')}
             </Label>
             <Input
@@ -349,14 +385,13 @@ export function StepContactLocation({
         )}
       </div>
 
-      {/* ── LOCATION (conditional) ─────────────────────────────────────── */}
+      {/* ── LOCATION ───────────────────────────────────────────────────────── */}
       {!isOnline && (
         <div className="space-y-5">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground border-b pb-2">
+          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
             {t('whereWeAreHeading')}
           </p>
 
-          {/* Toggle for HYBRID / HOME_BASED */}
           {showPhysicalToggle && (
             <div className="flex items-center justify-between border rounded-lg px-4 py-3">
               <div className="space-y-0.5 pr-3">
@@ -370,10 +405,18 @@ export function StepContactLocation({
             </div>
           )}
 
-          {/* Address field */}
           {showLocationFields && (
-            <div className="space-y-1.5">
-              <Label htmlFor="wizard-address" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+            /*
+              [SCROLL FIX] data-field-error di wrapper address
+            */
+            <div
+              className="space-y-1.5"
+              data-field-error={hasAddressError ? 'true' : undefined}
+            >
+              <Label
+                htmlFor="wizard-address"
+                className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+              >
                 {t('addressLabel')}{' '}
                 {isAddressMandatory ? (
                   <span className="text-destructive normal-case font-normal">*</span>
@@ -390,16 +433,28 @@ export function StepContactLocation({
                 onChange={(e) => onAddressChange(e.target.value)}
                 rows={3}
                 maxLength={300}
-                className="resize-none text-sm placeholder:font-normal placeholder:text-muted-foreground/50"
+                className={cn(
+                  'resize-none text-sm placeholder:font-normal placeholder:text-muted-foreground/50',
+                  hasAddressError && 'border-destructive focus-visible:ring-destructive',
+                )}
               />
-              <p className="text-xs text-muted-foreground tabular-nums">{address.length}/300</p>
+              {hasAddressError ? (
+                <p className="text-xs text-destructive font-medium">{t('addressRequired')}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground tabular-nums">{address.length}/300</p>
+              )}
             </div>
           )}
 
-          {/* Map — dual path */}
           {showLocationFields && (
-            <div className="space-y-1.5">
-              <Label className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+            /*
+              [SCROLL FIX] data-field-error di wrapper map section
+            */
+            <div
+              className="space-y-1.5"
+              data-field-error={hasMapError ? 'true' : undefined}
+            >
+              <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
                 {t('mapLabel')}{' '}
                 {isAddressMandatory && (
                   <span className="text-destructive normal-case font-normal">*</span>
@@ -411,13 +466,20 @@ export function StepContactLocation({
                 locationLng={locationLng}
                 onContactMapUrlChange={onContactMapUrlChange}
                 onLocationCoordsChange={onLocationCoordsChange}
+                hasMapError={hasMapError}
+                onClearMapError={() => onClearFieldError?.('map')}
               />
+              {hasMapError && (
+                <p className="flex items-center gap-1 text-xs text-destructive font-medium">
+                  <AlertCircle className="h-3 w-3 shrink-0" />
+                  {t('mapRequired')}
+                </p>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* Info for ONLINE */}
       {isOnline && (
         <div className="rounded-lg bg-muted/40 px-4 py-3 border">
           <p className="text-xs text-muted-foreground">{t('onlineNote')}</p>

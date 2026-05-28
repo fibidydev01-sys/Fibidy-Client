@@ -2,32 +2,36 @@
 
 // ============================================================================
 // FILE: src/components/dashboard/blocks/block3.tsx
-// VARIANT: Bold Maximalist — FULL LANDING TEMPLATE
+// VARIANT: Editorial Dark — FULL LANDING TEMPLATE
 //
 // SECTIONS:
 //   1. Hero          — film strip banner + asymmetric 60/40 dark panel
-//   2. Contact       — dark panel + huge "GET IN TOUCH" + numbered list
-//   3. Pre-footer CTA — full-bleed dark band + massive typography
+//   2. Contact       — dark panel + numbered contact list + optional map
+//   3. Pre-footer CTA — full-bleed dark band + strong CTA
 //
-// STYLE LANGUAGE: bold maximalist
-//   - Massive type (80-104px headings)
-//   - Sharp 0 border-radius (no rounded)
-//   - Numbered counters mono "01 / 04"
-//   - Dark foreground panels
-//   - High contrast, no soft shadows
+// STYLE LANGUAGE: editorial dark
+//   - Dark foreground panels with high contrast
+//   - Numbered mono counters "01 / 04"
+//   - Sharp, confident typography (capped at readable sizes)
+//   - No decorative geometry noise
+//   - Consistent with Block1 design system
+//
+// [RENAME — May 2026]
+//   feature.icon → feature.image (FeatureItem.icon removed)
+//   Lokasi: FilmStripPeek filter + image render
 // ============================================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
+import { Phone, MapPin, MessageCircle, Mail } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/shared/utils';
 import type { FeatureItem } from '@/types/tenant';
 
 interface Block3Props {
-  title: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   category?: string;
@@ -50,7 +54,7 @@ interface Block3Props {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// BANNER 3 — FILM STRIP PEEK (UNCHANGED, existing)
+// BANNER 3 — FILM STRIP PEEK
 // ────────────────────────────────────────────────────────────────────────────
 
 const AUTOPLAY_INTERVAL = 4000;
@@ -136,12 +140,13 @@ function FilmStripPeek({ features }: { features: FeatureItem[] }) {
         {features.map((feature, index) => (
           <div
             key={index}
-            className="shrink-0 snap-start relative aspect-[3/2] md:aspect-[21/9] bg-background border-2 border-foreground"
+            className="shrink-0 snap-start relative aspect-[3/2] md:aspect-[21/9] bg-background border border-background/20"
             style={{ width: 'calc(80vw - 64px)' }}
           >
-            {feature.icon ? (
+            {/* [RENAME] feature.icon → feature.image */}
+            {feature.image ? (
               <OptimizedImage
-                src={feature.icon}
+                src={feature.image}
                 alt={feature.title ?? `Banner ${index + 1}`}
                 fill
                 className="object-cover"
@@ -156,7 +161,7 @@ function FilmStripPeek({ features }: { features: FeatureItem[] }) {
               </div>
             )}
 
-            <div className="absolute top-3 right-3 px-2 py-1 bg-background/95 backdrop-blur text-[10px] font-mono tracking-widest text-foreground">
+            <div className="absolute top-3 right-3 px-2 py-1 bg-background/90 backdrop-blur-sm text-[10px] font-mono tracking-widest text-foreground">
               {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
             </div>
 
@@ -164,16 +169,16 @@ function FilmStripPeek({ features }: { features: FeatureItem[] }) {
               <>
                 <div
                   aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
                 />
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-10 max-w-3xl">
                   {feature.title && (
-                    <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[0.95] mb-2 md:mb-3 uppercase">
+                    <h3 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.0] mb-2 md:mb-3">
                       {feature.title}
                     </h3>
                   )}
                   {feature.description && (
-                    <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed line-clamp-2 max-w-md font-medium">
+                    <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed line-clamp-2 max-w-md">
                       {feature.description}
                     </p>
                   )}
@@ -186,7 +191,7 @@ function FilmStripPeek({ features }: { features: FeatureItem[] }) {
 
       {hasMultiple && (
         <div className="flex items-center justify-between px-8 pb-5 -mt-2">
-          <span className="text-[10px] font-mono tracking-[0.3em] text-background/70 uppercase">
+          <span className="text-[10px] font-mono tracking-[0.3em] text-background/60 uppercase">
             {String(activeIndex + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
           </span>
           <div className="flex gap-1">
@@ -216,11 +221,11 @@ function FilmStripPeek({ features }: { features: FeatureItem[] }) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — HERO (existing pattern, KEEP)
+// SECTION 1 — HERO
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block3HeroProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   category?: string;
@@ -248,112 +253,110 @@ function Block3HeroSection({
   storeName,
   features,
 }: Block3HeroProps) {
-  const t = useTranslations('common.state');
-
+  // [RENAME] f.icon → f.image
   const validFeatures = (features || []).filter(
-    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.icon)
+    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image)
   );
   const hasBanner = validFeatures.length > 0;
+  const hasEyebrow = !!(eyebrow ?? category);
+  const hasImage = !!(backgroundImage || logo);
+  const hasBadgeBlock = !!(storeName || logo);
+  const hasCta = showCta && !!ctaText;
+
+  const hasAnyContent =
+    hasBanner || hasBadgeBlock || hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasImage;
+
+  if (!hasAnyContent) return null;
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden bg-background flex flex-col">
-
       {hasBanner && <FilmStripPeek features={validFeatures} />}
 
       <div className="flex flex-1 flex-col lg:grid lg:grid-cols-[3fr_2fr] min-h-screen">
+        {/* LEFT — Dark content panel */}
+        <div className="relative flex flex-col justify-center px-8 sm:px-12 lg:px-20 py-16 lg:py-24 order-1 lg:order-1 bg-foreground text-background">
 
-        <div className="relative flex flex-col justify-center px-8 sm:px-12 lg:px-20 py-16 lg:py-24 order-1 lg:order-1 bg-foreground text-background overflow-hidden">
-
-          <div aria-hidden className="absolute -top-12 -right-12 w-48 h-48 border-2 border-background/20 rotate-12" />
-          <div aria-hidden className="absolute bottom-12 right-12 w-2 h-32 bg-background/20" />
-
-          {(storeName || logo) && (
-            <div className="relative mb-10 flex items-center gap-3">
+          {hasBadgeBlock && (
+            <div className="mb-10 flex items-center gap-3">
               {logo && (
-                <div className="relative w-12 h-12 overflow-hidden border border-background/30 bg-background/5 rounded-sm shrink-0">
-                  <OptimizedImage src={logo} alt={storeName ?? title} fill className="object-cover" />
+                <div className="relative w-12 h-12 overflow-hidden border border-background/20 rounded-sm shrink-0">
+                  <OptimizedImage src={logo} alt={storeName ?? title ?? ''} fill className="object-cover" />
                 </div>
               )}
               {storeName && (
                 <Badge
                   variant="outline"
-                  className="rounded-none px-2.5 py-1 text-[10px] tracking-[0.3em] uppercase font-mono border-background/40 text-background/70 bg-transparent"
+                  className="rounded-none px-2.5 py-1 text-[10px] tracking-[0.3em] uppercase font-mono border-background/30 text-background/60 bg-transparent"
                 >
-                  ⊹ {storeName}
+                  {storeName}
                 </Badge>
               )}
             </div>
           )}
 
-          {(eyebrow || category) && (
+          {hasEyebrow && (
             <div className="mb-6 flex items-center gap-3">
-              <div className="w-12 h-px bg-background/40" />
+              <div className="w-8 h-px bg-background/40" />
               <span className="text-[11px] uppercase tracking-[0.4em] text-background/60 whitespace-nowrap font-mono">
                 {eyebrow ?? category}
               </span>
             </div>
           )}
 
-          <h1 className="relative text-[48px] sm:text-[64px] md:text-[80px] lg:text-[104px] font-black leading-[0.92] tracking-[-0.02em] text-background mb-6 uppercase">
-            {title}
-          </h1>
+          {title && (
+            <h1 className="text-[36px] sm:text-[48px] md:text-[56px] lg:text-[68px] font-black leading-[0.95] tracking-tight text-background mb-6">
+              {title}
+            </h1>
+          )}
 
           {subtitle && (
-            <p className="relative text-lg md:text-xl font-medium text-background/85 leading-tight max-w-md mb-3">
+            <p className="text-base md:text-lg font-medium text-background/80 leading-snug max-w-md mb-3">
               {subtitle}
             </p>
           )}
 
           {description && (
-            <p className="relative text-sm md:text-base text-background/60 leading-relaxed max-w-md mb-10">
+            <p className="text-sm md:text-base text-background/55 leading-relaxed max-w-md mb-10">
               {description}
             </p>
           )}
 
-          {!description && <div className="mb-10" />}
+          {!description && hasCta && <div className="mb-10" />}
 
-          {showCta && (
-            <div className="relative">
+          {hasCta && (
+            <div>
               <Link
                 href={ctaLink}
-                className="group inline-flex items-center gap-4 px-8 py-4 bg-background text-foreground text-sm font-bold tracking-[0.15em] uppercase hover:bg-background/90 transition-colors"
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-background text-foreground text-sm font-bold tracking-[0.12em] uppercase hover:bg-background/90 transition-colors"
               >
                 <span>{ctaText}</span>
-                <span className="text-base group-hover:translate-x-1 transition-transform">→</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
             </div>
           )}
         </div>
 
+        {/* RIGHT — Image panel */}
         <div className="relative order-2 lg:order-2 min-h-[400px] lg:min-h-0">
           {backgroundImage ? (
-            <OptimizedImage src={backgroundImage} alt={title} fill priority className="object-cover" />
+            <OptimizedImage src={backgroundImage} alt={title ?? ''} fill priority className="object-cover" />
           ) : logo ? (
             <div className="absolute inset-0 bg-muted flex items-center justify-center">
               <div className="relative w-1/2 h-1/2">
-                <OptimizedImage src={logo} alt={title} fill className="object-contain" />
+                <OptimizedImage src={logo} alt={title ?? ''} fill className="object-contain" />
               </div>
             </div>
           ) : (
-            <div className="absolute inset-0 bg-muted flex items-center justify-center">
-              <span className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground font-mono">
-                {t('noImage')}
-              </span>
-            </div>
+            <div className="absolute inset-0 bg-muted" />
           )}
-
-          <div className="absolute bottom-6 left-6 px-3 py-1.5 bg-foreground text-background text-[10px] font-mono tracking-[0.2em] uppercase">
-            ◢ 03 / Visual
-          </div>
         </div>
-
       </div>
     </section>
   );
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — CONTACT (NEW, bold maximalist dark panel)
+// SECTION 2 — CONTACT
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block3ContactProps {
@@ -385,7 +388,7 @@ function Block3ContactSection({
   const hasAnyContact = !!(whatsapp || phone || email || address);
   if (!hasAnyContact) return null;
 
-  const showMap = contactShowMap && !!contactMapUrl;
+  const showMap = !!(contactShowMap && contactMapUrl);
 
   const whatsappLink = whatsapp && storeName
     ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: storeName }))}`
@@ -393,7 +396,6 @@ function Block3ContactSection({
       ? `https://wa.me/${whatsapp}`
       : null;
 
-  // Build numbered list for contact items
   const items: Array<{ icon: typeof Phone; label: string; value: string; href?: string }> = [];
   if (whatsapp && whatsappLink) items.push({ icon: MessageCircle, label: tHeader('whatsapp'), value: `+${whatsapp}`, href: whatsappLink });
   if (phone) items.push({ icon: Phone, label: tHeader('phone'), value: phone, href: `tel:${phone}` });
@@ -401,55 +403,54 @@ function Block3ContactSection({
   if (address) items.push({ icon: MapPin, label: tHeader('address'), value: address });
 
   return (
-    <section id="contact" className="relative bg-foreground text-background py-20 md:py-28 overflow-hidden">
+    <section id="contact" className="relative bg-foreground text-background py-20 md:py-28">
+      <div className="container px-4">
 
-      {/* Decorative geometry */}
-      <div aria-hidden className="absolute -top-20 -right-20 w-72 h-72 border-2 border-background/10 rotate-12" />
-      <div aria-hidden className="absolute bottom-12 left-12 w-1 h-32 bg-background/20" />
-
-      <div className="relative z-10 container px-4">
-
-        <div className="mb-12 md:mb-16 max-w-3xl">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="w-12 h-px bg-background/40" />
-            <span className="text-[11px] uppercase tracking-[0.4em] text-background/60 whitespace-nowrap font-mono">
-              02 / Contact
-            </span>
+        {(contactTitle || contactSubtitle) && (
+          <div className="mb-12 md:mb-16 max-w-2xl">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="w-8 h-px bg-background/40" />
+              <span className="text-[11px] uppercase tracking-[0.4em] text-background/50 whitespace-nowrap font-mono">
+                {t('sectionEyebrow')}
+              </span>
+            </div>
+            {contactTitle && (
+              <h2 className="text-[36px] sm:text-[48px] lg:text-[56px] font-black leading-[0.95] tracking-tight">
+                {contactTitle}
+              </h2>
+            )}
+            {contactSubtitle && (
+              <p className="text-base text-background/60 max-w-xl leading-relaxed mt-4">
+                {contactSubtitle}
+              </p>
+            )}
           </div>
-          <h2 className="text-[48px] sm:text-[64px] md:text-[80px] lg:text-[104px] font-black leading-[0.92] tracking-[-0.02em] uppercase">
-            {contactTitle || 'Get In Touch'}
-          </h2>
-          {contactSubtitle && (
-            <p className="text-lg md:text-xl text-background/70 max-w-xl leading-tight mt-4">
-              {contactSubtitle}
-            </p>
-          )}
-        </div>
+        )}
 
         <div className="grid lg:grid-cols-[3fr_2fr] gap-10 md:gap-16 items-start">
 
           {/* LEFT — Numbered contact list */}
-          <div className="space-y-0 border-t border-background/20">
+          <div className="border-t border-background/20">
             {items.map((item, idx) => {
               const Icon = item.icon;
-              const content = (
-                <div className="group flex items-center justify-between py-6 border-b border-background/20 hover:bg-background/5 px-2 -mx-2 transition-colors">
-                  <div className="flex items-center gap-6">
-                    <span className="text-[10px] font-mono tracking-[0.3em] text-background/40">
+              const inner = (
+                <div className="group flex items-center justify-between py-5 border-b border-background/15 hover:bg-background/5 px-2 -mx-2 transition-colors">
+                  <div className="flex items-center gap-5">
+                    <span className="text-[10px] font-mono tracking-[0.3em] text-background/30 w-5 shrink-0">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <Icon className="h-4 w-4 text-background/60" />
+                    <Icon className="h-4 w-4 text-background/50 shrink-0" />
                     <div>
-                      <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-background/50 mb-1">
+                      <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-background/40 mb-0.5">
                         {item.label}
                       </p>
-                      <p className="text-base md:text-lg font-bold text-background uppercase">
+                      <p className="text-sm md:text-base font-semibold text-background">
                         {item.value}
                       </p>
                     </div>
                   </div>
                   {item.href && (
-                    <span className="text-2xl text-background/40 group-hover:text-background group-hover:translate-x-1 transition-all">
+                    <span className="text-background/30 group-hover:text-background group-hover:translate-x-0.5 transition-all text-lg">
                       →
                     </span>
                   )}
@@ -462,29 +463,31 @@ function Block3ContactSection({
                   target={item.href.startsWith('http') ? '_blank' : undefined}
                   rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                 >
-                  {content}
+                  {inner}
                 </a>
               ) : (
-                <div key={idx}>{content}</div>
+                <div key={idx}>{inner}</div>
               );
             })}
           </div>
 
-          {/* RIGHT — Map with sharp border */}
+          {/* RIGHT — Map */}
           {showMap && (
-            <div className="border-2 border-background/30 overflow-hidden">
+            <div className="border border-background/20 overflow-hidden">
               <iframe
                 src={contactMapUrl}
                 width="100%"
-                height="400"
-                style={{ border: 0, display: 'block', filter: 'grayscale(0.3) contrast(1.1)' }}
+                height="360"
+                style={{ border: 0, display: 'block' }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Google Maps"
               />
-              <div className="bg-background text-foreground px-4 py-3 text-[10px] font-mono tracking-[0.2em] uppercase border-t-2 border-background/30">
-                ◢ Location
+              <div className="px-4 py-3 border-t border-background/20">
+                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-background/40">
+                  {tHeader('address')}
+                </p>
               </div>
             </div>
           )}
@@ -496,7 +499,7 @@ function Block3ContactSection({
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 3 — PRE-FOOTER CTA (NEW, full-bleed dark band massive type)
+// SECTION 3 — PRE-FOOTER CTA
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block3PrefooterProps {
@@ -513,37 +516,29 @@ function Block3PrefooterCTA({ whatsapp, storeName }: Block3PrefooterProps) {
   const link = `https://wa.me/${whatsapp}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
 
   return (
-    <section className="relative bg-background py-24 md:py-32 overflow-hidden border-t-4 border-foreground">
-
-      <div aria-hidden className="absolute top-12 left-12 w-2 h-32 bg-foreground/20" />
-      <div aria-hidden className="absolute -bottom-20 -right-20 w-72 h-72 border-2 border-foreground/10 rotate-12" />
-
-      <div className="relative z-10 container px-4">
-        <div className="max-w-4xl">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="w-12 h-px bg-foreground/40" />
-            <span className="text-[11px] uppercase tracking-[0.4em] text-foreground/60 whitespace-nowrap font-mono">
-              03 / Action
+    <section className="bg-background border-t border-border py-20 md:py-28">
+      <div className="container px-4">
+        <div className="max-w-3xl">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="w-8 h-px bg-foreground/30" />
+            <span className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground whitespace-nowrap font-mono">
+              {t('sectionEyebrow')}
             </span>
           </div>
 
-          <h2 className="text-[48px] sm:text-[72px] md:text-[96px] lg:text-[128px] font-black leading-[0.88] tracking-[-0.03em] uppercase mb-10">
-            Let&apos;s
-            <br />
-            <span className="text-muted-foreground">make it</span>
-            <br />
-            happen.
+          <h2 className="text-[36px] sm:text-[48px] lg:text-[56px] font-black leading-[0.95] tracking-tight text-foreground mb-10">
+            {t('ctaHeading', { name: storeName ?? '' })}
           </h2>
 
           <a
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-4 px-10 py-5 bg-foreground text-background text-base font-bold tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors"
+            className="group inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background text-sm font-bold tracking-[0.12em] uppercase hover:bg-foreground/85 transition-colors"
           >
-            <MessageCircle className="h-5 w-5" />
-            <span>Chat on WhatsApp</span>
-            <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
+            <MessageCircle className="h-4 w-4" />
+            <span>{t('whatsappCta')}</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </a>
         </div>
       </div>
@@ -552,7 +547,7 @@ function Block3PrefooterCTA({ whatsapp, storeName }: Block3PrefooterProps) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// BLOCK 3 — Bold Maximalist — FULL LANDING TEMPLATE
+// BLOCK 3 — Editorial Dark — FULL LANDING TEMPLATE
 // ────────────────────────────────────────────────────────────────────────────
 
 export function Block3(props: Block3Props) {
@@ -572,7 +567,6 @@ export function Block3(props: Block3Props) {
         storeName={props.storeName}
         features={props.features}
       />
-
       <Block3ContactSection
         contactTitle={props.contactTitle}
         contactSubtitle={props.contactSubtitle}
@@ -584,7 +578,6 @@ export function Block3(props: Block3Props) {
         contactShowMap={props.contactShowMap}
         storeName={props.storeName}
       />
-
       <Block3PrefooterCTA
         whatsapp={props.whatsapp}
         storeName={props.storeName}

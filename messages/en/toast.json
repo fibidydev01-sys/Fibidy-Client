@@ -86,14 +86,28 @@
       "validationFailed": "Validation failed",
       "validationDetailOne": "{error}",
       "validationDetailMany": "{count} errors found. Please review your settings.",
-      "saveFailed": "Failed to save landing page",
+      "saveFailed": "Publish failed",
       "resetSuccess": "Landing page reset to defaults",
       "resetFailed": "Failed to reset landing page",
-      "discarded": "Changes discarded"
+      "discarded": "Changes discarded",
+      "saveFailedDetail": "Your local changes are safe. Check your connection and try again.",
+      "retryAction": "Retry"
     },
     "share": {
       "copySuccess": "Link copied successfully!",
       "copyFailed": "Failed to copy link"
+    },
+    "upload": {
+      "logoFailed": "Logo upload failed",
+      "heroBgFailed": "Hero background upload failed",
+      "fileTooLarge": "File exceeds 10MB. Please compress it and try again.",
+      "invalidFileType": "File type not supported. Use JPG, PNG, WebP, SVG, or GIF.",
+      "networkError": "Network error. Check your connection and try again.",
+      "configMissing": "Upload service not configured. Contact admin.",
+      "generic": "Upload failed. Please try again.",
+      "retryAction": "Retry",
+      "logoSuccess": "Logo uploaded successfully",
+      "heroBgSuccess": "Hero background uploaded successfully"
     }
   }
 }

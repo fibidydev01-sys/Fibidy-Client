@@ -4,13 +4,13 @@
 // STEP ACCOUNT
 // File: src/components/auth/register/step-account.tsx
 //
-// [PHASE D — May 2026]
-// +hiddenFields prop: array of field names to hide for BUYER flow.
-// BUYER register tidak perlu WhatsApp — pass hiddenFields={['whatsapp']}.
-// Jika hiddenFields tidak dipass, semua field tampil normal (SELLER/EDU).
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// - Tambah props fieldErrors + onClearFieldError
+// - Field email, password, whatsapp highlight merah saat ada error
+// - Merah hilang saat user mulai ketik/input
 //
-// [PHASE C v2 — May 2026]
-// WhatsApp field diganti dengan phone number dropdown global.
+// [PHONE FIX v2 — May 2026]
+// Per-country prefix validation + length validation.
 // ============================================================================
 
 import { useState, useMemo } from 'react';
@@ -27,96 +27,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, EyeOff, Check, X, ChevronDown } from 'lucide-react';
+import { Eye, EyeOff, Check, X, ChevronDown, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
+import {
+  COUNTRY_CODES,
+  DEFAULT_COUNTRY,
+  stripLeadingZero,
+  validateLocalPhone,
+  type CountryCode,
+} from '@/lib/shared/validations/phone';
+import {
+  PASSWORD_RULES,
+  getPasswordStrength,
+  type StrengthLevel,
+} from '@/lib/shared/validations/password';
 
 // ============================================================================
-// COUNTRY CODES
+// PASSWORD STRENGTH COMPONENT
 // ============================================================================
-
-interface CountryCode {
-  code: string;
-  iso: string;
-  name: string;
-  flag: string;
-}
-
-const COUNTRY_CODES: CountryCode[] = [
-  { code: '+62', iso: 'ID', name: 'Indonesia', flag: '🇮🇩' },
-  { code: '+60', iso: 'MY', name: 'Malaysia', flag: '🇲🇾' },
-  { code: '+65', iso: 'SG', name: 'Singapura', flag: '🇸🇬' },
-  { code: '+63', iso: 'PH', name: 'Filipina', flag: '🇵🇭' },
-  { code: '+66', iso: 'TH', name: 'Thailand', flag: '🇹🇭' },
-  { code: '+84', iso: 'VN', name: 'Vietnam', flag: '🇻🇳' },
-  { code: '+855', iso: 'KH', name: 'Kamboja', flag: '🇰🇭' },
-  { code: '+856', iso: 'LA', name: 'Laos', flag: '🇱🇦' },
-  { code: '+95', iso: 'MM', name: 'Myanmar', flag: '🇲🇲' },
-  { code: '+673', iso: 'BN', name: 'Brunei', flag: '🇧🇳' },
-  { code: '+81', iso: 'JP', name: 'Jepang', flag: '🇯🇵' },
-  { code: '+82', iso: 'KR', name: 'Korea Selatan', flag: '🇰🇷' },
-  { code: '+86', iso: 'CN', name: 'Tiongkok', flag: '🇨🇳' },
-  { code: '+886', iso: 'TW', name: 'Taiwan', flag: '🇹🇼' },
-  { code: '+852', iso: 'HK', name: 'Hong Kong', flag: '🇭🇰' },
-  { code: '+91', iso: 'IN', name: 'India', flag: '🇮🇳' },
-  { code: '+92', iso: 'PK', name: 'Pakistan', flag: '🇵🇰' },
-  { code: '+880', iso: 'BD', name: 'Bangladesh', flag: '🇧🇩' },
-  { code: '+966', iso: 'SA', name: 'Arab Saudi', flag: '🇸🇦' },
-  { code: '+971', iso: 'AE', name: 'UAE', flag: '🇦🇪' },
-  { code: '+974', iso: 'QA', name: 'Qatar', flag: '🇶🇦' },
-  { code: '+61', iso: 'AU', name: 'Australia', flag: '🇦🇺' },
-  { code: '+64', iso: 'NZ', name: 'Selandia Baru', flag: '🇳🇿' },
-  { code: '+44', iso: 'GB', name: 'Inggris', flag: '🇬🇧' },
-  { code: '+49', iso: 'DE', name: 'Jerman', flag: '🇩🇪' },
-  { code: '+33', iso: 'FR', name: 'Prancis', flag: '🇫🇷' },
-  { code: '+31', iso: 'NL', name: 'Belanda', flag: '🇳🇱' },
-  { code: '+39', iso: 'IT', name: 'Italia', flag: '🇮🇹' },
-  { code: '+34', iso: 'ES', name: 'Spanyol', flag: '🇪🇸' },
-  { code: '+1', iso: 'US', name: 'Amerika Serikat', flag: '🇺🇸' },
-  { code: '+1', iso: 'CA', name: 'Kanada', flag: '🇨🇦' },
-  { code: '+55', iso: 'BR', name: 'Brasil', flag: '🇧🇷' },
-];
-
-const DEFAULT_COUNTRY = COUNTRY_CODES[0]; // Indonesia +62
-
-// ============================================================================
-// PASSWORD STRENGTH
-// ============================================================================
-
-interface PasswordRule {
-  labelKey: 'minLength' | 'uppercase' | 'number' | 'symbol';
-  test: (pw: string) => boolean;
-}
-
-const PASSWORD_RULES: PasswordRule[] = [
-  { labelKey: 'minLength', test: (pw) => pw.length >= 8 },
-  { labelKey: 'uppercase', test: (pw) => /[A-Z]/.test(pw) },
-  { labelKey: 'number', test: (pw) => /[0-9]/.test(pw) },
-  { labelKey: 'symbol', test: (pw) => /[^A-Za-z0-9]/.test(pw) },
-];
-
-type StrengthLevel = 0 | 1 | 2 | 3 | 4;
-
-interface StrengthInfo {
-  level: StrengthLevel;
-  labelKey: '' | 'weak' | 'fair' | 'good' | 'strong';
-  color: string;
-  textColor: string;
-}
-
-function getStrength(password: string): StrengthInfo {
-  if (!password) {
-    return { level: 0, labelKey: '', color: 'bg-border', textColor: 'text-muted-foreground' };
-  }
-  const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
-  if (passed <= 1) return { level: 1, labelKey: 'weak', color: 'bg-red-500', textColor: 'text-red-500' };
-  if (passed === 2) return { level: 2, labelKey: 'fair', color: 'bg-orange-400', textColor: 'text-orange-400' };
-  if (passed === 3) return { level: 3, labelKey: 'good', color: 'bg-yellow-400', textColor: 'text-yellow-500' };
-  return { level: 4, labelKey: 'strong', color: 'bg-green-500', textColor: 'text-green-600' };
-}
 
 function PasswordStrength({ password }: { password: string }) {
   const t = useTranslations('auth.register.account');
-  const strength = useMemo(() => getStrength(password), [password]);
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
   const rules = useMemo(
     () => PASSWORD_RULES.map((r) => ({ ...r, passed: r.test(password) })),
     [password],
@@ -159,7 +91,12 @@ function PasswordStrength({ password }: { password: string }) {
                 <X className="h-2 w-2 text-muted-foreground" strokeWidth={3} />
               )}
             </span>
-            <span className={cn('text-xs transition-colors', rule.passed ? 'text-foreground' : 'text-muted-foreground')}>
+            <span
+              className={cn(
+                'text-xs transition-colors',
+                rule.passed ? 'text-foreground' : 'text-muted-foreground',
+              )}
+            >
               {t(`passwordRules.${rule.labelKey}`)}
             </span>
           </div>
@@ -178,12 +115,10 @@ interface StepAccountProps {
   password: string;
   whatsapp: string;
   onUpdate: (data: { email?: string; password?: string; whatsapp?: string }) => void;
-  /**
-   * [PHASE D] Fields to hide for specific intents.
-   * BUYER intent: hiddenFields={['whatsapp']} — no WhatsApp needed
-   * SELLER/EDU: omit or pass empty array — all fields shown
-   */
   hiddenFields?: Array<'whatsapp'>;
+  // [SPRINT 5]
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 // ============================================================================
@@ -196,28 +131,60 @@ export function StepAccount({
   whatsapp,
   onUpdate,
   hiddenFields = [],
+  fieldErrors = new Set(),
+  onClearFieldError,
 }: StepAccountProps) {
   const t = useTranslations('auth.register.account');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
-  const [localPhone, setLocalPhone] = useState(() => {
-    if (whatsapp.startsWith('62')) return whatsapp.slice(2);
-    return whatsapp;
+  const [localPhone, setLocalPhone] = useState<string>(() => {
+    if (!whatsapp) return '';
+    const dial = DEFAULT_COUNTRY.code.replace('+', '');
+    const stripped = whatsapp.startsWith(dial) ? whatsapp.slice(dial.length) : whatsapp;
+    return stripLeadingZero(stripped);
   });
+  const [phoneTouched, setPhoneTouched] = useState(false);
 
   const showWhatsapp = !hiddenFields.includes('whatsapp');
 
+  const hasEmailError = fieldErrors.has('email');
+  const hasPasswordError = fieldErrors.has('password');
+  const hasWhatsappError = fieldErrors.has('whatsapp');
+
+  const phoneValidation = useMemo(
+    () => validateLocalPhone(localPhone, selectedCountry),
+    [localPhone, selectedCountry],
+  );
+
+  const phoneHintMessage = useMemo(() => {
+    if (!phoneTouched || !localPhone) return null;
+    if (!phoneValidation.valid) {
+      if (phoneValidation.reason === 'prefix') {
+        return t('whatsappInvalidPrefix', { prefix: selectedCountry.rule.prefixHint });
+      }
+      if (phoneValidation.reason === 'tooShort') {
+        return t('whatsappTooShort', { min: selectedCountry.rule.min });
+      }
+    }
+    return null;
+  }, [phoneTouched, localPhone, phoneValidation, selectedCountry, t]);
+
   const handleCountryChange = (country: CountryCode) => {
     setSelectedCountry(country);
-    const dialDigits = country.code.replace('+', '');
-    onUpdate({ whatsapp: dialDigits + localPhone });
+    setLocalPhone('');
+    setPhoneTouched(false);
+    onUpdate({ whatsapp: '' });
+    if (hasWhatsappError) onClearFieldError?.('whatsapp');
   };
 
   const handlePhoneChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    setLocalPhone(cleaned);
-    const dialDigits = selectedCountry.code.replace('+', '');
-    onUpdate({ whatsapp: dialDigits + cleaned });
+    if (hasWhatsappError) onClearFieldError?.('whatsapp');
+    const digits = stripLeadingZero(value.replace(/\D/g, ''));
+    const capped = digits.slice(0, selectedCountry.rule.max);
+    setLocalPhone(capped);
+    setPhoneTouched(true);
+    const dial = selectedCountry.code.replace('+', '');
+    onUpdate({ whatsapp: capped ? dial + capped : '' });
   };
 
   return (
@@ -227,7 +194,7 @@ export function StepAccount({
       <div className="space-y-1.5">
         <Label
           htmlFor="acc-email"
-          className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
+          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('emailLabel')}
         </Label>
@@ -237,10 +204,21 @@ export function StepAccount({
           placeholder={t('emailPlaceholder')}
           autoComplete="email"
           value={email}
-          onChange={(e) => onUpdate({ email: e.target.value })}
-          className="h-11 text-sm placeholder:text-muted-foreground/50"
+          onChange={(e) => {
+            if (hasEmailError) onClearFieldError?.('email');
+            onUpdate({ email: e.target.value });
+          }}
+          className={cn(
+            'h-11 text-sm placeholder:text-muted-foreground/50',
+            hasEmailError && 'border-destructive focus-visible:ring-destructive',
+          )}
         />
-        <p className="text-xs text-muted-foreground">{t('emailHelper')}</p>
+        {hasEmailError && (
+          <p className="flex items-center gap-1 text-xs text-destructive font-medium">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            {t('emailTaken')}
+          </p>
+        )}
       </div>
 
       <div className="border-t" />
@@ -249,7 +227,7 @@ export function StepAccount({
       <div className="space-y-1.5">
         <Label
           htmlFor="acc-password"
-          className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
+          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('passwordLabel')}
         </Label>
@@ -260,8 +238,14 @@ export function StepAccount({
             placeholder={t('passwordPlaceholder')}
             autoComplete="new-password"
             value={password}
-            onChange={(e) => onUpdate({ password: e.target.value })}
-            className="h-11 text-sm placeholder:text-muted-foreground/50"
+            onChange={(e) => {
+              if (hasPasswordError) onClearFieldError?.('password');
+              onUpdate({ password: e.target.value });
+            }}
+            className={cn(
+              'h-11 text-sm placeholder:text-muted-foreground/50',
+              hasPasswordError && 'border-destructive focus-visible:ring-destructive',
+            )}
           />
           <Button
             type="button"
@@ -277,28 +261,37 @@ export function StepAccount({
             )}
           </Button>
         </div>
+        {hasPasswordError && (
+          <p className="flex items-center gap-1 text-xs text-destructive font-medium">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            {t('passwordWeak')}
+          </p>
+        )}
         <PasswordStrength password={password} />
       </div>
 
-      {/* WhatsApp — hidden for BUYER intent */}
+      {/* WhatsApp */}
       {showWhatsapp && (
         <>
           <div className="border-t" />
-
           <div className="space-y-1.5">
             <Label
               htmlFor="acc-whatsapp"
-              className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
+              className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
             >
               {t('whatsappLabel')}
             </Label>
-            <div className="flex gap-2">
-              {/* Country code dropdown */}
+
+            <div className="flex gap-2 overflow-hidden">
+              {/* Country dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-11 gap-1.5 px-3 shrink-0 font-normal text-sm"
+                    className={cn(
+                      'h-11 gap-1.5 px-3 shrink-0 font-normal text-sm',
+                      hasWhatsappError && 'border-destructive',
+                    )}
                     type="button"
                   >
                     <span>{selectedCountry.flag}</span>
@@ -307,7 +300,7 @@ export function StepAccount({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 max-h-72 overflow-y-auto" align="start">
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widests text-muted-foreground font-medium">
                     Asia Tenggara
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
@@ -327,7 +320,7 @@ export function StepAccount({
                     ))}
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widests text-muted-foreground font-medium">
                     Asia & Lainnya
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
@@ -349,18 +342,39 @@ export function StepAccount({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Phone number input */}
+              {/* Local phone input */}
               <Input
                 id="acc-whatsapp"
                 type="tel"
                 inputMode="numeric"
-                placeholder={t('whatsappPlaceholder')}
-                className="h-11 flex-1 text-sm placeholder:text-muted-foreground/50"
+                placeholder={t('whatsappPlaceholder', { hint: selectedCountry.rule.prefixHint })}
+                className={cn(
+                  'h-11 flex-1 min-w-0 text-sm placeholder:text-muted-foreground/50',
+                  phoneTouched && localPhone && !phoneValidation.valid && 'border-destructive focus-visible:ring-destructive',
+                  hasWhatsappError && 'border-destructive focus-visible:ring-destructive',
+                )}
                 value={localPhone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
+                maxLength={selectedCountry.rule.max}
               />
             </div>
-            <p className="text-xs text-muted-foreground">{t('whatsappHelper')}</p>
+
+            {/* Error messages */}
+            {hasWhatsappError ? (
+              <p className="flex items-center gap-1 text-xs text-destructive font-medium">
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                {t('whatsappRequired')}
+              </p>
+            ) : phoneHintMessage ? (
+              <p className="flex items-center gap-1 text-xs text-destructive">
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                {phoneHintMessage}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {t('whatsappHelper')}
+              </p>
+            )}
           </div>
         </>
       )}

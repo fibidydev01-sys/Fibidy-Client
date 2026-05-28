@@ -19,6 +19,12 @@
 // Required env vars (already in use elsewhere):
 //   - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 //   - NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+//
+// [UPLOAD GUARD FIX — May 2026]
+// Tambah prop onGenerateStateChange(active: boolean).
+// Di-call INLINE (bukan via useEffect) agar tidak ada render-cycle delay —
+// orchestrator tahu LANGSUNG saat generate mulai/selesai sehingga
+// uploadTracker.isAnyActive akurat saat user klik Next.
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -64,6 +70,14 @@ interface LogoGeneratorProps {
   primaryColor: string;
   onGenerated: (url: string) => void;
   disabled?: boolean;
+  /**
+   * [UPLOAD GUARD FIX] Dipanggil INLINE saat state generate berubah.
+   * true  = generate/upload sedang berjalan
+   * false = selesai (berhasil atau gagal)
+   * Tidak pakai useEffect agar tidak ada render-cycle delay —
+   * tracker di orchestrator langsung tahu saat proses mulai/selesai.
+   */
+  onGenerateStateChange?: (active: boolean) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -73,6 +87,7 @@ export function LogoGenerator({
   primaryColor,
   onGenerated,
   disabled = false,
+  onGenerateStateChange,
 }: LogoGeneratorProps) {
   const t = useTranslations('dashboard.setupStore.seller.visual');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -81,7 +96,10 @@ export function LogoGenerator({
     if (!storeName.trim()) return;
     if (isGenerating) return;
 
+    // [UPLOAD GUARD FIX] Report aktif INLINE sebelum setState
+    // agar orchestrator tahu langsung tanpa menunggu render cycle
     setIsGenerating(true);
+    onGenerateStateChange?.(true);
 
     try {
       const initials = getInitials(storeName);
@@ -118,9 +136,12 @@ export function LogoGenerator({
       console.error('[LogoGenerator] Error:', err);
       toast.error(t('logoGenerateFailed'));
     } finally {
+      // [UPLOAD GUARD FIX] Report selesai INLINE di finally
+      // agar tracker clear segera setelah proses selesai/gagal
       setIsGenerating(false);
+      onGenerateStateChange?.(false);
     }
-  }, [storeName, primaryColor, onGenerated, isGenerating, t]);
+  }, [storeName, primaryColor, onGenerated, isGenerating, onGenerateStateChange, t]);
 
   // Hide button if no store name yet
   if (!storeName.trim()) return null;

@@ -1,30 +1,22 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // SETTINGS PAGE CLIENT
 // File: src/app/[locale]/(dashboard)/dashboard/settings/client.tsx
 //
-// [LAYER 8 — 2026-04-19]
-// Three changes in this version:
+// [EDU + KYC BADGE — May 2026]
+// Badge section ditambah di atas settings list:
+//   - EDU mode (isEduMode = true):
+//       Badge biru "Student Mode" — learning simulation, fitur payment disabled
+//   - Seller biasa (FEATURES.digitalProducts = true):
+//       KycBanner — Stripe Connect verification status
 //
-// 1. New "Preferences" group added between "Channels" and "Account",
-//    containing Language + Dark Mode rows. Account group now only holds
-//    Subscription and Change Password (semantically cleaner — Account
-//    is for billing/security, Preferences is for UI choices).
+// EduDashboardBanner dihapus dari layout global — badge ini penggantinya
+// yang lebih kontekstual (hanya muncul di Settings, bukan semua halaman).
 //
-// 2. Dark/Light Mode row MOVED from the Account group to the new
-//    Preferences group. The row itself is unchanged — same theme toggle
-//    behavior, just relocated.
-//
-// 3. New Language row added to Preferences. Opens the new
-//    LanguageSection at /dashboard/settings?section=language.
-//
-// [KYC MERGE — 2026-04-19]
-// KycBanner re-added from the previous client.tsx version.
-// Hooks: useKycStatus, useKycReturnHandler
-// Component: KycBanner
-// Rendered at the top of the list view, above the settings groups.
-// ==========================================
+// [LAYER 8 — 2026-04-19] Preferences group: Language + Dark Mode
+// [KYC MERGE — 2026-04-19] KycBanner di atas list view
+// ============================================================================
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -44,6 +36,8 @@ import {
   LogOut,
   ChevronRight,
   Languages,
+  GraduationCap,
+  ExternalLink,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -58,6 +52,8 @@ import { LanguageSection } from '@/components/dashboard/settings/language';
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
 import { useKycStatus, useKycReturnHandler } from '@/hooks/dashboard/use-products';
+import { useAuthStore } from '@/stores/auth-store';
+import { FEATURES } from '@/lib/config/features';
 
 // KYC Banner
 import { KycBanner } from '@/components/dashboard/product/kyc-banner';
@@ -84,10 +80,44 @@ interface SettingRow {
   labelKey: string;
   descriptionKey: string;
   href?: string;
-  /** When true, renders a theme toggle row instead of a nav link */
   isThemeToggle?: boolean;
-  /** When true, renders a logout confirm row */
   isSignOut?: boolean;
+}
+
+// ==========================================
+// EduModeBadge — Student Mode info card
+// ==========================================
+
+function EduModeBadge() {
+  // Pakai existing keys — dashboard.edu.badge + dashboard.edu.banner.*
+  const tEdu = useTranslations('dashboard.edu');
+
+  return (
+    <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
+          <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 leading-snug">
+            {tEdu('badge')}
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5 leading-relaxed">
+            {tEdu('banner.text')}
+          </p>
+          <a
+            href="https://guide.fibidy.com/edu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 transition-colors mt-1.5"
+          >
+            {tEdu('banner.learnMore')}
+            <ExternalLink className="h-3 w-3" aria-hidden />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ==========================================
@@ -102,17 +132,16 @@ export function SettingsClient() {
   const { theme, setTheme } = useTheme();
   const { logout } = useLogout();
 
-  // KYC
+  const tenant = useAuthStore((s) => s.tenant);
+  const isEdu = tenant?.isEduMode === true;
+
+  // KYC — hanya fetch jika digital products enabled dan bukan EDU
   const { data: kyc } = useKycStatus();
   const { isPolling } = useKycReturnHandler();
 
-  // Active section derived from `?section=...` query param
   const sectionParam = searchParams.get('section') as SettingId | null;
-  const [activeSection, setActiveSection] = useState<SettingId | null>(
-    sectionParam,
-  );
+  const [activeSection, setActiveSection] = useState<SettingId | null>(sectionParam);
 
-  // Keep URL in sync with local state
   useEffect(() => {
     setActiveSection(sectionParam);
   }, [sectionParam]);
@@ -135,92 +164,86 @@ export function SettingsClient() {
   // ==========================================
   // Groups definition
   // ==========================================
-  // Wrapped in useMemo so `t` changes (locale swap) rebuild the tree.
-  // Order here is the display order on screen.
 
-  const groups = useMemo(
-    () => {
-      const isDark = theme === 'dark';
+  const groups = useMemo(() => {
+    const isDark = theme === 'dark';
 
-      const tree: Record<GroupKey, SettingRow[]> = {
-        store: [
-          {
-            id: 'bio',
-            icon: Store,
-            labelKey: 'store.bio.label',
-            descriptionKey: 'store.bio.description',
-          },
-          {
-            id: 'featured',
-            icon: Star,
-            labelKey: 'store.featured.label',
-            descriptionKey: 'store.featured.description',
-          },
-          {
-            id: 'contact',
-            icon: Phone,
-            labelKey: 'store.contact.label',
-            descriptionKey: 'store.contact.description',
-          },
-        ],
-        channels: [
-          {
-            id: 'social',
-            icon: Share2,
-            labelKey: 'channels.social.label',
-            descriptionKey: 'channels.social.description',
-          },
-        ],
-        preferences: [
-          {
-            id: 'language',
-            icon: Languages,
-            labelKey: 'preferences.language.label',
-            descriptionKey: 'preferences.language.description',
-          },
-          {
-            id: 'theme-toggle',
-            icon: isDark ? Sun : Moon,
-            labelKey: isDark
-              ? 'preferences.lightMode.label'
-              : 'preferences.darkMode.label',
-            descriptionKey: isDark
-              ? 'preferences.lightMode.description'
-              : 'preferences.darkMode.description',
-            isThemeToggle: true,
-          },
-        ],
-        account: [
-          {
-            id: 'subscription',
-            icon: CreditCard,
-            labelKey: 'account.subscription.label',
-            descriptionKey: 'account.subscription.description',
-            href: '/dashboard/subscription',
-          },
-          {
-            id: 'password',
-            icon: KeyRound,
-            labelKey: 'account.changePassword.label',
-            descriptionKey: 'account.changePassword.description',
-          },
-        ],
-        legal: [
-          {
-            id: 'about-fibidy',
-            icon: FileText,
-            labelKey: 'legal.aboutFibidy.label',
-            descriptionKey: 'legal.aboutFibidy.description',
-            href: '/legal',
-          },
-        ],
-      };
+    const tree: Record<GroupKey, SettingRow[]> = {
+      store: [
+        {
+          id: 'bio',
+          icon: Store,
+          labelKey: 'store.bio.label',
+          descriptionKey: 'store.bio.description',
+        },
+        {
+          id: 'featured',
+          icon: Star,
+          labelKey: 'store.featured.label',
+          descriptionKey: 'store.featured.description',
+        },
+        {
+          id: 'contact',
+          icon: Phone,
+          labelKey: 'store.contact.label',
+          descriptionKey: 'store.contact.description',
+        },
+      ],
+      channels: [
+        {
+          id: 'social',
+          icon: Share2,
+          labelKey: 'channels.social.label',
+          descriptionKey: 'channels.social.description',
+        },
+      ],
+      preferences: [
+        {
+          id: 'language',
+          icon: Languages,
+          labelKey: 'preferences.language.label',
+          descriptionKey: 'preferences.language.description',
+        },
+        {
+          id: 'theme-toggle',
+          icon: isDark ? Sun : Moon,
+          labelKey: isDark
+            ? 'preferences.lightMode.label'
+            : 'preferences.darkMode.label',
+          descriptionKey: isDark
+            ? 'preferences.lightMode.description'
+            : 'preferences.darkMode.description',
+          isThemeToggle: true,
+        },
+      ],
+      account: [
+        {
+          id: 'subscription',
+          icon: CreditCard,
+          labelKey: 'account.subscription.label',
+          descriptionKey: 'account.subscription.description',
+          href: '/dashboard/subscription',
+        },
+        {
+          id: 'password',
+          icon: KeyRound,
+          labelKey: 'account.changePassword.label',
+          descriptionKey: 'account.changePassword.description',
+        },
+      ],
+      legal: [
+        {
+          id: 'about-fibidy',
+          icon: FileText,
+          labelKey: 'legal.aboutFibidy.label',
+          descriptionKey: 'legal.aboutFibidy.description',
+          href: '/legal',
+        },
+      ],
+    };
 
-      return tree;
-    },
-    // Theme icon swaps based on current theme — rebuild when theme flips.
-    [theme],
-  );
+    return tree;
+  }, [theme]);
 
   const groupOrder: GroupKey[] = [
     'store',
@@ -231,7 +254,7 @@ export function SettingsClient() {
   ];
 
   // ==========================================
-  // Section renderer — returns the full-page section view
+  // Section renderer
   // ==========================================
 
   if (activeSection) {
@@ -240,10 +263,10 @@ export function SettingsClient() {
       featured: <AboutSection onBack={handleBack} />,
       contact: <ContactSection onBack={handleBack} />,
       social: <SocialSection onBack={handleBack} />,
-      subscription: null, // handled by href
+      subscription: null,
       password: <PasswordSection onBack={handleBack} />,
       language: <LanguageSection onBack={handleBack} />,
-      'about-fibidy': null, // handled by href
+      'about-fibidy': null,
     };
 
     const node = sectionMap[activeSection];
@@ -258,15 +281,24 @@ export function SettingsClient() {
     <div className="max-w-2xl mx-auto pb-10">
       <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
 
-      {/* KYC Stripe Verification Banner */}
-      <KycBanner
-        kycStatus={kyc?.kycStatus}
-        hasStripeAccount={kyc?.hasStripeAccount}
-        errors={kyc?.errors}
-        hasFutureRequirements={kyc?.hasFutureRequirements}
-        futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
-        isPolling={isPolling}
-      />
+      {/*
+        Badge section — mutual exclusive:
+          EDU mode  → Student Mode badge (biru, info tentang learning simulation)
+          Seller biasa + digital products → KYC Stripe Connect banner
+          Seller biasa tanpa digital products → tidak ada badge
+      */}
+      {isEdu ? (
+        <EduModeBadge />
+      ) : FEATURES.digitalProducts ? (
+        <KycBanner
+          kycStatus={kyc?.kycStatus}
+          hasStripeAccount={kyc?.hasStripeAccount}
+          errors={kyc?.errors}
+          hasFutureRequirements={kyc?.hasFutureRequirements}
+          futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
+          isPolling={isPolling}
+        />
+      ) : null}
 
       <div className="space-y-6">
         {groupOrder.map((groupKey) => {
@@ -284,22 +316,18 @@ export function SettingsClient() {
                   {rows.map((row) => {
                     const Icon = row.icon;
 
-                    // Theme toggle row — no navigation
+                    // Theme toggle row
                     if (row.isThemeToggle) {
                       return (
                         <button
                           key={row.id}
                           type="button"
-                          onClick={() =>
-                            setTheme(theme === 'dark' ? 'light' : 'dark')
-                          }
+                          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                           className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors"
                         >
                           <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium">
-                              {t(row.labelKey)}
-                            </div>
+                            <div className="font-medium">{t(row.labelKey)}</div>
                             <div className="text-sm text-muted-foreground truncate">
                               {t(row.descriptionKey)}
                             </div>
@@ -308,7 +336,7 @@ export function SettingsClient() {
                       );
                     }
 
-                    // Link row — uses href for external-ish navigation
+                    // Link row
                     if (row.href) {
                       return (
                         <button
@@ -319,9 +347,7 @@ export function SettingsClient() {
                         >
                           <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium">
-                              {t(row.labelKey)}
-                            </div>
+                            <div className="font-medium">{t(row.labelKey)}</div>
                             <div className="text-sm text-muted-foreground truncate">
                               {t(row.descriptionKey)}
                             </div>
@@ -331,7 +357,7 @@ export function SettingsClient() {
                       );
                     }
 
-                    // Inline section row — opens in-page section
+                    // Inline section row
                     return (
                       <button
                         key={row.id}
@@ -341,9 +367,7 @@ export function SettingsClient() {
                       >
                         <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium">
-                            {t(row.labelKey)}
-                          </div>
+                          <div className="font-medium">{t(row.labelKey)}</div>
                           <div className="text-sm text-muted-foreground truncate">
                             {t(row.descriptionKey)}
                           </div>
@@ -358,7 +382,7 @@ export function SettingsClient() {
           );
         })}
 
-        {/* Sign out — standalone row at the bottom */}
+        {/* Sign out */}
         <div className="pt-2">
           <Card>
             <CardContent className="p-0">

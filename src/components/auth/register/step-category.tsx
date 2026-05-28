@@ -1,29 +1,17 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // STEP CATEGORY (REGISTER WIZARD)
 // File: src/components/auth/register/step-category.tsx
 //
-// [POLISH v15.4 — May 2026]
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// - fieldErrors prop: highlight container saat category tidak dipilih
+// - Border merah di bawah search + teks error
+// - Merah hilang saat user pilih kategori
 //
-// CHANGED in v15.4:
-//   - `cat.label` / `cat.description` access patterns REMOVED.
-//     The category registry (lib/constants/shared/categories.ts) marked
-//     these fields `@deprecated` and made them optional in v15.4 — they
-//     now live in i18n at `common.categories.items.{KEY}.{label,description}`.
-//   - Resolves labels/descriptions via the same helpers `step-review.tsx`
-//     uses: `getCategoryLabelKey()` / `getCategoryDescriptionKey()`.
-//   - Builds a single normalized `categoryItems` array up-front (id +
-//     resolved label + resolved description) so search filtering and
-//     row rendering both consume the same shape — no more optional
-//     unwrap dance at the call site.
-//
-// PRESERVED:
-//   - Custom-category escape hatch (the "Add your own" path)
-//   - Search input + filter behavior
-//   - Group rendering order via `getCategoryGroupList()`
-//   - Selected/unselected UI states
-// ==========================================
+// [STICKY LAYOUT FIX — May 2026]
+// Scroll dihandle oleh SCROLLABLE BODY di register.tsx
+// ============================================================================
 
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
@@ -37,11 +25,15 @@ import {
   getCategoryDescriptionKey,
   getCategoryGroupLabelKey,
 } from '@/lib/constants/shared/categories';
-import { Plus, Search, Check } from 'lucide-react';
+import { cn } from '@/lib/shared/utils';
+import { Plus, Search, Check, AlertCircle } from 'lucide-react';
 
 interface StepCategoryProps {
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  // [SPRINT 5]
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 interface ResolvedCategory {
@@ -54,21 +46,18 @@ interface ResolvedCategory {
 export function StepCategory({
   selectedCategory,
   onSelectCategory,
+  fieldErrors = new Set(),
+  onClearFieldError,
 }: StepCategoryProps) {
   const t = useTranslations('auth.register.category');
-  // Root-level translator — categories i18n lives under common.*, not auth.*
   const tRoot = useTranslations();
 
   const [search, setSearch] = useState('');
   const [showCustom, setShowCustom] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
 
-  // ──────────────────────────────────────────────────────────────
-  // Build per-group resolved categories ONCE per render. Each item
-  // carries its already-translated label + description so neither
-  // the search filter nor the row component has to deal with the
-  // optional/undefined registry fields directly.
-  // ──────────────────────────────────────────────────────────────
+  const hasCategoryError = fieldErrors.has('category');
+
   const groups = useMemo(() => {
     return getCategoryGroupList().map((group) => {
       const items: ResolvedCategory[] = getCategoriesByGroup(group.key).map(
@@ -87,7 +76,6 @@ export function StepCategory({
     });
   }, [tRoot]);
 
-  // Flat list — used only when the user has typed a search query
   const flatFiltered = useMemo(() => {
     if (!search) return [];
     const q = search.toLowerCase();
@@ -100,16 +88,32 @@ export function StepCategory({
       );
   }, [groups, search]);
 
+  const handleSelectCategory = (category: string) => {
+    onSelectCategory(category);
+    if (hasCategoryError) onClearFieldError?.('category');
+  };
+
   const handleSelectCustom = () => {
     if (customCategory.trim()) {
-      onSelectCategory(customCategory.trim());
+      handleSelectCategory(customCategory.trim());
       setShowCustom(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* ── SEARCH ─────────────────────────────────────────────── */}
+    <div className="space-y-3">
+
+      {/* Error banner */}
+      {hasCategoryError && (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
+          <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+          <p className="text-xs text-destructive font-medium">
+            {t('searchPlaceholder')}
+          </p>
+        </div>
+      )}
+
+      {/* Search */}
       {!showCustom && (
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -117,21 +121,24 @@ export function StepCategory({
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-10"
+            className={cn(
+              'pl-9 h-10',
+              hasCategoryError && 'border-destructive focus-visible:ring-destructive',
+            )}
           />
         </div>
       )}
 
-      {/* ── CATEGORY LIST ──────────────────────────────────────── */}
+      {/* Category List */}
       {!showCustom && (
-        <div className="space-y-5 max-h-[420px] overflow-y-auto pr-1">
+        <div className={cn(
+          'space-y-5 rounded-xl transition-all',
+          hasCategoryError && 'outline outline-2 outline-destructive/50 outline-offset-2',
+        )}>
           {search ? (
-            // Flat search results
             flatFiltered.length === 0 ? (
               <div className="py-10 text-center space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {t('noResults')}
-                </p>
+                <p className="text-sm text-muted-foreground">{t('noResults')}</p>
                 <Button
                   type="button"
                   variant="outline"
@@ -154,13 +161,12 @@ export function StepCategory({
                     description={cat.description}
                     value={cat.key}
                     isSelected={selectedCategory === cat.key}
-                    onSelect={onSelectCategory}
+                    onSelect={handleSelectCategory}
                   />
                 ))}
               </div>
             )
           ) : (
-            // Grouped view
             groups.map((group) => (
               <div key={group.key} className="space-y-2">
                 <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground px-1">
@@ -174,7 +180,7 @@ export function StepCategory({
                       description={cat.description}
                       value={cat.key}
                       isSelected={selectedCategory === cat.key}
-                      onSelect={onSelectCategory}
+                      onSelect={handleSelectCategory}
                     />
                   ))}
                 </div>
@@ -182,7 +188,6 @@ export function StepCategory({
             ))
           )}
 
-          {/* "Add your own" tail CTA */}
           {!search && (
             <div className="pt-2 border-t">
               <Button
@@ -200,7 +205,7 @@ export function StepCategory({
         </div>
       )}
 
-      {/* ── CUSTOM CATEGORY INPUT ──────────────────────────────── */}
+      {/* Custom Category Input */}
       {showCustom && (
         <Card className="p-4 space-y-3">
           <div className="flex items-center gap-2">
@@ -253,13 +258,12 @@ export function StepCategory({
           </div>
         </Card>
       )}
+
     </div>
   );
 }
 
-// ==========================================
-// CATEGORY ROW
-// ==========================================
+// ── Category Row ──────────────────────────────────────────────────────────────
 
 interface CategoryRowProps {
   label: string;
@@ -269,35 +273,36 @@ interface CategoryRowProps {
   onSelect: (v: string) => void;
 }
 
-function CategoryRow({
-  label,
-  description,
-  value,
-  isSelected,
-  onSelect,
-}: CategoryRowProps) {
+function CategoryRow({ label, description, value, isSelected, onSelect }: CategoryRowProps) {
   return (
     <button
       type="button"
       onClick={() => onSelect(value)}
-      className={`w-full text-left rounded-lg border p-3 transition-colors ${
+      className={cn(
+        'w-full text-left rounded-xl border-2 p-4 transition-all duration-150',
+        'flex items-center gap-4',
         isSelected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-          : 'border-border hover:border-primary/40 hover:bg-muted/40'
-      }`}
+          ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-sm'
+          : 'border-border hover:border-primary/40 hover:bg-muted/40',
+      )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">{label}</p>
-          {description && (
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              {description}
-            </p>
-          )}
-        </div>
-        {isSelected && (
-          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        {description && (
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed truncate">
+            {description}
+          </p>
         )}
+      </div>
+      <div
+        className={cn(
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all',
+          isSelected
+            ? 'bg-primary text-primary-foreground'
+            : 'border-2 border-muted-foreground/30',
+        )}
+      >
+        {isSelected && <Check className="h-3 w-3" strokeWidth={3} />}
       </div>
     </button>
   );

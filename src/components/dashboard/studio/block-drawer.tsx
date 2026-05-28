@@ -1,23 +1,28 @@
 'use client';
 
-// ==========================================
-// BLOCK DRAWER
+// ============================================================================
+// BLOCK DRAWER — Studio Flow v3
 // File: src/components/dashboard/studio/block-drawer.tsx
 //
-// [PHASE 5 — 2026-05-13]
-// Drawer now hosts the primary action toolbar at the bottom:
-//   Left:  Preview  → opens /store/{slug} in a new tab
-//   Right: Publish  → triggers publish flow
+// [STUDIO FLOW v3 — May 2026]
+// Props baru:
+//   - autoOpen: boolean            → auto-buka drawer saat onboarding fase drawer
+//   - autoPublish: boolean         → setelah auto-open, auto publishToServer()
+//   - onAutoOpenConsumed: ()=>void  → parent reset flag autoOpen
+//   - onAutoPublishConsumed: ()=>void → parent reset flag autoPublish
+//   - publishChanges: ()=>Promise  → direct ref ke publishToServer dari hook
 //
-// This replaces the floating BuilderHeader (removed in this phase).
-// The top bar of the studio is now empty — only the SaveStatusPill
-// floats top-center as a non-blocking status indicator.
+// Flow saat autoOpen + autoPublish = true:
+//   1. Drawer/Sheet open
+//   2. block1 di-pulse + badge "Mulai di sini" muncul 2.5s
+//   3. 600ms delay (user sempat lihat) → publishChanges() dipanggil otomatis
+//   4. Setelah publish → parent useLandingConfig.onSaveSuccess → FirstPublishDialog
 //
-// Mobile drawer (vaul, bottom sheet) and desktop sheet (shadcn, right
-// side) both render the same toolbar — different containers, same UX.
-// ==========================================
+// User TIDAK perlu klik apapun di drawer — semua otomatis.
+// Drawer ditampilkan sebagai "showcase" fitur, bukan action required.
+// ============================================================================
 
-import { useState, useEffect, memo, useCallback } from 'react';
+import { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Drawer,
@@ -29,12 +34,27 @@ import {
   SheetContent,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
-import { Check, Crown, ChevronLeft, ChevronRight, ExternalLink, Save } from 'lucide-react';
+import {
+  Check,
+  Crown,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Save,
+  Sparkles,
+} from 'lucide-react';
 import type { BlockOption } from './block-options';
 import { BLOCK_OPTIONS_MAP, isProBlock } from './block-options';
+import type { PublishResult } from '@/hooks/dashboard/use-landing-config';
 
 type SectionType = 'hero';
 
@@ -43,15 +63,31 @@ interface BlockDrawerProps {
   currentBlock?: string;
   onBlockSelect: (block: string) => void;
   blockVariantLimit?: number;
-  // ── Toolbar props (new in Phase 5) ─────────────────────────────────────
   storeSlug: string;
   hasUnsavedChanges: boolean;
   isSaving: boolean;
   configHasProBlocks: boolean;
+  heroEnabled: boolean;
+  hasPublishedOnce: boolean;
   onPublish: () => void;
+  /** [v3] Auto-buka drawer — dari parent saat onboarding fase drawer */
+  autoOpen?: boolean;
+  /** [v3] Auto-publish setelah drawer terbuka — first-time flow */
+  autoPublish?: boolean;
+  /** [v3] Callback setelah autoOpen dikonsumsi */
+  onAutoOpenConsumed?: () => void;
+  /** [v3] Callback setelah autoPublish dikonsumsi */
+  onAutoPublishConsumed?: () => void;
+  /** [v3] Direct ref ke publishToServer — dipakai untuk auto-publish */
+  publishChanges?: () => Promise<PublishResult>;
+  /** [v3] Callback setelah auto-publish selesai */
+  onPublishDone?: () => void;
 }
 
 const MOBILE_QUERY = '(max-width: 768px)';
+const PULSE_DURATION_MS = 2500;
+// Delay sebelum auto-publish — user sempat lihat drawer sebentar
+const AUTO_PUBLISH_DELAY_MS = 600;
 
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
@@ -84,6 +120,8 @@ interface ToolbarProps {
   hasUnsavedChanges: boolean;
   isSaving: boolean;
   configHasProBlocks: boolean;
+  heroEnabled: boolean;
+  hasPublishedOnce: boolean;
   onPublish: () => void;
 }
 
@@ -92,9 +130,37 @@ function DrawerToolbar({
   hasUnsavedChanges,
   isSaving,
   configHasProBlocks,
+  heroEnabled,
+  hasPublishedOnce,
   onPublish,
 }: ToolbarProps) {
   const t = useTranslations('studio.header');
+  const tDisabled = useTranslations('studio.publishDisabled');
+
+  const heroOff = !heroEnabled;
+  const nothingToSave = hasPublishedOnce && !hasUnsavedChanges;
+  const isPublishDisabled = isSaving || heroOff || nothingToSave;
+
+  const tooltipReason: string | null = isSaving
+    ? null
+    : heroOff
+    ? tDisabled('heroOff')
+    : nothingToSave
+    ? tDisabled('nothingToSave')
+    : null;
+
+  const publishButton = (
+    <Button
+      size="sm"
+      onClick={onPublish}
+      disabled={isPublishDisabled}
+      className="gap-1.5 h-9 text-xs flex-1"
+    >
+      {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
+      <Save className="h-3.5 w-3.5" />
+      {isSaving ? t('publishing') : t('publish')}
+    </Button>
+  );
 
   return (
     <div className="shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 py-2.5 flex items-center justify-between gap-2">
@@ -104,28 +170,95 @@ function DrawerToolbar({
         size="sm"
         className="gap-1.5 h-9 text-xs flex-1"
       >
-        <a
-          href={`/store/${storeSlug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={`/store/${storeSlug}`} target="_blank" rel="noopener noreferrer">
           <ExternalLink className="h-3.5 w-3.5" />
           {t('preview')}
         </a>
       </Button>
 
-      <Button
-        size="sm"
-        onClick={onPublish}
-        disabled={isSaving || !hasUnsavedChanges}
-        className="gap-1.5 h-9 text-xs flex-1"
-      >
-        {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
-        <Save className="h-3.5 w-3.5" />
-        {isSaving ? t('publishing') : t('publish')}
-      </Button>
+      {tooltipReason ? (
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex-1">{publishButton}</span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-[220px] text-xs">
+              {tooltipReason}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        publishButton
+      )}
     </div>
   );
+}
+
+// ============================================================================
+// SHARED AUTO-OPEN + AUTO-PUBLISH LOGIC
+// ============================================================================
+
+function useAutoFlow({
+  autoOpen,
+  autoPublish,
+  blocks,
+  onAutoOpenConsumed,
+  onAutoPublishConsumed,
+  publishChanges,
+  onPublishDone,
+  setOpen,
+  setPulsingBlock,
+}: {
+  autoOpen: boolean;
+  autoPublish: boolean;
+  blocks: BlockOption[];
+  onAutoOpenConsumed?: () => void;
+  onAutoPublishConsumed?: () => void;
+  publishChanges?: () => Promise<PublishResult>;
+  onPublishDone?: () => void;
+  setOpen: (v: boolean) => void;
+  setPulsingBlock: (v: string | null) => void;
+}) {
+  const publishRef = useRef(publishChanges);
+  publishRef.current = publishChanges;
+
+  useEffect(() => {
+    if (!autoOpen) return;
+
+    // 1. Buka drawer
+    setOpen(true);
+    onAutoOpenConsumed?.();
+
+    // 2. Pulse block1 setelah drawer terbuka
+    const pulseTimer = setTimeout(() => {
+      const firstBlock = blocks[0];
+      if (firstBlock) {
+        setPulsingBlock(firstBlock.value);
+        setTimeout(() => setPulsingBlock(null), PULSE_DURATION_MS);
+      }
+    }, 400);
+
+    return () => clearTimeout(pulseTimer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen]);
+
+  useEffect(() => {
+    if (!autoPublish) return;
+    onAutoPublishConsumed?.();
+
+    // 3. Auto-publish setelah delay — user sempat lihat drawer
+    const publishTimer = setTimeout(async () => {
+      if (publishRef.current) {
+        const result = await publishRef.current();
+        if (result.ok) {
+          onPublishDone?.();
+        }
+      }
+    }, AUTO_PUBLISH_DELAY_MS);
+
+    return () => clearTimeout(publishTimer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPublish]);
 }
 
 // ============================================================================
@@ -141,11 +274,32 @@ function MobileDrawer({
   hasUnsavedChanges,
   isSaving,
   configHasProBlocks,
+  heroEnabled,
+  hasPublishedOnce,
   onPublish,
+  autoOpen = false,
+  autoPublish = false,
+  onAutoOpenConsumed,
+  onAutoPublishConsumed,
+  publishChanges,
+  onPublishDone,
 }: BlockDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(false);
+  const [pulsingBlock, setPulsingBlock] = useState<string | null>(null);
   const blocks = BLOCK_OPTIONS_MAP[section] || [];
+
+  useAutoFlow({
+    autoOpen,
+    autoPublish,
+    blocks,
+    onAutoOpenConsumed,
+    onAutoPublishConsumed,
+    publishChanges,
+    onPublishDone,
+    setOpen,
+    setPulsingBlock,
+  });
 
   return (
     <>
@@ -181,6 +335,7 @@ function MobileDrawer({
                 isSelected={currentBlock === block.value}
                 onSelect={onBlockSelect}
                 blockVariantLimit={blockVariantLimit}
+                isPulsing={pulsingBlock === block.value}
               />
             ))}
           </div>
@@ -190,6 +345,8 @@ function MobileDrawer({
             hasUnsavedChanges={hasUnsavedChanges}
             isSaving={isSaving}
             configHasProBlocks={configHasProBlocks}
+            heroEnabled={heroEnabled}
+            hasPublishedOnce={hasPublishedOnce}
             onPublish={onPublish}
           />
         </DrawerContent>
@@ -211,12 +368,33 @@ function DesktopSheet({
   hasUnsavedChanges,
   isSaving,
   configHasProBlocks,
+  heroEnabled,
+  hasPublishedOnce,
   onPublish,
+  autoOpen = false,
+  autoPublish = false,
+  onAutoOpenConsumed,
+  onAutoPublishConsumed,
+  publishChanges,
+  onPublishDone,
 }: BlockDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
+  const [pulsingBlock, setPulsingBlock] = useState<string | null>(null);
   const blocks = BLOCK_OPTIONS_MAP[section] || [];
+
+  useAutoFlow({
+    autoOpen,
+    autoPublish,
+    blocks,
+    onAutoOpenConsumed,
+    onAutoPublishConsumed,
+    publishChanges,
+    onPublishDone,
+    setOpen,
+    setPulsingBlock,
+  });
 
   const handleCollapse = useCallback(() => {
     setIsClosing(true);
@@ -224,9 +402,7 @@ function DesktopSheet({
     setTimeout(() => setIsClosing(false), 350);
   }, []);
 
-  const handleExpand = useCallback(() => {
-    setOpen(true);
-  }, []);
+  const handleExpand = useCallback(() => setOpen(true), []);
 
   return (
     <>
@@ -246,9 +422,7 @@ function DesktopSheet({
 
       <Sheet
         open={open}
-        onOpenChange={(v) => {
-          if (!v) handleCollapse();
-        }}
+        onOpenChange={(v) => { if (!v) handleCollapse(); }}
         modal={false}
       >
         <SheetContent
@@ -264,7 +438,9 @@ function DesktopSheet({
               title={t('closeTooltip')}
             >
               <ChevronRight className="h-4 w-4" />
-              <SheetTitle className="text-sm font-semibold">{t('close')}</SheetTitle>
+              <SheetTitle className="text-sm font-semibold">
+                {t('close')}
+              </SheetTitle>
             </Button>
           </div>
 
@@ -276,6 +452,7 @@ function DesktopSheet({
                 isSelected={currentBlock === block.value}
                 onSelect={onBlockSelect}
                 blockVariantLimit={blockVariantLimit}
+                isPulsing={pulsingBlock === block.value}
               />
             ))}
           </div>
@@ -285,6 +462,8 @@ function DesktopSheet({
             hasUnsavedChanges={hasUnsavedChanges}
             isSaving={isSaving}
             configHasProBlocks={configHasProBlocks}
+            heroEnabled={heroEnabled}
+            hasPublishedOnce={hasPublishedOnce}
             onPublish={onPublish}
           />
         </SheetContent>
@@ -302,6 +481,7 @@ interface BlockListItemProps {
   isSelected: boolean;
   onSelect: (blockValue: string) => void;
   blockVariantLimit?: number;
+  isPulsing?: boolean;
 }
 
 const BlockListItem = memo(function BlockListItem({
@@ -309,6 +489,7 @@ const BlockListItem = memo(function BlockListItem({
   isSelected,
   onSelect,
   blockVariantLimit = 3,
+  isPulsing = false,
 }: BlockListItemProps) {
   const t = useTranslations('studio.drawer');
   const isPro = isProBlock(block.value, blockVariantLimit);
@@ -321,28 +502,33 @@ const BlockListItem = memo(function BlockListItem({
     <button
       onClick={handleClick}
       className={cn(
-        'w-full h-14 px-4 flex items-center justify-between border-b transition-colors',
+        'w-full h-14 px-4 flex items-center justify-between border-b transition-all duration-200',
         isSelected
           ? 'bg-primary/10 border-primary/20'
-          : 'hover:bg-muted/50 border-border'
+          : 'hover:bg-muted/50 border-border',
+        isPulsing && 'animate-pulse bg-primary/5 ring-2 ring-primary/30 ring-inset',
       )}
     >
-      <span className="text-sm font-medium text-left">{block.label}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-sm font-medium text-left truncate">
+          {block.label}
+        </span>
+        {isPulsing && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shrink-0 animate-bounce">
+            <Sparkles className="h-2.5 w-2.5" />
+            {t('startHere')}
+          </span>
+        )}
+      </div>
 
       <div className="flex items-center gap-2 ml-2 shrink-0">
         {isPro && (
-          <span className="flex items-center gap-1 text-xs font-medium
-                           text-amber-600 dark:text-amber-400
-                           bg-amber-50 dark:bg-amber-950/40
-                           border border-amber-200 dark:border-amber-800
-                           rounded-full px-2 py-0.5">
+          <span className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-full px-2 py-0.5">
             <Crown className="h-3 w-3" />
             {t('proBadge')}
           </span>
         )}
-        {isSelected && (
-          <Check className="h-4 w-4 text-primary" />
-        )}
+        {isSelected && <Check className="h-4 w-4 text-primary" />}
       </div>
     </button>
   );

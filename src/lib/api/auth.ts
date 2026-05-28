@@ -3,7 +3,15 @@ import type { Tenant } from '@/types/tenant';
 import type { LoginInput, RegisterInput, RegisterBuyerInput } from '@/types/auth';
 
 // ==========================================
-// AUTH RESPONSE TYPES
+// AUTH API SERVICE
+// File: src/lib/api/auth.ts
+//
+// [SPRINT 5] checkEmail() — cek apakah email sudah terdaftar.
+// Dipakai useCheckEmail di Step 4 register wizard sebelum Next.
+// Endpoint: GET /auth/check-email/:email
+//
+// [SPRINT 2 — A-A4 FIX: Hapus checkSlug duplikat]
+// authApi.checkSlug DIHAPUS — pakai tenantsApi.checkSlug
 // ==========================================
 
 interface AuthResponse {
@@ -16,10 +24,6 @@ interface AuthStatusResponse {
   tenant: Tenant | null;
 }
 
-// ==========================================
-// AUTH API SERVICE
-// ==========================================
-
 export const authApi = {
   login: (data: LoginInput): Promise<AuthResponse> => {
     return api.post<AuthResponse>('/auth/login', data);
@@ -29,9 +33,6 @@ export const authApi = {
     return api.post<AuthResponse>('/auth/register', data);
   },
 
-  // ── TAMBAHAN: register buyer (dialog di /discover) ────────────
-  // Hanya email + password. Role BUYER auto-set di server.
-  // Cookie fibidy_auth di-set sama seperti register seller.
   registerBuyer: (data: RegisterBuyerInput): Promise<AuthResponse> => {
     return api.post<AuthResponse>('/auth/register-buyer', data);
   },
@@ -52,7 +53,15 @@ export const authApi = {
     return api.post<AuthResponse>('/auth/refresh');
   },
 
-  checkSlug: (slug: string): Promise<{ available: boolean }> => {
-    return api.get<{ available: boolean }>(`/auth/check-slug/${slug}`);
+  // [SPRINT 5] Cek apakah email sudah terdaftar
+  // Dipakai di Step 4 register wizard sebelum user bisa Next ke Step 5
+  checkEmail: (email: string): Promise<{ email: string; available: boolean }> => {
+    return api.get<{ email: string; available: boolean }>(
+      `/auth/check-email/${encodeURIComponent(email)}`,
+      { skipCache: false },
+    );
   },
+
+  // [A-A4 FIX] checkSlug DIHAPUS dari authApi.
+  // Pakai tenantsApi.checkSlug yang return shape lebih lengkap.
 };

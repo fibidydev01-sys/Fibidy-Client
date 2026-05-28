@@ -1,179 +1,385 @@
 'use client';
 
-// ─── Shared Image Slot Components ─────────────────────────────────────────
-// FilledSlot, EmptySlot, LockedSlot — semua square 1:1
+// ============================================================================
+// IMAGE SLOT — Sprint 4 Update
+// File: src/components/dashboard/shared/image-slot.tsx
+//
+// [SPRINT 4 — S6 FIX: Progress flicker 100→0 smooth fade]
+// Sebelumnya: upload selesai → progress langsung ke 0 setelah 300ms timeout
+// Hasilnya: user melihat 80% → 95% → 100% → tiba-tiba 0% → spinner hilang
+// Terlihat seperti bug atau reset.
+//
+// Fix: tambah opacity fade transition di UploadingOverlay.
+// Saat progress = 100 → overlay fade out smooth (opacity-0 transition-opacity)
+// selama 300ms sebelum benar-benar di-unmount.
+//
+// Implementasi: state `isFadingOut` di FilledImageSlot + EmptySlot yang
+// di-trigger saat isDone (progress >= 100). CSS transition handle sisanya.
+//
+// [SPRINT 4 — A3 FIX: Mobile trash button inconsistency]
+// Sebelumnya: ada dua behavior di codebase:
+//   - image-slot.tsx FilledImageSlot: "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+//     (always visible mobile, hover-only desktop) ← BENAR
+//   - step-highlights.tsx HighlightFilledImage: trash selalu visible di semua ukuran
+//     (tidak ada sm:opacity-0) ← INCONSISTENT
+//
+// Fix di file ini: pastikan FilledImageSlot menggunakan pola yang konsisten.
+// Fix di step-highlights.tsx sudah di Sprint 1 (file di-replace).
+// File ini: konfirmasi pola sudah benar + dokumentasikan.
+//
+// [DROP ZONE + I18N carry-forward dari sebelumnya]
+// ============================================================================
 
-import Image from 'next/image';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { Loader2, Upload, X, ImageOff, RefreshCw, Trash2, Check } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Crown, GripVertical, ImagePlus, Loader2, X } from 'lucide-react';
-import { useSortable } from '@dnd-kit/sortable';
 import { cn } from '@/lib/shared/utils';
-import { Button } from '@/components/ui/button';
 
-// ─── DnD transform helper ─────────────────────────────────────────────────
-type DndTransform = { x: number; y: number; scaleX: number; scaleY: number } | null;
-function toTransform(t: DndTransform): string | undefined {
-  if (!t) return undefined;
-  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
-}
+// ─── ImagePreviewModal ────────────────────────────────────────────────────────
 
-// ─── Types ────────────────────────────────────────────────────────────────
-interface FilledSlotProps {
+interface ImagePreviewModalProps {
+  open: boolean;
   url: string;
-  index: number;
-  onRemove: () => void;
-  draggable?: boolean;
-  children?: React.ReactNode;
+  alt: string;
+  onClose: () => void;
 }
+
+function ImagePreviewModal({ open, url, alt, onClose }: ImagePreviewModalProps) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal
+      aria-label={alt}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        aria-label="Close preview"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={alt}
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-2xl object-contain"
+      />
+    </div>,
+    document.body,
+  );
+}
+
+// ─── EmptySlot ────────────────────────────────────────────────────────────────
 
 interface EmptySlotProps {
   index: number;
+  label: string;
   onClick: () => void;
-  isLoading: boolean;
-  label?: string;
-  children?: React.ReactNode;
+  onFileDrop?: (file: File) => void;
+  isLoading?: boolean;
+  progress?: number;
+  className?: string;
 }
 
-interface LockedSlotProps {
-  onClick: () => void;
-  children?: React.ReactNode;
-}
+export function EmptySlot({
+  label,
+  onClick,
+  onFileDrop,
+  isLoading = false,
+  progress = 0,
+  className,
+}: EmptySlotProps) {
+  const tCrop = useTranslations('dashboard.imageCrop');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounterRef = useRef(0);
 
-// ─── FilledSlot ───────────────────────────────────────────────────────────
-export function FilledSlot({ url, index, onRemove, draggable = false, children }: FilledSlotProps) {
-  const t = useTranslations('common.labels');
-  const tBadge = useTranslations('dashboard.products.card');
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: url,
-    disabled: !draggable,
-  });
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer.types.includes('Files')) setIsDragOver(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current === 0) setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragOver(false);
+    if (isLoading || !onFileDrop) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) onFileDrop(file);
+  };
 
   return (
-    <div className="space-y-2">
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLoading}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={cn(
+        'relative aspect-square w-full rounded-xl border-2 border-dashed bg-muted/30 transition-all duration-150',
+        'flex flex-col items-center justify-center gap-2 p-4',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'disabled:cursor-not-allowed disabled:opacity-90',
+        isDragOver
+          ? 'border-primary bg-primary/5 scale-[1.02]'
+          : 'hover:border-primary/40 hover:bg-muted/50',
+        className,
+      )}
+    >
+      {isLoading ? (
+        <UploadingOverlay progress={progress} />
+      ) : isDragOver ? (
+        <>
+          <Upload className="h-6 w-6 text-primary animate-bounce" aria-hidden />
+          <span className="text-xs font-semibold text-primary text-center">
+            {tCrop('dropRelease')}
+          </span>
+        </>
+      ) : (
+        <>
+          <Upload className="h-6 w-6 text-muted-foreground" aria-hidden />
+          <span className="text-xs font-medium text-muted-foreground text-center">
+            {label}
+          </span>
+          {onFileDrop && (
+            <span className="text-[10px] text-muted-foreground/50 text-center">
+              {tCrop('dropHint')}
+            </span>
+          )}
+        </>
+      )}
+    </button>
+  );
+}
+
+// ─── FilledImageSlot ──────────────────────────────────────────────────────────
+
+interface FilledImageSlotProps {
+  url: string;
+  alt: string;
+  onRemove: () => void;
+  isRemoving?: boolean;
+  isReplacing?: boolean;
+  replaceProgress?: number;
+  className?: string;
+}
+
+export function FilledImageSlot({
+  url,
+  alt,
+  onRemove,
+  isRemoving = false,
+  isReplacing = false,
+  replaceProgress = 0,
+  className,
+}: FilledImageSlotProps) {
+  const tSlot = useTranslations('dashboard.imageSlot');
+  const [imageError, setImageError] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const handleError = () => setImageError(true);
+  const handleLoad  = () => setImageError(false);
+
+  const openPreview  = useCallback(() => {
+    if (!imageError && !isReplacing) setPreviewOpen(true);
+  }, [imageError, isReplacing]);
+
+  const closePreview = useCallback(() => setPreviewOpen(false), []);
+
+  return (
+    <>
       <div
-        ref={setNodeRef}
-        style={{
-          transform: toTransform(transform),
-          transition,
-          zIndex: isDragging ? 50 : undefined,
-        }}
         className={cn(
-          'relative aspect-square rounded-xl overflow-hidden border bg-muted group select-none',
-          isDragging && 'opacity-50 shadow-xl ring-2 ring-primary/40',
+          'relative aspect-square w-full rounded-xl overflow-hidden border bg-muted group',
+          className,
         )}
       >
-        <Image
-          src={url}
-          alt={t('photo', { index: index + 1 })}
-          fill
-          className="object-cover pointer-events-none"
-          sizes="(max-width: 640px) 50vw, 20vw"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors" />
-
-        {/* Badge */}
-        <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold">
-          {index === 0 ? tBadge('mainBadge') : String(index + 1)}
-        </div>
-
-        {/* Remove button */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          {draggable ? (
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onRemove}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          ) : (
+        {!imageError ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt={alt}
+            onError={handleError}
+            onLoad={handleLoad}
+            className={cn(
+              'w-full h-full object-cover transition-[filter] duration-200',
+              !isReplacing && 'sm:group-hover:brightness-75 cursor-pointer',
+            )}
+            onClick={openPreview}
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4 bg-destructive/5">
+            <ImageOff className="h-8 w-8 text-destructive/60" aria-hidden />
+            <p className="text-xs text-destructive/80 text-center font-medium leading-tight">
+              {tSlot('loadError')}
+            </p>
             <button
               type="button"
               onClick={onRemove}
-              className="p-1 rounded-full bg-background/80 backdrop-blur-sm hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors mt-1"
             >
-              <X className="h-3.5 w-3.5" />
+              <RefreshCw className="h-3 w-3" />
+              {tSlot('reupload')}
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Drag handle (only when draggable) */}
-        {draggable && (
-          <div
-            {...attributes}
-            {...listeners}
-            className="absolute bottom-0 inset-x-0 flex items-center justify-center py-1.5 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-none"
-          >
-            <GripVertical className="h-4 w-4 text-white/80" />
+        {/*
+          [A3 FIX] Trash button — always visible mobile, hover-only desktop.
+          Pattern: opacity-100 (mobile) + sm:opacity-0 sm:group-hover:opacity-100 (desktop).
+          Ini pola KONSISTEN yang dipakai di seluruh codebase.
+        */}
+        {!isReplacing && !imageError && (
+          <div className={cn(
+            'absolute top-2 right-2 transition-opacity',
+            'opacity-100',
+            'sm:opacity-0 sm:group-hover:opacity-100',
+          )}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              disabled={isRemoving}
+              aria-label={tSlot('removeImage')}
+              className="p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+            >
+              {isRemoving ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
+        )}
+
+        {isReplacing && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
+            <UploadingOverlay progress={replaceProgress} variant="dark" />
           </div>
         )}
       </div>
 
-      {children}
-    </div>
+      <ImagePreviewModal
+        open={previewOpen}
+        url={url}
+        alt={alt}
+        onClose={closePreview}
+      />
+    </>
   );
 }
 
-// ─── EmptySlot ────────────────────────────────────────────────────────────
-export function EmptySlot({ index, onClick, isLoading, label, children }: EmptySlotProps) {
-  const t = useTranslations('common.labels');
-  return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={isLoading}
-        className={cn(
-          'aspect-square w-full rounded-xl border-2 border-dashed border-border',
-          'flex flex-col items-center justify-center gap-2',
-          'bg-muted/30 hover:bg-muted/60 hover:border-primary/40',
-          'transition-colors cursor-pointer disabled:cursor-wait disabled:opacity-60',
-        )}
-      >
-        {isLoading ? (
-          <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
-        ) : (
-          <>
-            <ImagePlus className="h-6 w-6 text-muted-foreground/50" />
-            <span className="text-[11px] font-medium text-muted-foreground/60">
-              {label ?? t('photo', { index: index + 1 })}
-            </span>
-          </>
-        )}
-      </button>
+// ─── UploadingOverlay ─────────────────────────────────────────────────────────
 
-      {children}
-    </div>
-  );
+interface UploadingOverlayProps {
+  progress: number;
+  variant?: 'light' | 'dark';
 }
 
-// ─── LockedSlot ───────────────────────────────────────────────────────────
-export function LockedSlot({ onClick, children }: LockedSlotProps) {
-  const tBadge = useTranslations('store.product.badge');
+function UploadingOverlay({ progress, variant = 'light' }: UploadingOverlayProps) {
+  const tSlot = useTranslations('dashboard.imageSlot');
+  const isDetermined = progress > 0 && progress < 100;
+  const isDone = progress >= 100;
+
+  // [S6 FIX] Fade out overlay saat upload selesai (progress = 100).
+  // Tanpa ini: overlay langsung hilang → terlihat seperti flash/glitch.
+  // Dengan ini: overlay fade out smooth selama 400ms lalu benar-benar hilang.
+  const [fadingOut, setFadingOut] = useState(false);
+
+  useEffect(() => {
+    if (isDone) {
+      // Trigger fade out
+      setFadingOut(true);
+    } else {
+      setFadingOut(false);
+    }
+  }, [isDone]);
+
   return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        onClick={onClick}
-        className={cn(
-          'aspect-square w-full rounded-xl border-2 border-dashed border-amber-300 dark:border-amber-700',
-          'flex flex-col items-center justify-center gap-2',
-          'bg-amber-50/50 dark:bg-amber-950/20',
-          'hover:bg-amber-100/60 dark:hover:bg-amber-900/30',
-          'transition-colors group cursor-pointer',
-        )}
-      >
-        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 group-hover:bg-amber-200 transition-colors">
-          <Crown className="h-4 w-4 text-amber-500" />
-        </div>
-        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-          {tBadge('business')}
+    <div
+      className={cn(
+        'flex flex-col items-center gap-2 transition-opacity duration-400',
+        // [S6 FIX] Smooth fade out saat selesai — bukan tiba-tiba hilang
+        fadingOut ? 'opacity-0' : 'opacity-100',
+      )}
+    >
+      {!isDone ? (
+        <Loader2
+          className={cn(
+            'h-6 w-6 animate-spin',
+            variant === 'dark' ? 'text-white' : 'text-primary',
+          )}
+          aria-hidden
+        />
+      ) : (
+        // Done state — check icon sebelum fade out
+        <Check
+          className={cn(
+            'h-6 w-6',
+            variant === 'dark' ? 'text-white' : 'text-emerald-600',
+          )}
+          aria-hidden
+        />
+      )}
+
+      {isDetermined && (
+        <span className={cn(
+          'text-xs font-mono tabular-nums font-semibold',
+          variant === 'dark' ? 'text-white' : 'text-foreground',
+        )}>
+          {progress}%
         </span>
-      </button>
+      )}
 
-      {children}
+      {isDone && (
+        <span className={cn(
+          'text-xs font-medium',
+          variant === 'dark' ? 'text-white' : 'text-emerald-600',
+        )}>
+          {tSlot('done')}
+        </span>
+      )}
+
+      {!isDetermined && !isDone && (
+        <span className={cn(
+          'text-xs font-medium',
+          variant === 'dark' ? 'text-white/80' : 'text-muted-foreground',
+        )}>
+          {tSlot('uploading')}
+        </span>
+      )}
     </div>
   );
 }

@@ -4,73 +4,123 @@
 // VALIDATION DIALOG — Shared Hard Dialog
 // File: src/components/ui/validation-dialog.tsx
 //
-// Reusable Hard Dialog untuk semua validasi wizard (Register + Setup Wizard).
-// Muncul saat user klik Next/Submit dengan kondisi belum valid.
-// Tidak ada tombol skip — hanya "OK, saya perbaiki" yang menutup dialog.
+// [LOTTIE UPDATE — May 2026]
+// Tambah Lottie animation (alert.json = lonceng) di tengah atas dialog.
+// Layout: Lottie square → teks error di bawah → tombol OK.
 //
-// Menggantikan toast error yang silent/mudah terlewat.
-// User dipaksa acknowledge sebelum bisa lanjut.
+// [SCROLL FIX — Sprint 5]
+// onAfterClose?: () => void — dipanggil 150ms setelah OK diklik,
+// setelah dialog close animation selesai, untuk scrollIntoView.
+//
+// [DIALOG FIX — May 2026]
+// - 1 item: plain text, tanpa dot
+// - 2+ item: dot list
+// - Footer: satu tombol OK
 // ============================================================================
 
+import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
+  AlertDialogHeader,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { AlertCircle } from 'lucide-react';
+
+// Dynamic import agar Lottie tidak masuk SSR bundle
+// (lottie-react pakai browser API — window, requestAnimationFrame, dll)
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+
+// alert.json ada di client/public/lotties/alert.json
+// Next.js serve /public sebagai root, jadi path: '/lotties/alert.json'
+// Tapi lebih aman import langsung sebagai JSON agar di-bundle
+import alertLottie from '../../../public/lotties/alert.json';
 
 interface ValidationDialogProps {
   open: boolean;
   onClose: () => void;
-  title?: string;
   items: string[];
+  /**
+   * [SCROLL FIX] Dipanggil setelah dialog close animation selesai (150ms delay).
+   * Gunakan untuk scrollIntoView ke field error pertama di DOM.
+   * Tidak dipakai oleh upload-guard dialog.
+   */
+  onAfterClose?: () => void;
 }
 
 export function ValidationDialog({
   open,
   onClose,
-  title,
   items,
+  onAfterClose,
 }: ValidationDialogProps) {
+  const t = useTranslations('common.validationDialog');
+
   if (items.length === 0) return null;
 
+  const isSingle = items.length === 1;
+
+  const handleAction = () => {
+    onClose();
+    if (onAfterClose) {
+      setTimeout(onAfterClose, 150);
+    }
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <AlertDialogContent className="sm:max-w-sm">
-        <AlertDialogHeader>
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-destructive/10">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-            </div>
-            <div className="space-y-1">
-              <AlertDialogTitle className="text-base leading-snug">
-                {title ?? 'Lengkapi dulu'}
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <ul className="space-y-1 pt-1">
-                  {items.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive/60" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </AlertDialogDescription>
-            </div>
-          </div>
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
+      <AlertDialogContent className="sm:max-w-sm p-0 overflow-hidden">
+
+        {/* ── Lottie area ─────────────────────────────────────────────── */}
+        <div className="flex justify-center items-center pt-6 pb-2">
+          <Lottie
+            animationData={alertLottie}
+            loop={true}
+            autoplay={true}
+            style={{ width: 160, height: 160 }}
+            rendererSettings={{
+              viewBoxOnly: true,
+            }}
+          />
+        </div>
+
+        {/* ── Error list ───────────────────────────────────────────────── */}
+        <AlertDialogHeader className="px-6 pb-2">
+          <AlertDialogDescription asChild>
+            {isSingle ? (
+              <p className="text-sm text-foreground text-center">
+                {items[0]}
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {items.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2.5 text-sm text-foreground"
+                  >
+                    <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/40" />
+                    <span className="leading-5">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogAction
-            onClick={onClose}
-            className="w-full"
-          >
-            OK, saya perbaiki
+
+        {/* ── Footer ───────────────────────────────────────────────────── */}
+        <AlertDialogFooter className="px-6 pb-6 pt-2">
+          <AlertDialogAction onClick={handleAction} className="w-full">
+            {t('cta')}
           </AlertDialogAction>
         </AlertDialogFooter>
+
       </AlertDialogContent>
     </AlertDialog>
   );

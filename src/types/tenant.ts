@@ -7,6 +7,12 @@
 //
 // [PHASE C v2 — May 2026]
 // +hasPublishedOnce, +dismissedFirstProductDialog
+//
+// [RENAME — May 2026]
+// FeatureItem.icon → FeatureItem.image
+// Sebelumnya field bernama `icon` — ambigu (orang assume SVG/icon kecil).
+// Padahal field ini adalah full feature image URL (Unsplash photo, Cloudinary JPEG).
+// Rename ke `image` agar semantik jelas. DB migration: migrate-icon-to-image.sql
 
 import type { TenantLandingConfig } from './landing';
 
@@ -29,7 +35,8 @@ export interface SocialLinks {
 }
 
 export interface FeatureItem {
-  icon?: string;
+  /** Full feature image URL — Unsplash photo or Cloudinary JPEG upload */
+  image?: string;
   title: string;
   description: string;
 }
@@ -65,27 +72,20 @@ interface BaseTenant {
   createdAt: string;
 }
 
-// ── Dashboard tenant (full private access) ────────────────────────────────────
 export interface Tenant extends BaseTenant {
   updatedAt?: string;
   isSetupComplete: boolean;
   setupCompletedAt?: string | null;
   hasPublishedOnce?: boolean;
   dismissedFirstProductDialog?: boolean;
-  // [PHASE D] EDU mode — true jika seller register sebagai Pelajar
-  // Tidak ada di UpdateTenantInput — hanya BE yang bisa set
   isEduMode?: boolean;
 }
 
-// ── Storefront tenant (public access) ────────────────────────────────────────
-// [PHASE D] isEduMode diperlukan storefront untuk render EduBanner
 export interface PublicTenant extends BaseTenant {
   _count?: { products: number };
   isEduMode?: boolean;
 }
 
-// ── Update input ──────────────────────────────────────────────────────────────
-// isEduMode TIDAK ada di sini — hanya admin atau dedicated upgrade endpoint
 export interface UpdateTenantInput {
   name?: string;
   description?: string;
@@ -111,7 +111,6 @@ export interface UpdateTenantInput {
   dismissedFirstProductDialog?: boolean;
 }
 
-// ── Complete setup input (wizard submit) ──────────────────────────────────────
 export interface CompleteSetupInput {
   logo: string;
   primaryColor: string;
@@ -138,7 +137,6 @@ export interface UpgradeToSellerInput {
   whatsapp: string;
 }
 
-// ── Settings form data shapes ─────────────────────────────────────────────────
 export interface HeroFormData {
   name: string;
   description: string;

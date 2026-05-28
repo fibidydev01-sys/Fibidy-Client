@@ -4,15 +4,24 @@
 // DASHBOARD SIDEBAR (desktop)
 // File: src/components/layout/dashboard/dashboard-sidebar.tsx
 //
-// [PHASE D — May 2026]
-// - Render EduBadge di bawah nama toko jika tenant.isEduMode === true
-// - Filter nav items: EDU seller tidak lihat Subscription + Onboard menu
+// [SETUP HIGHLIGHT — May 2026]
+// Saat user klik nav item yang locked (requiresSetup + !isSetupComplete):
+//   1. MandatoryDialog muncul
+//   2. User klik "Continue Setup"
+//   3. Jika user SUDAH di /dashboard/setup-store:
+//      → dispatch CustomEvent 'setup:highlight'
+//      → wizard mendengar event → highlight + scroll field kosong step saat ini
+//   4. Jika user BELUM di /dashboard/setup-store:
+//      → router.push ke setup-store
+//      → wizard mount fresh (state awal step 1)
 //
-// [PHASE 3] Digital-related nav items conditional on FEATURES.digitalProducts
+// Dengan begini: user yang sudah di step 2 dan coba navigate tetap di step 2,
+// field kosong di-highlight, tidak reset ke step 1.
 // ============================================================================
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
@@ -21,6 +30,8 @@ import {
   BookOpen,
   Store,
   History,
+  CreditCard,
+  ShieldCheck,
   LogOut,
   type LucideIcon,
 } from 'lucide-react';
@@ -36,49 +47,70 @@ import {
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
 import { FEATURES } from '@/lib/config/features';
-import { EduBadge } from './edu-badge';
+import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
 
 interface NavItem {
   titleKey: string;
   href: string;
   icon: LucideIcon;
+  hideForEdu?: boolean;
+  requiresSetup?: boolean;
 }
 
-// ── SELLER nav items ──
 const sellerNavItems: NavItem[] = [
-  { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard },
-  { titleKey: 'studio', href: '/dashboard/studio', icon: Layout },
+  { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard, requiresSetup: true },
+  { titleKey: 'studio', href: '/dashboard/studio', icon: Layout, requiresSetup: true },
   ...(FEATURES.digitalProducts
     ? [
-        { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History },
-        { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
-      ]
+      { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History, requiresSetup: true },
+      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen, requiresSetup: true },
+    ]
+    : []),
+  { titleKey: 'subscription', href: '/dashboard/subscription', icon: CreditCard, hideForEdu: true, requiresSetup: true },
+  ...(FEATURES.digitalProducts
+    ? [{ titleKey: 'onboard', href: '/dashboard/onboard', icon: ShieldCheck, hideForEdu: true, requiresSetup: true }]
     : []),
 ];
 
-// ── SELLER nav items for EDU mode (filter out subscription/onboard) ──
-// Subscription is in Settings → filtered at settings level
-// Main nav items stay the same for EDU
-
-// ── BUYER nav items ──
 const buyerNavItems: NavItem[] = FEATURES.digitalProducts
   ? [
-      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
-      { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
-    ]
+    { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
+    { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
+  ]
   : [
-      { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
-    ];
+    { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
+  ];
+
+// ─── Helper ───────────────────────────────────────────────────────────────────
+
+function stripLocalePrefix(pathname: string): string {
+  const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
+  if (!match) return pathname;
+  return match[2] || '/';
+}
+
+function isSetupStorePath(pathname: string): boolean {
+  return stripLocalePrefix(pathname).startsWith('/dashboard/setup-store');
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function DashboardSidebar() {
   const t = useTranslations('dashboard.nav');
+  const tGate = useTranslations('dashboard.setupStore.setupGateDialog');
   const pathname = usePathname();
+  const router = useRouter();
   const tenant = useAuthStore((s) => s.tenant);
   const { logout } = useLogout();
 
+  const [gateOpen, setGateOpen] = useState(false);
+
   const isSeller = tenant?.role === 'SELLER';
   const isEdu = isSeller && tenant?.isEduMode === true;
-  const navItems = isSeller ? sellerNavItems : buyerNavItems;
+  const isSetupDone = tenant?.isSetupComplete ?? true;
+
+  const rawNavItems = isSeller ? sellerNavItems : buyerNavItems;
+  const navItems = rawNavItems.filter((item) => !(isEdu && item.hideForEdu));
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -92,63 +124,103 @@ export function DashboardSidebar() {
     return pathname.startsWith(href);
   };
 
-  return (
-    <Sidebar collapsible="icon">
-      <SidebarContent className="flex flex-col justify-center">
-        <SidebarGroup>
-          {/* Store name + EDU badge */}
-          {tenant?.name && (
-            <div className="px-2 py-2 space-y-1">
-              <p className="text-xs font-semibold text-muted-foreground truncate">
-                {tenant.name}
-              </p>
-              {/* [PHASE D] EDU badge — hanya tampil jika isEduMode */}
-              {isEdu && <EduBadge />}
-            </div>
-          )}
+  const isLocked = (item: NavItem) => isSeller && !isSetupDone && !!item.requiresSetup;
 
+  // [SETUP HIGHLIGHT] Handler saat user klik "Continue Setup" di dialog
+  const handleContinueSetup = () => {
+    setGateOpen(false);
+
+    if (isSetupStorePath(pathname)) {
+      // User sudah di setup-store — jangan navigate, cukup highlight field kosong
+      // Dispatch event → seller-setup-wizard.tsx mendengar dan trigger highlight
+      window.dispatchEvent(new CustomEvent('setup:highlight'));
+    } else {
+      // User belum di setup-store — navigate ke sana
+      router.push('/dashboard/setup-store');
+    }
+  };
+
+  return (
+    <>
+      <Sidebar collapsible="icon">
+        <SidebarContent className="flex flex-col justify-center">
+          <SidebarGroup>
+            <SidebarMenu>
+              {navItems.map((item) => {
+                const locked = isLocked(item);
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    {locked ? (
+                      <SidebarMenuButton
+                        onClick={() => setGateOpen(true)}
+                        className="opacity-50 cursor-pointer"
+                        isActive={false}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span>{t(item.titleKey)}</span>
+                      </SidebarMenuButton>
+                    ) : (
+                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                        <Link href={item.href}>
+                          <item.icon className="h-5 w-5" />
+                          <span>{t(item.titleKey)}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    )}
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                  <Link href={item.href}>
-                    <item.icon className="h-5 w-5" />
-                    <span>{t(item.titleKey)}</span>
-                  </Link>
+            {isSeller ? (
+              <SidebarMenuItem>
+                {!isSetupDone ? (
+                  <SidebarMenuButton
+                    onClick={() => setGateOpen(true)}
+                    className="opacity-50 cursor-pointer"
+                    isActive={false}
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>{t('settings')}</span>
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
+                    <Link href="/dashboard/settings">
+                      <Settings className="h-5 w-5" />
+                      <span>{t('settings')}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
+              </SidebarMenuItem>
+            ) : (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => logout()}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>{t('signOut')}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            ))}
+            )}
           </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
+        </SidebarFooter>
+      </Sidebar>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          {isSeller ? (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/dashboard/settings')}
-              >
-                <Link href="/dashboard/settings">
-                  <Settings className="h-5 w-5" />
-                  <span>{t('settings')}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ) : (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={() => logout()}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <LogOut className="h-5 w-5" />
-                <span>{t('signOut')}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+      <MandatoryDialog
+        open={gateOpen}
+        title={tGate('title')}
+        description={tGate('description')}
+        primaryCta={{
+          label: tGate('cta'),
+          onClick: handleContinueSetup,
+          showArrow: true,
+        }}
+      />
+    </>
   );
 }

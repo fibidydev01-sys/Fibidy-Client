@@ -1,5 +1,24 @@
 'use client';
 
+// ============================================================================
+// AUTH GUARD
+// File: src/components/layout/auth/auth-guard.tsx
+//
+// [SPRINT 1 — R1 FIX: AuthGuard race on unmount]
+// Tambah `mounted` variable di useAuthCheck untuk guard setState setelah
+// komponen unmount. Tanpa ini, React 18 warn di dev mode dan potensi
+// memory leak + state inconsistency jika user navigasi cepat.
+//
+// Fix pattern:
+//   let mounted = true;
+//   const run = async () => {
+//     try { ... } finally {
+//       if (mounted) setChecked(true);
+//     }
+//   };
+//   return () => { mounted = false; };
+// ============================================================================
+
 import { useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -8,8 +27,6 @@ import { authApi } from '@/lib/api/auth';
 
 // ==========================================
 // useAuthCheck — shared internal hook
-// Called in AuthGuard and GuestGuard
-// Check session with server once on mount
 // ==========================================
 
 function useAuthCheck() {
@@ -23,18 +40,33 @@ function useAuthCheck() {
 
     hasCheckedRef.current = true;
 
+    // [R1 FIX] Track mounted state untuk guard async setState
+    let mounted = true;
+
     const run = async () => {
       try {
         const response = await authApi.status();
+        // [R1 FIX] Cek mounted sebelum setState — komponen mungkin sudah unmount
+        if (!mounted) return;
         setTenant(response.authenticated && response.tenant ? response.tenant : null);
       } catch {
+        // [R1 FIX] Cek mounted sebelum setState
+        if (!mounted) return;
         setTenant(null);
       } finally {
-        setChecked(true);
+        // [R1 FIX] Cek mounted sebelum setState
+        if (mounted) {
+          setChecked(true);
+        }
       }
     };
 
     run();
+
+    // [R1 FIX] Cleanup: set mounted = false saat komponen unmount
+    return () => {
+      mounted = false;
+    };
   }, [isHydrated, isChecked, setTenant, setChecked]);
 }
 

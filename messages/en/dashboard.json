@@ -4,7 +4,51 @@
       "badge": "Student Mode",
       "sidebar": {
         "tooltip": "This is a simulation account. Subscription and payment features are not available."
+      },
+      "banner": {
+        "text": "You're in Student Mode — this store is for learning simulation only. Subscription and payment features are disabled.",
+        "learnMore": "Learn more"
+      },
+      "restricted": {
+        "subscription": {
+          "title": "Not available in Student Mode",
+          "description": "Your account is a learning simulation. Subscription plans aren't available here, but everything else works just like the real thing.",
+          "featureName": "Subscription plans"
+        },
+        "onboard": {
+          "title": "Not available in Student Mode",
+          "description": "Your account is a learning simulation. Identity verification isn't required — you can practice the full seller flow without it.",
+          "featureName": "Identity verification"
+        },
+        "generic": {
+          "title": "Not available in Student Mode",
+          "description": "This feature is part of the live seller experience. Your simulation account doesn't include it.",
+          "featureName": "This feature"
+        },
+        "featureBlocked": "Blocked: {feature}",
+        "backToProducts": "Back to Products",
+        "contactAdmin": "Contact admin",
+        "contactUrl": "https://guide.fibidy.com/edu/upgrade",
+        "learnMoreLink": "Learn more about Student Mode"
       }
+    },
+    "imageCrop": {
+      "title": "Crop Image",
+      "hint": "Drag to pan · Scroll or pinch to zoom",
+      "processing": "Processing...",
+      "uploading": "Uploading...",
+      "confirm": "Crop & Use",
+      "cancel": "Cancel",
+      "dropRelease": "Release to upload",
+      "dropHint": "or drag a file here"
+    },
+    "imageSlot": {
+      "uploading": "Uploading…",
+      "done": "Done",
+      "loadError": "Image could not be loaded",
+      "reupload": "Re-upload",
+      "removeImage": "Remove image",
+      "uploadImage": "Upload image"
     },
     "metadata": {
       "productsTitle": "Products",
@@ -31,19 +75,31 @@
       "sell": "Sell",
       "discover": "Discover",
       "signOut": "Sign out",
-      "logout": "Logout"
+      "logout": "Logout",
+      "onboard": "Verification"
     },
     "products": {
       "title": "Products",
       "newButton": "New product",
       "addButton": "Add",
-      "empty": "No products yet.",
-      "emptyHint": "Click \"Add Product\" to start selling.",
+      "empty": "No products yet",
+      "emptyHint": "Add your first product to start selling.",
+      "emptyGuideLink": "Learn how to list products",
+      "emptyReopenDialog": "Need help adding your first product?",
       "firstProductDialog": {
-        "title": "Your storefront is live! 🎉",
-        "description": "Now let's add your first product so customers can start ordering. It only takes a minute.",
+        "title": "Ready to list your first product? 🎉",
+        "description": "Your store is set up. Add a product so customers can start ordering.",
         "addNow": "Add first product",
         "later": "Later"
+      },
+      "welcomeDialog": {
+        "title": "Time to stock your store! 🛍️",
+        "step1": "Add a product name and set your price",
+        "step2": "Upload a cover photo (optional but recommended)",
+        "step3": "Publish — your product goes live instantly",
+        "hint": "Customers can browse and order via WhatsApp — no checkout needed.",
+        "cta": "Add My First Product",
+        "later": "I'll do this later"
       },
       "card": {
         "draft": "Draft",
@@ -106,18 +162,22 @@
           "categoryHeadingCreateNew": "Create new",
           "categoryCreateOption": "Create \"{query}\"",
           "nameLabel": "Product name",
-          "nameRequired": "*",
+          "nameRequired": "Product name is required.",
           "namePlaceholder": "Give your product an inviting name",
           "descriptionLabel": "Description",
           "descriptionPlaceholder": "Tell buyers what makes this special — what they get, why they'll love it",
           "descriptionHelper": "A clear, honest description helps buyers feel confident.",
           "priceLabel": "Price (IDR)",
-          "priceRequired": "*",
+          "priceRequired": "Please enter a price of at least Rp 1.000.",
           "pricePlaceholder": "50000",
           "priceHelper": "Set in Rupiah. Buyers pay through Stripe and settlement is in IDR.",
           "comparePriceLabel": "Compare-at price",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Original price before discount — shown with a strikethrough. Leave empty if not on sale."
+        },
+        "validation": {
+          "nameRequired": "Product name is required — at least 2 characters.",
+          "priceRequired": "Please set a selling price of at least Rp 1.000."
         },
         "upload": {
           "editModeNote": "Product file — the file cannot be changed after upload. Delete the product and create a new one if you need to replace the file.",
@@ -216,6 +276,13 @@
           "ip": "IP"
         },
         "dash": "—"
+      },
+      "fetchError": {
+        "title": "Failed to load products",
+        "description": "We couldn't retrieve your products right now.",
+        "hint": "This is usually a temporary issue. Your products are safe.",
+        "retry": "Try again",
+        "retrying": "Retrying..."
       }
     },
     "library": {
@@ -309,7 +376,7 @@
       "plans": {
         "FREE": {
           "name": "Free",
-          "price": "Gratis",
+          "price": "Free",
           "priceNote": "Forever free",
           "features": [
             "5 products",
@@ -410,6 +477,11 @@
     "setupStore": {
       "title": "Start Selling",
       "subtitle": "Set up your store in a few steps",
+      "setupGateDialog": {
+        "title": "Complete your store setup first",
+        "description": "Your storefront needs to be set up before you can access this feature. It only takes a few minutes.",
+        "cta": "Continue Setup"
+      },
       "steps": {
         "category": {
           "title": "Business Type",
@@ -496,26 +568,37 @@
           "logoGenerateOr": "or",
           "logoGenerateSuccess": "Logo generated and uploaded",
           "logoGenerateFailed": "Failed to generate logo. Try uploading instead.",
+          "logoRequired": "Please upload a store logo or generate one",
           "colorLabel": "Brand Color",
           "colorHelper": "Used for buttons, links, and accents across your store.",
+          "colorRequired": "Please pick a brand color",
           "heroBgLabel": "Hero Background",
           "heroBgHelper": "Big image at the top of your store. Landscape orientation works best.",
-          "uploadHeroBg": "Upload Background"
+          "uploadHeroBg": "Upload Background",
+          "heroBgRequired": "Please upload a hero background image"
         },
         "story": {
           "heroTitleLabel": "Headline",
           "heroTitlePlaceholder": "Welcome to my store",
           "heroTitleHelper": "The first thing visitors read. Keep it short and punchy (5–200 chars).",
+          "heroTitleRequired": "Headline is too short (min. 5 characters)",
           "heroSubtitleLabel": "Tagline",
           "heroSubtitlePlaceholder": "Tell visitors what you offer in one clear sentence",
           "heroSubtitleHelper": "Support the headline — describe what you do or sell (10–300 chars).",
+          "heroSubtitleRequired": "Tagline is too short (min. 10 characters)",
           "heroCtaLabel": "Button Text",
           "heroCtaPlaceholder": "Shop Now",
-          "heroCtaHelper": "Max 2 words, 15 characters. Examples: Shop Now, Order Here, Get Started."
+          "heroCtaHelper": "Max 2 words, 15 characters. Examples: Shop Now, Order Here, Get Started.",
+          "heroCtaRequired": "Button text is too short (min. 2 characters)"
         },
         "highlights": {
           "intro": "Pick 3 things that make your store stand out. These appear on your homepage as feature cards.",
-          "iconLabel": "Icon {index}",
+          "imageLabel": "Image",
+          "imageRequired": "Please upload an image for this highlight",
+          "titleLabel": "Title",
+          "titleRequired": "Title is too short (min. 2 characters)",
+          "descriptionLabel": "Description",
+          "descriptionRequired": "Description is too short (min. 10 characters)",
           "titlePlaceholder": "e.g. Fresh Daily",
           "descriptionPlaceholder": "e.g. Sourced every morning from local farms"
         },
@@ -524,20 +607,25 @@
           "contactTitleLabel": "Section Title",
           "contactTitlePlaceholder": "Visit Us",
           "contactTitleHelper": "Heading for the contact section on your store page.",
+          "contactTitleRequired": "Section title is too short (min. 3 characters)",
           "contactSubtitleLabel": "Section Subtitle",
           "contactSubtitlePlaceholder": "Drop by anytime, we're open Mon–Sat",
+          "contactSubtitleRequired": "Section subtitle is too short (min. 5 characters)",
           "reachOutHeading": "Reach Out",
           "phoneLabel": "Phone Number",
           "phonePlaceholder": "+62 21 1234 5678",
+          "phoneRequired": "Phone number is required",
           "whatsappReadonly": "WhatsApp (from registration)",
           "whatsappReadonlyHelper": "Your WhatsApp is already saved. Update it in Settings → Contact.",
           "whereWeAreHeading": "Where We Are",
           "addressLabel": "Full Address",
           "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
           "addressOptional": "(optional)",
+          "addressRequired": "Address is too short (min. 10 characters)",
           "hasPhysicalLocationLabel": "Do you have a physical location?",
           "hasPhysicalLocationHelper": "Turn off if you only serve online or by appointment.",
           "mapLabel": "Map location",
+          "mapRequired": "Please set your location — use the button or paste a map URL",
           "geoUseMyLocation": "📍 Use my current location",
           "geoLocating": "Getting your location...",
           "geoSuccess": "Location captured",
@@ -548,8 +636,8 @@
           "geoQuickstartNote": "We'll generate an embed map from these coordinates. You can upgrade to a Google Business Profile later in Settings.",
           "onlineNote": "Your business is online-only — no physical address needed. Customers reach you via the contact form and your social links.",
           "mapUrlLabel": "Google Maps Embed URL",
-          "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
-          "mapUrlHelper": "Open Google Maps → Share → Embed → copy the",
+          "mapUrlPlaceholder": "Paste Google Maps embed URL or iframe code here",
+          "mapUrlHelper": "Paste the embed URL from Google Maps. We extract it automatically.",
           "mapPreviewLabel": "Map Preview",
           "mapPreviewEmpty": "Paste a Google Maps embed URL above to preview",
           "mapUrlInvalidHint": "Paste the full embed URL starting with https://www.google.com/maps/embed"
@@ -575,18 +663,15 @@
         },
         "done": {
           "title": "Setup complete! 🎉",
-          "heading": "Your store is live! 🎉",
-          "subtitle": "Your store is ready. Next, design your storefront layout in Studio — then add your first products.",
-          "subheading": "Start adding products so customers can discover you.",
-          "ctaBuildStore": "Build your storefront",
-          "ctaAddProduct": "Add First Product",
-          "ctaViewStore": "Preview Store",
+          "subtitle": "Your store is ready. Next, choose your storefront look in Studio — then publish.",
+          "ctaBuildStore": "Choose Your Store Look",
           "ctaPreview": "Preview store",
-          "helpFooter": "Need help? Visit our help center anytime from the dashboard.",
+          "helpFooter": "Need help? Visit guide.fibidy.com anytime.",
           "goToStudioDialog": {
-            "title": "Next up: Design your storefront",
-            "description": "You'll land in Studio where you can pick a layout and customize how your store looks. It only takes a minute.",
-            "cta": "Go to Studio"
+            "title": "One more step!",
+            "description": "Pick your store layout in Studio, then publish — your store goes live instantly. Takes 1-2 minutes.",
+            "cta": "Go to Studio",
+            "ctaPreview": "Preview store first"
           }
         },
         "errors": {
@@ -605,7 +690,10 @@
           "mapRequired": "Please set your location — use the button or paste a map URL",
           "contactTitleMin": "Section title is too short (min 3 characters)",
           "contactSubtitleMin": "Section subtitle is too short (min 5 characters)",
-          "atLeastOneSocial": "Add at least one social link to continue"
+          "atLeastOneSocial": "Add at least one social link to continue",
+          "uploadInProgress": "Please wait, image upload is still in progress. Wait until it finishes before continuing.",
+          "uploadInProgressCount": "Please wait, {count} images are still uploading. Wait until all uploads finish before continuing.",
+          "offlineSubmit": "You're offline. Check your connection and try again."
         }
       }
     },

@@ -4,6 +4,12 @@
       "text": "This store was created for learning simulation. Products are not available for purchase.",
       "learnMore": "Learn more"
     },
+    "eduOrder": {
+      "title": "Simulation Store",
+      "description": "This store is in Student Mode — it's a learning simulation only. Orders cannot be placed here.",
+      "understood": "Got it",
+      "learnMore": "Learn about Student Mode"
+    },
     "metadata": {
       "notFoundTitle": "Store Not Found",
       "notFoundDescription": "The store you are looking for does not exist or is no longer active.",
@@ -134,6 +140,7 @@
       },
       "askSellerWhatsapp": "Ask Seller via WhatsApp",
       "orderWhatsapp": "Order via WhatsApp",
+      "simulateOrder": "Simulate Order",
       "orderDialog": {
         "titleGeneric": "Order via WhatsApp",
         "titleAskSeller": "Ask Seller via WhatsApp",

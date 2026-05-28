@@ -1,20 +1,14 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // STEP STORE INFO
 // File: src/components/auth/register/step-store-info.tsx
 //
-// [PHASE C UX FIX — May 2026]
-// Accepts isChecking + isAvailable props from parent (register.tsx).
-// Parent owns the slug-check state so it can drive the Next button's
-// disabled state in real-time.
-//
-// Previously: this component owned useCheckSlug() locally → parent
-// didn't know when slug was unavailable → user clicked Next on bad
-// slug → backend rejected → confusing.
-//
-// Now: parent's useCheckSlug() state is single source of truth.
-// ==========================================
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// - Tambah props fieldErrors + onClearFieldError
+// - Field name + slug highlight merah saat ada error
+// - Merah hilang saat user mulai ketik
+// ============================================================================
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -22,15 +16,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Check, X, Info } from 'lucide-react';
+import { cn } from '@/lib/shared/utils';
 
 interface StepStoreInfoProps {
   name: string;
   slug: string;
   description: string;
   onUpdate: (data: { name?: string; slug?: string; description?: string }) => void;
-  /** [PHASE C UX FIX] Slug check state from parent */
   isChecking: boolean;
   isAvailable: boolean | null;
+  // [SPRINT 5]
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 export function StepStoreInfo({
@@ -40,11 +37,17 @@ export function StepStoreInfo({
   onUpdate,
   isChecking,
   isAvailable,
+  fieldErrors = new Set(),
+  onClearFieldError,
 }: StepStoreInfoProps) {
   const t = useTranslations('auth.register.storeInfo');
   const [hasManuallyEditedSlug, setHasManuallyEditedSlug] = useState(false);
 
+  const hasNameError = fieldErrors.has('name');
+  const hasSlugError = fieldErrors.has('slug');
+
   const handleNameChange = (value: string) => {
+    if (hasNameError) onClearFieldError?.('name');
     if (!hasManuallyEditedSlug) {
       const generated = value
         .toLowerCase()
@@ -58,6 +61,7 @@ export function StepStoreInfo({
   };
 
   const handleSlugChange = (value: string) => {
+    if (hasSlugError) onClearFieldError?.('slug');
     const cleaned = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
     setHasManuallyEditedSlug(true);
     onUpdate({ slug: cleaned });
@@ -67,12 +71,19 @@ export function StepStoreInfo({
     onUpdate({ description: value });
   };
 
+  const nameTooShort = name.length > 0 && name.trim().length < 3;
+  const slugTooShort = slug.length > 0 && slug.length < 3;
+  const showAvailability = slug.length >= 3;
+
   return (
     <div className="space-y-5 max-w-md">
 
       {/* Store Name */}
       <div className="space-y-1.5">
-        <Label htmlFor="store-name" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        <Label
+          htmlFor="store-name"
+          className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
+        >
           {t('nameLabel')}
         </Label>
         <Input
@@ -80,18 +91,34 @@ export function StepStoreInfo({
           placeholder={t('namePlaceholder')}
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
-          className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
+          className={cn(
+            'h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
+            hasNameError && 'border-destructive focus-visible:ring-destructive',
+          )}
         />
-        <p className="text-xs text-muted-foreground">
-          {t('nameHelper')}
-        </p>
+        {hasNameError ? (
+          <p className="text-xs text-destructive font-medium">
+            {t('nameRequired')}
+          </p>
+        ) : nameTooShort ? (
+          <p className="text-xs text-muted-foreground">
+            {t('nameMinLength')}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {t('nameHelper')}
+          </p>
+        )}
       </div>
 
       <div className="border-t max-w-md" />
 
-      {/* Store URL */}
+      {/* Store URL / Slug */}
       <div className="space-y-1.5">
-        <Label htmlFor="store-slug" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        <Label
+          htmlFor="store-slug"
+          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+        >
           {t('slugLabel')}
         </Label>
         <div className="relative">
@@ -100,9 +127,12 @@ export function StepStoreInfo({
             placeholder={t('slugPlaceholder')}
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
-            className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
+            className={cn(
+              'h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50',
+              hasSlugError && 'border-destructive focus-visible:ring-destructive',
+            )}
           />
-          {slug.length >= 3 && (
+          {showAvailability && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {isChecking ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -114,11 +144,23 @@ export function StepStoreInfo({
             </div>
           )}
         </div>
-        <p className="text-xs text-muted-foreground flex items-center gap-1">
-          <Info className="h-3 w-3" />
-          {t('slugSuffix', { slug: slug || t('slugDefault') })}
-        </p>
-        {isAvailable === false && (
+
+        {hasSlugError ? (
+          <p className="text-xs text-destructive font-medium">
+            {isAvailable === false ? t('slugTaken') : t('slugRequired')}
+          </p>
+        ) : slugTooShort ? (
+          <p className="text-xs text-muted-foreground">
+            {t('slugMinLength')}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Info className="h-3 w-3" />
+            {t('slugSuffix', { slug: slug || t('slugDefault') })}
+          </p>
+        )}
+
+        {isAvailable === false && !slugTooShort && !hasSlugError && (
           <p className="text-xs text-destructive">{t('slugTaken')}</p>
         )}
       </div>
@@ -127,7 +169,10 @@ export function StepStoreInfo({
 
       {/* Description */}
       <div className="space-y-1.5">
-        <Label htmlFor="store-desc" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        <Label
+          htmlFor="store-desc"
+          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+        >
           {t('descriptionLabel')}{' '}
           <span className="normal-case font-normal text-muted-foreground/70">{t('descriptionOptional')}</span>
         </Label>

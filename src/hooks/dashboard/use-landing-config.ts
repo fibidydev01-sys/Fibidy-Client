@@ -1,58 +1,47 @@
-// ============================================================================
-// FILE: src/hooks/dashboard/use-landing-config.ts
-// PURPOSE: Custom hook for managing Landing Page configuration
-//
-// [v4 cleanup — 2026-05-15]
-//   - Removed `products` section from DEFAULT_LANDING_CONFIG and
-//     `mergeLandingConfig()`. Products-on-landing was deprecated in Phase 3
-//     (`store/[slug]/page.tsx` only gates on `hero.enabled`). The `products`
-//     branch was being persisted to DB on save and reset, but never consumed
-//     by any render path. Removing it keeps the JSON payload tight and
-//     removes a misleading branch from the type contract.
-//
-// [i18n FIX — 2026-04-19]
-// Three categories of change:
-//
-// (1) Toast messages
-//     All hardcoded EN titles + descriptions wired to `toast.landing.*`
-//     via `useTranslations('toast.landing')`.
-//     Validation description uses singular vs plural templates
-//     (validationDetailOne / validationDetailMany) already in JSON.
-//
-// (2) Indonesian leftover
-//     `DEFAULT_LANDING_CONFIG.hero.config.ctaText` was 'Lihat Produk'.
-//     Replaced with 'View Products' — Phase 1 is EN-only and the runtime
-//     display also falls back to `settings.hero.ctaDefault` = "View Products"
-//     when a tenant hasn't customized their hero. Keeping the module-level
-//     default in sync avoids a locale mismatch when a seller hits reset.
-//     NOTE: this value is PERSISTED to the BE landingConfig JSON field —
-//     it's tenant data, not UI copy. Phase 2 can either (a) keep it
-//     stored in English and have the storefront translate at render time,
-//     or (b) move it off the default entirely and let BE seed per locale.
-//
-// (3) Fallback error string
-//     `extractErrorMessages` used to hardcode 'An unknown error occurred'.
-//     Now accepts a `fallback` string param; caller passes a translated
-//     value from `error.generic.unknown`. Keeps the helper pure (no hooks)
-//     while flowing through i18n at the call site.
-// ============================================================================
-
 'use client';
+
+// ============================================================================
+// USE LANDING CONFIG — Studio Flow v3 Fix
+// File: src/hooks/dashboard/use-landing-config.ts
+//
+// [STUDIO FLOW v3 FIX — May 2026]
+// Tambah publishWithOverride(overrideConfig) — atomic enable+publish.
+//
+// ROOT CAUSE BUG:
+//   handleEnableAndPublish di page.tsx melakukan:
+//     1. setLandingConfig({ ...config, hero: { enabled: true } })  ← update state
+//     2. autoPublish → publishToServer()                            ← pakai config lama!
+//
+//   React state update adalah async — publishToServer() membaca `config`
+//   dari closure yang belum terupdate. Hasilnya: hero.enabled masih false
+//   saat di-PATCH ke BE.
+//
+// FIX: publishWithOverride(overrideConfig) menerima config eksplisit
+//   dan langsung PATCH ke BE dengan nilai tersebut, tanpa bergantung
+//   pada React state update cycle.
+//
+//   Flow baru:
+//     handleEnableAndPublish → publishWithOverride({ ...config, hero: { enabled: true, block: 'block1' } })
+//     → BE menerima config dengan hero.enabled=true
+//     → onSaveSuccess dipanggil
+//     → setConfig + setSavedConfig diupdate
+//     → FirstPublishDialog muncul ✓
+//
+// [SPRINT 1.2 — May 2026] carry-forward semua fix sebelumnya.
+// ============================================================================
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
 import { tenantsApi } from '@/lib/api/tenants';
+import { useAuthStore } from '@/stores/auth-store';
 import type { TenantLandingConfig } from '@/types/landing';
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-// [i18n FIX] `ctaText` changed from Indonesian 'Lihat Produk' to English
-// 'View Products'. This default is persisted to BE as tenant data when
-// a seller resets their landing page. See file header note (3).
 const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
   enabled: false,
   hero: {
@@ -72,8 +61,13 @@ const DEFAULT_LANDING_CONFIG: TenantLandingConfig = {
 
 interface UseLandingConfigOptions {
   initialConfig?: TenantLandingConfig | null;
-  onSaveSuccess?: () => void;
+  onSaveSuccess?: (info: { wasFirstPublish: boolean }) => void | Promise<void>;
   onValidationError?: (errors: string[]) => void;
+}
+
+export interface PublishResult {
+  ok: boolean;
+  wasFirstPublish: boolean;
 }
 
 interface UseLandingConfigReturn {
@@ -83,7 +77,16 @@ interface UseLandingConfigReturn {
   isSaving: boolean;
   validationErrors: string[];
   updateConfig: (config: TenantLandingConfig) => void;
-  publishChanges: () => Promise<boolean>;
+  publishChanges: () => Promise<PublishResult>;
+  /**
+   * [v3 FIX] Atomic publish dengan override config.
+   * Langsung PATCH ke BE dengan overrideConfig tanpa bergantung
+   * pada React state update cycle.
+   *
+   * Dipakai di handleEnableAndPublish agar hero.enabled=true
+   * benar-benar ter-publish, bukan config lama dari state.
+   */
+  publishWithOverride: (overrideConfig: TenantLandingConfig) => Promise<PublishResult>;
   discardChanges: () => void;
   resetToDefaults: () => Promise<boolean>;
   clearValidationErrors: () => void;
@@ -98,12 +101,10 @@ function deepClone<T>(value: T): T {
 }
 
 function mergeLandingConfig(
-  tenant?: Partial<TenantLandingConfig> | null
+  tenant?: Partial<TenantLandingConfig> | null,
 ): TenantLandingConfig {
   const dHero = DEFAULT_LANDING_CONFIG.hero!;
-
   if (!tenant) return deepClone(DEFAULT_LANDING_CONFIG);
-
   return {
     enabled: tenant.enabled ?? DEFAULT_LANDING_CONFIG.enabled,
     hero: {
@@ -116,13 +117,6 @@ function mergeLandingConfig(
   };
 }
 
-/**
- * Extract human-readable error messages from an unknown error.
- *
- * [i18n FIX] `fallback` param added — caller passes a translated
- * "unknown error" string so downstream UI stays locale-aware.
- * Keeps this helper pure (no hooks) so it can stay at module scope.
- */
 function extractErrorMessages(error: unknown, fallback: string): string[] {
   if (error instanceof ApiRequestError) {
     const messages = [error.message, ...(error.errors ?? [])].filter(Boolean);
@@ -130,6 +124,71 @@ function extractErrorMessages(error: unknown, fallback: string): string[] {
   }
   if (error instanceof Error) return [error.message];
   return [fallback];
+}
+
+// ============================================================================
+// SHARED PUBLISH LOGIC
+// ============================================================================
+
+async function doPublish({
+  configToPublish,
+  wasFirstPublish,
+  onSaveSuccess,
+  onValidationError,
+  setSavedConfig,
+  setValidationErrors,
+  tToast,
+  tError,
+  publishChangesRef,
+}: {
+  configToPublish: TenantLandingConfig;
+  wasFirstPublish: boolean;
+  onSaveSuccess?: (info: { wasFirstPublish: boolean }) => void | Promise<void>;
+  onValidationError?: (errors: string[]) => void;
+  setSavedConfig: (c: TenantLandingConfig) => void;
+  setValidationErrors: (e: string[]) => void;
+  tToast: (key: string, values?: Record<string, string | number>) => string;
+  tError: (key: string) => string;
+  publishChangesRef: React.MutableRefObject<() => Promise<PublishResult>>;
+}): Promise<PublishResult> {
+  try {
+    await tenantsApi.update({ landingConfig: { ...configToPublish } });
+    setSavedConfig(deepClone(configToPublish));
+
+    if (!wasFirstPublish) {
+      toast.success(tToast('published'));
+    }
+
+    await onSaveSuccess?.({ wasFirstPublish });
+    return { ok: true, wasFirstPublish };
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[useLandingConfig] Publish error:', error);
+    }
+
+    if (error instanceof ApiRequestError && error.isValidationError()) {
+      const errors = extractErrorMessages(error, tError('unknown'));
+      setValidationErrors(errors);
+      onValidationError?.(errors);
+      toast.error(tToast('validationFailed'), {
+        description:
+          errors.length === 1
+            ? tToast('validationDetailOne', { error: errors[0] })
+            : tToast('validationDetailMany', { count: errors.length }),
+      });
+    } else {
+      toast.error(tToast('saveFailed'), {
+        description: tToast('saveFailedDetail'),
+        action: {
+          label: tToast('retryAction'),
+          onClick: () => { void publishChangesRef.current(); },
+        },
+        duration: 8000,
+      });
+    }
+
+    return { ok: false, wasFirstPublish };
+  }
 }
 
 // ============================================================================
@@ -152,9 +211,12 @@ export function useLandingConfig({
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const isInitialized = useRef(false);
 
-  // --------------------------------------------------------------------------
-  // Sync when initial config loads
-  // --------------------------------------------------------------------------
+  const authStoreRef = useRef(useAuthStore.getState);
+
+  const publishChangesRef = useRef<() => Promise<PublishResult>>(
+    async () => ({ ok: false, wasFirstPublish: false }),
+  );
+
   useEffect(() => {
     if (initialConfig && !isInitialized.current) {
       const merged = mergeLandingConfig(initialConfig);
@@ -166,9 +228,6 @@ export function useLandingConfig({
 
   const hasUnsavedChanges = JSON.stringify(config) !== JSON.stringify(savedConfig);
 
-  // --------------------------------------------------------------------------
-  // Update config locally (no auto-save)
-  // --------------------------------------------------------------------------
   const updateConfig = useCallback((newConfig: TenantLandingConfig) => {
     setConfig(newConfig);
     setValidationErrors([]);
@@ -176,59 +235,70 @@ export function useLandingConfig({
 
   const clearValidationErrors = useCallback(() => setValidationErrors([]), []);
 
-  // --------------------------------------------------------------------------
-  // Publish to server
-  // --------------------------------------------------------------------------
-  const publishChanges = useCallback(async (): Promise<boolean> => {
+  // ── publishChanges — pakai config dari state ──────────────────────────────
+  const publishChanges = useCallback(async (): Promise<PublishResult> => {
     setIsSaving(true);
     setValidationErrors([]);
 
-    try {
-      await tenantsApi.update({ landingConfig: { ...config } });
+    const tenantBefore = authStoreRef.current().tenant;
+    const wasFirstPublish = tenantBefore?.hasPublishedOnce === false;
 
-      setSavedConfig(deepClone(config));
-      toast.success(tToast('published'));
-      onSaveSuccess?.();
-      return true;
-    } catch (error) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('[useLandingConfig] Publish error:', error);
-      }
+    const result = await doPublish({
+      configToPublish: config,
+      wasFirstPublish,
+      onSaveSuccess,
+      onValidationError,
+      setSavedConfig: (c) => setSavedConfig(c),
+      setValidationErrors,
+      tToast,
+      tError,
+      publishChangesRef,
+    });
 
-      if (error instanceof ApiRequestError && error.isValidationError()) {
-        const errors = extractErrorMessages(error, tError('unknown'));
-        setValidationErrors(errors);
-        onValidationError?.(errors);
-        toast.error(tToast('validationFailed'), {
-          description:
-            errors.length === 1
-              ? tToast('validationDetailOne', { error: errors[0] })
-              : tToast('validationDetailMany', { count: errors.length }),
-        });
-      } else {
-        toast.error(tToast('saveFailed'), {
-          description: getErrorMessage(error),
-        });
-      }
-
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
+    setIsSaving(false);
+    return result;
   }, [config, onSaveSuccess, onValidationError, tToast, tError]);
 
-  // --------------------------------------------------------------------------
-  // Discard local changes
-  // --------------------------------------------------------------------------
+  publishChangesRef.current = publishChanges;
+
+  // ── [v3 FIX] publishWithOverride — atomic, bypass state update cycle ──────
+  const publishWithOverride = useCallback(
+    async (overrideConfig: TenantLandingConfig): Promise<PublishResult> => {
+      setIsSaving(true);
+      setValidationErrors([]);
+
+      const tenantBefore = authStoreRef.current().tenant;
+      const wasFirstPublish = tenantBefore?.hasPublishedOnce === false;
+
+      // [FIX] Update local state juga agar UI sinkron setelah publish
+      setConfig(overrideConfig);
+
+      const result = await doPublish({
+        configToPublish: overrideConfig,
+        wasFirstPublish,
+        onSaveSuccess,
+        onValidationError,
+        setSavedConfig: (c) => setSavedConfig(c),
+        setValidationErrors,
+        tToast,
+        tError,
+        publishChangesRef,
+      });
+
+      setIsSaving(false);
+      return result;
+    },
+    [onSaveSuccess, onValidationError, tToast, tError],
+  );
+
+  // ── discardChanges ────────────────────────────────────────────────────────
   const discardChanges = useCallback(() => {
     setConfig(deepClone(savedConfig));
     setValidationErrors([]);
     toast.info(tToast('discarded'));
   }, [savedConfig, tToast]);
 
-  // --------------------------------------------------------------------------
-  // Reset to defaults
-  // --------------------------------------------------------------------------
+  // ── resetToDefaults ───────────────────────────────────────────────────────
   const resetToDefaults = useCallback(async (): Promise<boolean> => {
     setIsSaving(true);
     setValidationErrors([]);
@@ -236,37 +306,28 @@ export function useLandingConfig({
     try {
       const resetConfig = deepClone(DEFAULT_LANDING_CONFIG);
       await tenantsApi.update({ landingConfig: resetConfig });
-
       setConfig(resetConfig);
       setSavedConfig(deepClone(resetConfig));
-
       toast.success(tToast('resetSuccess'));
-      onSaveSuccess?.();
+      await onSaveSuccess?.({ wasFirstPublish: false });
       return true;
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
         console.error('[useLandingConfig] Reset error:', error);
       }
-
       if (error instanceof ApiRequestError && error.isValidationError()) {
         const errors = extractErrorMessages(error, tError('unknown'));
         setValidationErrors(errors);
         toast.error(tToast('resetFailed'), { description: errors[0] });
       } else {
-        toast.error(tToast('resetFailed'), {
-          description: getErrorMessage(error),
-        });
+        toast.error(tToast('resetFailed'), { description: getErrorMessage(error) });
       }
-
       return false;
     } finally {
       setIsSaving(false);
     }
   }, [onSaveSuccess, tToast, tError]);
 
-  // --------------------------------------------------------------------------
-  // Return
-  // --------------------------------------------------------------------------
   return {
     config,
     savedConfig,
@@ -275,6 +336,7 @@ export function useLandingConfig({
     validationErrors,
     updateConfig,
     publishChanges,
+    publishWithOverride,
     discardChanges,
     resetToDefaults,
     clearValidationErrors,

@@ -4,16 +4,13 @@
 // STEP REVIEW
 // File: src/components/auth/register/step-review.tsx
 //
-// [PHASE D — May 2026]
-// +intent prop: 'BUYER' | 'SELLER' | 'EDU' | null
-//   - BUYER: skip store info section (no slug/name/category)
-//            show only email + password (masked)
-//   - EDU: show store info + account + edu note badge
-//   - SELLER: default — show all sections
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// - Tambah props fieldErrors + onClearFieldError
+// - Checkbox agreement highlight merah saat belum dicentang
+// - Merah hilang saat user centang checkbox
 //
+// [PHASE D — May 2026]
 // [PHASE C — May 2026]
-// Agreement state lifted to parent (register.tsx).
-// cameFromBuilder prop for builder badge.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
@@ -32,8 +29,8 @@ import {
   Phone,
   Edit2,
   CheckCircle2,
-  GraduationCap,
 } from 'lucide-react';
+import { cn } from '@/lib/shared/utils';
 import type { RegisterIntent } from '@/types/auth';
 
 // ============================================================================
@@ -50,17 +47,14 @@ interface StepReviewProps {
     password?: string;
     whatsapp?: string;
   };
-  /**
-   * [PHASE D] intent determines which sections are shown:
-   *   BUYER  → only account section (no store info)
-   *   SELLER → all sections
-   *   EDU    → all sections + EDU badge
-   */
   intent: RegisterIntent | null;
   onEdit: (step: number) => void;
   isAgreed: boolean;
   onAgreementChange: (agreed: boolean) => void;
   cameFromBuilder?: boolean;
+  // [SPRINT 5]
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 // ============================================================================
@@ -74,12 +68,14 @@ export function StepReview({
   isAgreed,
   onAgreementChange,
   cameFromBuilder = false,
+  fieldErrors = new Set(),
+  onClearFieldError,
 }: StepReviewProps) {
   const t = useTranslations('auth.register.review');
   const tRoot = useTranslations();
 
   const isBuyer = intent === 'BUYER';
-  const isEdu = intent === 'EDU';
+  const hasAgreementError = fieldErrors.has('agreement');
 
   const categoryConfig = data.category
     ? getCategoryConfig(data.category)
@@ -93,25 +89,12 @@ export function StepReview({
     ? tRoot(getCategoryDescriptionKey(categoryConfig.key))
     : null;
 
-  // Step numbers differ per intent
-  // BUYER:        1=Intent, 2=Account, 3=Review
-  // SELLER/EDU:   1=Intent, 2=Category, 3=StoreInfo, 4=Account, 5=Review
   const categoryStep = 2;
   const storeInfoStep = 3;
   const accountStep = isBuyer ? 2 : 4;
 
   return (
     <div className="space-y-3 max-w-md">
-
-      {/* EDU badge — hanya tampil untuk EDU intent */}
-      {isEdu && (
-        <div className="flex items-center gap-2 px-1">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
-            <GraduationCap className="h-3.5 w-3.5" aria-hidden />
-            {t('eduNote')}
-          </div>
-        </div>
-      )}
 
       {/* Business Type — hanya untuk SELLER + EDU */}
       {!isBuyer && (
@@ -154,11 +137,7 @@ export function StepReview({
       )}
 
       {/* Account */}
-      <ReviewCard
-        label={t('account')}
-        icon={<Mail className="h-3.5 w-3.5 text-muted-foreground" />}
-        onEdit={() => onEdit(accountStep)}
-      >
+      <ReviewCard onEdit={() => onEdit(accountStep)}>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -168,7 +147,6 @@ export function StepReview({
             <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <p className="text-sm">••••••••</p>
           </div>
-          {/* WhatsApp hanya tampil untuk SELLER + EDU */}
           {!isBuyer && data.whatsapp && (
             <div className="flex items-center gap-2">
               <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -186,16 +164,32 @@ export function StepReview({
             {t('agreementBuilderBadge')}
           </div>
         )}
-        <div className="flex items-start gap-3">
+        <div
+          className={cn(
+            'flex items-start gap-3 rounded-lg p-3 transition-colors',
+            hasAgreementError && 'bg-destructive/5 border border-destructive/30',
+          )}
+        >
           <Checkbox
             id="agreement"
             checked={isAgreed}
-            onCheckedChange={(checked) => onAgreementChange(checked === true)}
-            className="mt-0.5 shrink-0"
+            onCheckedChange={(checked) => {
+              onAgreementChange(checked === true);
+              if (checked && hasAgreementError) {
+                onClearFieldError?.('agreement');
+              }
+            }}
+            className={cn(
+              'mt-0.5 shrink-0',
+              hasAgreementError && 'border-destructive',
+            )}
           />
           <label
             htmlFor="agreement"
-            className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none"
+            className={cn(
+              'text-xs leading-relaxed cursor-pointer select-none',
+              hasAgreementError ? 'text-destructive' : 'text-muted-foreground',
+            )}
           >
             {t('agreementPrefix')}{' '}
             <a
@@ -220,6 +214,11 @@ export function StepReview({
             .
           </label>
         </div>
+        {hasAgreementError && (
+          <p className="text-xs text-destructive font-medium pl-1">
+            {t('agreementRequired')}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -235,7 +234,7 @@ function ReviewCard({
   onEdit,
   children,
 }: {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   onEdit: () => void;
   children: React.ReactNode;
@@ -246,9 +245,11 @@ function ReviewCard({
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-1.5">
             {icon}
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
-              {label}
-            </p>
+            {label && (
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widests">
+                {label}
+              </p>
+            )}
           </div>
           {children}
         </div>

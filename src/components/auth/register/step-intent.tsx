@@ -1,16 +1,13 @@
 'use client';
 
 // ============================================================================
-// STEP INTENT — Register Wizard Step 1 (NEW Phase D)
+// STEP INTENT
 // File: src/components/auth/register/step-intent.tsx
 //
-// Menggantikan StepWelcome. User memilih intent mereka sebelum apapun:
-//   🛍️  Pembeli  → register BUYER, flow diperpendek
-//   🏪  Penjual  → register SELLER, full wizard
-//   🎓  Pelajar  → register SELLER + isEduMode = true
-//
-// Klik card = langsung select (tidak perlu tombol confirm terpisah).
-// Selected state: border-primary + bg-primary/5 + check icon.
+// [SPRINT 5 — FIELD HIGHLIGHT]
+// - fieldErrors prop: highlight container saat intent tidak dipilih
+// - Ring merah di sekeliling radiogroup container
+// - Merah hilang saat user pilih salah satu role
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
@@ -21,6 +18,9 @@ import type { RegisterIntent } from '@/types/auth';
 interface StepIntentProps {
   selected: RegisterIntent | null;
   onSelect: (intent: RegisterIntent) => void;
+  // [SPRINT 5]
+  fieldErrors?: Set<string>;
+  onClearFieldError?: (field: string) => void;
 }
 
 interface IntentOption {
@@ -55,26 +55,39 @@ const INTENT_OPTIONS: IntentOption[] = [
   },
 ];
 
-export function StepIntent({ selected, onSelect }: StepIntentProps) {
+export function StepIntent({
+  selected,
+  onSelect,
+  fieldErrors = new Set(),
+  onClearFieldError,
+}: StepIntentProps) {
   const t = useTranslations('auth.register.intent');
 
-  return (
-    <div className="space-y-6 max-w-md mx-auto">
-      {/* Heading */}
-      <div className="text-center space-y-1.5">
-        <h2 className="text-xl font-bold tracking-tight">{t('heading')}</h2>
-        <p className="text-sm text-muted-foreground">{t('subheading')}</p>
-      </div>
+  const hasIntentError = fieldErrors.has('intent');
 
-      {/* Intent cards */}
-      <div className="space-y-3">
+  return (
+    <div className="space-y-3">
+      {/* [SPRINT 5] Ring merah saat belum pilih role */}
+      <div
+        role="radiogroup"
+        aria-label={t('groupLabel')}
+        className={cn(
+          'space-y-3 rounded-xl transition-all',
+          hasIntentError && 'outline outline-2 outline-destructive outline-offset-2',
+        )}
+      >
         {INTENT_OPTIONS.map(({ intent, icon: Icon, labelKey, iconColor, iconBg }) => {
           const isSelected = selected === intent;
           return (
             <button
               key={intent}
               type="button"
-              onClick={() => onSelect(intent)}
+              role="radio"
+              aria-checked={isSelected}
+              onClick={() => {
+                onSelect(intent);
+                if (hasIntentError) onClearFieldError?.('intent');
+              }}
               className={cn(
                 'w-full text-left rounded-xl border-2 p-4 transition-all duration-150',
                 'flex items-center gap-4',
@@ -83,12 +96,9 @@ export function StepIntent({ selected, onSelect }: StepIntentProps) {
                   : 'border-border hover:border-primary/40 hover:bg-muted/40',
               )}
             >
-              {/* Icon */}
               <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', iconBg)}>
-                <Icon className={cn('h-5 w-5', iconColor)} />
+                <Icon className={cn('h-5 w-5', iconColor)} aria-hidden />
               </div>
-
-              {/* Text */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">
                   {t(`${labelKey}.label`)}
@@ -97,8 +107,6 @@ export function StepIntent({ selected, onSelect }: StepIntentProps) {
                   {t(`${labelKey}.description`)}
                 </p>
               </div>
-
-              {/* Check indicator */}
               <div
                 className={cn(
                   'flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all',
@@ -106,6 +114,7 @@ export function StepIntent({ selected, onSelect }: StepIntentProps) {
                     ? 'bg-primary text-primary-foreground'
                     : 'border-2 border-muted-foreground/30',
                 )}
+                aria-hidden
               >
                 {isSelected && <Check className="h-3 w-3" strokeWidth={3} />}
               </div>
@@ -113,6 +122,13 @@ export function StepIntent({ selected, onSelect }: StepIntentProps) {
           );
         })}
       </div>
+
+      {/* Error text */}
+      {hasIntentError && (
+        <p className="text-xs text-destructive font-medium px-1">
+          {t('groupLabel')}
+        </p>
+      )}
     </div>
   );
 }

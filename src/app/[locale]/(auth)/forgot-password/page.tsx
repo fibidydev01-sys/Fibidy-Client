@@ -2,22 +2,9 @@
 // FORGOT PASSWORD PAGE
 // File: src/app/[locale]/(auth)/forgot-password/page.tsx
 //
-// [i18n FIX — 2026-04-19]
-// Three changes:
-//
-// 1. Static `metadata` → async `generateMetadata` with
-//    `auth.metadata.forgotPasswordTitle` / `forgotPasswordDescription`.
-//
-// 2. AuthLayout props (`title`, `imageAlt`) resolved via async
-//    `getTranslations` in the default export. `image` path stays static —
-//    asset paths aren't i18n.
-//
-// 3. The local `ComingSoonBadge` helper is now a server component that
-//    accepts the translated label as a prop. The dot animation and
-//    styling stay identical; only the rendered text flows through i18n.
-//    Because `ComingSoonBadge` has no state or event handlers, staying
-//    server-side keeps the initial HTML fully translated (no hydration
-//    flash of the English badge).
+// [NATIVE MOBILE VIBES — May 2026]
+// AuthLayout sekarang render tombol back native (← Kembali Login) di pojok kiri atas.
+// Prop `backLabel` dan `backHref` diteruskan ke AuthLayout.
 // ==========================================
 
 import type { Metadata } from 'next';
@@ -96,8 +83,9 @@ export default async function ForgotPasswordPage({
       badge={<ComingSoonBadge label={t('comingSoonBadge')} />}
       image="/auth-picture/auth-forgot-password.jpg"
       imageAlt={t('imageAlt')}
+      backLabel={t('backLabel')}
+      backHref="/login"
     >
-      {/* Suspense required for client-side hooks */}
       <Suspense fallback={<ForgotPasswordFormSkeleton />}>
         <ForgotPasswordForm />
       </Suspense>

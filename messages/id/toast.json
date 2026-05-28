@@ -86,14 +86,28 @@
       "validationFailed": "Validasi gagal",
       "validationDetailOne": "{error}",
       "validationDetailMany": "{count} error ditemukan. Silakan review pengaturan kamu.",
-      "saveFailed": "Gagal menyimpan landing page",
+      "saveFailed": "Publish gagal",
       "resetSuccess": "Landing page direset ke default",
       "resetFailed": "Gagal reset landing page",
-      "discarded": "Perubahan dibatalkan"
+      "discarded": "Perubahan dibatalkan",
+      "saveFailedDetail": "Perubahan lokal kamu masih aman. Periksa koneksi dan coba lagi.",
+      "retryAction": "Coba lagi"
     },
     "share": {
       "copySuccess": "Link berhasil disalin!",
       "copyFailed": "Gagal menyalin link"
+    },
+    "upload": {
+      "logoFailed": "Upload logo gagal",
+      "heroBgFailed": "Upload gambar hero gagal",
+      "fileTooLarge": "Ukuran file melebihi 10MB. Kompres dulu lalu coba lagi.",
+      "invalidFileType": "Tipe file tidak didukung. Pakai JPG, PNG, WebP, SVG, atau GIF.",
+      "networkError": "Error jaringan. Periksa koneksi dan coba lagi.",
+      "configMissing": "Layanan upload belum dikonfigurasi. Hubungi admin.",
+      "generic": "Upload gagal. Coba lagi.",
+      "retryAction": "Coba lagi",
+      "logoSuccess": "Logo berhasil diunggah",
+      "heroBgSuccess": "Gambar hero berhasil diunggah"
     }
   }
 }

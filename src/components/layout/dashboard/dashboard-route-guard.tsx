@@ -4,20 +4,23 @@
 // DASHBOARD ROUTE GUARD
 // File: src/components/layout/dashboard/dashboard-route-guard.tsx
 //
-// [PHASE D — May 2026]
-// Case E — EDU seller tidak boleh akses KYC + Subscription:
-//   - /dashboard/subscription → redirect /dashboard/products
-//   - /onboard → redirect /dashboard/products
-//   - KYC banner: early return null (handled in kyc-banner.tsx)
-//   - Subscription menu: filtered in sidebar-nav + mobile-navbar
+// [PHASE F · SPRINT 3 — May 2026]
+// CASE E REFACTOR — EDU restriction no longer silent redirect.
 //
-// [SETUP-GATE — May 2026]
-// Case D — SELLER + isSetupComplete=false → redirect /dashboard/setup-store
+// OLD BEHAVIOR (Phase D):
+//   EDU user → /dashboard/subscription → guard redirects silently to /products
+//   → user confusion ("kenapa aku ke sini?")
 //
-// [PHASE 3]
-// Case A — Digital OFF + BUYER → redirect /dashboard/setup-store
-// Case B — Digital ON + BUYER on seller-only route → redirect /dashboard/library
-// Case C — Digital OFF + SELLER on digital route → page shows ComingSoonPage
+// NEW BEHAVIOR (Phase F):
+//   EDU user → /dashboard/subscription → guard does NOT redirect
+//   → page renders EduRestrictedPage inline with full context
+//
+// WHAT THIS GUARD STILL DOES:
+//   Case D — SELLER + !isSetupComplete → setup-store
+//   Case F — SELLER + setupComplete + !hasPublishedOnce → studio
+//   Case A — BUYER + !FEATURES.digitalProducts → setup-store
+//   Case B — BUYER on seller-only route → library
+//   Case E — DEFENSIVE FALLBACK only for routes not yet wired with inline page
 // ============================================================================
 
 import { useEffect } from 'react';
@@ -44,34 +47,57 @@ function isStudioPath(pathname: string): boolean {
   return stripLocalePrefix(pathname).startsWith('/dashboard/studio');
 }
 
-/**
- * [PHASE D] Returns true if pathname is an EDU-restricted path.
- * EDU sellers cannot access subscription or KYC onboarding pages.
- */
+// Routes with INLINE EduRestrictedPage handling — guard does NOT redirect these
+const EDU_INLINE_HANDLED_PATHS = [
+  '/dashboard/subscription',
+  '/dashboard/onboard',
+] as const;
+
+function isEduInlineHandled(pathname: string): boolean {
+  const clean = stripLocalePrefix(pathname);
+  return EDU_INLINE_HANDLED_PATHS.some((p) => clean.startsWith(p));
+}
+
 function isEduRestrictedPath(pathname: string): boolean {
   const clean = stripLocalePrefix(pathname);
   return (
     clean.startsWith('/dashboard/subscription') ||
-    clean.startsWith('/onboard')
+    clean.startsWith('/dashboard/onboard')
   );
 }
 
 function shouldHide(
-  tenant: { role: string; isSetupComplete?: boolean; isEduMode?: boolean } | null,
+  tenant: {
+    role: string;
+    isSetupComplete?: boolean;
+    isEduMode?: boolean;
+    hasPublishedOnce?: boolean;
+  } | null,
   pathname: string,
 ): boolean {
   if (!tenant) return false;
 
-  // Case E — EDU: hide while redirect in-flight
+  // Case E — only hide if route NOT yet wired with inline handler
   if (
     tenant.role === 'SELLER' &&
     tenant.isEduMode === true &&
-    isEduRestrictedPath(pathname)
+    isEduRestrictedPath(pathname) &&
+    !isEduInlineHandled(pathname)
   ) {
     return true;
   }
 
-  // Case D — SELLER setup not complete → hide until redirect fires
+  // Case F — SELLER + setupComplete + !hasPublishedOnce → must publish first
+  if (
+    tenant.role === 'SELLER' &&
+    tenant.isSetupComplete === true &&
+    tenant.hasPublishedOnce === false &&
+    !isStudioPath(pathname)
+  ) {
+    return true;
+  }
+
+  // Case D — SELLER setup not complete
   if (
     tenant.role === 'SELLER' &&
     !tenant.isSetupComplete &&
@@ -81,17 +107,16 @@ function shouldHide(
     return true;
   }
 
-  // Case A — Digital OFF + BUYER → only setup-store is allowed
+  // Case A — Digital OFF + BUYER
   if (!FEATURES.digitalProducts && tenant.role === 'BUYER') {
     return !isSetupStorePath(pathname);
   }
 
-  // Case B — Digital ON + BUYER on seller-only route → hide while redirecting
+  // Case B — Digital ON + BUYER on seller-only route
   if (tenant.role === 'BUYER' && isBuyerRestrictedRoute(pathname)) {
     return true;
   }
 
-  // Case C — Digital OFF + SELLER on digital route → DO NOT hide
   return false;
 }
 
@@ -103,17 +128,30 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
   useEffect(() => {
     if (!tenant) return;
 
-    // Case E — EDU seller: redirect from subscription + onboard
+    // [SPRINT 3] Case E — DEFENSIVE FALLBACK
+    // Only redirect paths NOT yet wired with inline EduRestrictedPage
     if (
       tenant.role === 'SELLER' &&
       tenant.isEduMode === true &&
-      isEduRestrictedPath(pathname)
+      isEduRestrictedPath(pathname) &&
+      !isEduInlineHandled(pathname)
     ) {
       router.replace('/dashboard/products');
       return;
     }
 
-    // Case D — SELLER + isSetupComplete=false → must complete setup wizard
+    // Case F — SELLER + setupComplete + !hasPublishedOnce → back to /studio
+    if (
+      tenant.role === 'SELLER' &&
+      tenant.isSetupComplete === true &&
+      tenant.hasPublishedOnce === false &&
+      !isStudioPath(pathname)
+    ) {
+      router.replace('/dashboard/studio');
+      return;
+    }
+
+    // Case D — SELLER + isSetupComplete=false
     if (
       tenant.role === 'SELLER' &&
       !tenant.isSetupComplete &&
@@ -137,8 +175,6 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
       router.replace('/dashboard/library');
       return;
     }
-
-    // Case C — no-op
   }, [tenant, pathname, router]);
 
   if (shouldHide(tenant, pathname)) {

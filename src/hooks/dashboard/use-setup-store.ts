@@ -4,13 +4,13 @@
 // USE SETUP STORE
 // File: src/hooks/dashboard/use-setup-store.ts
 //
+// [SPRINT 1 — G3 FIX: getErrorMessage pakai t]
+// getErrorMessage(err) → getErrorMessage(err, t) agar error key dari
+// BE ditranslate sebelum ditampilkan ke user.
+//
 // [PHASE C — May 2026]
 // On completeSetup success → isDone:true → success screen shows.
-// Success screen CTA redirects to /dashboard/studio (NOT /products).
-// Flow: setup-store → studio (publish) → products (with empty state dialog).
-//
-// CompleteSetupInput now includes hasPhysicalLocation + locationLat/Lng
-// — type reference auto-updates via @/types/tenant import.
+// Success screen CTA redirects to /dashboard/studio.
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -23,6 +23,8 @@ import type { CompleteSetupInput } from '@/types/tenant';
 
 export function useCompleteSetup() {
   const tToast = useTranslations('toast.setup');
+  // [G3 FIX] t untuk getErrorMessage
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
@@ -37,19 +39,18 @@ export function useCompleteSetup() {
         const response = await tenantsApi.completeSetup(data);
 
         // Update auth store — tenant.isSetupComplete is now true.
-        // This lifts the setup gate in dashboard-route-guard immediately.
         setTenant(response.tenant);
 
         toast.success(tToast('success'), {
           description: tToast('successDetail'),
         });
 
-        // Signal done — component shows the success screen with CTA → studio
         setIsDone(true);
 
         return response;
       } catch (err) {
-        const message = getErrorMessage(err);
+        // [G3 FIX] Pass t agar error key ditranslate
+        const message = getErrorMessage(err, t);
         setError(message);
         toast.error(tToast('failed'), { description: message });
         throw err;
@@ -57,7 +58,7 @@ export function useCompleteSetup() {
         setIsLoading(false);
       }
     },
-    [setTenant, tToast],
+    [setTenant, tToast, t],
   );
 
   const reset = useCallback(() => {

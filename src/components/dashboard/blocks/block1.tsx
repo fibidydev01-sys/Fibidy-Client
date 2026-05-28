@@ -1,5 +1,13 @@
 'use client';
 
+// ============================================================================
+// FILE: src/components/dashboard/blocks/block1.tsx
+//
+// [RENAME — May 2026]
+// feature.icon → feature.image (FeatureItem.icon removed)
+// Lokasi: CarouselStandard filter + image render
+// ============================================================================
+
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -12,7 +20,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
 
 import type { FeatureItem } from '@/types/tenant';
@@ -124,9 +131,10 @@ function CarouselStandard({ features }: { features: FeatureItem[] }) {
             key={index}
             className="shrink-0 w-full snap-start relative aspect-[16/9] md:aspect-[2/1] bg-muted"
           >
-            {feature.icon && (
+            {/* [RENAME] feature.icon → feature.image */}
+            {feature.image && (
               <OptimizedImage
-                src={feature.icon}
+                src={feature.image}
                 alt={feature.title ?? ''}
                 fill
                 className="object-cover"
@@ -212,7 +220,8 @@ function Block1HeroSection({
   features,
 }: Block1HeroProps) {
   const validFeatures = (features || []).filter(
-    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.icon)
+    // [RENAME] f.icon → f.image
+    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image)
   );
   const hasBanner = validFeatures.length > 0;
   const hasEyebrow = !!(eyebrow ?? category);
@@ -376,7 +385,6 @@ function Block1ContactSection({
 
   return (
     <section id="contact" className="container px-4 py-20 md:py-28 space-y-12 md:space-y-16">
-
       {(contactTitle || contactSubtitle) && (
         <div className="space-y-3 text-center flex flex-col items-center">
           {contactTitle && (
@@ -392,15 +400,8 @@ function Block1ContactSection({
         </div>
       )}
 
-
-
-
-
-      {/* LAYER 3: Map + Form dalam card 50/50 */}
       {showMap && (
         <div className="rounded-xl overflow-hidden border border-border grid grid-cols-1 md:grid-cols-2">
-
-          {/* Kiri: iframe map — square */}
           <div className="aspect-square w-full">
             <iframe
               src={contactMapUrl}
@@ -413,8 +414,6 @@ function Block1ContactSection({
               title="Google Maps"
             />
           </div>
-
-          {/* Kanan: form */}
           {showForm && (
             <form onSubmit={handleSubmit} className="p-6 flex flex-col justify-center space-y-5">
               <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground">
@@ -470,10 +469,7 @@ function Block1ContactSection({
         </div>
       )}
 
-      {/* Contact info rows — di bawah card, 2 kolom 50/50 */}
       <div className="grid grid-cols-1 md:grid-cols-2 border-y border-border divide-y md:divide-y-0 md:divide-x divide-border">
-
-        {/* Kiri: WhatsApp + Phone */}
         <div className="divide-y divide-border">
           {whatsapp && whatsappLink && (
             <a
@@ -494,7 +490,6 @@ function Block1ContactSection({
               <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-green-600 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
             </a>
           )}
-
           {phone && (
             <a
               href={`tel:${phone}`}
@@ -513,8 +508,6 @@ function Block1ContactSection({
             </a>
           )}
         </div>
-
-        {/* Kanan: Email + Address */}
         <div className="divide-y divide-border">
           {email && (
             <a
@@ -533,7 +526,6 @@ function Block1ContactSection({
               <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
             </a>
           )}
-
           {address && (
             <div className="flex items-start gap-3 px-5 py-4">
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -546,9 +538,7 @@ function Block1ContactSection({
             </div>
           )}
         </div>
-
       </div>
-
     </section>
   );
 }
@@ -570,7 +560,6 @@ export function Block1(props: Block1Props) {
         storeName={props.storeName}
         features={props.features}
       />
-
       <Block1ContactSection
         contactTitle={props.contactTitle}
         contactSubtitle={props.contactSubtitle}

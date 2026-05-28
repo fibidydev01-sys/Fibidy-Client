@@ -4,6 +4,12 @@
       "text": "Toko ini dibuat untuk simulasi pembelajaran. Produk tidak tersedia untuk dibeli.",
       "learnMore": "Pelajari"
     },
+    "eduOrder": {
+      "title": "Toko Simulasi",
+      "description": "Toko ini dalam Mode Pelajar — hanya untuk simulasi belajar. Pesanan tidak dapat dilakukan di sini.",
+      "understood": "Mengerti",
+      "learnMore": "Pelajari tentang Mode Pelajar"
+    },
     "metadata": {
       "notFoundTitle": "Toko Tidak Ditemukan",
       "notFoundDescription": "Toko yang kamu cari tidak ada atau sudah tidak aktif.",
@@ -134,6 +140,7 @@
       },
       "askSellerWhatsapp": "Tanya Penjual via WhatsApp",
       "orderWhatsapp": "Pesan via WhatsApp",
+      "simulateOrder": "Simulasi Pesanan",
       "orderDialog": {
         "titleGeneric": "Pesan via WhatsApp",
         "titleAskSeller": "Tanya Penjual via WhatsApp",

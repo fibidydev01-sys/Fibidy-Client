@@ -4,7 +4,51 @@
       "badge": "Mode Pelajar",
       "sidebar": {
         "tooltip": "Ini akun simulasi. Fitur langganan dan pembayaran tidak tersedia."
+      },
+      "banner": {
+        "text": "Kamu di Mode Pelajar — toko ini hanya untuk simulasi belajar. Fitur langganan dan pembayaran dinonaktifkan.",
+        "learnMore": "Pelajari"
+      },
+      "restricted": {
+        "subscription": {
+          "title": "Tidak tersedia di Mode Pelajar",
+          "description": "Akun kamu adalah simulasi pembelajaran. Paket langganan tidak tersedia di sini, tapi fitur lainnya berjalan persis seperti akun nyata.",
+          "featureName": "Paket langganan"
+        },
+        "onboard": {
+          "title": "Tidak tersedia di Mode Pelajar",
+          "description": "Akun kamu adalah simulasi pembelajaran. Verifikasi identitas tidak diperlukan — kamu bisa praktik alur seller lengkap tanpa itu.",
+          "featureName": "Verifikasi identitas"
+        },
+        "generic": {
+          "title": "Tidak tersedia di Mode Pelajar",
+          "description": "Fitur ini bagian dari pengalaman seller aktif. Akun simulasi kamu tidak termasuk fitur ini.",
+          "featureName": "Fitur ini"
+        },
+        "featureBlocked": "Dibatasi: {feature}",
+        "backToProducts": "Kembali ke Produk",
+        "contactAdmin": "Hubungi admin",
+        "contactUrl": "https://guide.fibidy.com/edu/upgrade",
+        "learnMoreLink": "Pelajari Mode Pelajar"
       }
+    },
+    "imageCrop": {
+      "title": "Sesuaikan Gambar",
+      "hint": "Drag untuk geser · Scroll atau cubit untuk zoom",
+      "processing": "Memproses...",
+      "uploading": "Mengunggah...",
+      "confirm": "Crop & Pakai",
+      "cancel": "Batal",
+      "dropRelease": "Lepas untuk upload",
+      "dropHint": "atau seret file ke sini"
+    },
+    "imageSlot": {
+      "uploading": "Mengunggah…",
+      "done": "Selesai",
+      "loadError": "Gambar tidak bisa dimuat",
+      "reupload": "Upload ulang",
+      "removeImage": "Hapus gambar",
+      "uploadImage": "Upload gambar"
     },
     "metadata": {
       "productsTitle": "Produk",
@@ -31,18 +75,30 @@
       "sell": "Jual",
       "discover": "Jelajah",
       "signOut": "Keluar",
-      "logout": "Logout"
+      "logout": "Logout",
+      "onboard": "Verifikasi"
     },
     "products": {
       "title": "Produk",
       "newButton": "Produk baru",
       "addButton": "Tambah",
-      "empty": "Belum ada produk.",
-      "emptyHint": "Klik \"Tambah Produk\" untuk mulai jualan.",
+      "empty": "Belum ada produk",
+      "emptyHint": "Tambah produk pertama kamu untuk mulai jualan.",
+      "emptyGuideLink": "Pelajari cara listing produk",
+      "emptyReopenDialog": "Butuh panduan tambah produk pertama?",
       "firstProductDialog": {
-        "title": "Storefront Anda sudah live! 🎉",
-        "description": "Sekarang yuk tambahkan produk pertama biar pelanggan bisa mulai pesan. Cukup satu menit.",
+        "title": "Siap listing produk pertama? 🎉",
+        "description": "Setup toko selesai. Tambah produk biar pelanggan bisa langsung pesan.",
         "addNow": "Tambah produk pertama",
+        "later": "Nanti dulu"
+      },
+      "welcomeDialog": {
+        "title": "Saatnya isi toko kamu! 🛍️",
+        "step1": "Tambahkan nama produk dan set harga kamu",
+        "step2": "Upload foto cover (opsional tapi disarankan)",
+        "step3": "Publish — produk langsung tampil ke pelanggan",
+        "hint": "Pelanggan bisa lihat dan pesan via WhatsApp — tanpa perlu checkout.",
+        "cta": "Tambah Produk Pertama",
         "later": "Nanti dulu"
       },
       "card": {
@@ -106,18 +162,22 @@
           "categoryHeadingCreateNew": "Buat baru",
           "categoryCreateOption": "Buat \"{query}\"",
           "nameLabel": "Nama produk",
-          "nameRequired": "*",
+          "nameRequired": "Nama produk wajib diisi.",
           "namePlaceholder": "Beri produk kamu nama yang menarik",
           "descriptionLabel": "Deskripsi",
           "descriptionPlaceholder": "Ceritakan apa yang bikin produk ini spesial — apa yang pembeli dapat, kenapa mereka bakal suka",
           "descriptionHelper": "Deskripsi yang jelas dan jujur bantu pembeli memutuskan dengan tenang.",
           "priceLabel": "Harga (Rp)",
-          "priceRequired": "*",
+          "priceRequired": "Mohon masukkan harga minimal Rp 1.000.",
           "pricePlaceholder": "50000",
           "priceHelper": "Atur dalam Rupiah. Pembeli bayar via Stripe, settlement langsung dalam IDR.",
           "comparePriceLabel": "Harga pembanding",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
+        },
+        "validation": {
+          "nameRequired": "Nama produk wajib diisi — minimal 2 karakter.",
+          "priceRequired": "Mohon isi harga jual minimal Rp 1.000."
         },
         "upload": {
           "editModeNote": "File produk — file tidak bisa diubah setelah diupload. Hapus produk dan buat baru jika perlu ganti file.",
@@ -216,6 +276,13 @@
           "ip": "IP"
         },
         "dash": "—"
+      },
+      "fetchError": {
+        "title": "Produk gagal dimuat",
+        "description": "Kami tidak bisa mengambil produk kamu saat ini.",
+        "hint": "Ini biasanya masalah sementara. Produk kamu aman.",
+        "retry": "Coba lagi",
+        "retrying": "Mencoba lagi..."
       }
     },
     "library": {
@@ -410,6 +477,11 @@
     "setupStore": {
       "title": "Mulai Jualan",
       "subtitle": "Siapkan toko kamu dalam beberapa langkah",
+      "setupGateDialog": {
+        "title": "Selesaikan setup toko dulu",
+        "description": "Toko kamu perlu disetup terlebih dahulu sebelum bisa mengakses fitur ini. Hanya butuh beberapa menit.",
+        "cta": "Lanjutkan Setup"
+      },
       "steps": {
         "category": {
           "title": "Jenis Usaha",
@@ -496,48 +568,64 @@
           "logoGenerateOr": "atau",
           "logoGenerateSuccess": "Logo dibuat dan diunggah",
           "logoGenerateFailed": "Gagal membuat logo. Coba unggah manual.",
+          "logoRequired": "Mohon upload logo toko atau buat otomatis",
           "colorLabel": "Warna Brand",
           "colorHelper": "Dipakai untuk tombol, link, dan aksen di seluruh toko kamu.",
+          "colorRequired": "Mohon pilih warna brand",
           "heroBgLabel": "Gambar Hero",
           "heroBgHelper": "Gambar besar di bagian atas toko. Orientasi landscape paling cocok.",
-          "uploadHeroBg": "Upload Gambar"
+          "uploadHeroBg": "Upload Gambar",
+          "heroBgRequired": "Mohon upload gambar hero"
         },
         "story": {
           "heroTitleLabel": "Headline",
           "heroTitlePlaceholder": "Selamat datang di toko saya",
           "heroTitleHelper": "Hal pertama yang dibaca pengunjung. Singkat dan berkesan (5–200 karakter).",
+          "heroTitleRequired": "Headline terlalu pendek (min. 5 karakter)",
           "heroSubtitleLabel": "Tagline",
           "heroSubtitlePlaceholder": "Ceritakan apa yang kamu jual dalam satu kalimat",
           "heroSubtitleHelper": "Dukung headline — jelaskan apa yang kamu jual (10–300 karakter).",
+          "heroSubtitleRequired": "Tagline terlalu pendek (min. 10 karakter)",
           "heroCtaLabel": "Teks Tombol",
           "heroCtaPlaceholder": "Belanja Sekarang",
-          "heroCtaHelper": "Maks 2 kata, 15 karakter. Contoh: Belanja Sekarang, Pesan Di Sini, Mulai Sekarang."
+          "heroCtaHelper": "Maks 2 kata, 15 karakter. Contoh: Belanja Sekarang, Pesan Di Sini, Mulai Sekarang.",
+          "heroCtaRequired": "Teks tombol terlalu pendek (min. 2 karakter)"
         },
         "highlights": {
           "intro": "Pilih 3 hal yang bikin toko kamu menonjol. Ini tampil di homepage sebagai kartu fitur.",
-          "iconLabel": "Ikon {index}",
+          "imageLabel": "Gambar",
+          "imageRequired": "Mohon upload gambar untuk highlight ini",
+          "titleLabel": "Judul",
+          "titleRequired": "Judul terlalu pendek (min. 2 karakter)",
+          "descriptionLabel": "Deskripsi",
+          "descriptionRequired": "Deskripsi terlalu pendek (min. 10 karakter)",
           "titlePlaceholder": "cth. Fresh Daily",
           "descriptionPlaceholder": "cth. Bahan diambil setiap pagi dari petani lokal"
         },
         "contact": {
-          "sectionCopyHeading": "Heading Section",
+          "sectionCopyHeading": "Section Heading",
           "contactTitleLabel": "Judul Section",
           "contactTitlePlaceholder": "Mampir Yuk",
           "contactTitleHelper": "Judul untuk section kontak di halaman toko kamu.",
+          "contactTitleRequired": "Judul section terlalu pendek (min. 3 karakter)",
           "contactSubtitleLabel": "Subjudul Section",
           "contactSubtitlePlaceholder": "Buka setiap hari, drop by kapan saja",
+          "contactSubtitleRequired": "Subjudul section terlalu pendek (min. 5 karakter)",
           "reachOutHeading": "Hubungi Kami",
           "phoneLabel": "Nomor Telepon",
           "phonePlaceholder": "+62 21 1234 5678",
+          "phoneRequired": "Nomor telepon wajib diisi",
           "whatsappReadonly": "WhatsApp (dari registrasi)",
           "whatsappReadonlyHelper": "WhatsApp kamu sudah tersimpan. Update di Pengaturan → Kontak.",
           "whereWeAreHeading": "Lokasi Kami",
           "addressLabel": "Alamat Lengkap",
           "addressPlaceholder": "Jl. Sudirman No. 123, Jakarta Pusat 10220",
           "addressOptional": "(opsional)",
+          "addressRequired": "Alamat terlalu pendek (min. 10 karakter)",
           "hasPhysicalLocationLabel": "Apakah punya lokasi fisik?",
           "hasPhysicalLocationHelper": "Matikan jika hanya melayani online atau dengan janji temu.",
           "mapLabel": "Lokasi peta",
+          "mapRequired": "Mohon atur lokasi — gunakan tombol atau tempel URL peta",
           "geoUseMyLocation": "📍 Gunakan lokasi saya saat ini",
           "geoLocating": "Mengambil lokasi...",
           "geoSuccess": "Lokasi tersimpan",
@@ -548,8 +636,8 @@
           "geoQuickstartNote": "Kami akan buatkan peta embed dari koordinat ini. Anda bisa upgrade ke Google Business Profile nanti di Settings.",
           "onlineNote": "Bisnis Anda online-only — tidak perlu alamat fisik. Pelanggan menghubungi via form kontak dan media sosial.",
           "mapUrlLabel": "URL Embed Google Maps",
-          "mapUrlPlaceholder": "https://www.google.com/maps/embed?pb=...",
-          "mapUrlHelper": "Buka Google Maps → Bagikan → Sematkan → salin nilai",
+          "mapUrlPlaceholder": "Tempel URL embed Google Maps atau kode iframe di sini",
+          "mapUrlHelper": "Tempel URL embed dari Google Maps. Kami ekstrak otomatis.",
           "mapPreviewLabel": "Preview Peta",
           "mapPreviewEmpty": "Tempel URL embed Google Maps di atas untuk preview",
           "mapUrlInvalidHint": "Tempel URL embed lengkap yang dimulai dengan https://www.google.com/maps/embed"
@@ -575,18 +663,15 @@
         },
         "done": {
           "title": "Setup selesai! 🎉",
-          "heading": "Toko kamu sudah live! 🎉",
-          "subtitle": "Toko Anda siap. Selanjutnya, atur tampilan storefront di Studio — lalu tambahkan produk pertama.",
-          "subheading": "Mulai tambah produk agar pelanggan bisa menemukan kamu.",
-          "ctaBuildStore": "Bangun storefront",
-          "ctaAddProduct": "Tambah Produk Pertama",
-          "ctaViewStore": "Preview Toko",
+          "subtitle": "Toko kamu siap. Selanjutnya, pilih tampilan storefront di Studio — lalu publish.",
+          "ctaBuildStore": "Pilih Tampilan Toko",
           "ctaPreview": "Lihat toko",
-          "helpFooter": "Butuh bantuan? Kunjungi help center kapan saja dari dashboard.",
+          "helpFooter": "Butuh bantuan? Kunjungi guide.fibidy.com kapan saja.",
           "goToStudioDialog": {
-            "title": "Selanjutnya: Desain storefront kamu",
-            "description": "Kamu akan masuk ke Studio untuk pilih layout dan kustomisasi tampilan toko. Cukup semenit.",
-            "cta": "Ke Studio"
+            "title": "Satu langkah lagi!",
+            "description": "Pilih tampilan toko di Studio, lalu publish — toko langsung live. Cuma 1-2 menit.",
+            "cta": "Lanjut ke Studio",
+            "ctaPreview": "Lihat toko dulu"
           }
         },
         "errors": {
@@ -605,7 +690,10 @@
           "mapRequired": "Mohon atur lokasi — gunakan tombol atau tempel URL peta",
           "contactTitleMin": "Judul section terlalu pendek (min 3 karakter)",
           "contactSubtitleMin": "Subjudul section terlalu pendek (min 5 karakter)",
-          "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan"
+          "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan",
+          "uploadInProgress": "Mohon tunggu, gambar masih sedang diupload. Tunggu sampai selesai baru bisa lanjut.",
+          "uploadInProgressCount": "Mohon tunggu, masih upload {count} gambar. Tunggu sampai semua selesai baru bisa lanjut.",
+          "offlineSubmit": "Anda sedang offline. Periksa koneksi dan coba lagi."
         }
       }
     },

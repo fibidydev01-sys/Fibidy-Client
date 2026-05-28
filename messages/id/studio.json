@@ -13,12 +13,13 @@
       "saved": "Tersimpan"
     },
     "drawer": {
-      "open": "Buka",
+      "open": "Pilih Tampilan",
       "close": "Tutup",
       "proBadge": "Pro",
       "selectBlock": "Pilih block {section}",
       "openTooltip": "Buka pemilih block",
-      "closeTooltip": "Tutup pemilih block"
+      "closeTooltip": "Tutup pemilih block",
+      "startHere": "Mulai di sini"
     },
     "preview": {
       "heroInactive": "Section \"Hero\" belum aktif",
@@ -66,11 +67,23 @@
       "heroEnable": "Aktifkan"
     },
     "onboardingDialog": {
-      "title": "Selamat datang di Studio!",
-      "step1": "Pilih layout hero dari panel di sebelah kanan",
-      "step2": "Sesuaikan warna, teks, dan gambar di Pengaturan",
-      "step3": "Tekan Publikasikan kalau sudah oke — toko langsung live",
-      "cta": "Siap, ayo mulai!"
+      "title": "Pilih tampilan toko kamu",
+      "step1": "Pilih kombinasi blok yang kamu suka",
+      "step2": "Klik Publish",
+      "step3": "Toko kamu langsung live! 🚀",
+      "cta": "Ayo Mulai"
+    },
+    "firstPublishDialog": {
+      "title": "Toko kamu sudah live! 🎉",
+      "description": "Storefront kamu sekarang bisa diakses di {slug}.fibidy.com. Saatnya tambah produk pertama supaya pelanggan bisa belanja.",
+      "exploreHint": "Mau tampilan berbeda? Kamu bisa ganti block kapan saja dari Studio — perubahan langsung tampil.",
+      "ctaPreview": "Lihat Toko Saya",
+      "ctaContinue": "Tambah Produk Pertama"
+    },
+    "publishDisabled": {
+      "heroOff": "Aktifkan Hero dulu — storefront butuh hero sebelum bisa di-publish.",
+      "nothingToSave": "Tidak ada yang perlu di-publish — ubah sesuatu dulu.",
+      "offline": "Kamu offline. Sambungkan ulang untuk publish perubahan."
     },
     "upgradeModal": {
       "title": "Upgrade untuk publikasikan block Pro",
@@ -80,7 +93,10 @@
       "title": "Aktifkan Hero Section",
       "description": "Hero section belum aktif. Aktifkan sekarang supaya landing page kamu bisa dilihat pelanggan.",
       "later": "Nanti",
-      "enableNow": "Aktifkan sekarang"
+      "enableNow": "Aktifkan sekarang",
+      "enableOnly": "Aktifkan Saja",
+      "enableAndPublish": "Aktifkan & Publish Sekarang",
+      "publishing": "Sedang menerbitkan toko kamu..."
     },
     "unsavedModal": {
       "title": "Perubahan belum dipublikasikan",

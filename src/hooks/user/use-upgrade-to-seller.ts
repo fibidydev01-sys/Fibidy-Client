@@ -4,22 +4,14 @@
 // USE UPGRADE TO SELLER
 // File: src/hooks/user/use-upgrade-to-seller.ts
 //
+// [SPRINT 1 — G3 FIX: getErrorMessage pakai t]
+// getErrorMessage(err) → getErrorMessage(err, t) agar error key dari
+// BE ditranslate sebelum ditampilkan ke user.
+//
 // Hook to upgrade tenant from BUYER → SELLER.
-// Called from /dashboard/setup-store after wizard completes.
-//
 // After upgrade:
-//   1. Update tenant in store (role: SELLER, proper slug, etc.)
+//   1. Update tenant in store (role: SELLER)
 //   2. Redirect to /dashboard/products
-//   3. Sidebar fully unlocked
-//   4. Library preserved — same account
-//
-// [i18n FIX — 2026-04-19]
-// Toast title + description wired to `toast.upgrade.*`. JSON keys used:
-//   - success       ("Congratulations!")
-//   - successDetail ("Your store is live. Start selling products now!")
-//   - failed        ("Upgrade failed")
-//
-// Error state stays as passthrough — same rationale as use-buyer-register.
 // ==========================================
 
 import { useState, useCallback } from 'react';
@@ -33,6 +25,8 @@ import type { Tenant, UpgradeToSellerInput } from '@/types/tenant';
 
 export function useUpgradeToSeller() {
   const tToast = useTranslations('toast.upgrade');
+  // [G3 FIX] t untuk getErrorMessage
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setTenant } = useAuthStore();
@@ -61,7 +55,8 @@ export function useUpgradeToSeller() {
 
         return response;
       } catch (err) {
-        const message = getErrorMessage(err);
+        // [G3 FIX] Pass t agar error key ditranslate
+        const message = getErrorMessage(err, t);
         setError(message);
         toast.error(tToast('failed'), { description: message });
         throw err;
@@ -69,7 +64,7 @@ export function useUpgradeToSeller() {
         setIsLoading(false);
       }
     },
-    [setTenant, router, tToast],
+    [setTenant, router, tToast, t],
   );
 
   const reset = useCallback(() => setError(null), []);

@@ -2,18 +2,22 @@
 
 // ============================================================================
 // FILE: src/components/dashboard/blocks/block2.tsx
-// VARIANT: Glass Blur — FULL LANDING TEMPLATE
+// VARIANT: Elegant Minimal — FULL LANDING TEMPLATE
 //
 // SECTIONS:
-//   1. Hero          — blurred backdrop + split frame banner + glass border
-//   2. Contact       — glass panel wrapper, frosted card vibe
-//   3. Pre-footer CTA — large frosted CTA panel centered
+//   1. Hero          — split frame banner + 2-col image/text layout
+//   2. Contact       — clean card panel + optional map
+//   3. Pre-footer CTA — centered CTA panel
 //
-// STYLE LANGUAGE: glass blur
-//   - Frosted panels (backdrop-blur)
-//   - White/30 borders on dark backdrop
-//   - High contrast white text on blurred bg
-//   - Soft shadows
+// STYLE LANGUAGE: elegant minimal
+//   - Clean white/surface panels
+//   - Subtle border separators
+//   - Refined typography, no oversized type
+//   - Consistent with Block1 design system
+//
+// [RENAME — May 2026]
+//   feature.icon → feature.image (FeatureItem.icon removed)
+//   Lokasi: SplitFrame filter + image render
 // ============================================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -29,7 +33,7 @@ import { cn } from '@/lib/shared/utils';
 import type { FeatureItem } from '@/types/tenant';
 
 interface Block2Props {
-  title: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   category?: string;
@@ -52,7 +56,7 @@ interface Block2Props {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// BANNER 2 — SPLIT FRAME (UNCHANGED, existing)
+// BANNER 2 — SPLIT FRAME
 // ────────────────────────────────────────────────────────────────────────────
 
 const AUTOPLAY_INTERVAL = 5000;
@@ -122,7 +126,7 @@ function SplitFrame({ features }: { features: FeatureItem[] }) {
 
   return (
     <div
-      className="banner-full-bleed relative bg-foreground"
+      className="banner-full-bleed relative bg-muted"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -139,10 +143,11 @@ function SplitFrame({ features }: { features: FeatureItem[] }) {
             key={index}
             className="shrink-0 w-full snap-start flex flex-col md:flex-row"
           >
+            {/* [RENAME] feature.icon → feature.image */}
             <div className="relative w-full md:w-1/2 aspect-square md:aspect-auto md:min-h-[420px] lg:min-h-[520px] bg-muted shrink-0">
-              {feature.icon ? (
+              {feature.image ? (
                 <OptimizedImage
-                  src={feature.icon}
+                  src={feature.image}
                   alt={feature.title ?? `Banner ${index + 1}`}
                   fill
                   className="object-cover"
@@ -208,11 +213,11 @@ function SplitFrame({ features }: { features: FeatureItem[] }) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — HERO (existing pattern, KEEP — blurred backdrop)
+// SECTION 1 — HERO
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block2HeroProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   category?: string;
@@ -240,79 +245,90 @@ function Block2HeroSection({
   storeName,
   features,
 }: Block2HeroProps) {
-  const t = useTranslations('common.state');
-
+  // [RENAME] f.icon → f.image
   const validFeatures = (features || []).filter(
-    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.icon)
+    (f) => f && typeof f === 'object' && !Array.isArray(f) && (f.title || f.image)
   );
   const hasBanner = validFeatures.length > 0;
+  const hasEyebrow = !!(eyebrow ?? category);
+  const hasImage = !!(backgroundImage || logo);
+  const hasBadgeBlock = !!(storeName || logo);
+  const hasCta = showCta && !!ctaText;
+
+  const hasAnyContent =
+    hasBanner || hasBadgeBlock || hasEyebrow || !!title || !!subtitle || !!description || hasCta || hasImage;
+
+  if (!hasAnyContent) return null;
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden bg-background flex flex-col">
+      {hasBanner && <SplitFrame features={validFeatures} />}
 
-      <div className="absolute inset-0 z-0">
-        {(backgroundImage || logo) && (
-          <div className="absolute inset-0 scale-110 overflow-hidden">
-            <OptimizedImage
-              src={(backgroundImage ?? logo)!}
-              alt=""
-              fill
-              className="object-cover blur-2xl scale-110"
-            />
+      <div className="flex flex-1 flex-col lg:grid lg:grid-cols-2 min-h-screen">
+        {hasImage && (
+          <div className="flex items-center justify-center px-8 sm:px-10 lg:px-12 py-12 lg:py-16 order-2 lg:order-1">
+            <div className="w-full max-w-sm lg:max-w-none">
+              <div className="overflow-hidden border border-border rounded-2xl">
+                <div className="aspect-[3/4] relative w-full">
+                  {backgroundImage ? (
+                    <OptimizedImage src={backgroundImage} alt={title ?? ''} fill priority className="object-cover" />
+                  ) : logo ? (
+                    <OptimizedImage src={logo} alt={title ?? ''} fill className="object-contain p-12" />
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
 
-      {hasBanner && (
-        <div className="relative z-10">
-          <SplitFrame features={validFeatures} />
-        </div>
-      )}
-
-      <div className="relative z-10 flex flex-1 flex-col lg:grid lg:grid-cols-2 min-h-screen">
-
-        <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-16 lg:py-24 order-1 lg:order-1">
-          {(storeName || logo) && (
+        <div
+          className={cn(
+            'flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-16 lg:py-24 order-1 lg:order-2',
+            !hasImage && 'lg:col-span-2 lg:items-center lg:text-center',
+          )}
+        >
+          {hasBadgeBlock && (
             <div className="mb-8 flex items-center gap-3">
               {logo && (
-                <Card className="relative w-14 h-14 overflow-hidden border border-white/30 bg-white/10 rounded-xl shrink-0">
-                  <OptimizedImage src={logo} alt={storeName ?? title} fill className="object-cover" />
+                <Card className="relative w-14 h-14 overflow-hidden border border-border bg-card rounded-xl shrink-0">
+                  <OptimizedImage src={logo} alt={storeName ?? title ?? ''} fill className="object-cover" />
                 </Card>
               )}
               {storeName && (
-                <Badge variant="outline" className="rounded-sm px-3 py-1 text-[10px] tracking-[0.2em] uppercase font-medium border-white/30 text-white/70 bg-transparent">
+                <Badge variant="outline" className="rounded-sm px-3 py-1 text-[10px] tracking-[0.2em] uppercase font-medium border-border text-muted-foreground bg-transparent">
                   {storeName}
                 </Badge>
               )}
             </div>
           )}
 
-          {(eyebrow || category) && (
+          {hasEyebrow && (
             <div className="mb-5 flex items-center gap-3 max-w-[260px]">
-              <Separator className="flex-1 bg-white/30" />
-              <span className="text-[11px] uppercase tracking-[0.28em] text-white/60 whitespace-nowrap font-medium">
+              <Separator className="flex-1 bg-border" />
+              <span className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground whitespace-nowrap font-medium">
                 {eyebrow ?? category}
               </span>
-              <Separator className="flex-1 bg-white/30" />
+              <Separator className="flex-1 bg-border" />
             </div>
           )}
 
-          <h1 className="text-[36px] sm:text-[42px] md:text-[48px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-white mb-4 max-w-lg drop-shadow-lg">
-            {title}
-          </h1>
+          {title && (
+            <h1 className="text-[36px] sm:text-[42px] md:text-[48px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground mb-4 max-w-lg">
+              {title}
+            </h1>
+          )}
 
           {subtitle && (
-            <p className="text-base font-medium text-white/90 leading-snug max-w-sm mb-3">{subtitle}</p>
+            <p className="text-base font-medium text-foreground/80 leading-snug max-w-sm mb-3">{subtitle}</p>
           )}
 
           {description && (
-            <p className="text-sm text-white/60 leading-relaxed max-w-sm mb-10">{description}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-10">{description}</p>
           )}
 
-          {!description && <div className="mb-10" />}
+          {!description && hasCta && <div className="mb-10" />}
 
-          {showCta && (
+          {hasCta && (
             <div>
               <Link href={ctaLink}>
                 <InteractiveHoverButton className="px-9 py-4 text-sm font-semibold tracking-wide">
@@ -322,34 +338,13 @@ function Block2HeroSection({
             </div>
           )}
         </div>
-
-        <div className="flex items-center justify-center px-8 sm:px-10 lg:px-12 py-12 lg:py-16 order-2 lg:order-2">
-          <div className="w-full max-w-sm lg:max-w-none">
-            <div className="overflow-hidden border-2 border-white/70 rounded-2xl shadow-2xl">
-              <div className="aspect-[3/4] relative w-full">
-                {backgroundImage ? (
-                  <OptimizedImage src={backgroundImage} alt={title} fill priority className="object-cover" />
-                ) : logo ? (
-                  <OptimizedImage src={logo} alt={title} fill className="object-contain p-12" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-white/20 font-medium">
-                      {t('noImage')}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </section>
   );
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — CONTACT (NEW, glass blur panel style)
+// SECTION 2 — CONTACT
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block2ContactProps {
@@ -362,8 +357,6 @@ interface Block2ContactProps {
   contactMapUrl?: string;
   contactShowMap?: boolean;
   storeName?: string;
-  backgroundImage?: string;
-  logo?: string;
 }
 
 function Block2ContactSection({
@@ -376,8 +369,6 @@ function Block2ContactSection({
   contactMapUrl,
   contactShowMap,
   storeName,
-  backgroundImage,
-  logo,
 }: Block2ContactProps) {
   const t = useTranslations('store.tenantContact');
   const tHeader = useTranslations('store.header');
@@ -385,7 +376,7 @@ function Block2ContactSection({
   const hasAnyContact = !!(whatsapp || phone || email || address);
   if (!hasAnyContact) return null;
 
-  const showMap = contactShowMap && !!contactMapUrl;
+  const showMap = !!(contactShowMap && contactMapUrl);
 
   const whatsappLink = whatsapp && storeName
     ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(t('whatsappTemplate', { name: storeName }))}`
@@ -394,117 +385,105 @@ function Block2ContactSection({
       : null;
 
   return (
-    <section id="contact" className="relative py-20 md:py-28 overflow-hidden">
-      {/* Blurred backdrop continuity */}
-      <div className="absolute inset-0 z-0">
-        {(backgroundImage || logo) && (
-          <div className="absolute inset-0 scale-110 overflow-hidden">
-            <OptimizedImage
-              src={(backgroundImage ?? logo)!}
-              alt=""
-              fill
-              className="object-cover blur-3xl scale-110 opacity-40"
-            />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-black/60" />
-      </div>
-
-      <div className="relative z-10 container px-4">
-        <div className="mb-10 md:mb-14 space-y-3">
-          <div className="w-8 h-px bg-white/60" />
-          <h2 className="text-[36px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-white drop-shadow-lg">
-            {contactTitle || t('heading')}
-          </h2>
+    <section id="contact" className="container px-4 py-20 md:py-28 space-y-12 md:space-y-16">
+      {(contactTitle || contactSubtitle) && (
+        <div className="space-y-3 text-center flex flex-col items-center">
+          {contactTitle && (
+            <h2 className="text-[36px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
+              {contactTitle}
+            </h2>
+          )}
           {contactSubtitle && (
-            <p className="text-base text-white/70 max-w-xl leading-relaxed">
+            <p className="text-base text-muted-foreground max-w-xl leading-relaxed">
               {contactSubtitle}
             </p>
           )}
         </div>
+      )}
 
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+      {showMap && (
+        <div className="rounded-xl overflow-hidden border border-border">
+          <iframe
+            src={contactMapUrl}
+            width="100%"
+            height="400"
+            style={{ border: 0, display: 'block' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Google Maps"
+          />
+        </div>
+      )}
 
-          {/* LEFT — Glass contact panel */}
-          <div className="rounded-2xl border border-white/30 bg-white/10 backdrop-blur-xl shadow-2xl p-6 md:p-8 divide-y divide-white/20">
-
-            {whatsapp && whatsappLink && (
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between py-4 first:pt-0 hover:text-green-300 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="h-4 w-4 text-white/60 group-hover:text-green-300 transition-colors" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 mb-0.5">{tHeader('whatsapp')}</p>
-                    <p className="text-sm font-medium text-white">+{whatsapp}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-white/40 group-hover:text-green-300 group-hover:translate-x-0.5 transition-all duration-200" />
-              </a>
-            )}
-
-            {phone && (
-              <a
-                href={`tel:${phone}`}
-                className="group flex items-center justify-between py-4 hover:text-white/80 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-white/60" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 mb-0.5">{tHeader('phone')}</p>
-                    <p className="text-sm font-medium text-white">{phone}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-white/40 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </a>
-            )}
-
-            {email && (
-              <a
-                href={`mailto:${email}`}
-                className="group flex items-center justify-between py-4 hover:text-white/80 transition-colors duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-white/60" />
-                  <div>
-                    <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 mb-0.5">{tHeader('email')}</p>
-                    <p className="text-sm font-medium text-white">{email}</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-white/40 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </a>
-            )}
-
-            {address && (
-              <div className="flex items-start gap-3 py-4 last:pb-0">
-                <MapPin className="h-4 w-4 text-white/60 mt-0.5 shrink-0" />
+      <div className="grid grid-cols-1 md:grid-cols-2 border-y border-border divide-y md:divide-y-0 md:divide-x divide-border">
+        <div className="divide-y divide-border">
+          {whatsapp && whatsappLink && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between px-5 py-4 hover:text-green-600 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-green-600 transition-colors shrink-0" />
                 <div>
-                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 mb-0.5">{tHeader('address')}</p>
-                  <p className="text-sm font-medium text-white">{address}</p>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('whatsapp')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">+{whatsapp}</p>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* RIGHT — Map glass-wrapped */}
-          {showMap && (
-            <div className="rounded-2xl overflow-hidden border border-white/30 bg-white/10 backdrop-blur-xl shadow-2xl">
-              <iframe
-                src={contactMapUrl}
-                width="100%"
-                height="400"
-                style={{ border: 0, display: 'block' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Google Maps"
-              />
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-green-600 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
+            </a>
+          )}
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('phone')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">{phone}</p>
+                </div>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+            </a>
+          )}
+        </div>
+        <div className="divide-y divide-border">
+          {email && (
+            <a
+              href={`mailto:${email}`}
+              className="group flex items-center justify-between px-5 py-4 hover:text-foreground/70 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                    {tHeader('email')}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">{email}</p>
+                </div>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+            </a>
+          )}
+          {address && (
+            <div className="flex items-start gap-3 px-5 py-4">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-muted-foreground mb-0.5">
+                  {tHeader('address')}
+                </p>
+                <p className="text-sm font-medium text-foreground">{address}</p>
+              </div>
             </div>
           )}
-
         </div>
       </div>
     </section>
@@ -512,17 +491,15 @@ function Block2ContactSection({
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// SECTION 3 — PRE-FOOTER CTA (NEW, glass frosted panel center)
+// SECTION 3 — PRE-FOOTER CTA
 // ────────────────────────────────────────────────────────────────────────────
 
 interface Block2PrefooterProps {
   whatsapp?: string;
   storeName?: string;
-  backgroundImage?: string;
-  logo?: string;
 }
 
-function Block2PrefooterCTA({ whatsapp, storeName, backgroundImage, logo }: Block2PrefooterProps) {
+function Block2PrefooterCTA({ whatsapp, storeName }: Block2PrefooterProps) {
   const t = useTranslations('store.tenantContact');
 
   if (!whatsapp) return null;
@@ -531,44 +508,26 @@ function Block2PrefooterCTA({ whatsapp, storeName, backgroundImage, logo }: Bloc
   const link = `https://wa.me/${whatsapp}${message ? `?text=${encodeURIComponent(message)}` : ''}`;
 
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        {(backgroundImage || logo) && (
-          <div className="absolute inset-0 scale-110 overflow-hidden">
-            <OptimizedImage
-              src={(backgroundImage ?? logo)!}
-              alt=""
-              fill
-              className="object-cover blur-3xl scale-110 opacity-50"
-            />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-black/70" />
-      </div>
-
-      <div className="relative z-10 container px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="rounded-3xl border border-white/30 bg-white/10 backdrop-blur-2xl shadow-2xl p-10 md:p-14 text-center space-y-6">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-white/60">
-              Get in touch
-            </p>
-            <h2 className="text-[32px] sm:text-[42px] lg:text-[52px] font-black leading-[1.05] tracking-tight text-white drop-shadow-lg">
-              Got a question?
-              <br />
-              <span className="text-white/70">Let&apos;s talk.</span>
-            </h2>
-            <div className="pt-4">
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 px-7 py-3.5 border-2 border-white/70 bg-white/10 backdrop-blur text-white text-sm font-semibold tracking-wide hover:bg-white hover:text-foreground transition-colors rounded-full"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>Chat on WhatsApp</span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </div>
+    <section className="border-t border-border bg-muted/30 py-20 md:py-28">
+      <div className="container px-4">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted-foreground">
+            {t('sectionEyebrow')}
+          </p>
+          <h2 className="text-[32px] sm:text-[42px] lg:text-[52px] font-black leading-[1.0] tracking-tight text-foreground">
+            {t('ctaHeading', { name: storeName ?? '' })}
+          </h2>
+          <div className="pt-2">
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-3 px-7 py-3.5 bg-foreground text-background text-sm font-semibold tracking-wide hover:bg-foreground/85 transition-colors rounded-full"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>{t('whatsappCta')}</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </a>
           </div>
         </div>
       </div>
@@ -577,7 +536,7 @@ function Block2PrefooterCTA({ whatsapp, storeName, backgroundImage, logo }: Bloc
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// BLOCK 2 — Glass Blur — FULL LANDING TEMPLATE
+// BLOCK 2 — Elegant Minimal — FULL LANDING TEMPLATE
 // ────────────────────────────────────────────────────────────────────────────
 
 export function Block2(props: Block2Props) {
@@ -597,7 +556,6 @@ export function Block2(props: Block2Props) {
         storeName={props.storeName}
         features={props.features}
       />
-
       <Block2ContactSection
         contactTitle={props.contactTitle}
         contactSubtitle={props.contactSubtitle}
@@ -608,15 +566,10 @@ export function Block2(props: Block2Props) {
         contactMapUrl={props.contactMapUrl}
         contactShowMap={props.contactShowMap}
         storeName={props.storeName}
-        backgroundImage={props.backgroundImage}
-        logo={props.logo}
       />
-
       <Block2PrefooterCTA
         whatsapp={props.whatsapp}
         storeName={props.storeName}
-        backgroundImage={props.backgroundImage}
-        logo={props.logo}
       />
     </>
   );

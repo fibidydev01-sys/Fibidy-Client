@@ -1,13 +1,27 @@
 'use client';
 
+// ============================================================================
+// STEP HIGHLIGHTS — Settings About Form
+// File: src/components/dashboard/settings/form/about/step-highlights.tsx
+//
+// [FIX — May 2026]
+// image-slot.tsx (Sprint 1.3 refactor) no longer exports FilledSlot or
+// LockedSlot. Updated API usage accordingly.
+//
+// [RENAME — May 2026]
+// item.icon → item.image (FeatureItem.icon removed)
+// icon: url  → image: url  (saat add new item)
+// ============================================================================
+
 import { useEffect, useRef } from 'react';
-import { Crown } from 'lucide-react';
+import { Crown, Lock, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/shared/utils';
 import { useCloudinaryUpload } from '@/hooks/shared/use-cloudinary-upload';
-import { FilledSlot, EmptySlot, LockedSlot } from '@/components/dashboard/shared/image-slot';
+import { EmptySlot } from '@/components/dashboard/shared/image-slot';
 import type { AboutFormData, FeatureItem } from '@/types/tenant';
 
 // ─── Constants ────────────────────────────────────────────────────────────
@@ -22,6 +36,117 @@ interface StepHighlightsProps {
   updateFormData: <K extends keyof AboutFormData>(key: K, value: AboutFormData[K]) => void;
   isBusiness?: boolean;
   onUpgrade?: () => void;
+}
+
+// ─── Inline LockedSlot ────────────────────────────────────────────────────
+function LockedSlotInline({ onClick }: { onClick: () => void }) {
+  return (
+    <div className="rounded-xl border-2 border-dashed border-amber-300/50 bg-amber-50/30 dark:bg-amber-950/10 p-4 space-y-3">
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50 text-amber-600 dark:text-amber-400 text-xs font-medium hover:bg-amber-100/60 transition-colors"
+      >
+        <Lock className="h-3.5 w-3.5" aria-hidden />
+        <Crown className="h-3.5 w-3.5" aria-hidden />
+      </button>
+      <div className="h-9 rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
+      <div className="h-[76px] rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
+    </div>
+  );
+}
+
+// ─── Highlight Card (filled) ──────────────────────────────────────────────
+interface HighlightCardProps {
+  item: FeatureItem;
+  index: number;
+  onRemove: () => void;
+  onTitleChange: (val: string) => void;
+  onDescriptionChange: (val: string) => void;
+  t: ReturnType<typeof useTranslations<'settings.about'>>;
+}
+
+function HighlightCard({
+  item,
+  index,
+  onRemove,
+  onTitleChange,
+  onDescriptionChange,
+  t,
+}: HighlightCardProps) {
+  return (
+    <div className="rounded-xl border bg-card p-4 space-y-3 group">
+      {/* Image thumbnail + remove button */}
+      <div className="flex items-center gap-3">
+        <div className="relative w-12 h-12 rounded-lg overflow-hidden border bg-muted shrink-0">
+          {/* [RENAME] item.icon → item.image */}
+          {item.image && (
+            <Image
+              src={item.image}
+              alt={item.title || `Highlight ${index + 1}`}
+              fill
+              className="object-cover"
+              sizes="48px"
+              unoptimized
+            />
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Remove highlight"
+          className="ml-auto p-1.5 rounded-full bg-muted/60 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Title */}
+      <div className="relative">
+        <Input
+          placeholder={t('highlightTitlePlaceholder')}
+          value={item.title || ''}
+          onChange={(e) => onTitleChange(e.target.value)}
+          className="h-9 text-sm font-semibold pr-10 placeholder:font-normal placeholder:text-muted-foreground/50"
+        />
+        <span
+          className={cn(
+            'absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono tabular-nums pointer-events-none',
+            (item.title || '').length >= MAX_TITLE - 2
+              ? 'text-amber-500 font-semibold'
+              : 'text-muted-foreground/40',
+          )}
+        >
+          {t('counter', { current: (item.title || '').length, max: MAX_TITLE })}
+        </span>
+      </div>
+
+      {/* Description */}
+      <div className="relative">
+        <Textarea
+          placeholder={t('highlightDescriptionPlaceholder')}
+          value={item.description || ''}
+          onChange={(e) => {
+            if (e.target.value.length <= MAX_DESC) {
+              onDescriptionChange(e.target.value);
+            }
+          }}
+          rows={3}
+          className="resize-none text-sm pb-5 placeholder:font-normal placeholder:text-muted-foreground/50"
+        />
+        <span
+          className={cn(
+            'absolute bottom-2 right-3 text-[10px] font-mono tabular-nums pointer-events-none',
+            (item.description || '').length >= MAX_DESC - 10
+              ? 'text-amber-500 font-semibold'
+              : 'text-muted-foreground/40',
+          )}
+        >
+          {t('counter', { current: (item.description || '').length, max: MAX_DESC })}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────
@@ -41,12 +166,12 @@ export function StepHighlights({
   }, [items]);
 
   const { isUploading, openWidget } = useCloudinaryUpload({
-    folder: 'fibidy/feature-icons',
+    folder: 'fibidy/highlight-images',
     maxFiles: 1,
-    multiple: false,
     onSuccess: (url) => {
       const cur = itemsRef.current;
-      const newItem: FeatureItem = { icon: url, title: '', description: '' };
+      // [RENAME] icon: url → image: url
+      const newItem: FeatureItem = { image: url, title: '', description: '' };
       updateFormData('aboutFeatures', [...cur, newItem]);
     },
   });
@@ -80,80 +205,42 @@ export function StepHighlights({
 
         if (item) {
           return (
-            <FilledSlot
+            <HighlightCard
               key={i}
-              url={item.icon || ''}
+              item={item}
               index={i}
               onRemove={() => handleRemove(i)}
-            >
-              {/* Title */}
-              <div className="relative">
-                <Input
-                  placeholder={t('highlightTitlePlaceholder')}
-                  value={item.title || ''}
-                  onChange={(e) => handleTitleChange(i, e.target.value)}
-                  className="h-9 text-sm font-semibold pr-10 placeholder:font-normal placeholder:text-muted-foreground/50"
-                />
-                <span className={cn(
-                  'absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono tabular-nums pointer-events-none',
-                  (item.title || '').length >= MAX_TITLE - 2
-                    ? 'text-amber-500 font-semibold'
-                    : 'text-muted-foreground/40'
-                )}>
-                  {t('counter', { current: (item.title || '').length, max: MAX_TITLE })}
-                </span>
-              </div>
-
-              {/* Description */}
-              <div className="relative">
-                <Textarea
-                  placeholder={t('highlightDescriptionPlaceholder')}
-                  value={item.description || ''}
-                  onChange={(e) => {
-                    if (e.target.value.length <= MAX_DESC)
-                      handleUpdate(i, 'description', e.target.value);
-                  }}
-                  rows={3}
-                  className="resize-none text-sm pb-5 placeholder:font-normal placeholder:text-muted-foreground/50"
-                />
-                <span className={cn(
-                  'absolute bottom-2 right-3 text-[10px] font-mono tabular-nums pointer-events-none',
-                  (item.description || '').length >= MAX_DESC - 10
-                    ? 'text-amber-500 font-semibold'
-                    : 'text-muted-foreground/40'
-                )}>
-                  {t('counter', { current: (item.description || '').length, max: MAX_DESC })}
-                </span>
-              </div>
-            </FilledSlot>
+              onTitleChange={(val) => handleTitleChange(i, val)}
+              onDescriptionChange={(val) => handleUpdate(i, 'description', val)}
+              t={t}
+            />
           );
         }
 
         if (!isBusiness && i >= FREE_SLOTS) {
           return (
-            <LockedSlot key={`locked-${i}`} onClick={() => onUpgrade?.()}>
-              <div className="h-9 rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
-              <div className="h-[76px] rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
-            </LockedSlot>
+            <LockedSlotInline key={`locked-${i}`} onClick={() => onUpgrade?.()} />
           );
         }
 
         return (
-          <EmptySlot
-            key={`empty-${i}`}
-            index={i}
-            label={t('emptySlotLabel', { index: i + 1 })}
-            onClick={handleOpen}
-            isLoading={isUploading && i === items.length}
-          >
+          <div key={`empty-wrapper-${i}`} className="space-y-3">
+            <EmptySlot
+              index={i}
+              label={t('emptySlotLabel', { index: i + 1 })}
+              onClick={handleOpen}
+              isLoading={isUploading && i === items.length}
+            />
             <div className="h-9 rounded-md bg-muted/40 border border-dashed" />
             <div className="h-[76px] rounded-md bg-muted/40 border border-dashed" />
-          </EmptySlot>
+          </div>
         );
       })}
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="tabular-nums">{t('slotCount', { current: items.length, max: maxSlots })}</span>
+        <span className="tabular-nums">
+          {t('slotCount', { current: items.length, max: maxSlots })}
+        </span>
         {!isBusiness && (
           <button
             type="button"

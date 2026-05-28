@@ -8,16 +8,19 @@ import { EduBanner } from '@/components/store/shared/edu-banner';
 import { LocalBusinessSchema } from '@/components/store/shared/local-business-schema';
 import { generateThemeCSS } from '@/lib/shared/colors';
 import { createTenantMetadata } from '@/lib/shared/seo';
+import { OfflineBanner } from '@/components/layout/dashboard/offline-banner';
 import type { PublicTenant } from '@/types/tenant';
 
 // ============================================================================
 // STORE LAYOUT
 // File: src/app/[locale]/store/[slug]/layout.tsx
 //
-// [PHASE D — May 2026]
-// Render EduBanner SEBELUM StoreHeader jika tenant.isEduMode === true.
-// EduBanner bersifat sticky + non-dismissible.
-// tenant.isEduMode tersedia karena findBySlug() di BE sudah include isEduMode.
+// [EDU BANNER MOVED — May 2026]
+// EduBanner dipindah ke SETELAH StoreHeader — sticky top-16 (di bawah header).
+// Sebelumnya: di atas header (z-[60]) → menumpuk dan tidak natural.
+// Sekarang: mengikuti header saat scroll, terasa seperti bagian dari header.
+//
+// Order: OfflineBanner → StoreHeader → EduBanner → main content
 // ============================================================================
 
 export const dynamic = 'force-dynamic';
@@ -29,8 +32,7 @@ interface StoreLayoutProps {
 
 async function getTenant(slug: string): Promise<PublicTenant | null> {
   try {
-    const tenant = await tenantsApi.getBySlug(slug);
-    return tenant;
+    return await tenantsApi.getBySlug(slug);
   } catch {
     return null;
   }
@@ -100,10 +102,14 @@ export default async function StoreLayout({
           }}
         />
 
-        {/* [PHASE D] EduBanner — sticky, non-dismissible, above StoreHeader */}
-        {tenant.isEduMode === true && <EduBanner />}
+        {/* z-50 — offline banner tetap paling atas */}
+        <OfflineBanner />
 
+        {/* Header sticky top-0 z-50 */}
         <StoreHeader tenant={tenant} />
+
+        {/* EduBanner — sticky top-16, tepat di bawah header, z-40 */}
+        {tenant.isEduMode === true && <EduBanner />}
 
         <main className="flex-1">
           {children}

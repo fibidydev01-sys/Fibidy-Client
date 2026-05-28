@@ -36,16 +36,19 @@
 //   2. Add the key to AUTOFILL_CATEGORY_KEYS below
 //   3. Add the autofill entry to CATEGORY_AUTOFILL below
 //   pnpm typecheck will tell you exactly what's missing.
+//
+// [FIX — May 2026]
+// aboutFeatures[].image is a FEATURE IMAGE URL (full photo), bukan SVG icon.
+// Sebelumnya helper icon() return Cloudinary SVG URL yang tidak exist (404).
+// Fix: ganti dengan Unsplash photo URL per kategori — proven valid,
+// same pattern dengan heroBackgroundImage. Schema: aboutFeatures Json? —
+// tidak ada constraint, string URL apapun valid.
 // ============================================================================
 
 import { getCategoryList } from './categories';
 import type { FeatureItem } from '@/types/tenant';
 
 // ─── Canonical key list — single source of truth for typing ──────────────────
-//
-// Kept as const so TypeScript can derive a strict literal union.
-// Must stay in sync with CATEGORY_CONFIG in categories.ts.
-// The runtime assertion below will catch any drift.
 
 const AUTOFILL_CATEGORY_KEYS = [
   // FOOD & DRINK
@@ -69,21 +72,13 @@ const AUTOFILL_CATEGORY_KEYS = [
   'MOVING_SERVICE',
 ] as const;
 
-/** Strict union of all supported autofill category keys */
 export type CategoryKey = typeof AUTOFILL_CATEGORY_KEYS[number];
 
-/** Full map type — every CategoryKey must have an entry + __default__ */
 type CategoryAutofillMap = { [K in CategoryKey]: CategoryAutofill } & {
   __default__: CategoryAutofill;
 };
 
-// ─── Runtime drift detection (dev + prod) ────────────────────────────────────
-//
-// Runs once at module load. Compares AUTOFILL_CATEGORY_KEYS against the live
-// CATEGORY_CONFIG in categories.ts. Logs warnings for any gaps in either direction.
-//
-// In development: throws so the problem is impossible to miss.
-// In production: warns so logs capture it without breaking the app.
+// ─── Runtime drift detection ──────────────────────────────────────────────────
 
 function assertAutofillCoverage(): void {
   const registryKeys = new Set(getCategoryList().map((c) => c.key));
@@ -92,19 +87,15 @@ function assertAutofillCoverage(): void {
   const inRegistryNotAutofill = [...registryKeys].filter((k) => !autofillKeys.has(k));
   const inAutofillNotRegistry = [...autofillKeys].filter((k) => !registryKeys.has(k));
 
-  if (inRegistryNotAutofill.length === 0 && inAutofillNotRegistry.length === 0) {
-    return; // All good
-  }
+  if (inRegistryNotAutofill.length === 0 && inAutofillNotRegistry.length === 0) return;
 
   const lines: string[] = ['[category-autofill] Coverage mismatch detected:'];
-
   if (inRegistryNotAutofill.length > 0) {
     lines.push(
       `  ❌ In categories.ts but MISSING from autofill: ${inRegistryNotAutofill.join(', ')}`,
       '     → Add entries to CATEGORY_AUTOFILL in category-autofill.ts',
     );
   }
-
   if (inAutofillNotRegistry.length > 0) {
     lines.push(
       `  ⚠️  In autofill but NOT in categories.ts: ${inAutofillNotRegistry.join(', ')}`,
@@ -113,7 +104,6 @@ function assertAutofillCoverage(): void {
   }
 
   const message = lines.join('\n');
-
   if (process.env.NODE_ENV === 'development') {
     throw new Error(message);
   } else {
@@ -126,21 +116,13 @@ assertAutofillCoverage();
 // ─── Autofill shape ───────────────────────────────────────────────────────────
 
 export interface CategoryAutofill {
-  /** Hex color — must exist in THEME_COLORS */
   primaryColor: string;
-  /** Unsplash CDN URL — landscape, tested */
   heroBackgroundImage: string;
-  /** Supports {{storeName}} placeholder */
   heroTitle: string;
-  /** Generic but relatable — no {{storeName}} needed */
   heroSubtitle: string;
-  /** Max 2 words, 15 chars */
   heroCtaText: string;
-  /** Exactly 3 feature items */
   aboutFeatures: FeatureItem[];
-  /** Contact section heading */
   contactTitle: string;
-  /** Contact section subheading */
   contactSubtitle: string;
 }
 
@@ -165,12 +147,164 @@ export function getCategoryAutofill(categoryKey: string): CategoryAutofill {
   );
 }
 
-// ─── Cloudinary base helper ───────────────────────────────────────────────────
-// All icons live under fibidy/feature-icons/ in Cloudinary.
-// Replace {name} with the actual uploaded filename (without extension changes needed).
+// ─── Feature image helper ─────────────────────────────────────────────────────
+//
+// [FIX] aboutFeatures[].icon adalah FEATURE IMAGE (foto penuh), bukan SVG icon.
+// Sebelumnya pakai Cloudinary SVG URL yang tidak exist → 404 → blank display.
+// Sekarang pakai Unsplash photo URL per tema — same pattern heroBackgroundImage.
+//
+// Mapping: icon name → Unsplash photo URL yang relevan secara tematik.
+// Fallback ke generic business photo jika nama tidak dikenal.
 
-const icon = (name: string): string =>
-  `https://res.cloudinary.com/fibidy/image/upload/v1/feature-icons/${name}.svg`;
+const FEATURE_IMAGES: Record<string, string> = {
+  // ── Food & Dining ────────────────────────────────────────────────────────
+  'fork-knife':           'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80&auto=format&fit=crop',
+  'chef-hat':             'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&auto=format&fit=crop',
+  'serving-dish':         'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80&auto=format&fit=crop',
+  'bread-loaf':           'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80&auto=format&fit=crop',
+  'wheat':                'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80&auto=format&fit=crop',
+  'fire-flame':           'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80&auto=format&fit=crop',
+  'leaf-fresh':           'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80&auto=format&fit=crop',
+  'star-rating':          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80&auto=format&fit=crop',
+  'coffee-bean':          'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80&auto=format&fit=crop',
+  'couch':                'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80&auto=format&fit=crop',
+  'leaf':                 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80&auto=format&fit=crop',
+  'gift-box':             'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=800&q=80&auto=format&fit=crop',
+  'calendar-check':       'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80&auto=format&fit=crop',
+  'breakfast':            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80&auto=format&fit=crop',
+  'catering-venue':       'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80&auto=format&fit=crop',
+
+  // ── Location & Delivery ──────────────────────────────────────────────────
+  'location-pin':         'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80&auto=format&fit=crop',
+  'location-strategic':   'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80&auto=format&fit=crop',
+  'clock-fast':           'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80&auto=format&fit=crop',
+  'delivery-box':         'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80&auto=format&fit=crop',
+  'delivery-fast':        'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&q=80&auto=format&fit=crop',
+  'delivery-local':       'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&q=80&auto=format&fit=crop',
+  'delivery-car':         'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&q=80&auto=format&fit=crop',
+  'delivery-safe':        'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80&auto=format&fit=crop',
+  'truck-delivery':       'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&q=80&auto=format&fit=crop',
+  'truck-moving':         'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&q=80&auto=format&fit=crop',
+  'shipping-box':         'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80&auto=format&fit=crop',
+  'box-packing':          'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&q=80&auto=format&fit=crop',
+  'airplane':             'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80&auto=format&fit=crop',
+  'shield-travel':        'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80&auto=format&fit=crop',
+  'support-24h':          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop',
+
+  // ── Quality & Trust ──────────────────────────────────────────────────────
+  'shield-check':         'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'shield-safe':          'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'shield-guarantee':     'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'shield-warranty':      'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'shield-original':      'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'shield-security':      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop',
+  'quality-badge':        'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&auto=format&fit=crop',
+  'certificate':          'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'certificate-original': 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80&auto=format&fit=crop',
+  'star-quality':         'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop',
+  'handshake':            'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&q=80&auto=format&fit=crop',
+  'invoice':              'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80&auto=format&fit=crop',
+  'invoice-transparent':  'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80&auto=format&fit=crop',
+  'document-contract':    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop',
+  'clipboard-check':      'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80&auto=format&fit=crop',
+  'gift-box-quality':     'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=800&q=80&auto=format&fit=crop',
+
+  // ── Schedule & Planning ──────────────────────────────────────────────────
+  'calendar-repeat':      'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80&auto=format&fit=crop',
+  'calendar-schedule':    'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80&auto=format&fit=crop',
+  'calendar-project':     'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80&auto=format&fit=crop',
+  'calendar-maintenance': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80&auto=format&fit=crop',
+  'calendar-fast':        'https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80&auto=format&fit=crop',
+
+  // ── Health & Beauty ──────────────────────────────────────────────────────
+  'scissors':             'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80&auto=format&fit=crop',
+  'hair-color':           'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&q=80&auto=format&fit=crop',
+  'leaf-treatment':       'https://images.unsplash.com/photo-1559599238-308793637427?w=800&q=80&auto=format&fit=crop',
+  'razor':                'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80&auto=format&fit=crop',
+  'scissors-barber':      'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80&auto=format&fit=crop',
+  'crown':                'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80&auto=format&fit=crop',
+  'nail-polish':          'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80&auto=format&fit=crop',
+  'diamond':              'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80&auto=format&fit=crop',
+  'lotus':                'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80&auto=format&fit=crop',
+  'candle-spa':           'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=80&auto=format&fit=crop',
+  'leaf-herbal':          'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&q=80&auto=format&fit=crop',
+  'microscope':           'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80&auto=format&fit=crop',
+  'serum-dropper':        'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80&auto=format&fit=crop',
+  'dumbbell':             'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop',
+  'trainer':              'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80&auto=format&fit=crop',
+  'lightning':            'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80&auto=format&fit=crop',
+  'pill-bottle':          'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80&auto=format&fit=crop',
+  'pharmacist':           'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&q=80&auto=format&fit=crop',
+
+  // ── Retail & Fashion ─────────────────────────────────────────────────────
+  'hanger':               'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80&auto=format&fit=crop',
+  'sneaker':              'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80&auto=format&fit=crop',
+  'ruler-size':           'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80&auto=format&fit=crop',
+  'smartphone':           'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80&auto=format&fit=crop',
+  'apple-fresh':          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80&auto=format&fit=crop',
+  'price-tag':            'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80&auto=format&fit=crop',
+  'price-affordable':     'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80&auto=format&fit=crop',
+  'lipstick':             'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80&auto=format&fit=crop',
+  'brush-makeup':         'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80&auto=format&fit=crop',
+  'sparkle':              'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80&auto=format&fit=crop',
+  'sofa':                 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80&auto=format&fit=crop',
+
+  // ── Home Services ────────────────────────────────────────────────────────
+  'sparkle-clean':        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  'washing-machine':      'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&q=80&auto=format&fit=crop',
+  'iron':                 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&q=80&auto=format&fit=crop',
+  'wrench':               'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&q=80&auto=format&fit=crop',
+  'tools-repair':         'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=80&auto=format&fit=crop',
+  'snowflake':            'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=800&q=80&auto=format&fit=crop',
+  'blueprint':            'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop',
+  'palette-color':        'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&auto=format&fit=crop',
+  'plant-tree':           'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80&auto=format&fit=crop',
+  'water-drop':           'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80&auto=format&fit=crop',
+  'house-clean':          'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&auto=format&fit=crop',
+  'team-professional':    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+
+  // ── Automotive ───────────────────────────────────────────────────────────
+  'engine':               'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80&auto=format&fit=crop',
+  'motorcycle-icon':      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  'water-spray':          'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80&auto=format&fit=crop',
+  'sparkle-shine':        'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80&auto=format&fit=crop',
+  'interior-clean':       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80&auto=format&fit=crop',
+  'gear-cog':             'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=800&q=80&auto=format&fit=crop',
+
+  // ── Lifestyle & Travel ───────────────────────────────────────────────────
+  'camera':               'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&q=80&auto=format&fit=crop',
+  'edit-photo':           'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&q=80&auto=format&fit=crop',
+  'bed-comfort':          'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80&auto=format&fit=crop',
+  'ballroom':             'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80&auto=format&fit=crop',
+  'sound-system':         'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80&auto=format&fit=crop',
+  'book-open':            'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80&auto=format&fit=crop',
+  'target-focus':         'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80&auto=format&fit=crop',
+  'flexible-schedule':    'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80&auto=format&fit=crop',
+
+  // ── Professional Services ────────────────────────────────────────────────
+  'measuring-tape':       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  'fabric-choice':        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  'scissors-craft':       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  'paw-print':            'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80&auto=format&fit=crop',
+  'staff-knowledgeable':  'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80&auto=format&fit=crop',
+  'bath-pet':             'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80&auto=format&fit=crop',
+  'scissors-pet':         'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80&auto=format&fit=crop',
+  'heart-care':           'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80&auto=format&fit=crop',
+  'printer-quality':      'https://images.unsplash.com/photo-1563906267088-b029e7101114?w=800&q=80&auto=format&fit=crop',
+  'design-help':          'https://images.unsplash.com/photo-1563906267088-b029e7101114?w=800&q=80&auto=format&fit=crop',
+  'support':              'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop',
+};
+
+const FEATURE_IMAGE_FALLBACK =
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop';
+
+/**
+ * Return feature image URL for a given name.
+ * Uses real Unsplash photos — same proven pattern as heroBackgroundImage.
+ * aboutFeatures[].icon field in schema is Json? — any string URL is valid.
+ */
+const img = (name: string): string =>
+  FEATURE_IMAGES[name] ?? FEATURE_IMAGE_FALLBACK;
 
 export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
 
@@ -186,19 +320,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Pesan Sekarang',
     aboutFeatures: [
       {
-        icon: icon('fork-knife'),
+        image: img('fork-knife'),
         title: 'Menu Lengkap',
         description:
           'Dari nasi campur sampai lauk pilihan — ada sesuatu untuk semua selera.',
       },
       {
-        icon: icon('chef-hat'),
+        image: img('chef-hat'),
         title: 'Masak Segar',
         description:
           'Setiap hidangan dimasak fresh — tidak pakai bahan kemarin.',
       },
       {
-        icon: icon('location-pin'),
+        image: img('location-pin'),
         title: 'Strategis',
         description:
           'Mudah dijangkau, parkir tersedia, suasana nyaman untuk keluarga.',
@@ -219,19 +353,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Order Now',
     aboutFeatures: [
       {
-        icon: icon('coffee-bean'),
+        image: img('coffee-bean'),
         title: 'Fresh Beans',
         description:
           'Roasted weekly from single-origin sources — every cup tells a story.',
       },
       {
-        icon: icon('couch'),
+        image: img('couch'),
         title: 'Cozy Space',
         description:
           'A quiet corner to work, meet, or just slow down for a bit.',
       },
       {
-        icon: icon('leaf'),
+        image: img('leaf'),
         title: 'Local Sourced',
         description:
           'Ingredients from farmers we know by name — fresh and responsible.',
@@ -251,19 +385,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Lihat Menu',
     aboutFeatures: [
       {
-        icon: icon('bread-loaf'),
+        image: img('bread-loaf'),
         title: 'Panggang Pagi',
         description:
           'Produksi mulai subuh — kamu dapat yang benar-benar fresh setiap hari.',
       },
       {
-        icon: icon('wheat'),
+        image: img('wheat'),
         title: 'Bahan Pilihan',
         description:
           'Tepung premium, butter asli — tanpa shortcut, tanpa kompromi kualitas.',
       },
       {
-        icon: icon('gift-box'),
+        image: img('gift-box'),
         title: 'Hamper & Custom',
         description:
           'Order kue custom untuk ulang tahun, hajatan, atau hadiah spesial.',
@@ -284,19 +418,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Order Sekarang',
     aboutFeatures: [
       {
-        icon: icon('clock-fast'),
+        image: img('clock-fast'),
         title: 'Cepat Sampai',
         description:
           'Estimasi pengiriman dikasih di awal — kamu tahu kapan makanannya datang.',
       },
       {
-        icon: icon('shield-check'),
+        image: img('shield-check'),
         title: 'Aman & Rapi',
         description:
           'Dikemas dengan packaging kedap — sampai masih hangat dan tidak tumpah.',
       },
       {
-        icon: icon('location-pin'),
+        image: img('location-pin'),
         title: 'Area Luas',
         description:
           'Cek jangkauan pengiriman kami — terus berkembang setiap bulan.',
@@ -317,19 +451,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Konsultasi',
     aboutFeatures: [
       {
-        icon: icon('serving-dish'),
+        image: img('serving-dish'),
         title: 'Menu Variatif',
         description:
           'Indonesian, Chinese, Western — disesuaikan dengan tema dan selera tamu.',
       },
       {
-        icon: icon('calendar-check'),
+        image: img('calendar-check'),
         title: 'On Time',
         description:
           'Setup tepat waktu, tim berpengalaman — acara berjalan tanpa hambatan.',
       },
       {
-        icon: icon('chef-hat'),
+        image: img('chef-hat'),
         title: 'Chef Berpengalaman',
         description:
           'Tim dapur dengan jam terbang ratusan event — kualitas konsisten.',
@@ -350,19 +484,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Coba Sekarang',
     aboutFeatures: [
       {
-        icon: icon('fire-flame'),
+        image: img('fire-flame'),
         title: 'Resep Original',
         description:
           'Bumbu rahasia keluarga — sudah jualan bertahun-tahun, pelanggan setia.',
       },
       {
-        icon: icon('leaf-fresh'),
+        image: img('leaf-fresh'),
         title: 'Bahan Harian',
         description:
           'Belanja tiap pagi di pasar — kesegaran bukan basa-basi.',
       },
       {
-        icon: icon('star-rating'),
+        image: img('star-rating'),
         title: 'Langganan Loyal',
         description:
           'Pelanggan yang balik lagi dan lagi adalah bukti terbaik kualitas kami.',
@@ -385,19 +519,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Booking Now',
     aboutFeatures: [
       {
-        icon: icon('scissors'),
+        image: img('scissors'),
         title: 'Stylist Pro',
         description:
           'Tim kami terus update tren terkini — hasilnya selalu fresh dan on-point.',
       },
       {
-        icon: icon('hair-color'),
+        image: img('hair-color'),
         title: 'Warna & Highlight',
         description:
           'Dari balayage sampai warna bold — cat aman kulit kepala, hasil tahan lama.',
       },
       {
-        icon: icon('leaf-treatment'),
+        image: img('leaf-treatment'),
         title: 'Perawatan Rambut',
         description:
           'Treatment keratin, mask, dan smoothing untuk rambut sehat dan berkilau.',
@@ -418,19 +552,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Book a Cut',
     aboutFeatures: [
       {
-        icon: icon('razor'),
+        image: img('razor'),
         title: 'Cukur Presisi',
         description:
           'Teknik klasik dan modern — fade, undercut, pompadour, semua bisa.',
       },
       {
-        icon: icon('scissors-barber'),
+        image: img('scissors-barber'),
         title: 'Beard Grooming',
         description:
           'Trim, shaping, dan hot towel shave — jenggot rapi bikin tampilan naik level.',
       },
       {
-        icon: icon('crown'),
+        image: img('crown'),
         title: 'Produk Premium',
         description:
           'Pomade, wax, dan clay terbaik tersedia — pulang langsung siap tampil.',
@@ -451,19 +585,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Book Now',
     aboutFeatures: [
       {
-        icon: icon('nail-polish'),
+        image: img('nail-polish'),
         title: 'Nail Art Custom',
         description:
           'Design sesuai keinginan kamu — dari minimalis elegan sampai bold statement.',
       },
       {
-        icon: icon('shield-check'),
+        image: img('shield-check'),
         title: 'Alat Steril',
         description:
           'Semua alat disterilkan sebelum dipakai — kebersihan nomor satu di sini.',
       },
       {
-        icon: icon('diamond'),
+        image: img('diamond'),
         title: 'Gel & Dipping',
         description:
           'Cat gel tahan lama dan dipping powder — pilihan lengkap, hasil maksimal.',
@@ -484,19 +618,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Reservasi',
     aboutFeatures: [
       {
-        icon: icon('lotus'),
+        image: img('lotus'),
         title: 'Full Body Relax',
         description:
           'Pijat Swedish, deep tissue, dan reflexology — disesuaikan dengan kebutuhan tubuh.',
       },
       {
-        icon: icon('candle-spa'),
+        image: img('candle-spa'),
         title: 'Aromaterapi',
         description:
           'Essential oil pilihan dan suasana tenang — pikiran jernih setelah satu sesi.',
       },
       {
-        icon: icon('leaf-herbal'),
+        image: img('leaf-herbal'),
         title: 'Bahan Alami',
         description:
           'Scrub dan masker dari bahan lokal Indonesia — kulit lembut, alami, tanpa kimia keras.',
@@ -517,19 +651,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Konsultasi',
     aboutFeatures: [
       {
-        icon: icon('microscope'),
+        image: img('microscope'),
         title: 'Diagnosa Tepat',
         description:
           'Analisis kulit mendalam sebelum treatment — bukan asal rekomendasikan produk.',
       },
       {
-        icon: icon('serum-dropper'),
+        image: img('serum-dropper'),
         title: 'Produk Tersertifikasi',
         description:
           'Hanya pakai produk dengan izin BPOM — aman, teruji, bukan abal-abal.',
       },
       {
-        icon: icon('calendar-repeat'),
+        image: img('calendar-repeat'),
         title: 'Program Rutin',
         description:
           'Paket perawatan berkala untuk hasil optimal — kulit membaik dari dalam.',
@@ -550,19 +684,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Join Now',
     aboutFeatures: [
       {
-        icon: icon('dumbbell'),
+        image: img('dumbbell'),
         title: 'Alat Lengkap',
         description:
           'Cardio, strength, functional training — semua ada, semua terawat.',
       },
       {
-        icon: icon('trainer'),
+        image: img('trainer'),
         title: 'Personal Trainer',
         description:
           'PT bersertifikat siap bantu susun program sesuai target dan kemampuan kamu.',
       },
       {
-        icon: icon('lightning'),
+        image: img('lightning'),
         title: 'Kelas Grup',
         description:
           'Zumba, yoga, HIIT, pilates — jadwal padat, suasana seru bareng komunitas.',
@@ -583,19 +717,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Stok',
     aboutFeatures: [
       {
-        icon: icon('pill-bottle'),
+        image: img('pill-bottle'),
         title: 'Stok Lengkap',
         description:
           'Ribuan produk kesehatan tersedia — obat resep, OTC, suplemen, dan alkes.',
       },
       {
-        icon: icon('pharmacist'),
+        image: img('pharmacist'),
         title: 'Apoteker Siap',
         description:
           'Konsultasi gratis dengan apoteker berlisensi — tanya sebelum minum obat.',
       },
       {
-        icon: icon('delivery-box'),
+        image: img('delivery-box'),
         title: 'Antar ke Rumah',
         description:
           'Pesan via WhatsApp, kami antar — cepat, aman, dan tepat sasaran.',
@@ -618,19 +752,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Shop Now',
     aboutFeatures: [
       {
-        icon: icon('hanger'),
+        image: img('hanger'),
         title: 'Koleksi Terkini',
         description:
           'Update koleksi setiap minggu — selalu ada yang baru, selalu ada yang pas.',
       },
       {
-        icon: icon('quality-badge'),
+        image: img('quality-badge'),
         title: 'Bahan Berkualitas',
         description:
           'Material dipilih dengan cermat — nyaman dipakai seharian, awet dicuci berkali-kali.',
       },
       {
-        icon: icon('shipping-box'),
+        image: img('shipping-box'),
         title: 'Kirim Aman',
         description:
           'Packaging rapi, dikemas dengan plastik seal — sampai dalam kondisi sempurna.',
@@ -651,18 +785,18 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Lihat Koleksi',
     aboutFeatures: [
       {
-        icon: icon('sneaker'),
+        image: img('sneaker'),
         title: 'Brand Pilihan',
         description:
           'Koleksi dari brand lokal dan internasional — original, bukan KW.',
       },
       {
-        icon: icon('ruler-size'),
+        image: img('ruler-size'),
         title: 'Pilihan Size',
         description: 'Size 36–46 tersedia — plus wide fit untuk kaki lebar.',
       },
       {
-        icon: icon('shield-original'),
+        image: img('shield-original'),
         title: '100% Original',
         description:
           'Garansi keaslian produk — setiap item dilengkapi sertifikat atau tag resmi.',
@@ -683,19 +817,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Produk',
     aboutFeatures: [
       {
-        icon: icon('smartphone'),
+        image: img('smartphone'),
         title: 'Unit Resmi',
         description:
           'Semua produk garansi resmi distributor — bukan set, bukan refurb tanpa kejelasan.',
       },
       {
-        icon: icon('shield-warranty'),
+        image: img('shield-warranty'),
         title: 'Garansi Jelas',
         description:
           'Kartu garansi lengkap, proses klaim mudah — kami dampingi sampai selesai.',
       },
       {
-        icon: icon('delivery-fast'),
+        image: img('delivery-fast'),
         title: 'Pengiriman Aman',
         description:
           'Dikemas bubble wrap tebal, asuransi pengiriman — gadget sampai mulus.',
@@ -716,19 +850,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Belanja Yuk',
     aboutFeatures: [
       {
-        icon: icon('apple-fresh'),
+        image: img('apple-fresh'),
         title: 'Produk Segar',
         description:
           'Sayur, buah, dan bahan basah didatangkan tiap pagi dari supplier terpercaya.',
       },
       {
-        icon: icon('price-tag'),
+        image: img('price-tag'),
         title: 'Harga Transparan',
         description:
           'Semua harga tertera jelas — tidak ada biaya kejutan saat bayar.',
       },
       {
-        icon: icon('delivery-local'),
+        image: img('delivery-local'),
         title: 'Antar Sekitar',
         description:
           'Pesan minimal tertentu, kami antar ke rumah kamu di area sekitar toko.',
@@ -749,19 +883,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Explore Now',
     aboutFeatures: [
       {
-        icon: icon('lipstick'),
+        image: img('lipstick'),
         title: 'Brand Lengkap',
         description:
           'Dari drugstore sampai luxury brand — semua ada, semua original.',
       },
       {
-        icon: icon('brush-makeup'),
+        image: img('brush-makeup'),
         title: 'Beauty Advisor',
         description:
           'Staff terlatih siap bantu kamu temukan shade dan produk yang paling cocok.',
       },
       {
-        icon: icon('sparkle'),
+        image: img('sparkle'),
         title: 'Promo Rutin',
         description:
           'Flash sale, bundle deal, dan loyalty points — belanja lebih hemat setiap minggu.',
@@ -782,19 +916,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Jelajahi',
     aboutFeatures: [
       {
-        icon: icon('sofa'),
+        image: img('sofa'),
         title: 'Koleksi Beragam',
         description:
           'Minimalis modern, Skandinavia, hingga industrial — semua ada di satu tempat.',
       },
       {
-        icon: icon('quality-badge'),
+        image: img('quality-badge'),
         title: 'Material Tahan Lama',
         description:
           'Bukan furniture musiman — beli sekali, pakai bertahun-tahun.',
       },
       {
-        icon: icon('truck-delivery'),
+        image: img('truck-delivery'),
         title: 'Perakitan Gratis',
         description:
           'Termasuk pengiriman dan jasa pasang — kamu cukup tunjuk, kami yang kerja.',
@@ -817,19 +951,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Booking Sekarang',
     aboutFeatures: [
       {
-        icon: icon('sparkle-clean'),
+        image: img('sparkle-clean'),
         title: 'Deep Cleaning',
         description:
           'Bukan cuma lap-lap — kami bersihkan area yang biasa terlewat: sudut, celah, lantai bawah.',
       },
       {
-        icon: icon('shield-safe'),
+        image: img('shield-safe'),
         title: 'Produk Ramah Keluarga',
         description:
           'Bahan pembersih aman untuk anak dan hewan peliharaan — bersih tanpa residu berbahaya.',
       },
       {
-        icon: icon('calendar-schedule'),
+        image: img('calendar-schedule'),
         title: 'Jadwal Fleksibel',
         description:
           'Cleaning harian, mingguan, atau sekali pakai — sesuaikan dengan kebutuhan kamu.',
@@ -850,19 +984,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Antar Sekarang',
     aboutFeatures: [
       {
-        icon: icon('washing-machine'),
+        image: img('washing-machine'),
         title: 'Cuci Bersih',
         description:
           'Mesin modern dan detergen premium — noda membandel pun angkat.',
       },
       {
-        icon: icon('iron'),
+        image: img('iron'),
         title: 'Setrika Rapi',
         description:
           'Hasil setrika halus dan rapi — kemeja, baju batik, sampai jas bisa ditangani.',
       },
       {
-        icon: icon('delivery-car'),
+        image: img('delivery-car'),
         title: 'Antar Jemput',
         description:
           'Gratis pickup dan antar untuk area tertentu — pakaian bersih tanpa keluar rumah.',
@@ -883,19 +1017,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Panggil Sekarang',
     aboutFeatures: [
       {
-        icon: icon('wrench'),
+        image: img('wrench'),
         title: 'Respons Cepat',
         description:
           'Target on-site dalam 1–2 jam untuk darurat — tidak biarkan masalah membesar.',
       },
       {
-        icon: icon('shield-guarantee'),
+        image: img('shield-guarantee'),
         title: 'Garansi Pengerjaan',
         description:
           'Jika bermasalah dalam 30 hari, kami perbaiki gratis — tanggung jawab penuh.',
       },
       {
-        icon: icon('invoice'),
+        image: img('invoice'),
         title: 'Estimasi Transparan',
         description:
           'Harga dikasih sebelum kerja dimulai — tidak ada angka kejutan di akhir.',
@@ -916,19 +1050,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Hubungi Kami',
     aboutFeatures: [
       {
-        icon: icon('certificate'),
+        image: img('certificate'),
         title: 'Teknisi Bersertifikat',
         description:
           'Semua teknisi memiliki SLO dan sertifikat kompetensi — pekerjaan sesuai standar.',
       },
       {
-        icon: icon('shield-safe'),
+        image: img('shield-safe'),
         title: 'Keselamatan Utama',
         description:
           'Instalasi yang benar mencegah korsleting dan kebakaran — tidak main-main dengan listrik.',
       },
       {
-        icon: icon('clipboard-check'),
+        image: img('clipboard-check'),
         title: 'Garansi Pengerjaan',
         description:
           'Masalah muncul setelah kami kerja? Kami datang lagi, gratis.',
@@ -949,19 +1083,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Panggil Teknisi',
     aboutFeatures: [
       {
-        icon: icon('snowflake'),
+        image: img('snowflake'),
         title: 'Service AC Lengkap',
         description:
           'Cuci, isi freon, perbaikan komponen — semua dikerjakan di tempat.',
       },
       {
-        icon: icon('tools-repair'),
+        image: img('tools-repair'),
         title: 'Alat Rumah Tangga',
         description:
           'Mesin cuci, kulkas, dispenser, water heater — kami tangani semua merk.',
       },
       {
-        icon: icon('clock-fast'),
+        image: img('clock-fast'),
         title: 'Respons Hari Ini',
         description:
           'Booking pagi, teknisi datang hari ini — tidak harus tunggu berhari-hari.',
@@ -982,19 +1116,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Konsultasi',
     aboutFeatures: [
       {
-        icon: icon('blueprint'),
+        image: img('blueprint'),
         title: 'Desain Custom',
         description:
           'Tidak ada template — setiap proyek dirancang khusus sesuai kepribadian dan kebutuhan klien.',
       },
       {
-        icon: icon('palette-color'),
+        image: img('palette-color'),
         title: 'Full Supervision',
         description:
           'Dari pemilihan material sampai finishing — kami awasi agar hasilnya sesuai desain.',
       },
       {
-        icon: icon('calendar-project'),
+        image: img('calendar-project'),
         title: 'On Budget & Time',
         description:
           'Timeline dan anggaran disepakati di awal — tidak ada cost overrun yang mengejutkan.',
@@ -1015,19 +1149,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Konsultasi Taman',
     aboutFeatures: [
       {
-        icon: icon('plant-tree'),
+        image: img('plant-tree'),
         title: 'Desain Taman',
         description:
           'Minimalis modern, tropis, atau zen — taman yang sesuai karakter rumah kamu.',
       },
       {
-        icon: icon('water-drop'),
+        image: img('water-drop'),
         title: 'Sistem Irigasi',
         description:
           'Instalasi drip dan sprinkler otomatis — tanaman tumbuh sehat tanpa perlu siram manual.',
       },
       {
-        icon: icon('calendar-maintenance'),
+        image: img('calendar-maintenance'),
         title: 'Perawatan Rutin',
         description:
           'Paket monthly maintenance — taman selalu rapi tanpa kamu harus turun tangan.',
@@ -1050,19 +1184,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Booking Servis',
     aboutFeatures: [
       {
-        icon: icon('engine'),
+        image: img('engine'),
         title: 'Mekanik Berpengalaman',
         description:
           'Tim dengan pengalaman berbagai merk dan tahun — tahu cara baca masalah sebelum parah.',
       },
       {
-        icon: icon('invoice-transparent'),
+        image: img('invoice-transparent'),
         title: 'Estimasi Dulu',
         description:
           'Harga spare part dan jasa dikasih sebelum pengerjaan — kamu yang putuskan.',
       },
       {
-        icon: icon('shield-warranty'),
+        image: img('shield-warranty'),
         title: 'Garansi Servis',
         description:
           'Garansi pengerjaan dan spare part — masalah yang sama tidak akan kamu bayar dua kali.',
@@ -1083,19 +1217,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Servis Sekarang',
     aboutFeatures: [
       {
-        icon: icon('motorcycle-icon'),
+        image: img('motorcycle-icon'),
         title: 'Semua Merk',
         description:
           'Honda, Yamaha, Suzuki, Kawasaki — pengalaman dengan semua jenis motor.',
       },
       {
-        icon: icon('clock-fast'),
+        image: img('clock-fast'),
         title: 'Pengerjaan Cepat',
         description:
           'Servis ringan selesai dalam 1–2 jam — kamu bisa tunggu atau jalan-jalan dulu.',
       },
       {
-        icon: icon('price-affordable'),
+        image: img('price-affordable'),
         title: 'Harga Bersahabat',
         description:
           'Spare part dengan harga wajar, jasa transparan — tidak ada mark-up tersembunyi.',
@@ -1116,19 +1250,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cuci Sekarang',
     aboutFeatures: [
       {
-        icon: icon('water-spray'),
+        image: img('water-spray'),
         title: 'Cuci Manual',
         description:
           'Setiap sudut dijangkau tangan — bukan conveyor belt yang melewatkan banyak bagian.',
       },
       {
-        icon: icon('sparkle-shine'),
+        image: img('sparkle-shine'),
         title: 'Poles & Coating',
         description:
           'Nano coating dan carnauba wax — cat terlindungi, mobil tetap kinclong lebih lama.',
       },
       {
-        icon: icon('interior-clean'),
+        image: img('interior-clean'),
         title: 'Interior Detail',
         description:
           'Vacuum, lap dashboard, jok bersih — dalam mobil senyaman luar.',
@@ -1149,19 +1283,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Stok',
     aboutFeatures: [
       {
-        icon: icon('gear-cog'),
+        image: img('gear-cog'),
         title: 'Stok Luas',
         description:
           'Ribuan SKU tersedia — part langka pun bisa kami carikan dari jaringan supplier kami.',
       },
       {
-        icon: icon('certificate-original'),
+        image: img('certificate-original'),
         title: 'OEM & Aftermarket',
         description:
           'Pilihan sesuai anggaran — OEM untuk ketenangan pikiran, aftermarket berkualitas untuk hemat.',
       },
       {
-        icon: icon('shield-warranty'),
+        image: img('shield-warranty'),
         title: 'Garansi Part',
         description:
           'Setiap spare part ada garansi — cacat produksi langsung diganti tanpa perdebatan.',
@@ -1184,19 +1318,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Lihat Portofolio',
     aboutFeatures: [
       {
-        icon: icon('camera'),
+        image: img('camera'),
         title: 'Berbagai Sesi',
         description:
           'Portrait, pre-wedding, maternity, produk, dan event — pengalaman lintas genre.',
       },
       {
-        icon: icon('edit-photo'),
+        image: img('edit-photo'),
         title: 'Editing Profesional',
         description:
           'Setiap foto melalui proses editing cermat — hasilnya konsisten dan siap cetak.',
       },
       {
-        icon: icon('calendar-fast'),
+        image: img('calendar-fast'),
         title: 'Pengiriman Cepat',
         description:
           'Foto siap dalam 7–14 hari kerja — file resolusi tinggi langsung ke Google Drive kamu.',
@@ -1217,19 +1351,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Rencanakan Trip',
     aboutFeatures: [
       {
-        icon: icon('airplane'),
+        image: img('airplane'),
         title: 'Paket Lengkap',
         description:
           'Tiket, hotel, transport, dan tour guide — semua sudah termasuk, tinggal berangkat.',
       },
       {
-        icon: icon('shield-travel'),
+        image: img('shield-travel'),
         title: 'Asuransi Perjalanan',
         description:
           'Setiap paket include asuransi — perjalanan terlindungi dari hal tak terduga.',
       },
       {
-        icon: icon('support-24h'),
+        image: img('support-24h'),
         title: 'Support 24 Jam',
         description:
           'Tim kami standby selama perjalanan kamu — ada masalah? Kami siap bantu kapan saja.',
@@ -1250,19 +1384,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Kamar',
     aboutFeatures: [
       {
-        icon: icon('bed-comfort'),
+        image: img('bed-comfort'),
         title: 'Kamar Nyaman',
         description:
           'Sprei bersih, AC dingin, kamar mandi higienis — standar yang tidak pernah kami kompromikan.',
       },
       {
-        icon: icon('breakfast'),
+        image: img('breakfast'),
         title: 'Sarapan Tersedia',
         description:
           'Menu sarapan lokal dan continental — energi penuh sebelum mulai hari.',
       },
       {
-        icon: icon('location-strategic'),
+        image: img('location-strategic'),
         title: 'Lokasi Strategis',
         description:
           'Dekat pusat kota, wisata, atau kawasan bisnis — akses mudah ke mana-mana.',
@@ -1283,19 +1417,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Ketersediaan',
     aboutFeatures: [
       {
-        icon: icon('ballroom'),
+        image: img('ballroom'),
         title: 'Kapasitas Variatif',
         description:
           'Dari gathering kecil 50 pax sampai pesta besar 1000 orang — kami ada solusinya.',
       },
       {
-        icon: icon('catering-venue'),
+        image: img('catering-venue'),
         title: 'Catering & Setup',
         description:
           'Paket lengkap tersedia — venue, dekorasi, dan katering dalam satu kontrak.',
       },
       {
-        icon: icon('sound-system'),
+        image: img('sound-system'),
         title: 'Sound & Lighting',
         description:
           'Sistem audio visual profesional tersedia — tidak perlu sewa alat dari luar.',
@@ -1316,19 +1450,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Daftar Sekarang',
     aboutFeatures: [
       {
-        icon: icon('book-open'),
+        image: img('book-open'),
         title: 'Pengajar Berkualitas',
         description:
           'Semua tutor lulusan PTN atau memiliki pengalaman mengajar minimal 3 tahun.',
       },
       {
-        icon: icon('target-focus'),
+        image: img('target-focus'),
         title: 'Program Terstruktur',
         description:
           'Silabus sesuai kurikulum, progress dipantau per sesi — ada laporan untuk orang tua.',
       },
       {
-        icon: icon('flexible-schedule'),
+        image: img('flexible-schedule'),
         title: 'Jadwal Fleksibel',
         description:
           'Belajar online atau offline — pilih waktu yang tidak ganggu kegiatan sekolah.',
@@ -1351,19 +1485,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Konsultasi',
     aboutFeatures: [
       {
-        icon: icon('measuring-tape'),
+        image: img('measuring-tape'),
         title: 'Ukuran Presisi',
         description:
           'Setiap pakaian dibuat dari nol berdasarkan ukuran tubuh kamu — tidak ada kompromi fit.',
       },
       {
-        icon: icon('fabric-choice'),
+        image: img('fabric-choice'),
         title: 'Pilihan Kain Luas',
         description:
           'Koleksi kain dari berbagai jenis dan daerah — bantu pilih yang paling cocok untuk desainmu.',
       },
       {
-        icon: icon('scissors-craft'),
+        image: img('scissors-craft'),
         title: 'Pengerjaan Teliti',
         description:
           'Setiap jahitan dikerjakan dengan detail — hasilnya tahan lama dan rapi dari dalam.',
@@ -1384,19 +1518,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Lihat Produk',
     aboutFeatures: [
       {
-        icon: icon('paw-print'),
+        image: img('paw-print'),
         title: 'Produk Premium',
         description:
           'Brand pet food terpercaya, halal, dan teruji nutrisinya — dari anak kucing sampai senior.',
       },
       {
-        icon: icon('staff-knowledgeable'),
+        image: img('staff-knowledgeable'),
         title: 'Staff Pencinta Hewan',
         description:
           'Tim kami semua pet owner — saran yang kami kasih berasal dari pengalaman nyata.',
       },
       {
-        icon: icon('delivery-safe'),
+        image: img('delivery-safe'),
         title: 'Pengiriman Aman',
         description:
           'Produk dikemas aman agar tidak bocor atau rusak — sampai dalam kondisi sempurna.',
@@ -1417,19 +1551,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Book Grooming',
     aboutFeatures: [
       {
-        icon: icon('bath-pet'),
+        image: img('bath-pet'),
         title: 'Mandi Lengkap',
         description:
           'Shampo sesuai jenis bulu, kondisioner, dan blow dry — bulu halus dan wangi tahan lama.',
       },
       {
-        icon: icon('scissors-pet'),
+        image: img('scissors-pet'),
         title: 'Potong Bulu Custom',
         description:
           'Gaya sesuai permintaan atau standar breed — hasilnya rapi dan proporsional.',
       },
       {
-        icon: icon('heart-care'),
+        image: img('heart-care'),
         title: 'Penanganan Lembut',
         description:
           'Kami sabar dengan hewan yang takut atau tidak kooperatif — tidak ada paksa, tidak ada stres.',
@@ -1450,19 +1584,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Order Cetak',
     aboutFeatures: [
       {
-        icon: icon('printer-quality'),
+        image: img('printer-quality'),
         title: 'Mesin Modern',
         description:
           'Cetak digital dan offset berkualitas tinggi — warna akurat, garis tajam, tidak blobor.',
       },
       {
-        icon: icon('design-help'),
+        image: img('design-help'),
         title: 'Desain Dibantu',
         description:
           'Tidak punya file desain? Tim kami bantu buat dari brief kamu — tanpa biaya desain mahal.',
       },
       {
-        icon: icon('delivery-fast'),
+        image: img('delivery-fast'),
         title: 'Cetak Ekspres',
         description:
           'Butuh cepat? Layanan same-day dan next-day tersedia — untuk deadline yang tidak bisa ditunda.',
@@ -1483,19 +1617,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Cek Ketersediaan',
     aboutFeatures: [
       {
-        icon: icon('house-clean'),
+        image: img('house-clean'),
         title: 'Unit Terawat',
         description:
           'Rutin dibersihkan dan dicek kondisinya — kamu masuk ke unit yang benar-benar siap huni.',
       },
       {
-        icon: icon('shield-security'),
+        image: img('shield-security'),
         title: 'Keamanan 24 Jam',
         description:
           'CCTV, satpam, dan sistem akses yang terkontrol — ketenangan pikiran untuk kamu dan keluarga.',
       },
       {
-        icon: icon('document-contract'),
+        image: img('document-contract'),
         title: 'Kontrak Jelas',
         description:
           'Semua tertuang dalam kontrak tertulis — tidak ada kenaikan harga mendadak atau kejutan.',
@@ -1516,19 +1650,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Minta Estimasi',
     aboutFeatures: [
       {
-        icon: icon('truck-moving'),
+        image: img('truck-moving'),
         title: 'Armada Lengkap',
         description:
           'Dari pickup kecil sampai truk besar — disesuaikan dengan volume barang bawaan kamu.',
       },
       {
-        icon: icon('box-packing'),
+        image: img('box-packing'),
         title: 'Packing Aman',
         description:
           'Barang pecah belah dibungkus khusus, furnitur dilindungi — sampai tanpa lecet.',
       },
       {
-        icon: icon('team-professional'),
+        image: img('team-professional'),
         title: 'Tim Profesional',
         description:
           'Berpengalaman handling barang besar dan berat — cepat, cermat, tidak ngasal.',
@@ -1539,7 +1673,7 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
       'Ceritakan lokasi asal, tujuan, dan perkiraan barang — estimasi harga gratis.',
   },
 
-  // ── FALLBACK — untuk custom kategori / tidak dikenal ────────────────────────
+  // ── FALLBACK ─────────────────────────────────────────────────────────────────
 
   __default__: {
     primaryColor: '#6366F1',
@@ -1551,19 +1685,19 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     heroCtaText: 'Explore Now',
     aboutFeatures: [
       {
-        icon: icon('star-quality'),
+        image: img('star-quality'),
         title: 'Quality First',
         description:
           'Everything we offer is selected and verified for quality you can trust.',
       },
       {
-        icon: icon('handshake'),
+        image: img('handshake'),
         title: 'Trusted Service',
         description:
           'Hundreds of satisfied customers — their trust is our biggest achievement.',
       },
       {
-        icon: icon('support'),
+        image: img('support'),
         title: 'Always Available',
         description:
           'Questions? We are responsive and ready to help before and after purchase.',
@@ -1573,11 +1707,3 @@ export const CATEGORY_AUTOFILL: CategoryAutofillMap = {
     contactSubtitle: 'We are open and ready to serve — reach out anytime.',
   },
 };
-
-// ─── Compile-time exhaustiveness ──────────────────────────────────────────────
-// CATEGORY_AUTOFILL is annotated as CategoryAutofillMap above.
-// If any CategoryKey is missing from the object literal, TypeScript will error:
-//   "Property 'NEW_KEY' is missing in type '...' but required in type 'CategoryAutofillMap'"
-//
-// This is caught by `pnpm typecheck` in CI — no manual audits needed.
-// The runtime assertAutofillCoverage() above catches the reverse direction.

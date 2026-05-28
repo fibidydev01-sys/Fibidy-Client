@@ -1,5 +1,19 @@
 'use client';
 
+// ============================================================================
+// AUTH STORE
+// File: src/stores/auth-store.ts
+//
+// [SPRINT 1 — A-S1 FIX: reset() clear localStorage]
+// useLogout memanggil reset(), tapi reset() sebelumnya tidak clear
+// localStorage 'fibidy_token'. Padahal handleUnauthorized di client.ts
+// melakukan removeItem. Inconsistency ini bisa menyebabkan stale token
+// tersisa setelah logout normal (bukan karena 401).
+//
+// Fix: pindahkan localStorage.removeItem ke dalam reset() agar semua
+// code path yang call reset() (logout, 401, dll) auto-clear token.
+// ============================================================================
+
 import { create } from 'zustand';
 import { useSyncExternalStore } from 'react';
 import type { Tenant } from '@/types/tenant';
@@ -45,6 +59,18 @@ export const useAuthStore = create<AuthStore>()((set) => ({
   },
 
   reset: () => {
+    // [A-S1 FIX] Clear localStorage fibidy_token saat reset.
+    // Sebelumnya hanya di-clear oleh handleUnauthorized (401 path).
+    // Logout normal via useLogout → reset() melewatkan ini.
+    // Sekarang semua code path yang call reset() auto-clear token.
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('fibidy_token');
+      }
+    } catch {
+      // Ignore — private browsing atau storage disabled
+    }
+
     set({
       tenant: null,
       isLoading: false,
