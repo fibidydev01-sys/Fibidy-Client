@@ -453,57 +453,6 @@
         "cancel": "Cancel",
         "confirm": "Yes, cancel",
         "canceling": "Canceling..."
-      },
-      "provider": {
-        "viaCard": "Card",
-        "viaQris": "QRIS",
-        "renewsOn": "Renews automatically on",
-        "activeUntilDate": "Active until",
-        "cardNotice": "Your subscription renews automatically each period. You can cancel anytime — access continues until the current period ends.",
-        "qrisNotice": "QRIS payments don't renew automatically. Access simply ends when the period is over — nothing to cancel. To continue, just pay again before the end date.",
-        "qrisNoAutoRenewToast": "QRIS subscriptions don't renew automatically, so there's nothing to cancel."
-      },
-      "paymentMethod": {
-        "title": "Pay for {tier}",
-        "description": "Choose a payment method.",
-        "descriptionWithPrice": "Choose a payment method for {price}.",
-        "cancel": "Maybe later",
-        "qris": {
-          "title": "QRIS",
-          "subtitle": "Scan with GoPay, OVO, DANA, ShopeePay, or mobile banking.",
-          "noAutoRenew": "One-time payment — no auto-renewal"
-        },
-        "card": {
-          "title": "Credit / debit card",
-          "subtitle": "Visa, Mastercard, and other international cards.",
-          "autoRenew": "Renews automatically each period"
-        }
-      },
-      "tripay": {
-        "back": "Back",
-        "backToSubscription": "Back to subscription",
-        "waitingTitle": "Waiting for payment",
-        "waitingDescription": "Scan the QR code below with your payment app.",
-        "qrAlt": "Payment QR code",
-        "qrPending": "Preparing your QR code. If it doesn't appear within a few minutes, go back to the subscription page and try again.",
-        "amountLabel": "Total amount",
-        "tierLabel": "{tier} plan",
-        "expiresIn": "Valid for",
-        "checking": "Checking payment status…",
-        "step1": "Open your e-wallet or mobile banking app.",
-        "step2": "Choose the pay/scan QRIS menu, then scan the code above.",
-        "step3": "Make sure the amount matches, then confirm the payment.",
-        "autoDetect": "This page updates automatically once your payment is detected. No need to refresh.",
-        "paidTitle": "Payment successful",
-        "paidDescription": "Your {tier} plan is now active.",
-        "expiredTitle": "QR code expired",
-        "expiredDescription": "The payment window has closed. Please create a new payment from the subscription page.",
-        "failedTitle": "Payment unsuccessful",
-        "failedDescription": "This payment couldn't be processed. Please try again from the subscription page.",
-        "loadError": "Couldn't load payment status.",
-        "retry": "Try again",
-        "reusedNotice": "You still have an active payment — we're showing the same QR code instead of creating a new one.",
-        "unreachable": "Couldn't reach the payment provider yet. Check the subscription page shortly — your payment may already have been created."
       }
     },
     "comingSoon": {

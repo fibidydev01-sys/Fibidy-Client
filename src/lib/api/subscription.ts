@@ -5,28 +5,30 @@ import { api } from './client';
 //
 // Backend tiers: FREE | STARTER | BUSINESS
 //
-// Subscription billing is handled exclusively by LemonSqueezy as of the
-// May 2026 LS-vs-Stripe separation refactor. Stripe is no longer used
-// for tier subscriptions — see docs/REFACTOR-PLAN-LS-VS-STRIPE.md.
+// DUA PROVIDER, PERAN BERBEDA:
+//   LemonSqueezy → checkout hosted (redirect), auto-renew, cancel via API
+//   Tripay       → QRIS lokal, SEKALI BAYAR (tidak auto-renew), tanpa cancel
 //
-// Stripe Connect (marketplace digital product transactions) is a separate
-// concern and is unaffected by this — see lib/api/checkout.ts.
-//
-// Schema cleanup completed in Batch 4:
-//   - Subscription.stripeSubId field removed from DB
-//   - Subscription.billingProvider field removed from DB
-//   - Tenant.stripeCustomerId field removed from DB
+// Stripe Connect (marketplace digital product) adalah urusan terpisah —
+// lihat lib/api/checkout.ts. Tidak ada hubungannya dengan tier subscription.
 //
 // [IDR MIGRATION — May 2026]
-// Added `businessThreshold` to SubscriptionInfo. Backend now returns
-// the BUSINESS qualifier threshold values (Rp 3.000.000 OR 20 transactions)
-// in the response so the FE can render progress bars without hardcoding.
-// Source: src/subscription/subscription.constants.ts on the BE.
-// salesTrack.totalAmount is now in Rupiah (was USD pre-migration).
+// businessThreshold dikirim BE supaya FE tidak hardcode 3000000 / 20.
+//
+// [TRIPAY — Aug 2026]
+// Ditambah createTripayCheckout() + getTripayPayment().
 // ==========================================
 
 export type SubscriptionTier = 'FREE' | 'STARTER' | 'BUSINESS';
 export type SubscriptionStatus = 'ACTIVE' | 'PAST_DUE' | 'CANCELED';
+
+/** Status satu transaksi Tripay. Cerminan enum TripayPaymentStatus di BE. */
+export type TripayPaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'FAILED'
+  | 'EXPIRED'
+  | 'REFUNDED';
 
 interface PlanLimits {
   maxProducts: number;
@@ -48,12 +50,8 @@ interface SubscriptionRecord {
 
 /**
  * BUSINESS tier qualifier thresholds.
- * Seller qualifies if EITHER condition is met (OR logic):
- *   - totalSalesAmount (in Rupiah) >= amountIdr
- *   - totalSalesCount >= txCount
- *
- * Source of truth: BE `src/subscription/subscription.constants.ts`.
- * FE reads from API response — DO NOT hardcode 3000000 / 20 anywhere.
+ * Sumber kebenaran: BE `src/subscription/subscription.constants.ts`.
+ * FE baca dari respons API — JANGAN hardcode 3000000 / 20 di manapun.
  */
 export interface BusinessThreshold {
   amountIdr: number;
@@ -76,16 +74,8 @@ export interface SubscriptionInfo {
     digitalProducts: boolean;
   };
   businessQualified: boolean;
-  /**
-   * BUSINESS qualifier thresholds.
-   * Defined optional for backward compat — BE that hasn't been redeployed
-   * with the IDR migration won't return this field. FE callers MUST handle
-   * undefined with a sensible fallback (recommend: skip progress UI entirely
-   * rather than hardcoding stale USD numbers).
-   */
   businessThreshold?: BusinessThreshold;
   salesTrack: {
-    /** Total sales in Rupiah (post-IDR migration). Was USD pre-migration. */
     totalAmount: number;
     totalCount: number;
   };
@@ -100,25 +90,52 @@ interface CancelResponse {
   cancelAt?: string;
 }
 
-// ==========================================
-// VERIFY RESPONSE
-// ==========================================
-
-/**
- * Response from GET /subscription/verify
- *
- * Backend reads the tenant row and returns:
- *   - 'pending'   — webhook hasn't processed yet, keep polling
- *   - 'completed' — tenant tier upgraded, safe to show success UI
- *
- * Recommended polling: every 2s, max 60s timeout.
- */
 export interface VerifySubscriptionResponse {
   status: 'pending' | 'completed';
   tier?: SubscriptionTier;
   subscriptionStatus?: SubscriptionStatus | null;
   periodEnd?: string | null;
   source?: string;
+}
+
+// ==========================================
+// TRIPAY
+// ==========================================
+
+/**
+ * Respons POST /subscription/checkout/tripay
+ *
+ * ⚠️ `reused: true` berarti server MENGEMBALIKAN tagihan yang sudah ada —
+ * entah karena Idempotency-Key sama (klik ganda) atau karena masih ada QR
+ * aktif yang belum kedaluwarsa. BUKAN tagihan baru.
+ *
+ * UI wajib membedakannya: menampilkan QR lama seolah baru dibuat membuat
+ * seller mengira nominalnya bertambah / tagihannya dobel.
+ */
+export interface TripayCheckoutResponse {
+  paymentId: string;
+  qrUrl: string | null;
+  qrString: string | null;
+  checkoutUrl: string | null;
+  amount: number;
+  status: TripayPaymentStatus;
+  expiresAt: string | null;
+  reused: boolean;
+}
+
+/** Respons GET /subscription/tripay/payments/:id — di-poll halaman tunggu. */
+export interface TripayPaymentDetail {
+  paymentId: string;
+  status: TripayPaymentStatus;
+  amount: number;
+  tier: SubscriptionTier;
+  qrUrl: string | null;
+  qrString: string | null;
+  checkoutUrl: string | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+  failureReason: string | null;
+  createdAt: string;
 }
 
 // ==========================================
@@ -132,25 +149,63 @@ export const subscriptionApi = {
 
   /**
    * POST /subscription/checkout?tier=STARTER|BUSINESS
-   * Returns LemonSqueezy hosted checkout URL — frontend just redirects.
+   * Mengembalikan URL checkout LemonSqueezy — FE cukup redirect.
    */
   createCheckout: (tier: 'STARTER' | 'BUSINESS') =>
     api.post<CheckoutResponse>(`/subscription/checkout?tier=${tier}`),
 
   /**
+   * POST /subscription/checkout/tripay?tier=STARTER|BUSINESS
+   *
+   * ⚠️ HEADER `Idempotency-Key` WAJIB — request tanpa header ini ditolak 400
+   * dengan code IDEMPOTENCY_KEY_REQUIRED.
+   *
+   * ⚠️ ATURAN PEMBUATAN KUNCI — dibaca sebelum memanggil fungsi ini:
+   *
+   * Kunci dibuat SEKALI PER NIAT BAYAR, bukan sekali per klik.
+   *
+   * Memanggil `crypto.randomUUID()` langsung di dalam handler onClick
+   * menghasilkan kunci BERBEDA untuk klik kedua — server melihat dua niat
+   * berbeda, dua transaksi terbit di Tripay, dan seluruh perlindungan hilang
+   * persis di skenario yang ia dirancang untuk cegah (seller di sinyal lemah
+   * menekan tombol dua kali).
+   *
+   * Yang benar: generate sekali saat dialog checkout dibuka, simpan di ref,
+   * pakai ulang untuk semua percobaan. Lihat useTripayCheckout().
+   */
+  createTripayCheckout: (
+    tier: 'STARTER' | 'BUSINESS',
+    idempotencyKey: string,
+  ) =>
+    api.post<TripayCheckoutResponse>(
+      `/subscription/checkout/tripay?tier=${tier}`,
+      undefined,
+      { headers: { 'Idempotency-Key': idempotencyKey } },
+    ),
+
+  /**
+   * GET /subscription/tripay/payments/:id
+   * Status satu tagihan Tripay — di-poll halaman tunggu QR.
+   */
+  getTripayPayment: (paymentId: string) =>
+    api.get<TripayPaymentDetail>(`/subscription/tripay/payments/${paymentId}`),
+
+  /**
    * POST /subscription/cancel
-   * Cancel-at-period-end via LemonSqueezy API.
-   * User retains access until billing period ends.
+   *
+   * ⚠️ HANYA berlaku untuk langganan LemonSqueezy.
+   *
+   * Tenant yang aktivasinya lewat Tripay akan menerima 400 dengan code
+   * `TRIPAY_NO_AUTORENEW` — itu BUKAN error, itu jawaban: langganan QRIS
+   * memang tidak diperpanjang otomatis, jadi tidak ada yang perlu
+   * dibatalkan. UI wajib menampilkannya sebagai informasi, bukan kegagalan.
    */
   cancelSubscription: () => api.post<CancelResponse>('/subscription/cancel'),
 
   /**
    * GET /subscription/verify
-   *
-   * Polls the backend until LS webhook has processed and upgraded the
-   * tenant tier. Returns 'pending' until the webhook lands, then 'completed'.
-   *
-   * Recommended polling: every 2s, max 60s timeout.
+   * Poll sampai webhook (LS ATAU Tripay) memproses dan menaikkan tier.
+   * Tidak peduli provider mana yang mengaktifkan.
    */
   verify: () => api.get<VerifySubscriptionResponse>('/subscription/verify'),
 };

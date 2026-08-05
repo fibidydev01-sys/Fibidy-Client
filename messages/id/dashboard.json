@@ -453,6 +453,57 @@
         "cancel": "Batal",
         "confirm": "Ya, batalkan",
         "canceling": "Membatalkan..."
+      },
+      "provider": {
+        "viaCard": "Kartu",
+        "viaQris": "QRIS",
+        "renewsOn": "Diperpanjang otomatis pada",
+        "activeUntilDate": "Aktif sampai",
+        "cardNotice": "Langganan diperpanjang otomatis setiap periode. Kamu bisa berhenti kapan saja — akses tetap jalan sampai periode berjalan habis.",
+        "qrisNotice": "Pembayaran QRIS tidak diperpanjang otomatis. Akses berakhir sendiri saat periode habis — tidak perlu dibatalkan. Kalau mau lanjut, cukup bayar lagi sebelum tanggal berakhir.",
+        "qrisNoAutoRenewToast": "Langganan QRIS tidak diperpanjang otomatis, jadi tidak ada yang perlu dibatalkan."
+      },
+      "paymentMethod": {
+        "title": "Bayar paket {tier}",
+        "description": "Pilih metode pembayaran.",
+        "descriptionWithPrice": "Pilih metode pembayaran untuk {price}.",
+        "cancel": "Nanti saja",
+        "qris": {
+          "title": "QRIS",
+          "subtitle": "Scan pakai GoPay, OVO, DANA, ShopeePay, atau m-banking.",
+          "noAutoRenew": "Sekali bayar — tidak diperpanjang otomatis"
+        },
+        "card": {
+          "title": "Kartu kredit / debit",
+          "subtitle": "Visa, Mastercard, dan kartu internasional lainnya.",
+          "autoRenew": "Diperpanjang otomatis tiap periode"
+        }
+      },
+      "tripay": {
+        "back": "Kembali",
+        "backToSubscription": "Kembali ke halaman langganan",
+        "waitingTitle": "Menunggu pembayaran",
+        "waitingDescription": "Scan kode QR di bawah dengan aplikasi pembayaran kamu.",
+        "qrAlt": "Kode QR pembayaran",
+        "qrPending": "Kode QR sedang disiapkan. Kalau tidak muncul dalam beberapa menit, kembali ke halaman langganan dan coba lagi.",
+        "amountLabel": "Total pembayaran",
+        "tierLabel": "Paket {tier}",
+        "expiresIn": "Berlaku",
+        "checking": "Memeriksa status pembayaran…",
+        "step1": "Buka aplikasi e-wallet atau m-banking kamu.",
+        "step2": "Pilih menu bayar/scan QRIS, lalu scan kode di atas.",
+        "step3": "Pastikan nominalnya sesuai, lalu konfirmasi pembayaran.",
+        "autoDetect": "Halaman ini akan otomatis berubah begitu pembayaran kamu terdeteksi. Tidak perlu di-refresh.",
+        "paidTitle": "Pembayaran berhasil",
+        "paidDescription": "Paket {tier} kamu sudah aktif.",
+        "expiredTitle": "Kode QR kedaluwarsa",
+        "expiredDescription": "Waktu pembayaran sudah habis. Silakan buat tagihan baru dari halaman langganan.",
+        "failedTitle": "Pembayaran tidak berhasil",
+        "failedDescription": "Tagihan ini tidak bisa diproses. Silakan coba lagi dari halaman langganan.",
+        "loadError": "Tidak bisa memuat status pembayaran.",
+        "retry": "Coba lagi",
+        "reusedNotice": "Kamu masih punya tagihan yang aktif — kami tampilkan kode QR yang sama, bukan membuat tagihan baru.",
+        "unreachable": "Belum bisa terhubung ke penyedia pembayaran. Cek halaman langganan sebentar lagi — tagihannya mungkin sudah terbuat."
       }
     },
     "comingSoon": {
