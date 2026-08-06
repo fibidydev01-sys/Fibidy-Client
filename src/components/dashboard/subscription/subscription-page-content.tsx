@@ -11,6 +11,15 @@
 // Seluruh teks memakai key i18n yang SUDAH ADA di
 // `dashboard.subscription.*` — `plans`, `cta`, `badge`, `usage`,
 // `businessUnlock`, `platformFee`. Tidak ada namespace tandingan.
+//
+// [UI/UX — Aug 2026] Satu-satunya sumber kebenaran untuk semua UI yang
+// mengasumsikan digital checkout (tier BUSINESS, businessUnlock progress
+// card, baris platformFee) adalah FEATURES.digitalProducts — TIDAK ada
+// flag/kondisi lain yang dibuat untuk ini. Alasan BUSINESS ikut disembunyikan
+// total (bukan cuma unlock-gate-nya): salesTrack cuma valid kalau checkout
+// tercatat otomatis lewat Stripe, jadi selama flag mati, BUSINESS tidak
+// punya sumber data yang sah untuk fitur pembanding tier ini. Flag off →
+// cuma FREE dan STARTER yang tampil di grid perbandingan.
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -117,6 +126,12 @@ export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps
 
   const threshold = data?.businessThreshold;
 
+  // Single source of truth for "does BUSINESS exist as an option right now":
+  // FEATURES.digitalProducts. No separate flag for this.
+  const visibleTiers = FEATURES.digitalProducts
+    ? TIER_ORDER
+    : TIER_ORDER.filter((tier) => tier !== 'BUSINESS');
+
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
       <div className="flex-1 pb-20 space-y-6">
@@ -131,8 +146,13 @@ export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps
         cancelLoading={cancelLoading}
       />
 
-      {/* Progress unlock BUSINESS — hanya relevan untuk seller STARTER */}
-      {currentTier === 'STARTER' && !data?.businessQualified && threshold && (
+      {/* Progress unlock BUSINESS — hanya render saat digital checkout aktif.
+          salesTrack cuma valid kalau tercatat otomatis dari checkout Stripe;
+          selama checkout satu-satunya adalah WA manual, tidak ada sumber
+          data yang bisa dipercaya untuk fitur ini (self-report bisa
+          diakalin, otomatis mustahil tanpa pencatatan transaksi yang
+          memang sengaja tidak kita simpan). */}
+      {FEATURES.digitalProducts && currentTier === 'STARTER' && !data?.businessQualified && threshold && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
@@ -172,15 +192,19 @@ export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps
         </Card>
       )}
 
-      {/* Perbandingan tier */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {TIER_ORDER.map((tier) => {
+      {/* Perbandingan tier — BUSINESS disembunyikan total selama digital
+          checkout mati (lihat header komentar file ini). */}
+      <div className={`grid gap-4 ${FEATURES.digitalProducts ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+        {visibleTiers.map((tier) => {
           const isCurrent = tier === currentTier;
           const isUpgrade =
             TIER_ORDER.indexOf(tier) > TIER_ORDER.indexOf(currentTier);
 
           // BUSINESS terkunci sampai syarat penjualan terpenuhi.
           // Angkanya dari respons API — tidak pernah di-hardcode.
+          // (Hanya relevan saat FEATURES.digitalProducts true — kalau tidak,
+          // BUSINESS sudah difilter keluar dari visibleTiers di atas dan
+          // baris-baris ini tidak pernah tereksekusi untuk tier itu.)
           const needsStarterFirst = tier === 'BUSINESS' && currentTier === 'FREE';
           const notQualified =
             tier === 'BUSINESS' &&
