@@ -23,11 +23,11 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { toast } from 'sonner';
-import { ChevronLeft } from 'lucide-react';
 
 // ==========================================
 // VALIDATION — uses validation.password.* keys
@@ -112,54 +112,43 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
   };
 
   return (
-    <div className="max-w-lg mx-auto w-full space-y-6">
-      {/* Back button */}
-      {onBack && (
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t('backButton')}
-        </button>
-      )}
-
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-bold">{t('title')}</h2>
+    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+      <div className="flex-1 pb-20 space-y-6">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-bold">{t('title')}</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {t('subtitle')}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {t('subtitle')}
-        </p>
-      </div>
 
-      {/* Security Info */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription className="text-xs leading-relaxed">
-          {t('infoAlert')}
-        </AlertDescription>
-      </Alert>
-
-      {/* Error */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+        {/* Security Info */}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription className="text-xs leading-relaxed">
+            {t('infoAlert')}
+          </AlertDescription>
         </Alert>
-      )}
 
-      {/* Form */}
-      <Form {...form}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSave();
-          }}
-          className="space-y-5"
-        >
+        {/* Error */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Form */}
+        <Form {...form}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            className="space-y-5"
+          >
           {/* Current Password */}
           <FormField
             control={form.control}
@@ -287,36 +276,21 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            {onBack && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onBack}
-                disabled={isLoading}
-                className="flex-1"
-              >
-                {t('cancelButton')}
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('submittingButton')}
-                </>
-              ) : (
-                t('submitButton')
-              )}
-            </Button>
-          </div>
+          {/* Hidden submit — keeps Enter-to-submit working from the fields; the visible action lives in WizardNav below */}
+          <button type="submit" className="sr-only" tabIndex={-1} disabled={isLoading}>
+            {t('submitButton')}
+          </button>
         </form>
-      </Form>
+        </Form>
+      </div>
+
+      <WizardNav
+        onBack={onBack}
+        onSave={handleSave}
+        isSaving={isLoading}
+        saveLabel={t('submitButton')}
+        savingLabel={t('submittingButton')}
+      />
     </div>
   );
 }

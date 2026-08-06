@@ -17,6 +17,7 @@ import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
 import { SocialShare } from '@/components/store/shared/social-share';
 import { generateProductBreadcrumbs } from '@/lib/shared/seo';
 import { createProductMetadata } from '@/lib/shared/seo';
+import { productsUrl } from '@/lib/public/store-url';
 import { Separator } from '@/components/ui/separator';
 
 // ==========================================
@@ -177,7 +178,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             storeSlug={slug}
             storeName={tenant.name}
             items={[
-              { label: tBreadcrumb('products'), href: `/store/${slug}/products` },
+              { label: tBreadcrumb('products'), href: productsUrl(slug) },
               { label: product.name },
             ]}
           />

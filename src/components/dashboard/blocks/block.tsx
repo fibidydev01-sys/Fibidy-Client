@@ -27,13 +27,19 @@
 //   /contact sub-page reference). When toggle ON, block contact section
 //   renders the form.
 //
-//   ctaLink hardcoded `/products` BY DESIGN — landing → /products is the
+//   ctaLink journey is fixed BY DESIGN — landing → Products listing is the
 //   only journey for hero CTA. heroCtaLink field remains in schema for
 //   future use but is not consumed at render.
+//
+//   [UI/UX CONSISTENCY AUDIT] ctaLink used to be the literal string
+//   '/products', which only worked under subdomain routing. Now built via
+//   productsUrl(tenant.slug) — same helper the store header's Products nav
+//   link uses — so it also resolves correctly under path-based routing.
 // ============================================================================
 
 import { lazy, Suspense, ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
+import { productsUrl } from '@/lib/public/store-url';
 import type { Tenant, PublicTenant, FeatureItem } from '@/types/tenant';
 import type { TenantLandingConfig } from '@/types/landing';
 
@@ -52,7 +58,7 @@ export interface BlockComponentProps {
   backgroundImage?: string;
   features?: FeatureItem[];      // aboutFeatures[] → banner carousel in Hero
   ctaText: string;
-  ctaLink: string;               // hardcoded '/products' in dispatcher
+  ctaLink: string;               // always the tenant's Products listing — see dispatcher
 
   // ─── Contact (CTA KONTAK per item) ─────────────────────────
   contactTitle?: string;
@@ -111,7 +117,8 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
       tenant.heroCtaText ||
       heroConfigSettings?.ctaText ||
       tSettings('ctaDefault'),
-    ctaLink: '/products', // hardcoded — landing → /products is the only journey
+    // Was hardcoded '/products' — 404s outside subdomain routing. productsUrl() matches how the header's Products nav link is built.
+    ctaLink: productsUrl(tenant.slug), // landing → /products is the only journey
 
     // ─── Contact ─────────────────────────────────────────────
     contactTitle: tenant.contactTitle || undefined,

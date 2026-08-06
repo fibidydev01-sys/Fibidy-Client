@@ -48,6 +48,7 @@ import { ContactSection } from '@/components/dashboard/settings/contact';
 import { SocialSection } from '@/components/dashboard/settings/social';
 import { PasswordSection } from '@/components/dashboard/settings/password';
 import { LanguageSection } from '@/components/dashboard/settings/language';
+import { SubscriptionPageContent } from '@/components/dashboard/subscription/subscription-page-content';
 
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
@@ -222,7 +223,6 @@ export function SettingsClient() {
           icon: CreditCard,
           labelKey: 'account.subscription.label',
           descriptionKey: 'account.subscription.description',
-          href: '/dashboard/subscription',
         },
         {
           id: 'password',
@@ -263,7 +263,7 @@ export function SettingsClient() {
       featured: <AboutSection onBack={handleBack} />,
       contact: <ContactSection onBack={handleBack} />,
       social: <SocialSection onBack={handleBack} />,
-      subscription: null,
+      subscription: <SubscriptionPageContent onBack={handleBack} />,
       password: <PasswordSection onBack={handleBack} />,
       language: <LanguageSection onBack={handleBack} />,
       'about-fibidy': null,

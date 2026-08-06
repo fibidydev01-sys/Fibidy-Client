@@ -45,6 +45,8 @@ interface PreviewProductProps {
   formData: ProductFormData;
   isEditing: boolean;
   selectedFile?: File | null;
+  /** Mirrors product.tsx's showFileStep — hides the File section instead of showing "No file yet". */
+  showFileSection: boolean;
 }
 
 function PreviewSection({
@@ -95,6 +97,7 @@ export function PreviewProduct({
   formData,
   isEditing,
   selectedFile,
+  showFileSection,
 }: PreviewProductProps) {
   const t = useTranslations('dashboard.products.form.preview');
   const images = formData.images || [];
@@ -167,22 +170,24 @@ export function PreviewProduct({
           </PreviewSection>
 
           {/* File */}
-          <PreviewSection label={t('sectionDigitalFile')}>
-            <div className="rounded-xl border bg-card px-3 py-1">
-              <PreviewRow
-                label={t('rowFile')}
-                value={
-                  selectedFile
-                    ? t('fileWithSize', { name: selectedFile.name, size: formatFileSizeFromBytes(selectedFile.size) })
-                    : isEditing
-                      ? t('fileUploadedPrefix')
-                      : null
-                }
-                missing={t('noFile')}
-                valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
-              />
-            </div>
-          </PreviewSection>
+          {showFileSection && (
+            <PreviewSection label={t('sectionDigitalFile')}>
+              <div className="rounded-xl border bg-card px-3 py-1">
+                <PreviewRow
+                  label={t('rowFile')}
+                  value={
+                    selectedFile
+                      ? t('fileWithSize', { name: selectedFile.name, size: formatFileSizeFromBytes(selectedFile.size) })
+                      : isEditing
+                        ? t('fileUploadedPrefix')
+                        : null
+                  }
+                  missing={t('noFile')}
+                  valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
+                />
+              </div>
+            </PreviewSection>
+          )}
 
           {/* Cover Images */}
           <PreviewSection label={t('sectionCoverImages')}>

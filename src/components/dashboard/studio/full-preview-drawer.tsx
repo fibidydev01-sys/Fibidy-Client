@@ -8,6 +8,7 @@ import { cn } from '@/lib/shared/utils';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LivePreview } from '@/components/dashboard/studio/live-preview';
+import { storeAbsoluteUrl } from '@/lib/public/store-url';
 import type { TenantLandingConfig } from '@/types/landing';
 import type { Tenant } from '@/types/tenant';
 
@@ -69,11 +70,7 @@ export function FullPreviewDrawer({
               size="sm"
               className="gap-1.5 h-8 text-xs shrink-0"
             >
-              <a
-                href={`/store/${tenant.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={storeAbsoluteUrl(tenant.slug)}>
                 <ExternalLink className="h-3.5 w-3.5" />
                 {t('openLandingPage')}
               </a>

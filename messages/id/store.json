@@ -75,12 +75,6 @@
         "noImage": "Tidak Ada Gambar",
         "zoomButton": "Zoom"
       },
-      "badge": {
-        "digital": "Digital",
-        "custom": "Custom",
-        "main": "★ Utama",
-        "business": "Business"
-      },
       "info": {
         "priceContactSeller": "Harga: Hubungi penjual",
         "discountBadge": "-{percent}%"

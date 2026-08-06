@@ -171,6 +171,7 @@
           "priceRequired": "Please enter a price of at least Rp 1.000.",
           "pricePlaceholder": "50000",
           "priceHelper": "Set in Rupiah. Buyers pay through Stripe and settlement is in IDR.",
+          "priceHelperNoDigital": "The price shown to buyers on your storefront.",
           "comparePriceLabel": "Compare-at price",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Original price before discount — shown with a strikethrough. Leave empty if not on sale."
@@ -188,10 +189,6 @@
           "dropzoneInfo": "Upload product file — {types} · Max {size} · {usedGb}GB / {totalGb}GB used",
           "dropzoneInfoLoading": "Loading storage info...",
           "dropzoneLoading": "Loading storage configuration...",
-          "comingSoonTitle": "Coming Soon",
-          "comingSoonBody": "We're polishing the file upload experience for Indonesian sellers. Continue setting up your product details — uploads will be ready soon.",
-          "comingSoonCta": "Coming Soon",
-          "comingSoonDropzoneLabel": "File upload available soon",
           "kycStates": {
             "NOT_STARTED": "You haven't set up payments yet. Complete verification first to upload products.",
             "PENDING": "Verification is being processed. Please wait for confirmation before uploading products.",

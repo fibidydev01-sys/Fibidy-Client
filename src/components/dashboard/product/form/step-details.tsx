@@ -36,6 +36,7 @@ import {
   ComboboxSeparator,
 } from '@/components/ui/combobox';
 import { cn } from '@/lib/shared/utils';
+import { FEATURES } from '@/lib/config/features';
 import type { ProductFormData } from '@/lib/shared/validations';
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -235,7 +236,9 @@ export function StepDetails({
             aria-invalid={!!errors.price || hasPriceError}
           />
         </div>
-        <p className="text-xs text-muted-foreground">{t('priceHelper')}</p>
+        <p className="text-xs text-muted-foreground">
+          {FEATURES.digitalProducts ? t('priceHelper') : t('priceHelperNoDigital')}
+        </p>
         {hasPriceError && (
           <p className="text-sm text-destructive font-medium">
             {t('priceRequired')}

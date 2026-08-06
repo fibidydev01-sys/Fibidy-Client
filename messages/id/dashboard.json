@@ -171,6 +171,7 @@
           "priceRequired": "Mohon masukkan harga minimal Rp 1.000.",
           "pricePlaceholder": "50000",
           "priceHelper": "Atur dalam Rupiah. Pembeli bayar via Stripe, settlement langsung dalam IDR.",
+          "priceHelperNoDigital": "Harga yang dilihat pembeli di toko kamu.",
           "comparePriceLabel": "Harga pembanding",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
@@ -188,10 +189,6 @@
           "dropzoneInfo": "Upload file produk — {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
           "dropzoneInfoLoading": "Memuat info penyimpanan...",
           "dropzoneLoading": "Memuat konfigurasi penyimpanan...",
-          "comingSoonTitle": "Segera Hadir",
-          "comingSoonBody": "Kami lagi menyempurnakan pengalaman upload file untuk seller Indonesia. Lanjut isi detail produknya dulu — fitur upload bakal siap segera.",
-          "comingSoonCta": "Segera Hadir",
-          "comingSoonDropzoneLabel": "Upload file akan tersedia segera",
           "kycStates": {
             "NOT_STARTED": "Kamu belum setup pembayaran. Selesaikan verifikasi dulu untuk upload produk.",
             "PENDING": "Verifikasi sedang diproses. Tunggu konfirmasi sebelum upload produk.",

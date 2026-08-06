@@ -32,10 +32,12 @@ interface Step {
 
 interface WizardNavProps {
   // Save / Submit
-  onSave: () => void;
+  onSave?: () => void;
   isSaving?: boolean;
   saveLabel?: string;
   savingLabel?: string;
+  // Back-only bar — instant-apply sections (e.g. Language) with nothing to save
+  hideSaveButton?: boolean;
 
   // Universal back — step 0: caller tentukan kemana
   onBack?: () => void;
@@ -58,6 +60,7 @@ export function WizardNav({
   isSaving = false,
   saveLabel,
   savingLabel,
+  hideSaveButton = false,
   onBack,
   steps,
   currentStep = 0,
@@ -120,14 +123,16 @@ export function WizardNav({
             <div />
           )}
 
-          <Button
-            onClick={onSave}
-            disabled={isSaving}
-            className="gap-1.5 h-9 text-sm min-w-[130px]"
-          >
-            <Save className="h-3.5 w-3.5" />
-            {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-          </Button>
+          {!hideSaveButton && (
+            <Button
+              onClick={onSave}
+              disabled={isSaving}
+              className="gap-1.5 h-9 text-sm min-w-[130px]"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
+            </Button>
+          )}
         </div>
 
         {/* Mobile */}
@@ -145,14 +150,16 @@ export function WizardNav({
             ) : (
               <div />
             )}
-            <Button
-              size="sm"
-              onClick={onSave}
-              disabled={isSaving}
-              className="h-9 px-4 text-xs font-medium"
-            >
-              {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-            </Button>
+            {!hideSaveButton && (
+              <Button
+                size="sm"
+                onClick={onSave}
+                disabled={isSaving}
+                className="h-9 px-4 text-xs font-medium"
+              >
+                {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
+              </Button>
+            )}
           </div>
         </div>
       </>

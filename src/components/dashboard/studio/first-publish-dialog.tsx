@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { storeAbsoluteUrl } from '@/lib/public/store-url';
 
 interface FirstPublishDialogProps {
   open: boolean;
@@ -96,11 +97,7 @@ export function FirstPublishDialog({
 
           {/* Secondary: lihat toko live */}
           <Button variant="outline" asChild className="w-full">
-            <a
-              href={`/store/${storeSlug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={storeAbsoluteUrl(storeSlug)}>
               {t('ctaPreview')}
             </a>
           </Button>

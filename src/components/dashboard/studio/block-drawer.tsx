@@ -55,6 +55,7 @@ import {
 import type { BlockOption } from './block-options';
 import { BLOCK_OPTIONS_MAP, isProBlock } from './block-options';
 import type { PublishResult } from '@/hooks/dashboard/use-landing-config';
+import { storeAbsoluteUrl } from '@/lib/public/store-url';
 
 type SectionType = 'hero';
 
@@ -170,7 +171,7 @@ function DrawerToolbar({
         size="sm"
         className="gap-1.5 h-9 text-xs flex-1"
       >
-        <a href={`/store/${storeSlug}`} target="_blank" rel="noopener noreferrer">
+        <a href={storeAbsoluteUrl(storeSlug)}>
           <ExternalLink className="h-3.5 w-3.5" />
           {t('preview')}
         </a>
@@ -180,7 +181,8 @@ function DrawerToolbar({
         <TooltipProvider delayDuration={150}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="flex-1">{publishButton}</span>
+              {/* `flex` (not just `flex-1`) so the nested Button's own flex-1 still stretches it to match the enabled size */}
+              <span className="flex-1 flex">{publishButton}</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-[220px] text-xs">
               {tooltipReason}

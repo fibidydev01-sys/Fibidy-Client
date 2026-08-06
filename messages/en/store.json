@@ -75,12 +75,6 @@
         "noImage": "No Image",
         "zoomButton": "Zoom"
       },
-      "badge": {
-        "digital": "Digital",
-        "custom": "Custom",
-        "main": "★ Main",
-        "business": "Business"
-      },
       "info": {
         "priceContactSeller": "Price: Contact seller",
         "discountBadge": "-{percent}%"

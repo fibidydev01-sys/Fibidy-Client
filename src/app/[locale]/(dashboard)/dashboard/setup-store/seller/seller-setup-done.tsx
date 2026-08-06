@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
 import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
+import { storeAbsoluteUrl } from '@/lib/public/store-url';
 
 export function SellerSetupDone() {
   const t = useTranslations('dashboard.setupStore.seller.done.goToStudioDialog');
@@ -32,7 +33,7 @@ export function SellerSetupDone() {
       description={t('description')}
       secondaryCta={
         showPreviewCta
-          ? { label: t('ctaPreview'), href: `/store/${tenant!.slug}` }
+          ? { label: t('ctaPreview'), href: storeAbsoluteUrl(tenant!.slug) }
           : undefined
       }
       primaryCta={{

@@ -17,10 +17,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Check, Crown, Sparkles, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
+import { FEATURES } from '@/lib/config/features';
 import { EduRestrictedPage } from '@/components/dashboard/shared/edu-restricted-page';
-import { Button } from '@/components/ui/button';
+import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { queryKeys } from '@/lib/shared/query-keys';
 import { subscriptionApi, type SubscriptionTier } from '@/lib/api/subscription';
@@ -37,10 +40,19 @@ const TIER_ICON = {
   BUSINESS: Crown,
 } as const;
 
-export function SubscriptionPageContent() {
+interface SubscriptionPageContentProps {
+  // Provided when embedded inline in Settings (clears the ?section= query
+  // param instead of navigating away). Standalone /dashboard/subscription
+  // falls back to routing back to Settings itself.
+  onBack?: () => void;
+}
+
+export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps = {}) {
   const t = useTranslations('dashboard.subscription');
   const queryClient = useQueryClient();
+  const router = useRouter();
   const tenant = useAuthStore((s) => s.tenant);
+  const handleBack = onBack ?? (() => router.push('/dashboard/settings'));
 
   const [payDialogTier, setPayDialogTier] = useState<
     Exclude<SubscriptionTier, 'FREE'> | null
@@ -55,7 +67,7 @@ export function SubscriptionPageContent() {
 
   // EDU restriction — dirender DI TEMPAT konten, bukan redirect diam-diam.
   if (tenant?.isEduMode === true) {
-    return <EduRestrictedPage type="subscription" />;
+    return <EduRestrictedPage type="subscription" backPath="/dashboard/settings" />;
   }
 
   const currentTier: SubscriptionTier = data?.tier ?? 'FREE';
@@ -88,14 +100,17 @@ export function SubscriptionPageContent() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 sm:p-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40 w-full" />
-        <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
+      <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+        <div className="flex-1 pb-20 space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-40 w-full" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <Skeleton className="h-80" />
+            <Skeleton className="h-80" />
+            <Skeleton className="h-80" />
+          </div>
         </div>
+        <WizardNav onBack={handleBack} hideSaveButton />
       </div>
     );
   }
@@ -103,7 +118,8 @@ export function SubscriptionPageContent() {
   const threshold = data?.businessThreshold;
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+      <div className="flex-1 pb-20 space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
@@ -214,12 +230,15 @@ export function SubscriptionPageContent() {
                   ))}
                 </ul>
 
-                <div className="flex items-center justify-between border-t pt-3 text-sm">
-                  <span className="text-muted-foreground">
-                    {t('platformFee.label')}
-                  </span>
-                  <span className="font-medium">{t(`platformFee.${tier}`)}</span>
-                </div>
+                {/* Only shown when Stripe checkout (digital products) is on — this fee applies to that flow, not manual WhatsApp orders. */}
+                {FEATURES.digitalProducts && (
+                  <div className="flex items-center justify-between border-t pt-3 text-sm">
+                    <span className="text-muted-foreground">
+                      {t('platformFee.label')}
+                    </span>
+                    <span className="font-medium">{t(`platformFee.${tier}`)}</span>
+                  </div>
+                )}
 
                 {isUpgrade && (
                   <Button
@@ -243,6 +262,9 @@ export function SubscriptionPageContent() {
           );
         })}
       </div>
+      </div>
+
+      <WizardNav onBack={handleBack} hideSaveButton />
 
       <PaymentMethodDialog
         open={payDialogTier !== null}

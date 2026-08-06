@@ -19,8 +19,20 @@
 // - Current selection is derived from `useLocale()`.
 //
 // Styling convention matches sibling section components (Hero, About,
-// Contact, Social, Password). Uses `onBack` prop to return to settings
-// list, same as other sections.
+// Contact, Social, Password) — max-w-2xl shell + WizardNav sticky bottom
+// bar, back-only (no Save: selection applies instantly, nothing to save).
+//
+// [UI/UX CONSISTENCY AUDIT]
+//   1. Back button moved off the top-inline position into the shared
+//      sticky-bottom WizardNav (hideSaveButton) — same "thumb reach"
+//      placement as every other settings section.
+//   2. Fixed en->id switching one way only ("stuck on id"): switching TO
+//      the default locale (en) produces a bare/unprefixed URL under
+//      localePrefix:'as-needed'. If the NEXT_LOCALE cookie still said
+//      'id' from a previous switch, the middleware treated the bare URL
+//      as ambiguous and re-detected 'id' from the stale cookie, redirecting
+//      straight back — confirmed against the dev middleware. Setting the
+//      cookie client-side before navigating closes that race.
 //
 // JSON keys used:
 //   - `settings.language.title`
@@ -35,10 +47,12 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { ArrowLeft, Check, Languages } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Check, Languages } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { cn } from '@/lib/shared/utils';
+
+const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year — matches next-intl's own default
 
 interface LanguageSectionProps {
   onBack: () => void;
@@ -52,26 +66,17 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
 
   const handleSelect = (nextLocale: string) => {
     if (nextLocale === currentLocale) return;
-    // next-intl's router.replace() understands the `locale` option and
-    // will re-render the route tree with the new locale's messages.
-    // `pathname` from @/i18n/navigation is the locale-stripped path, so
-    // this is safe to pass back verbatim — the router re-prefixes it.
+    // Sync the cookie before navigating — see [UI/UX CONSISTENCY AUDIT] above.
+    // eslint-disable-next-line react-hooks/immutability -- browser cookie write in a click handler, not render
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
     router.replace(pathname, { locale: nextLocale });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onBack}
-          aria-label={t('backButton')}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
+    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+      <div className="flex-1 pb-20 space-y-6">
+        {/* Header */}
+        <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Languages className="h-5 w-5" />
             {t('title')}
@@ -80,61 +85,63 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
             {t('subtitle')}
           </p>
         </div>
-      </div>
 
-      {/* Info alert */}
-      <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        {t('infoAlert')}
-      </div>
+        {/* Info alert */}
+        <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          {t('infoAlert')}
+        </div>
 
-      {/* Current language */}
-      <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
-        {t('currentLanguage')}
-      </div>
+        {/* Current language */}
+        <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+          {t('currentLanguage')}
+        </div>
 
-      {/* Locale options */}
-      <div className="space-y-2">
-        {routing.locales.map((locale) => {
-          const isActive = locale === currentLocale;
-          return (
-            <Card
-              key={locale}
-              className={cn(
-                'cursor-pointer transition-colors',
-                isActive
-                  ? 'border-primary/50 bg-primary/5'
-                  : 'hover:border-foreground/20 hover:bg-muted/30',
-              )}
-              onClick={() => handleSelect(locale)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleSelect(locale);
-                }
-              }}
-              aria-pressed={isActive}
-            >
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex-1">
-                  <div className="font-medium">
-                    {t(`options.${locale}.native`)}
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-0.5">
-                    {t(`options.${locale}.description`)}
-                  </div>
-                </div>
-                {isActive && (
-                  <div className="flex items-center gap-2 text-primary">
-                    <Check className="h-5 w-5" />
-                  </div>
+        {/* Locale options */}
+        <div className="space-y-2">
+          {routing.locales.map((locale) => {
+            const isActive = locale === currentLocale;
+            return (
+              <Card
+                key={locale}
+                className={cn(
+                  'cursor-pointer transition-colors',
+                  isActive
+                    ? 'border-primary/50 bg-primary/5'
+                    : 'hover:border-foreground/20 hover:bg-muted/30',
                 )}
-              </CardContent>
-            </Card>
-          );
-        })}
+                onClick={() => handleSelect(locale)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSelect(locale);
+                  }
+                }}
+                aria-pressed={isActive}
+              >
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {t(`options.${locale}.native`)}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-0.5">
+                      {t(`options.${locale}.description`)}
+                    </div>
+                  </div>
+                  {isActive && (
+                    <div className="flex items-center gap-2 text-primary">
+                      <Check className="h-5 w-5" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
+
+      <WizardNav onBack={onBack} hideSaveButton />
     </div>
   );
 }

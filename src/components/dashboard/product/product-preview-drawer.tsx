@@ -25,10 +25,16 @@
 //
 // `product.currency` carries the actual currency from BE; we fall back
 // to 'IDR' for legacy/null values consistent with format.ts default.
+//
+// [UI/UX CONSISTENCY AUDIT]
+// Rebuilt on top of the shared shadcn Drawer primitives (DrawerHeader /
+// DrawerFooter from '@/components/ui/drawer') instead of raw vaul +
+// a hand-rolled sticky-on-scroll IntersectionObserver. Header and footer
+// now sit outside the scroll container as regular flex siblings, so they
+// stay put by construction — only the middle section scrolls.
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { Drawer } from 'vaul';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { useTranslations } from 'next-intl';
 import {
@@ -43,6 +49,14 @@ import {
   Download,
   Info,
 } from 'lucide-react';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -82,24 +96,7 @@ function DrawerInner({
   // [i18n FIX] For the "FILE" fallback label when fileType is null.
   const tProductType = useTranslations('common.productType');
 
-  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const headerSentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const sentinel = headerSentinelRef.current;
-    if (!scrollContainer || !sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsHeaderSticky(!entry.isIntersecting),
-      { root: scrollContainer, threshold: 0, rootMargin: '-1px 0px 0px 0px' },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
 
   const handleEdit = useCallback(() => {
     if (onEdit) {
@@ -133,38 +130,25 @@ function DrawerInner({
 
   return (
     <>
-      <Drawer.Title asChild>
-        <VisuallyHidden.Root>
-          {product.name ? t('title', { name: product.name }) : t('titleFallback')}
-        </VisuallyHidden.Root>
-      </Drawer.Title>
-      <Drawer.Description asChild>
-        <VisuallyHidden.Root id="drawer-description">
-          {product.description || t('descriptionFallback', { name: product.name || '' })}
-        </VisuallyHidden.Root>
-      </Drawer.Description>
-
-      <div className="flex justify-center pt-3 pb-2 shrink-0">
-        <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-      </div>
-
-      {/* Sticky Header */}
-      <div
-        className={cn(
-          'px-4 pb-4 border-b shrink-0 transition-shadow duration-200',
-          'sticky top-0 bg-background z-10',
-          isHeaderSticky && 'shadow-md',
-        )}
-      >
+      {/* Sticky header — outside the scroll container, so it never moves */}
+      <DrawerHeader className="border-b shrink-0 gap-0">
+        <DrawerTitle asChild>
+          <VisuallyHidden.Root>
+            {product.name ? t('title', { name: product.name }) : t('titleFallback')}
+          </VisuallyHidden.Root>
+        </DrawerTitle>
+        <DrawerDescription asChild>
+          <VisuallyHidden.Root id="drawer-description">
+            {product.description || t('descriptionFallback', { name: product.name || '' })}
+          </VisuallyHidden.Root>
+        </DrawerDescription>
         <h2 className="font-semibold text-base text-center truncate">
           {product.name}
         </h2>
-      </div>
+      </DrawerHeader>
 
-      {/* Scrollable Content */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        <div ref={headerSentinelRef} className="h-0" />
-
+      {/* Scrollable content — the only part that scrolls */}
+      <div className="flex-1 overflow-y-auto">
         {/* Image / File icon */}
         <div className="px-4 py-6">
           <div className="relative w-full max-w-2xl mx-auto">
@@ -252,7 +236,7 @@ function DrawerInner({
           )}
 
           {/* Info grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4">
             {product.category && (
               <div className="flex items-start gap-3">
                 <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -298,72 +282,72 @@ function DrawerInner({
               </div>
             )}
           </div>
-
-          <Separator className="my-6" />
-
-          {/* Action buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            {onToggleActive && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleToggleActive}
-              >
-                {product.isActive ? (
-                  <>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    {t('deactivate')}
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    {t('activate')}
-                  </>
-                )}
-              </Button>
-            )}
-            {onEdit && (
-              <Button
-                variant="default"
-                className="w-full"
-                onClick={handleEdit}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                {t('edit')}
-              </Button>
-            )}
-          </div>
-
-          {/* [FIX #9] Delete button — only shown if product has NO purchases */}
-          {onDelete && canDelete && (
-            <Button
-              variant="outline"
-              className="w-full mt-3 text-destructive hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t('deleteProduct')}
-            </Button>
-          )}
-
-          {/* [FIX #9] Info hint when product has purchases (delete blocked) */}
-          {onDelete && !canDelete && (
-            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-3 py-2.5">
-              <div className="flex gap-2">
-                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                  <p className="font-medium mb-0.5">
-                    {t('cannotDeleteTitle')}
-                  </p>
-                  <p className="text-amber-700 dark:text-amber-400">
-                    {t('cannotDeleteBody')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Sticky footer — outside the scroll container, always reachable */}
+      <DrawerFooter className="border-t">
+        <div className="grid grid-cols-2 gap-3">
+          {onToggleActive && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleToggleActive}
+            >
+              {product.isActive ? (
+                <>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  {t('deactivate')}
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4 mr-2" />
+                  {t('activate')}
+                </>
+              )}
+            </Button>
+          )}
+          {onEdit && (
+            <Button
+              variant="default"
+              className="w-full"
+              onClick={handleEdit}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              {t('edit')}
+            </Button>
+          )}
+        </div>
+
+        {/* [FIX #9] Delete button — only shown if product has NO purchases */}
+        {onDelete && canDelete && (
+          <Button
+            variant="outline"
+            className="w-full text-destructive hover:text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {t('deleteProduct')}
+          </Button>
+        )}
+
+        {/* [FIX #9] Info hint when product has purchases (delete blocked) */}
+        {onDelete && !canDelete && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-3 py-2.5">
+            <div className="flex gap-2">
+              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                <p className="font-medium mb-0.5">
+                  {t('cannotDeleteTitle')}
+                </p>
+                <p className="text-amber-700 dark:text-amber-400">
+                  {t('cannotDeleteBody')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </DrawerFooter>
     </>
   );
 }
@@ -377,30 +361,19 @@ export function ProductPreviewDrawer({
   onToggleActive,
 }: ProductPreviewDrawerProps) {
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange}>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/60 z-[9999]" />
-        <Drawer.Content
-          className={cn(
-            'fixed bottom-0 left-0 right-0 z-[10000]',
-            'bg-background rounded-t-[20px]',
-            'max-h-[92vh] outline-none',
-            'flex flex-col',
-          )}
-          aria-describedby="drawer-description"
-        >
-          {product && (
-            <DrawerInner
-              key={product.id}
-              product={product}
-              onOpenChange={onOpenChange}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onToggleActive={onToggleActive}
-            />
-          )}
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="z-[60] max-h-[92vh]">
+        {product && (
+          <DrawerInner
+            key={product.id}
+            product={product}
+            onOpenChange={onOpenChange}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleActive={onToggleActive}
+          />
+        )}
+      </DrawerContent>
+    </Drawer>
   );
 }

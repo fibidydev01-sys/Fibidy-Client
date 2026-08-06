@@ -50,6 +50,7 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
+import { mainAppUrl } from '@/lib/public/store-url';
 import { useIsAuthenticated } from '@/stores/auth-store';
 import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import { SaveStatusPill } from '@/components/dashboard/studio/save-status-pill';
@@ -217,7 +218,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
               variant="outline"
               className="gap-1.5 h-9 text-xs"
             >
-              <Link href="/dashboard/studio">
+              <Link href={mainAppUrl('/dashboard/studio')}>
                 <Layout className="h-3.5 w-3.5" />
                 {t('nav.studio')}
               </Link>
@@ -237,7 +238,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
               variant="outline"
               className="gap-1.5 h-9 text-xs"
             >
-              <Link href="/dashboard/studio">
+              <Link href={mainAppUrl('/dashboard/studio')}>
                 <Layout className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{t('nav.studio')}</span>
               </Link>

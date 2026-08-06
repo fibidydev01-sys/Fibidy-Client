@@ -7,7 +7,12 @@
 // [IDR MIGRATION — May 2026]
 // Removed `(isDigital ? 'USD' : 'IDR')` ternary.
 // Post-migration uniform default IDR — see product-info.tsx for rationale.
-// `isDigital` is still used for icon/badge logic (FileText vs Package).
+//
+// [UI/UX — Aug 2026] Dropped the "Digital"/"Custom" product-type badge —
+// it exposed an internal fileKey distinction that means nothing to a
+// buyer. The only badge shown here now is the discount one. `isDigital`
+// is still used for the fallback icon (FileText vs Package) when a
+// product has no photo.
 // ==========================================
 
 import { useMemo } from 'react';
@@ -27,7 +32,6 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, storeSlug }: ProductCardProps) {
-  const t = useTranslations('store.product.badge');
   const tInfo = useTranslations('store.product.info');
   const tCommon = useTranslations('common.productType');
   const { hasDiscount, discountPercent, isCustomPrice } = getProductPricing(product);
@@ -77,7 +81,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badge: Discount */}
+          {/* Badge: Discount — the only badge a buyer needs here */}
           {hasDiscount && (
             <div className="absolute top-2 left-2">
               <Badge variant="destructive" className="text-xs px-1.5 py-0">
@@ -85,19 +89,6 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
               </Badge>
             </div>
           )}
-
-          {/* Badge: Product type (top right) */}
-          <div className="absolute top-2 right-2">
-            {isDigital ? (
-              <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600 text-white">
-                {t('digital')}
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-background/80">
-                {t('custom')}
-              </Badge>
-            )}
-          </div>
         </div>
 
         {/* Footer */}
