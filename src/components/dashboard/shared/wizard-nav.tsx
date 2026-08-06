@@ -17,6 +17,27 @@
 // i18n: Default labels (Save/Saving/Back/Previous/Next) di-resolve dari
 //       common.actions.* via useTranslations. Caller bisa override via
 //       props (saveLabel, savingLabel, lastStepLabel, dst).
+//
+// [UI/UX — Aug 2026] Desktop bar width is HARDCODED max-w-2xl, on purpose,
+// not a per-caller prop. Every caller's own content column can be whatever
+// width it wants — this bar deliberately does not follow it. The one time
+// it did (a contentMaxWidthClassName override for settings/hero.tsx's
+// narrower max-w-lg steps), the result was every page having a
+// visibly different bar width, which read as broken rather than adaptive.
+// One width, everywhere, no exceptions.
+//
+// [UI/UX — Aug 2026 v2] Desktop bar switched from `fixed` (positioned
+// against the viewport, with `left: var(--sidebar-width)` hand-approximating
+// where the content column starts) to `sticky` (positioned as a normal
+// child of whatever wraps it). `fixed` required guessing the page shell's
+// padding (DashboardShell wraps every page in `container p-4 md:p-6
+// lg:p-8`, and `container` itself adds `padding-inline: 2rem` — see
+// globals.css) to center correctly; a wrong guess is exactly what made the
+// bar visibly off-axis from the content column above it (not parallel —
+// each edge shifted by a different, unmatched amount). `sticky` sidesteps
+// the guessing entirely: rendered as the last child inside the SAME
+// `max-w-2xl mx-auto` column every caller already wraps its own content
+// in, it inherits that column's exact box, so it cannot drift from it.
 // ==========================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
@@ -38,12 +59,6 @@ interface WizardNavProps {
   savingLabel?: string;
   // Back-only bar — instant-apply sections (e.g. Language) with nothing to save
   hideSaveButton?: boolean;
-
-  // [UI/UX — Aug 2026] Desktop bar is a floating pill matching the content
-  // column's width, not a full-width strip — see desktop JSX below. Callers
-  // whose content isn't the sitewide `max-w-2xl` shell (settings/hero.tsx's
-  // narrower steps, for instance) can override this to match.
-  contentMaxWidthClassName?: string;
 
   // Universal back — step 0: caller tentukan kemana
   onBack?: () => void;
@@ -67,7 +82,6 @@ export function WizardNav({
   saveLabel,
   savingLabel,
   hideSaveButton = false,
-  contentMaxWidthClassName = 'max-w-2xl',
   onBack,
   steps,
   currentStep = 0,
@@ -111,44 +125,34 @@ export function WizardNav({
   if (!hasSteps) {
     return (
       <>
-        {/* Desktop — floating pill, centered, capped at contentMaxWidthClassName
-            so it lines up with the form column above it instead of stretching
-            edge-to-edge of the whole content area. */}
-        <div
-          className="hidden lg:flex fixed bottom-4 right-0 z-40 justify-center px-4"
-          style={{ left: 'var(--sidebar-width)' }}
-        >
-          <div
-            className={cn(
-              'flex w-full items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm',
-              contentMaxWidthClassName,
-            )}
-          >
-            {/* Back button (save-only mode) */}
-            {onBack ? (
-              <Button
-                variant="outline"
-                onClick={onBack}
-                className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-                {t('back')}
-              </Button>
-            ) : (
-              <div />
-            )}
+        {/* Desktop — floating pill, sticky within (and therefore always
+            exactly as wide + as centered as) the max-w-2xl column every
+            caller wraps its own content in. See file header. */}
+        <div className="hidden lg:flex sticky bottom-4 z-40 mx-auto w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm">
+          {/* Back button (save-only mode) */}
+          {onBack ? (
+            <Button
+              variant="outline"
+              onClick={onBack}
+              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              {t('back')}
+            </Button>
+          ) : (
+            <div />
+          )}
 
-            {!hideSaveButton && (
-              <Button
-                onClick={onSave}
-                disabled={isSaving}
-                className="gap-1.5 h-9 text-sm min-w-[130px] rounded-full"
-              >
-                <Save className="h-3.5 w-3.5" />
-                {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-              </Button>
-            )}
-          </div>
+          {!hideSaveButton && (
+            <Button
+              onClick={onSave}
+              disabled={isSaving}
+              className="gap-1.5 h-9 text-sm min-w-[130px] rounded-full"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
+            </Button>
+          )}
         </div>
 
         {/* Mobile */}
@@ -185,52 +189,42 @@ export function WizardNav({
   // ── Multi-step mode (hero, contact, payment, product, register) ───────
   return (
     <>
-      {/* Desktop — floating pill, centered, capped at contentMaxWidthClassName
-          so it lines up with the form column above it instead of stretching
-          edge-to-edge of the whole content area. */}
-      <div
-        className="hidden lg:flex fixed bottom-4 right-0 z-40 justify-center px-4"
-        style={{ left: 'var(--sidebar-width)' }}
-      >
-        <div
+      {/* Desktop — floating pill, sticky within (and therefore always
+          exactly as wide + as centered as) the max-w-2xl column every
+          caller wraps its own content in. See file header. */}
+      <div className="hidden lg:flex sticky bottom-4 z-40 mx-auto w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm">
+        <Button
+          variant="outline"
+          onClick={handlePrev}
           className={cn(
-            'flex w-full items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm',
-            contentMaxWidthClassName,
+            'gap-1.5 min-w-[130px] h-9 text-sm rounded-full',
+            !showPrevButton && 'invisible',
           )}
         >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          {isFirstStep ? t('back') : t('previous')}
+        </Button>
+
+        <StepDots steps={steps} currentStep={currentStep} />
+
+        {isLastStep ? (
           <Button
-            variant="outline"
-            onClick={handlePrev}
-            className={cn(
-              'gap-1.5 min-w-[130px] h-9 text-sm rounded-full',
-              !showPrevButton && 'invisible',
-            )}
+            onClick={handleLastStep}
+            disabled={isSaving}
+            className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
           >
-            <ChevronLeft className="h-3.5 w-3.5" />
-            {isFirstStep ? t('back') : t('previous')}
+            <LastStepIcon className="h-3.5 w-3.5" />
+            {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
           </Button>
-
-          <StepDots steps={steps} currentStep={currentStep} />
-
-          {isLastStep ? (
-            <Button
-              onClick={handleLastStep}
-              disabled={isSaving}
-              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-            >
-              <LastStepIcon className="h-3.5 w-3.5" />
-              {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
-            </Button>
-          ) : (
-            <Button
-              onClick={onNext}
-              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-            >
-              {t('next')}
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
+        ) : (
+          <Button
+            onClick={onNext}
+            className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
+          >
+            {t('next')}
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       {/* Mobile */}
