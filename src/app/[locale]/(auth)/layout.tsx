@@ -40,10 +40,20 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <>
+    // [UI/UX — Aug 2026] flex min-h-svh flex-col — OfflineBanner and
+    // {children} now share ONE min-h-svh budget. Previously OfflineBanner
+    // sat above a plain fragment, and {children} (register/page.tsx's own
+    // grid, or auth-layout.tsx's) independently claimed ITS OWN
+    // min-h-svh — so whenever the banner showed, the page needed
+    // banner-height + one full viewport, always overflowing the actual
+    // viewport by exactly the banner's height. That's what was clipping
+    // the register wizard's sticky footer off the bottom of the screen.
+    // {children}'s own grid must be `flex-1` (not `min-h-svh`) for this
+    // to actually fix it — see register/page.tsx and auth-layout.tsx.
+    <div className="flex min-h-svh flex-col">
       {/* [SPRINT 3] Offline banner — user perlu tahu offline sebelum submit form */}
       <OfflineBanner />
       {children}
-    </>
+    </div>
   );
 }

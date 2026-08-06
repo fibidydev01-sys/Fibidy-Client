@@ -15,6 +15,13 @@
 // [MOBILE NAV FIX — May 2026]
 // MobileNavbar dan pb-20 padding DISEMBUNYIKAN saat di halaman
 // /dashboard/setup-store.
+//
+// [UI/UX — Aug 2026] pb-20 → pb-40. WizardNav's mobile variant is now
+// `fixed` (see shared/wizard-nav.tsx), floating bottom-20 above
+// MobileNavbar with its own ~62px height — content needs to clear
+// BOTH MobileNavbar (64px) AND that floating pill above it, not just
+// the navbar alone. pb-20 was sized for MobileNavbar only, from before
+// WizardNav had any fixed-position element to clear on mobile.
 // ============================================================================
 
 import { usePathname } from 'next/navigation';
@@ -43,7 +50,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <SidebarInset className={isSetupStore ? 'pb-0' : 'pb-20 md:pb-0'}>
+      <SidebarInset className={isSetupStore ? 'pb-0' : 'pb-40 md:pb-0'}>
         {/* z-50 — connectivity issues selalu urgent */}
         <OfflineBanner />
         <DashboardShell>{children}</DashboardShell>

@@ -570,7 +570,12 @@ export function SellerSetupWizard() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto pb-32">
+    // pb-32 → pb-40 md:pb-8 — SetupWizardNav's mobile variant is now
+    // `fixed`, floating bottom-20 above the viewport edge with its own
+    // ~62px height (no MobileNavbar to also clear here — setup-store
+    // hides it — but the pill itself still needs clearance). At md+ it
+    // reverts to `sticky` (in-flow), so the large reserve isn't needed.
+    <div className="max-w-3xl mx-auto pb-40 md:pb-8">
       <div className="mb-8">
         <SetupStepIndicator
           steps={STEPS}

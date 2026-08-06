@@ -73,7 +73,13 @@ export function AuthLayout({
   // ==========================================
   if (showSplitLayout) {
     return (
-      <div className="grid min-h-svh lg:grid-cols-2">
+      // [UI/UX — Aug 2026] flex-1, not min-h-svh — this renders as
+      // {children} inside (auth)/layout.tsx, which now owns the
+      // min-h-svh budget it shares with OfflineBanner. Claiming an
+      // independent min-h-svh here double-counted that height whenever
+      // the banner showed. See (auth)/layout.tsx and register/page.tsx
+      // for the same fix applied there.
+      <div className="grid flex-1 lg:grid-cols-2">
         {/* Kolom Kiri — Form */}
         <div className="flex flex-col p-6 md:p-10">
           {/* Back button — pojok kiri atas, native feel */}

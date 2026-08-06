@@ -534,10 +534,15 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
         )}
       </div>
 
-      {/* SCROLLABLE BODY */}
+      {/* SCROLLABLE BODY — pb-36 md:pb-5: RegisterNav's mobile variant
+          is `fixed` (floating bottom-20 above the viewport with its own
+          ~62px height), which takes it out of flow — this body needs
+          enough bottom clearance so content doesn't scroll in underneath
+          it. Reverts to a plain py-5 at md+, where RegisterNav is
+          `sticky` (in-flow) and doesn't need the reserve. */}
       <div
         className={cn(
-          'flex-1 overflow-y-auto py-5 px-1 overscroll-contain',
+          'flex-1 overflow-y-auto pt-5 px-1 pb-36 md:pb-5 overscroll-contain',
           centerContent && 'flex flex-col justify-center items-stretch',
         )}
         style={{ touchAction: 'pan-y' }}

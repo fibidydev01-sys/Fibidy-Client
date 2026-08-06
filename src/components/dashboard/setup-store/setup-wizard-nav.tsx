@@ -42,6 +42,29 @@
 // [UI/UX — Aug 2026 v3] One bar for every breakpoint, matching
 // wizard-nav.tsx's v3 — no separate unrounded mobile block. Only the
 // button label text is responsive (hidden sm:inline).
+//
+// [UI/UX — Aug 2026 v4] fixed below md, sticky from md up — matching
+// wizard-nav.tsx's v4. setup-store hides MobileNavbar entirely (see
+// dashboard-layout.tsx's isSetupStore check) so this specific caller
+// never actually had the sticky-detach-near-full-scroll bug that
+// motivated the split there, but using the same mechanism everywhere
+// is the point — one component, one behavior, no per-caller exceptions.
+//
+// [UI/UX — Aug 2026 v5] Dropped `w-full` — see wizard-nav.tsx's v5 note.
+// Same over-constrained-width bug (right edge silently ignored, pill
+// 16px wider than the screen on every phone-width viewport below
+// max-w-2xl) applied here identically.
+//
+// [UI/UX — Aug 2026 v6] Re-added as `md:w-full` — see wizard-nav.tsx's
+// v6 note for the full writeup. This specific caller (seller-setup-
+// wizard.tsx's `max-w-3xl mx-auto pb-40 md:pb-8`) isn't itself a `flex
+// flex-col` — this component wasn't actually hitting the shrink-to-fit
+// bug v6 fixes elsewhere — but `md:w-full` is a no-op for a plain block
+// parent (width:100% and width:auto resolve to the exact same used
+// value once max-w-2xl and centered auto margins are applied either
+// way) so there's no reason for this component's className to diverge
+// from the other two just because its current caller happens not to
+// trigger the bug. One shared shape, verified safe either way.
 // ============================================================================
 
 import { ChevronLeft, ChevronRight, Rocket } from 'lucide-react';
@@ -112,7 +135,7 @@ export function SetupWizardNav({
   );
 
   return (
-    <div className="sticky bottom-16 md:bottom-4 z-30 mx-auto flex w-full max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+    <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-30 mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
       {prevButton}
       {stepCounter}
       {nextOrSubmitButton}

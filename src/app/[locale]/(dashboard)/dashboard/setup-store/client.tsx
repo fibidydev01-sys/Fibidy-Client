@@ -260,7 +260,23 @@ function BuyerUpgradeWizard() {
     // bottoming out at the real viewport edge — same bug already fixed
     // for the dashboard's other short wizard pages (see
     // dashboard-shell.tsx / settings/client.tsx).
-    <div className="mx-auto flex h-full max-w-2xl flex-col px-4 py-8">
+    //
+    // [UI/UX — Aug 2026] max-w-lg, not max-w-2xl — this wizard reuses
+    // the exact same StepCategory/StepStoreInfo components as the
+    // public /register page, which is itself capped at max-w-lg. Was
+    // max-w-2xl, wider than RegisterNav's own internal max-w-lg cap —
+    // the same nav-narrower-than-content mismatch already flagged (and
+    // deliberately kept) for the image-upload steps elsewhere, except
+    // here there's no image-dropzone reason to keep it wider. Matching
+    // register.tsx's width exactly makes this the same wizard, not a
+    // wider reskin of it.
+    //
+    // pb-40 md:pb-8 — RegisterNav's mobile variant is `fixed` (floating
+    // above the viewport edge, out of flow) — same clearance reasoning
+    // as register.tsx's own scrollable body and seller-setup-wizard.tsx.
+    // setup-store routes get pb-0 from SidebarInset (MobileNavbar is
+    // hidden here), so this page owns its own bottom clearance entirely.
+    <div className="mx-auto flex h-full max-w-lg flex-col px-4 pt-8 pb-40 md:pb-8">
       <div className="flex-1">
         {/* Header */}
         <div className="mb-6 text-center">

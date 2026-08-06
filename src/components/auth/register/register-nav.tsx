@@ -24,6 +24,31 @@
 // lg:grid-cols-2 split-screen layout — max-w-2xl risks overflowing that
 // column at moderate desktop widths. max-w-lg matches the page's own
 // outer cap (register/page.tsx's `w-full max-w-lg` form column).
+//
+// [UI/UX — Aug 2026 v2] fixed below md, sticky from md up — matching
+// shared/wizard-nav.tsx's v4 fix for the same reasoning (see that file's
+// header for the full writeup). Horizontal inset on mobile is left-4/
+// right-4 up to sm, then left-6/right-6 — matching register/page.tsx's
+// own px-4 sm:px-6 (its md:px-10 step doesn't matter here since fixed
+// positioning stops applying at md anyway).
+//
+// [UI/UX — Aug 2026 v3] Dropped `w-full` — see wizard-nav.tsx's v5 note.
+// Same over-constrained-width bug (right edge silently ignored on
+// `fixed` + left+right+w-full together) applied here too, confirmed by
+// the same viewport sweep.
+//
+// [UI/UX — Aug 2026 v4] Re-added as `md:w-full` — see wizard-nav.tsx's
+// v6 note for the full writeup. register.tsx's own footer wrapper
+// (`pt-4 pb-4 shrink-0`, not itself flex) shields THAT caller from the
+// bug, but setup-store/client.tsx's BuyerUpgradeWizard renders this nav
+// as a DIRECT child of its own `flex h-full max-w-lg flex-col` column —
+// exactly the shrink-to-fit-via-auto-margin trap v6 documents: without
+// an explicit width, a cross-axis flex item with `mx-auto` shrinks to
+// its own content instead of stretching to fill/cap at max-w-lg, even
+// though the column's `align-items` defaults to stretch. `md:w-full` is
+// a no-op for register.tsx's already-safe wrapper and the actual fix
+// for BuyerUpgradeWizard's — same className either way, no caller-
+// specific branching.
 // ============================================================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
@@ -100,7 +125,7 @@ export function RegisterNav({
   // ── WELCOME STEP ──────────────────────────────────────────────────────────
   if (isWelcomeStep) {
     return (
-      <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+      <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 sm:left-6 sm:right-6 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
         {/* Kiri: Kembali ke "/" */}
         <Button
           variant="outline"
@@ -128,7 +153,7 @@ export function RegisterNav({
 
   // ── STEP 1+ NORMAL ────────────────────────────────────────────────────────
   return (
-    <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+    <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 sm:left-6 sm:right-6 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
 
       {/* Kiri: Sebelumnya (atau kembali ke Welcome dari Intent) */}
       <Button

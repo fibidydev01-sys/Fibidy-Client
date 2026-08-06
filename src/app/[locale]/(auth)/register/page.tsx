@@ -62,12 +62,21 @@ export default function RegisterPage() {
   }, []);
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
+    // [UI/UX — Aug 2026] grid flex-1 — was `grid min-h-svh`, independently
+    // claiming a full viewport regardless of AuthLayout's OfflineBanner
+    // above it. AuthLayout now owns the min-h-svh budget and this fills
+    // whatever's left within it. See (auth)/layout.tsx for the full
+    // reasoning — this was clipping the register wizard's sticky footer
+    // off the bottom of the screen whenever the banner showed.
+    <div className="grid flex-1 lg:grid-cols-2">
 
       {/*
        * ── KOLOM KIRI ──
        *
-       * h-svh          → tinggi tepat 1 viewport, tidak lebih tidak kurang
+       * h-full         → [was h-svh] fills the grid row's height, which
+       *                  is now correctly bounded by AuthLayout's
+       *                  min-h-svh minus the banner, not an independent
+       *                  full-viewport claim.
        * flex flex-col  → children disusun vertikal
        * overflow-hidden → clip konten yang melebihi viewport
        *
@@ -75,7 +84,7 @@ export default function RegisterPage() {
        * TIDAK ada py — RegisterForm mengatur top/bottom padding sendiri
        * di sticky header dan sticky footer.
        */}
-      <div className="flex flex-col h-svh overflow-hidden px-4 sm:px-6 md:px-10">
+      <div className="flex flex-col h-full overflow-hidden px-4 sm:px-6 md:px-10">
 
         {/*
          * Satu-satunya child: wrapper form.

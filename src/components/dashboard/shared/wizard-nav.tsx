@@ -45,6 +45,70 @@
 // (`hidden sm:inline`, same pattern setup-wizard-nav.tsx already used) —
 // icon-only below `sm`, icon+label from `sm` up. Shape, width, and
 // position are identical at every size.
+//
+// [UI/UX — Aug 2026 v4] Position itself now DOES split responsively:
+// `fixed` below md, `sticky` from md up — verified by measuring actual
+// scroll behavior, not just static screenshots. Pure `sticky` at every
+// size looked stable in most positions but visibly jumped ~32px right
+// at the bottom of a scrollable mobile page (MobileNavbar's mobile-only
+// pb-20 reserve on SidebarInset creates a gap between where the sticky
+// element's containing block ends and where it visually "should" stay
+// stuck — sticky snaps back to normal flow there). `fixed` has no such
+// edge case — it doesn't care about containing-block boundaries at all.
+// This is safe specifically because mobile has no persistent sidebar to
+// track (Sidebar switches to a Sheet/drawer below md — see
+// components/ui/sidebar.tsx's useMediaQuery("(max-width: 767px)")) —
+// the exact risk that made `fixed` wrong for the DESKTOP case (sidebar
+// collapse changing the real content offset) doesn't exist below md.
+// The mobile fixed variant hardcodes left-4/right-4 (16px) — measured
+// against DashboardShell's actual rendered padding at mobile widths,
+// not guessed. Also widened the bottom offset from flush-with-navbar
+// (bottom-16, zero visual gap) to bottom-20 (a real ~16px floating gap),
+// matching the desktop pill's own floating-with-gap look instead of
+// sitting edge-to-edge against MobileNavbar.
+//
+// [UI/UX — Aug 2026 v5] Dropped `w-full`. On a `fixed` element with
+// BOTH `left` and `right` set, `width:100%` is over-constrained against
+// those offsets — the browser resolves it by effectively ignoring
+// `right`, so the box was silently `100vw` wide (only visually saved by
+// max-w-2xl once the viewport exceeded ~672px). Below that, on every
+// phone-width viewport, the pill's right edge sat 16px past the actual
+// screen edge — invisible in a static screenshot at one width, but a
+// real, measured overflow, confirmed by sweeping viewport widths from
+// 320 to 1600px and checking the pill's bounding box directly rather
+// than eyeballing a couple of screenshots. Removing `w-full` lets
+// `width:auto` do what it's supposed to for an absolutely/fixed
+// positioned box with left+right both set: fill exactly the gap between
+// them, still capped by max-w-2xl and centered by mx-auto once that cap
+// applies. Re-swept after the fix: symmetric at every width, no overflow
+// anywhere in the range.
+//
+// [UI/UX — Aug 2026 v6] Re-added width, but only as `md:w-full` — v5's
+// sweep only checked `/dashboard/subscription` (save-only mode) and
+// missed that dropping `w-full` unconditionally broke every caller's
+// DESKTOP width instead: every single caller (subscription, social,
+// hero, contact, about, language, password, product) wraps this in its
+// own `flex flex-col` column with THIS div as a DIRECT flex-item child.
+// From md up (`sticky`, `left-auto`/`right-auto`), a flex item with an
+// auto cross-axis width and `mx-auto` doesn't stretch to fill its
+// container even though the parent's `align-items` defaults to
+// `stretch` — per the flexbox spec, auto margins in the cross axis
+// absorb any leftover space FIRST, which suppresses stretch entirely
+// and leaves the item sized to shrink-to-fit its own content instead.
+// Confirmed by dumping computed styles directly: the pill's used width
+// was 180px (shrink-to-fit around its one visible button) with
+// margin-left/margin-right both computed to 246px — exactly
+// (672 - 180) / 2, i.e. the max-w-2xl leftover space being silently
+// eaten by the auto margins instead of the box stretching to fill it.
+// `md:w-full` gives the item an explicit (non-auto) width at md+, which
+// takes that leftover-space-to-auto-margins path out of the equation
+// entirely — width resolves to 100% of the flex column's content box
+// (which is already correctly sized/centered at max-w-2xl by that
+// column's own mx-auto), margins resolve to 0, and the pill exactly
+// fills its parent. Below md, `w-full` is still absent — down there the
+// element is `fixed` (out of flow, not a flex item at all — flex only
+// sizes in-flow children), so this is the exact same over-constraint
+// case v5 already fixed and must stay untouched.
 // ==========================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
@@ -131,7 +195,7 @@ export function WizardNav({
   // ── Save-only mode (shipping, social, about) ─────────────────────────
   if (!hasSteps) {
     return (
-      <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+      <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
         {/* Back button (save-only mode) */}
         {onBack ? (
           <Button
@@ -164,7 +228,7 @@ export function WizardNav({
 
   // ── Multi-step mode (hero, contact, payment, product, register) ───────
   return (
-    <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+    <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
       <Button
         variant="outline"
         onClick={handlePrev}
