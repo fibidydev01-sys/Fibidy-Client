@@ -39,6 +39,12 @@ interface WizardNavProps {
   // Back-only bar — instant-apply sections (e.g. Language) with nothing to save
   hideSaveButton?: boolean;
 
+  // [UI/UX — Aug 2026] Desktop bar is a floating pill matching the content
+  // column's width, not a full-width strip — see desktop JSX below. Callers
+  // whose content isn't the sitewide `max-w-2xl` shell (settings/hero.tsx's
+  // narrower steps, for instance) can override this to match.
+  contentMaxWidthClassName?: string;
+
   // Universal back — step 0: caller tentukan kemana
   onBack?: () => void;
 
@@ -61,6 +67,7 @@ export function WizardNav({
   saveLabel,
   savingLabel,
   hideSaveButton = false,
+  contentMaxWidthClassName = 'max-w-2xl',
   onBack,
   steps,
   currentStep = 0,
@@ -104,35 +111,44 @@ export function WizardNav({
   if (!hasSteps) {
     return (
       <>
-        {/* Desktop */}
+        {/* Desktop — floating pill, centered, capped at contentMaxWidthClassName
+            so it lines up with the form column above it instead of stretching
+            edge-to-edge of the whole content area. */}
         <div
-          className="hidden lg:flex fixed bottom-0 right-0 z-40 items-center justify-between px-8 py-4 bg-background/90 backdrop-blur-sm border-t"
+          className="hidden lg:flex fixed bottom-4 right-0 z-40 justify-center px-4"
           style={{ left: 'var(--sidebar-width)' }}
         >
-          {/* Back button (save-only mode) */}
-          {onBack ? (
-            <Button
-              variant="outline"
-              onClick={onBack}
-              className="gap-1.5 min-w-[130px] h-9 text-sm"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              {t('back')}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div
+            className={cn(
+              'flex w-full items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm',
+              contentMaxWidthClassName,
+            )}
+          >
+            {/* Back button (save-only mode) */}
+            {onBack ? (
+              <Button
+                variant="outline"
+                onClick={onBack}
+                className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                {t('back')}
+              </Button>
+            ) : (
+              <div />
+            )}
 
-          {!hideSaveButton && (
-            <Button
-              onClick={onSave}
-              disabled={isSaving}
-              className="gap-1.5 h-9 text-sm min-w-[130px]"
-            >
-              <Save className="h-3.5 w-3.5" />
-              {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-            </Button>
-          )}
+            {!hideSaveButton && (
+              <Button
+                onClick={onSave}
+                disabled={isSaving}
+                className="gap-1.5 h-9 text-sm min-w-[130px] rounded-full"
+              >
+                <Save className="h-3.5 w-3.5" />
+                {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Mobile */}
@@ -169,43 +185,52 @@ export function WizardNav({
   // ── Multi-step mode (hero, contact, payment, product, register) ───────
   return (
     <>
-      {/* Desktop */}
+      {/* Desktop — floating pill, centered, capped at contentMaxWidthClassName
+          so it lines up with the form column above it instead of stretching
+          edge-to-edge of the whole content area. */}
       <div
-        className="hidden lg:flex fixed bottom-0 right-0 z-40 items-center justify-between px-8 py-4 bg-background/90 backdrop-blur-sm border-t"
+        className="hidden lg:flex fixed bottom-4 right-0 z-40 justify-center px-4"
         style={{ left: 'var(--sidebar-width)' }}
       >
-        <Button
-          variant="outline"
-          onClick={handlePrev}
+        <div
           className={cn(
-            'gap-1.5 min-w-[130px] h-9 text-sm',
-            !showPrevButton && 'invisible',
+            'flex w-full items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm',
+            contentMaxWidthClassName,
           )}
         >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          {isFirstStep ? t('back') : t('previous')}
-        </Button>
-
-        <StepDots steps={steps} currentStep={currentStep} />
-
-        {isLastStep ? (
           <Button
-            onClick={handleLastStep}
-            disabled={isSaving}
-            className="gap-1.5 min-w-[130px] h-9 text-sm"
+            variant="outline"
+            onClick={handlePrev}
+            className={cn(
+              'gap-1.5 min-w-[130px] h-9 text-sm rounded-full',
+              !showPrevButton && 'invisible',
+            )}
           >
-            <LastStepIcon className="h-3.5 w-3.5" />
-            {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
+            <ChevronLeft className="h-3.5 w-3.5" />
+            {isFirstStep ? t('back') : t('previous')}
           </Button>
-        ) : (
-          <Button
-            onClick={onNext}
-            className="gap-1.5 min-w-[130px] h-9 text-sm"
-          >
-            {t('next')}
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-        )}
+
+          <StepDots steps={steps} currentStep={currentStep} />
+
+          {isLastStep ? (
+            <Button
+              onClick={handleLastStep}
+              disabled={isSaving}
+              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
+            >
+              <LastStepIcon className="h-3.5 w-3.5" />
+              {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
+            </Button>
+          ) : (
+            <Button
+              onClick={onNext}
+              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
+            >
+              {t('next')}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Mobile */}

@@ -227,6 +227,7 @@ export function HeroSection({ onBack }: HeroSectionProps) {
         onNext={() => setCurrentStep((p) => p + 1)}
         onSave={handleSave}
         isSaving={isSaving}
+        contentMaxWidthClassName="max-w-lg"
       />
 
       <ValidationDialog

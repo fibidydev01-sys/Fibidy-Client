@@ -305,13 +305,15 @@ function MobileDrawer({
 
   return (
     <>
+      {/* [UI/UX — Aug 2026] Right-anchored pill, not a full-width centered
+          bar — stays clear of thumb-reach on the left and matches the
+          desktop collapsed tab's right-side position. */}
       {!open && (
         <div
           onClick={() => setOpen(true)}
-          className="fixed bottom-16 left-4 right-4 z-40 flex flex-col items-center py-3 bg-background rounded-t-[20px] border-t shadow-2xl cursor-pointer select-none"
+          className="fixed bottom-16 right-4 z-40 flex items-center rounded-full border bg-background px-5 py-3 shadow-2xl cursor-pointer select-none"
         >
-          <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-          <p className="text-xs text-muted-foreground mt-1">{t('open')}</p>
+          <p className="text-xs font-medium text-foreground">{t('open')}</p>
         </div>
       )}
 
