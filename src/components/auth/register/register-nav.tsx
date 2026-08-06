@@ -11,6 +11,19 @@
 //
 // Step 1 (Intent):
 //   - Kiri "← Sebelumnya" → prevStep() → kembali ke Welcome
+//
+// [UI/UX — Aug 2026] Self-contained pill styling — sticky, rounded-full,
+// shadow, backdrop-blur, hidden sm:inline responsive labels — matching
+// dashboard/shared/wizard-nav.tsx's pattern instead of leaving shape/
+// position up to each caller (previously: register.tsx wrapped this in
+// its own sticky+border+no-rounding footer, while setup-store's
+// BuyerUpgradeWizard didn't wrap it in anything at all — two different
+// looks for the same component). Width is max-w-lg, not the dashboard's
+// max-w-2xl: register.tsx's own step content (StepStoreInfo) already
+// caps out at max-w-md, and the register PAGE itself is one half of a
+// lg:grid-cols-2 split-screen layout — max-w-2xl risks overflowing that
+// column at moderate desktop widths. max-w-lg matches the page's own
+// outer cap (register/page.tsx's `w-full max-w-lg` form column).
 // ============================================================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
@@ -87,15 +100,15 @@ export function RegisterNav({
   // ── WELCOME STEP ──────────────────────────────────────────────────────────
   if (isWelcomeStep) {
     return (
-      <div className="flex items-center justify-between gap-2">
+      <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
         {/* Kiri: Kembali ke "/" */}
         <Button
           variant="outline"
           onClick={() => router.push(backHref)}
-          className="gap-1.5 h-9 text-sm min-w-[80px] sm:min-w-[120px]"
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[120px]"
         >
           <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
-          <span>{t('back')}</span>
+          <span className="hidden sm:inline">{t('back')}</span>
         </Button>
 
         {/* Tengah: kosong (dots tidak relevan di Welcome) */}
@@ -104,9 +117,9 @@ export function RegisterNav({
         {/* Kanan: Mulai */}
         <Button
           onClick={onNext}
-          className="gap-1.5 h-9 text-sm min-w-[80px] sm:min-w-[120px]"
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[120px]"
         >
-          <span>{tRegister('welcome.cta')}</span>
+          <span className="hidden sm:inline">{tRegister('welcome.cta')}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
         </Button>
       </div>
@@ -115,16 +128,16 @@ export function RegisterNav({
 
   // ── STEP 1+ NORMAL ────────────────────────────────────────────────────────
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-lg items-center justify-between gap-2 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
 
       {/* Kiri: Sebelumnya (atau kembali ke Welcome dari Intent) */}
       <Button
         variant="outline"
         onClick={handlePrev}
-        className="gap-1.5 h-9 text-sm min-w-[80px] sm:min-w-[120px]"
+        className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[120px]"
       >
         <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
-        <span>{t('previous')}</span>
+        <span className="hidden sm:inline">{t('previous')}</span>
       </Button>
 
       {/* Tengah: dots */}
@@ -135,17 +148,19 @@ export function RegisterNav({
         <Button
           onClick={onLastStep}
           disabled={isSaving}
-          className="gap-1.5 h-9 text-sm min-w-[80px] sm:min-w-[120px]"
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[120px]"
         >
           <LastStepIcon className="h-3.5 w-3.5 shrink-0" />
-          <span>{isSaving ? resolvedLastSavingLabel : resolvedLastLabel}</span>
+          <span className="hidden sm:inline">
+            {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
+          </span>
         </Button>
       ) : (
         <Button
           onClick={onNext}
-          className="gap-1.5 h-9 text-sm min-w-[80px] sm:min-w-[120px]"
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[120px]"
         >
-          <span>{t('next')}</span>
+          <span className="hidden sm:inline">{t('next')}</span>
           <ChevronRight className="h-3.5 w-3.5 shrink-0" />
         </Button>
       )}

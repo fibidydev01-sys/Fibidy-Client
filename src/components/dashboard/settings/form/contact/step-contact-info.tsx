@@ -37,7 +37,7 @@ export function StepContactInfo({ formData, updateFormData, isDesktop = false }:
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   if (isDesktop) {
     return (
-      <div className="space-y-8 max-w-lg mx-auto">
+      <div className="space-y-8 max-w-2xl mx-auto">
 
         {/* WhatsApp */}
         <div id="tour-whatsapp" className="space-y-1.5">
@@ -106,7 +106,7 @@ export function StepContactInfo({ formData, updateFormData, isDesktop = false }:
 
   // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-sm mx-auto">
+    <div className="space-y-5 max-w-2xl mx-auto">
 
       {/* WhatsApp */}
       <div id="tour-whatsapp" className="space-y-1.5">

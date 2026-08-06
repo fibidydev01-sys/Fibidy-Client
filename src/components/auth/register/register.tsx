@@ -545,8 +545,10 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
         {renderStep()}
       </div>
 
-      {/* STICKY FOOTER */}
-      <div className="sticky bottom-0 bg-background pt-4 pb-6 border-t shrink-0">
+      {/* FOOTER — RegisterNav is self-styled (pill, sticky, shadow) now;
+          this wrapper only provides breathing room so the pill's shadow
+          isn't clipped by the column's `overflow-hidden` above it. */}
+      <div className="pt-4 pb-4 shrink-0">
         <RegisterNav
           steps={STEPS}
           currentStep={indicatorStep}

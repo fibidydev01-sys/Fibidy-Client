@@ -253,62 +253,71 @@ function BuyerUpgradeWizard() {
   const indicatorStep = state.currentStep - 1;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-6 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
-          <Store className="h-6 w-6 text-primary" />
+    // h-full flex flex-col — RegisterNav is now a self-contained sticky
+    // pill (see register-nav.tsx). Without a definite-height flex
+    // ancestor here, a plain block div only ever sizes to its own short
+    // content, and the sticky pill just sits right after it instead of
+    // bottoming out at the real viewport edge — same bug already fixed
+    // for the dashboard's other short wizard pages (see
+    // dashboard-shell.tsx / settings/client.tsx).
+    <div className="mx-auto flex h-full max-w-2xl flex-col px-4 py-8">
+      <div className="flex-1">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
+            <Store className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t('subtitle')}</p>
-      </div>
 
-      {/* Step indicator */}
-      <div className="flex justify-center mb-8">
-        <RegisterStepIndicator
-          steps={STEPS}
-          currentStep={indicatorStep}
-          onStepClick={(i) => goToStep(i + 1)}
-          size="lg"
-        />
-      </div>
+        {/* Step indicator */}
+        <div className="flex justify-center mb-8">
+          <RegisterStepIndicator
+            steps={STEPS}
+            currentStep={indicatorStep}
+            onStepClick={(i) => goToStep(i + 1)}
+            size="lg"
+          />
+        </div>
 
-      {/* Step header */}
-      <div className="text-center mb-6">
-        <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          {t('stepCounter', { current: state.currentStep, total: BUYER_TOTAL_STEPS })}
-        </p>
-        <h2 className="text-lg font-bold tracking-tight mt-1">{STEPS[indicatorStep].title}</h2>
-        <p className="text-sm text-muted-foreground">{STEPS[indicatorStep].desc}</p>
-      </div>
+        {/* Step header */}
+        <div className="text-center mb-6">
+          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+            {t('stepCounter', { current: state.currentStep, total: BUYER_TOTAL_STEPS })}
+          </p>
+          <h2 className="text-lg font-bold tracking-tight mt-1">{STEPS[indicatorStep].title}</h2>
+          <p className="text-sm text-muted-foreground">{STEPS[indicatorStep].desc}</p>
+        </div>
 
-      {/* Step content */}
-      <div className="min-h-[300px]">
-        {state.currentStep === 1 && (
-          <StepCategory
-            selectedCategory={state.category}
-            onSelectCategory={(category) => update({ category })}
-          />
-        )}
-        {state.currentStep === 2 && (
-          <StepStoreInfo
-            name={state.name}
-            slug={state.slug}
-            description={state.description}
-            onUpdate={(patch) => update(patch)}
-            isChecking={isChecking}
-            isAvailable={isAvailable}
-          />
-        )}
-        {state.currentStep === 3 && (
-          <BuyerWhatsAppStep
-            whatsapp={state.whatsapp}
-            onChange={(whatsapp) => update({ whatsapp })}
-          />
-        )}
-        {state.currentStep === 4 && (
-          <BuyerReviewStep data={state} onEdit={(step) => goToStep(step)} />
-        )}
+        {/* Step content */}
+        <div className="min-h-[300px]">
+          {state.currentStep === 1 && (
+            <StepCategory
+              selectedCategory={state.category}
+              onSelectCategory={(category) => update({ category })}
+            />
+          )}
+          {state.currentStep === 2 && (
+            <StepStoreInfo
+              name={state.name}
+              slug={state.slug}
+              description={state.description}
+              onUpdate={(patch) => update(patch)}
+              isChecking={isChecking}
+              isAvailable={isAvailable}
+            />
+          )}
+          {state.currentStep === 3 && (
+            <BuyerWhatsAppStep
+              whatsapp={state.whatsapp}
+              onChange={(whatsapp) => update({ whatsapp })}
+            />
+          )}
+          {state.currentStep === 4 && (
+            <BuyerReviewStep data={state} onEdit={(step) => goToStep(step)} />
+          )}
+        </div>
       </div>
 
       {/* Nav */}

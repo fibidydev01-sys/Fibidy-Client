@@ -25,7 +25,7 @@ export function StepIdentity({
   const t = useTranslations('settings.hero.identity');
 
   return (
-    <div className="space-y-8 max-w-lg mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto">
 
       {/* Store Name */}
       <div id="tour-store-name" className="space-y-1.5">

@@ -3,6 +3,20 @@ import { cn } from '@/lib/shared/utils';
 // ==========================================
 // DASHBOARD SHELL
 // Content wrapper with consistent padding
+//
+// [UI/UX — Aug 2026] Both wrapper divs are now `flex flex-col` +
+// `flex-1` on the inner one. Without this, the inner `container` div
+// only ever sized itself to its own content (a plain block div has no
+// reason to stretch just because ITS parent got a tall flex-stretched
+// height) — so a page's own `h-full` wrapper had nothing definite to
+// resolve 100% against, and on short pages (Language, Password — a
+// couple of fields) that meant the sticky wizard bar never reached the
+// bottom of the viewport; it just sat right after the short content,
+// wherever that happened to end. `flex-1` here gives `container` a real,
+// definite height (viewport height, via SidebarProvider's min-h-svh),
+// so `h-full` + `flex-1` + the sticky bar as last child inside a page
+// now correctly bottoms out at the actual viewport edge regardless of
+// how little content that page has.
 // ==========================================
 
 interface DashboardShellProps {
@@ -12,8 +26,8 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, className }: DashboardShellProps) {
   return (
-    <div className={cn('flex-1', className)}>
-      <div className="container p-4 md:p-6 lg:p-8">
+    <div className={cn('flex flex-1 flex-col', className)}>
+      <div className="container flex-1 p-4 md:p-6 lg:p-8">
         {children}
       </div>
     </div>

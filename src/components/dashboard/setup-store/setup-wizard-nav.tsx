@@ -38,6 +38,10 @@
 // that ancestor's center — nested mx-auto centers around the same point
 // regardless of which one is narrower. See wizard-nav.tsx's header for why
 // `sticky` replaced `fixed` here (same reasoning, same bug).
+//
+// [UI/UX — Aug 2026 v3] One bar for every breakpoint, matching
+// wizard-nav.tsx's v3 — no separate unrounded mobile block. Only the
+// button label text is responsive (hidden sm:inline).
 // ============================================================================
 
 import { ChevronLeft, ChevronRight, Rocket } from 'lucide-react';
@@ -71,7 +75,7 @@ export function SetupWizardNav({
     <Button
       variant="outline"
       onClick={onPrev}
-      className={cn('gap-1.5 rounded-full', isFirstStep && 'invisible')}
+      className={cn('gap-1.5 rounded-full sm:min-w-[130px]', isFirstStep && 'invisible')}
       disabled={isFirstStep}
     >
       <ChevronLeft className="h-4 w-4" />
@@ -93,7 +97,7 @@ export function SetupWizardNav({
       disabled={isSaving}
       offlineMessage={t('errors.offlineSubmit')}
       tooltipSide="top"
-      className="gap-1.5 rounded-full"
+      className="gap-1.5 rounded-full sm:min-w-[130px]"
     >
       <Rocket className="h-4 w-4" />
       <span className="hidden sm:inline">
@@ -101,31 +105,17 @@ export function SetupWizardNav({
       </span>
     </OfflineAwareButton>
   ) : (
-    <Button onClick={onNext} className="gap-1.5 rounded-full">
+    <Button onClick={onNext} className="gap-1.5 rounded-full sm:min-w-[130px]">
       <span className="hidden sm:inline">Selanjutnya</span>
       <ChevronRight className="h-4 w-4" />
     </Button>
   );
 
   return (
-    <>
-      {/* Desktop — floating pill, same max-w-2xl + shape as WizardNav
-          (shared/wizard-nav.tsx) so setup-store doesn't look like a
-          different app from the rest of the dashboard. */}
-      <div className="hidden lg:flex sticky bottom-4 z-30 mx-auto w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm">
-        {prevButton}
-        {stepCounter}
-        {nextOrSubmitButton}
-      </div>
-
-      {/* Mobile */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="px-4 py-3 flex items-center justify-between gap-3">
-          {prevButton}
-          {stepCounter}
-          {nextOrSubmitButton}
-        </div>
-      </div>
-    </>
+    <div className="sticky bottom-16 md:bottom-4 z-30 mx-auto flex w-full max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+      {prevButton}
+      {stepCounter}
+      {nextOrSubmitButton}
+    </div>
   );
 }

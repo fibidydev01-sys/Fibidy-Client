@@ -61,7 +61,7 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   if (isDesktop) {
     return (
-      <div className="space-y-8 max-w-lg mx-auto">
+      <div className="space-y-8 max-w-2xl mx-auto">
         <div id="tour-maps-url" className="space-y-1.5">
           <Label htmlFor="mapUrl-d" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
             {t('urlLabel')}
@@ -134,7 +134,7 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
 
   // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-sm mx-auto">
+    <div className="space-y-5 max-w-2xl mx-auto">
       <div id="tour-maps-url" className="space-y-1.5">
         <Label htmlFor="mapUrl-m" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
           {t('urlLabel')}

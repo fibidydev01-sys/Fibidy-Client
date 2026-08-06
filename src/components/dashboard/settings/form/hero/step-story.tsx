@@ -24,7 +24,7 @@ export function StepStory({ formData, updateFormData }: StepStoryProps) {
   const t = useTranslations('settings.hero.story');
 
   return (
-    <div className="space-y-8 max-w-lg mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto">
       {FIELDS.map((field) => (
         <div key={field.key} id={`tour-${field.key}`} className="space-y-1.5">
           <Label

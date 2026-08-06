@@ -38,6 +38,13 @@
 // the guessing entirely: rendered as the last child inside the SAME
 // `max-w-2xl mx-auto` column every caller already wraps its own content
 // in, it inherits that column's exact box, so it cannot drift from it.
+//
+// [UI/UX — Aug 2026 v3] Collapsed to ONE bar for every breakpoint — no
+// more separate mobile block with its own (unrounded, edge-to-edge) shape.
+// The only thing that changes by screen size is button LABEL TEXT
+// (`hidden sm:inline`, same pattern setup-wizard-nav.tsx already used) —
+// icon-only below `sm`, icon+label from `sm` up. Shape, width, and
+// position are identical at every size.
 // ==========================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
@@ -124,143 +131,74 @@ export function WizardNav({
   // ── Save-only mode (shipping, social, about) ─────────────────────────
   if (!hasSteps) {
     return (
-      <>
-        {/* Desktop — floating pill, sticky within (and therefore always
-            exactly as wide + as centered as) the max-w-2xl column every
-            caller wraps its own content in. See file header. */}
-        <div className="hidden lg:flex sticky bottom-4 z-40 mx-auto w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm">
-          {/* Back button (save-only mode) */}
-          {onBack ? (
-            <Button
-              variant="outline"
-              onClick={onBack}
-              className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              {t('back')}
-            </Button>
-          ) : (
-            <div />
-          )}
+      <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+        {/* Back button (save-only mode) */}
+        {onBack ? (
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{t('back')}</span>
+          </Button>
+        ) : (
+          <div />
+        )}
 
-          {!hideSaveButton && (
-            <Button
-              onClick={onSave}
-              disabled={isSaving}
-              className="gap-1.5 h-9 text-sm min-w-[130px] rounded-full"
-            >
-              <Save className="h-3.5 w-3.5" />
+        {!hideSaveButton && (
+          <Button
+            onClick={onSave}
+            disabled={isSaving}
+            className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+          >
+            <Save className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">
               {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-            </Button>
-          )}
-        </div>
-
-        {/* Mobile */}
-        <div className="lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/90 backdrop-blur-sm border-t">
-          <div className="px-4 py-3 flex items-center justify-between">
-            {onBack ? (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={onBack}
-                className="h-9 w-9 shrink-0"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            ) : (
-              <div />
-            )}
-            {!hideSaveButton && (
-              <Button
-                size="sm"
-                onClick={onSave}
-                disabled={isSaving}
-                className="h-9 px-4 text-xs font-medium"
-              >
-                {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
-              </Button>
-            )}
-          </div>
-        </div>
-      </>
+            </span>
+          </Button>
+        )}
+      </div>
     );
   }
 
   // ── Multi-step mode (hero, contact, payment, product, register) ───────
   return (
-    <>
-      {/* Desktop — floating pill, sticky within (and therefore always
-          exactly as wide + as centered as) the max-w-2xl column every
-          caller wraps its own content in. See file header. */}
-      <div className="hidden lg:flex sticky bottom-4 z-40 mx-auto w-full max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-6 py-3 shadow-lg backdrop-blur-sm">
-        <Button
-          variant="outline"
-          onClick={handlePrev}
-          className={cn(
-            'gap-1.5 min-w-[130px] h-9 text-sm rounded-full',
-            !showPrevButton && 'invisible',
-          )}
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          {isFirstStep ? t('back') : t('previous')}
-        </Button>
-
-        <StepDots steps={steps} currentStep={currentStep} />
-
-        {isLastStep ? (
-          <Button
-            onClick={handleLastStep}
-            disabled={isSaving}
-            className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-          >
-            <LastStepIcon className="h-3.5 w-3.5" />
-            {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
-          </Button>
-        ) : (
-          <Button
-            onClick={onNext}
-            className="gap-1.5 min-w-[130px] h-9 text-sm rounded-full"
-          >
-            {t('next')}
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
+    <div className="sticky bottom-16 md:bottom-4 z-40 mx-auto flex w-full max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+      <Button
+        variant="outline"
+        onClick={handlePrev}
+        className={cn(
+          'gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]',
+          !showPrevButton && 'invisible',
         )}
-      </div>
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">{isFirstStep ? t('back') : t('previous')}</span>
+      </Button>
 
-      {/* Mobile */}
-      <div className="lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-background/90 backdrop-blur-sm border-t">
-        <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handlePrev}
-            className={cn('h-9 w-9 shrink-0', !showPrevButton && 'invisible')}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+      <StepDots steps={steps} currentStep={currentStep} />
 
-          <StepDots steps={steps} currentStep={currentStep} />
-
-          {isLastStep ? (
-            <Button
-              size="sm"
-              onClick={handleLastStep}
-              disabled={isSaving}
-              className="h-9 px-4 text-xs font-medium shrink-0"
-            >
-              {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
-            </Button>
-          ) : (
-            <Button
-              size="icon"
-              onClick={onNext}
-              className="h-9 w-9 shrink-0"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-    </>
+      {isLastStep ? (
+        <Button
+          onClick={handleLastStep}
+          disabled={isSaving}
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+        >
+          <LastStepIcon className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">
+            {isSaving ? resolvedLastSavingLabel : resolvedLastLabel}
+          </span>
+        </Button>
+      ) : (
+        <Button
+          onClick={onNext}
+          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+        >
+          <span className="hidden sm:inline">{t('next')}</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </div>
   );
 }

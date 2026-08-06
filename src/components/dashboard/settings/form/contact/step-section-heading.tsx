@@ -17,7 +17,7 @@ export function StepSectionHeading({ formData, updateFormData, isDesktop = false
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   if (isDesktop) {
     return (
-      <div className="space-y-8 max-w-lg mx-auto">
+      <div className="space-y-8 max-w-2xl mx-auto">
 
         {/* Section Title */}
         <div id="tour-contact-title" className="space-y-1.5">
@@ -55,7 +55,7 @@ export function StepSectionHeading({ formData, updateFormData, isDesktop = false
 
   // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-sm mx-auto">
+    <div className="space-y-5 max-w-2xl mx-auto">
 
       {/* Section Title */}
       <div id="tour-contact-title" className="space-y-1.5">

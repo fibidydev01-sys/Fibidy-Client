@@ -270,7 +270,12 @@ export function SettingsClient() {
     };
 
     const node = sectionMap[activeSection];
-    if (node) return <div className="max-w-2xl mx-auto">{node}</div>;
+    // h-full — without it this div block-sizes to its own (often short)
+    // content instead of inheriting DashboardShell's stretched height,
+    // which left the section's sticky WizardNav floating right after
+    // the content on short pages (Language, Password) instead of
+    // bottoming out at the real viewport edge. See dashboard-shell.tsx.
+    if (node) return <div className="h-full max-w-2xl mx-auto">{node}</div>;
   }
 
   // ==========================================
