@@ -136,7 +136,7 @@
       "subtitle": "Tools to keep the database and platform healthy",
       "cleanup": {
         "title": "Cleanup Logs",
-        "description": "Delete old DownloadLog and WebhookEvent records to prevent DB bloat. Safe to run anytime — historical data required for accounting is not deleted.",
+        "description": "Delete old DownloadLog and WebhookEvent records to prevent DB bloat. Safe to run anytime historical data required for accounting is not deleted.",
         "downloadLogsLabel": "Download Logs (days)",
         "downloadLogsHelper": "Delete records older than {days} days",
         "webhookEventsLabel": "Webhook Events (days)",

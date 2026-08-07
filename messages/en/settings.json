@@ -104,8 +104,8 @@
         "whatsappRequired": "*required",
         "whatsappRequiredShort": "*",
         "whatsappPlaceholder": "89123456789",
-        "whatsappHelperDesktop": "Type without 0 or 62 — e.g.",
-        "whatsappHelperMobile": "No 0 or 62 — e.g.",
+        "whatsappHelperDesktop": "Type without 0 or 62 e.g.",
+        "whatsappHelperMobile": "No 0 or 62 e.g.",
         "whatsappExample": "89123456789",
         "phoneLabel": "Phone Number",
         "phoneOptional": "(Optional)",
@@ -113,7 +113,7 @@
         "addressLabel": "Full Address",
         "addressPlaceholder": "123 Example St, City...",
         "tipLabel": "Tip:",
-        "tipBody": "Make sure your WhatsApp number is active — customers will be connected directly when they tap the contact button."
+        "tipBody": "Make sure your WhatsApp number is active customers will be connected directly when they tap the contact button."
       },
       "location": {
         "urlLabel": "Google Maps Embed URL",
@@ -207,7 +207,7 @@
         }
       },
       "tipLabel": "Tip:",
-      "tipBody": "Social links appear in your store footer. Only add active accounts — fewer well-managed links are better than many inactive ones."
+      "tipBody": "Social links appear in your store footer. Only add active accounts fewer well-managed links are better than many inactive ones."
     },
     "password": {
       "title": "Change Password",

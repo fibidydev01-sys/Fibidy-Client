@@ -76,13 +76,13 @@
     "firstPublishDialog": {
       "title": "Toko kamu sudah live! 🎉",
       "description": "Storefront kamu sekarang bisa diakses di {slug}.fibidy.com. Saatnya tambah produk pertama supaya pelanggan bisa belanja.",
-      "exploreHint": "Mau tampilan berbeda? Kamu bisa ganti block kapan saja dari Studio — perubahan langsung tampil.",
+      "exploreHint": "Mau tampilan berbeda? Kamu bisa ganti block kapan saja dari Studio perubahan langsung tampil.",
       "ctaPreview": "Lihat Toko Saya",
       "ctaContinue": "Tambah Produk Pertama"
     },
     "publishDisabled": {
-      "heroOff": "Aktifkan Hero dulu — storefront butuh hero sebelum bisa di-publish.",
-      "nothingToSave": "Tidak ada yang perlu di-publish — ubah sesuatu dulu.",
+      "heroOff": "Aktifkan Hero dulu storefront butuh hero sebelum bisa di-publish.",
+      "nothingToSave": "Tidak ada yang perlu di-publish ubah sesuatu dulu.",
       "offline": "Kamu offline. Sambungkan ulang untuk publish perubahan."
     },
     "upgradeModal": {

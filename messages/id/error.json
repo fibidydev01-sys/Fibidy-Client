@@ -17,7 +17,7 @@
       "title": "Masalah koneksi",
       "description": "Kami tidak bisa menjangkau server. Cek koneksi kamu lalu coba lagi.",
       "retry": "Coba lagi",
-      "timeout": "Permintaan timeout — silakan coba lagi sebentar",
+      "timeout": "Permintaan timeout silakan coba lagi sebentar",
       "offline": "Kamu terlihat sedang offline"
     },
     "unauthorized": {

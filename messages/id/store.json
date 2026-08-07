@@ -6,7 +6,7 @@
     },
     "eduOrder": {
       "title": "Toko Simulasi",
-      "description": "Toko ini dalam Mode Pelajar — hanya untuk simulasi belajar. Pesanan tidak dapat dilakukan di sini.",
+      "description": "Toko ini dalam Mode Pelajar hanya untuk simulasi belajar. Pesanan tidak dapat dilakukan di sini.",
       "understood": "Mengerti",
       "learnMore": "Pelajari tentang Mode Pelajar"
     },
@@ -65,8 +65,8 @@
       "detail": {
         "shareLabel": "Bagikan produk ini:",
         "buyFallbackDescription": "Beli {name} di {tenant}",
-        "imageAlt": "{name} — gambar {index}",
-        "thumbAlt": "{name} — thumbnail {index}",
+        "imageAlt": "{name} gambar {index}",
+        "thumbAlt": "{name} thumbnail {index}",
         "descriptionHeading": "Deskripsi produk",
         "actionsDivider": "atau",
         "imagePosition": "{current} / {total}"
@@ -156,7 +156,7 @@
       },
       "stripe": {
         "signInToBuy": "Masuk untuk Membeli",
-        "buyNow": "Beli Sekarang — {price}",
+        "buyNow": "Beli Sekarang {price}",
         "loading": "Memuat...",
         "redirecting": "Mengalihkan ke Stripe...",
         "stillProcessingTitle": "Masih memproses checkout sebelumnya",

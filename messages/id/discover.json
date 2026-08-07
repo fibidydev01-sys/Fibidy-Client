@@ -3,8 +3,8 @@
     "metadata": {
       "listTitle": "Jelajahi Produk Digital",
       "listDescription": "Lihat produk digital dari semua kreator di Fibidy",
-      "layoutTemplate": "%s | Jelajah — Fibidy",
-      "layoutDefault": "Jelajahi Produk Digital — Fibidy",
+      "layoutTemplate": "%s | Jelajah Fibidy",
+      "layoutDefault": "Jelajahi Produk Digital Fibidy",
       "detailNotFound": "Produk Tidak Ditemukan",
       "detailFallbackDescription": "Beli {name} di Fibidy"
     },
@@ -32,7 +32,7 @@
     "buyButton": {
       "signInToBuy": "Masuk untuk Membeli",
       "signInHint": "Akun dibutuhkan untuk melanjutkan pembelian",
-      "buyNow": "Beli — ${price}",
+      "buyNow": "Beli ${price}",
       "redirecting": "Mengalihkan ke Stripe...",
       "policyAgreement": "Saya mengerti bahwa semua penjualan bersifat final dan produk digital tidak bisa dikembalikan setelah dibeli."
     },

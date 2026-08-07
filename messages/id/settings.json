@@ -104,8 +104,8 @@
         "whatsappRequired": "*wajib",
         "whatsappRequiredShort": "*",
         "whatsappPlaceholder": "89123456789",
-        "whatsappHelperDesktop": "Tanpa 0 atau 62 — contoh",
-        "whatsappHelperMobile": "Tanpa 0 atau 62 — contoh",
+        "whatsappHelperDesktop": "Tanpa 0 atau 62 contoh",
+        "whatsappHelperMobile": "Tanpa 0 atau 62 contoh",
         "whatsappExample": "89123456789",
         "phoneLabel": "Nomor Telepon",
         "phoneOptional": "(Opsional)",
@@ -113,7 +113,7 @@
         "addressLabel": "Alamat Lengkap",
         "addressPlaceholder": "Jl. Contoh No. 123, Kota...",
         "tipLabel": "Tips:",
-        "tipBody": "Pastikan nomor WhatsApp kamu aktif — pelanggan akan langsung terhubung saat menekan tombol kontak."
+        "tipBody": "Pastikan nomor WhatsApp kamu aktif pelanggan akan langsung terhubung saat menekan tombol kontak."
       },
       "location": {
         "urlLabel": "URL Embed Google Maps",
@@ -207,7 +207,7 @@
         }
       },
       "tipLabel": "Tips:",
-      "tipBody": "Link sosial muncul di footer toko kamu. Tambahkan hanya akun yang aktif — sedikit link terkelola lebih baik daripada banyak yang pasif."
+      "tipBody": "Link sosial muncul di footer toko kamu. Tambahkan hanya akun yang aktif sedikit link terkelola lebih baik daripada banyak yang pasif."
     },
     "password": {
       "title": "Ubah Kata Sandi",

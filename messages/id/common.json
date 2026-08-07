@@ -260,7 +260,7 @@
     },
     "offline": {
       "bannerTitle": "Kamu sedang offline",
-      "bannerDescription": "Beberapa aksi tidak tersedia. Pekerjaan lokal kamu aman — kami akan reconnect otomatis.",
+      "bannerDescription": "Beberapa aksi tidak tersedia. Pekerjaan lokal kamu aman kami akan reconnect otomatis.",
       "checking": "Mencoba sambung ulang…",
       "backOnlineTitle": "Kembali online",
       "backOnlineDescription": "Koneksi pulih. Kamu bisa lanjut dari tempat tadi.",

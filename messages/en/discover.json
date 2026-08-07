@@ -3,8 +3,8 @@
     "metadata": {
       "listTitle": "Discover Digital Products",
       "listDescription": "Browse digital products from all creators on Fibidy",
-      "layoutTemplate": "%s | Discover — Fibidy",
-      "layoutDefault": "Discover Digital Products — Fibidy",
+      "layoutTemplate": "%s | Discover Fibidy",
+      "layoutDefault": "Discover Digital Products Fibidy",
       "detailNotFound": "Product Not Found",
       "detailFallbackDescription": "Buy {name} on Fibidy"
     },
@@ -32,7 +32,7 @@
     "buyButton": {
       "signInToBuy": "Sign in to Buy",
       "signInHint": "An account is required to continue with the purchase",
-      "buyNow": "Buy — ${price}",
+      "buyNow": "Buy ${price}",
       "redirecting": "Redirecting to Stripe...",
       "policyAgreement": "I understand that all sales are final and digital products cannot be returned once purchased."
     },

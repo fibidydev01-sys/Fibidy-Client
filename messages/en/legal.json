@@ -42,7 +42,7 @@
     "terms": {
       "title": "Terms of Service",
       "summary": [
-        "Fibidy is an offline POS and online store platform for small businesses — not a marketplace.",
+        "Fibidy is an offline POS and online store platform for small businesses not a marketplace.",
         "All transactions happen outside Fibidy, directly between you (the Seller) and your customers.",
         "Fibidy never receives, holds, or transfers money of any kind.",
         "You can leave anytime. Your store data stays intact, just downgraded to the Free plan limits."
@@ -62,7 +62,7 @@
           "title": "Your account.",
           "content": [
             "To use Fibidy, you need to register and fill in basic business information (store name, contact, business type). You are responsible for keeping your account credentials confidential and for all activity that occurs within your account.",
-            "Fibidy can be used for many types of businesses — warungs, salons, coffee shops, repair shops, and more — as long as you use it for its intended purpose: recording transactions and displaying your business information."
+            "Fibidy can be used for many types of businesses warungs, salons, coffee shops, repair shops, and more as long as you use it for its intended purpose: recording transactions and displaying your business information."
           ]
         },
         {
@@ -79,7 +79,7 @@
           "number": "04",
           "title": "Your responsibilities as a seller.",
           "content": [
-            "Because transactions happen directly between you and your customers, you are responsible for the accuracy of the product or service information you display, price agreements, payment, and delivery with your customers, and handling complaints, refunds, or warranties — in accordance with the policies you set for your customers.",
+            "Because transactions happen directly between you and your customers, you are responsible for the accuracy of the product or service information you display, price agreements, payment, and delivery with your customers, and handling complaints, refunds, or warranties in accordance with the policies you set for your customers.",
             "Fibidy does not mediate, guarantee, or bear any responsibility for the outcome of those transactions."
           ]
         },
@@ -96,7 +96,7 @@
           "title": "Plans and payments to Fibidy.",
           "content": [
             "Fibidy offers a Free plan and a Starter plan. Feature details and pricing for each plan are listed on the Pricing page.",
-            "Payment for the Starter plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). If you stop paying for Starter, your account downgrades to the Free plan limits — your data stays intact, but some features (including the offline POS) become inactive until you resubscribe."
+            "Payment for the Starter plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). If you stop paying for Starter, your account downgrades to the Free plan limits your data stays intact, but some features (including the offline POS) become inactive until you resubscribe."
           ]
         },
         {
@@ -104,7 +104,7 @@
           "title": "Your store data.",
           "content": [
             "Data you enter into Fibidy (products, photos, business info, POS transaction history) remains yours. You can download a backup anytime through the feature available in your account.",
-            "If you cancel your subscription, your data is not deleted — it simply downgrades to the Free plan limits."
+            "If you cancel your subscription, your data is not deleted it simply downgrades to the Free plan limits."
           ]
         },
         {
@@ -133,7 +133,7 @@
     "privacy": {
       "title": "Privacy Policy",
       "summary": [
-        "Fibidy stores store owner (Seller) data — not buyer customer data.",
+        "Fibidy stores store owner (Seller) data not buyer customer data.",
         "Customer data that flows through WhatsApp is never stored by Fibidy.",
         "Offline POS data is stored on your device and synced when a connection is available.",
         "You can download a backup or request deletion of your account data at any time."
@@ -144,7 +144,7 @@
           "title": "Data we collect.",
           "content": [
             "Fibidy collects data you provide as a store owner (Seller), including: account data (name, WhatsApp number, email, business type), store data (product names, photos, prices, descriptions, and other business information you fill in), and POS transaction data (daily transaction records you input through the offline cashier app).",
-            "Fibidy does not collect or store your customers' (buyers') data. When a customer contacts you via WhatsApp from your online store, the conversation and their data flow directly through WhatsApp — they do not pass through or get stored on Fibidy's servers."
+            "Fibidy does not collect or store your customers' (buyers') data. When a customer contacts you via WhatsApp from your online store, the conversation and their data flow directly through WhatsApp they do not pass through or get stored on Fibidy's servers."
           ]
         },
         {
@@ -166,15 +166,15 @@
           "number": "04",
           "title": "Who can see your online store data.",
           "content": [
-            "Information you display on your online store page (products, photos, descriptions, contact details) is public — anyone who accesses the link can see it, because that is its purpose (so potential customers can view and contact you).",
-            "Your POS transaction data and account data are private — only accessible by you through your account."
+            "Information you display on your online store page (products, photos, descriptions, contact details) is public anyone who accesses the link can see it, because that is its purpose (so potential customers can view and contact you).",
+            "Your POS transaction data and account data are private only accessible by you through your account."
           ]
         },
         {
           "number": "05",
           "title": "Storage and security.",
           "content": [
-            "Data is stored on servers we maintain with standard security practices. That said, no system is 100% risk-free — we do our best to keep your data as secure as possible, and we recommend you also keep your account credentials confidential (password, device access)."
+            "Data is stored on servers we maintain with standard security practices. That said, no system is 100% risk-free we do our best to keep your data as secure as possible, and we recommend you also keep your account credentials confidential (password, device access)."
           ]
         },
         {
@@ -212,7 +212,7 @@
           "number": "01",
           "title": "What cookies are.",
           "content": [
-            "Cookies are small files stored by your browser or app so that a website or app can \"remember\" you — for example, keeping you logged in as you navigate between pages."
+            "Cookies are small files stored by your browser or app so that a website or app can \"remember\" you for example, keeping you logged in as you navigate between pages."
           ]
         },
         {
@@ -227,7 +227,7 @@
           "number": "03",
           "title": "Why these cookies are necessary.",
           "content": [
-            "Login session cookies are essential for Fibidy's basic functionality — without them, you would have to log in again every time you navigate to a new page. Because of this, these cookies cannot be disabled while you are using Fibidy."
+            "Login session cookies are essential for Fibidy's basic functionality without them, you would have to log in again every time you navigate to a new page. Because of this, these cookies cannot be disabled while you are using Fibidy."
           ]
         },
         {
@@ -264,11 +264,11 @@
           "items": [
             {
               "question": "Is the POS really free?",
-              "answer": "The offline POS is active on the Starter plan (Rp 35,000/month) — one payment and you're ready to go. The Free plan still includes an online store, but in a limited version and without the POS."
+              "answer": "The offline POS is active on the Starter plan (Rp 35,000/month) one payment and you're ready to go. The Free plan still includes an online store, but in a limited version and without the POS."
             },
             {
               "question": "Why POS + online store together, not just one?",
-              "answer": "Because they serve different needs that often go hand in hand. The offline POS records all your daily transactions — sales, stock, revenue reports, history — accessible anytime, even without a signal. The online store makes your business discoverable and reachable by potential customers from outside. One for internal operations, one for external reach — Fibidy brings both together in one platform."
+              "answer": "Because they serve different needs that often go hand in hand. The offline POS records all your daily transactions sales, stock, revenue reports, history accessible anytime, even without a signal. The online store makes your business discoverable and reachable by potential customers from outside. One for internal operations, one for external reach Fibidy brings both together in one platform."
             },
             {
               "question": "What types of businesses is it suitable for?",
@@ -281,7 +281,7 @@
           "items": [
             {
               "question": "How do customers pay at my online store?",
-              "answer": "Customers browse products on your store page, then contact you directly — via WhatsApp, phone, or the contact details you provide. Payment is handled via QRIS. Fibidy is not involved in the transaction at all."
+              "answer": "Customers browse products on your store page, then contact you directly via WhatsApp, phone, or the contact details you provide. Payment is handled via QRIS. Fibidy is not involved in the transaction at all."
             },
             {
               "question": "Does Fibidy hold my sales money?",
@@ -294,11 +294,11 @@
           "items": [
             {
               "question": "Can I take my data if I leave?",
-              "answer": "Yes. Your business data remains yours — there's a backup button to save it anytime. Need help with the migration process? Our team is ready to assist — reach out and we'll handle it."
+              "answer": "Yes. Your business data remains yours there's a backup button to save it anytime. Need help with the migration process? Our team is ready to assist reach out and we'll handle it."
             },
             {
               "question": "Can I migrate from another platform to Fibidy?",
-              "answer": "Yes. Bring your product photos, descriptions, and prices — everything can be moved to Fibidy. Our team is ready to assist with the migration directly — just send a message and we'll take care of the heavy lifting."
+              "answer": "Yes. Bring your product photos, descriptions, and prices everything can be moved to Fibidy. Our team is ready to assist with the migration directly just send a message and we'll take care of the heavy lifting."
             },
             {
               "question": "If I stop paying for Starter, will my store data be deleted?",
@@ -324,7 +324,7 @@
         },
         "location": {
           "label": "Location",
-          "value": "Madiun, East Java — Indonesia"
+          "value": "Madiun, East Java Indonesia"
         }
       }
     }

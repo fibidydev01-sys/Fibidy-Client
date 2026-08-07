@@ -76,13 +76,13 @@
     "firstPublishDialog": {
       "title": "Your store is now live! 🎉",
       "description": "Your storefront is live at {slug}.fibidy.com. Time to add your first products so customers can start shopping.",
-      "exploreHint": "Want a different look? You can switch block styles anytime from Studio — changes go live instantly.",
+      "exploreHint": "Want a different look? You can switch block styles anytime from Studio changes go live instantly.",
       "ctaPreview": "View My Store",
       "ctaContinue": "Add Your First Product"
     },
     "publishDisabled": {
-      "heroOff": "Enable Hero first — your storefront needs a hero to publish.",
-      "nothingToSave": "Nothing to publish — make a change first.",
+      "heroOff": "Enable Hero first your storefront needs a hero to publish.",
+      "nothingToSave": "Nothing to publish make a change first.",
       "offline": "You're offline. Reconnect to publish your changes."
     },
     "upgradeModal": {

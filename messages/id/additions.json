@@ -1,5 +1,5 @@
 {
-  "_comment": "PATCH ADDITIONS — merge keys ini ke dalam messages/id/dashboard.json dan messages/id/auth.json yang sudah ada",
+  "_comment": "PATCH ADDITIONS merge keys ini ke dalam messages/id/dashboard.json dan messages/id/auth.json yang sudah ada",
 
   "dashboard": {
     "products": {
@@ -16,13 +16,13 @@
       "seller": {
         "done": {
           "title": "Setup selesai! 🎉",
-          "subtitle": "Toko kamu siap. Selanjutnya, pilih tampilan storefront di Studio — lalu publish.",
+          "subtitle": "Toko kamu siap. Selanjutnya, pilih tampilan storefront di Studio lalu publish.",
           "ctaBuildStore": "Pilih Tampilan Toko",
           "ctaPreview": "Lihat toko",
           "helpFooter": "Butuh bantuan? Kunjungi guide.fibidy.com kapan saja.",
           "goToStudioDialog": {
             "title": "Satu langkah lagi!",
-            "description": "Pilih tampilan toko di Studio, lalu publish — toko langsung live. Cuma 1-2 menit.",
+            "description": "Pilih tampilan toko di Studio, lalu publish toko langsung live. Cuma 1-2 menit.",
             "cta": "Lanjut ke Studio"
           }
         }

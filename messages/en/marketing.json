@@ -1,11 +1,11 @@
 {
   "marketing": {
     "metadata": {
-      "title": "Fibidy — Open your store. Sell today.",
+      "title": "Fibidy Open your store. Sell today.",
       "description": "The fastest way for Indonesian creators and small businesses to launch a digital storefront. Build your catalog, share your link, customers order via WhatsApp. Free forever to start."
     },
     "announcement": {
-      "messageDesktop": "🚀 Open your store free in 5 minutes — sign up in seconds.",
+      "messageDesktop": "🚀 Open your store free in 5 minutes sign up in seconds.",
       "messageMobile": "🚀 Open your store free in 5 minutes.",
       "ctaLabel": "Get started",
       "dismissLabel": "Dismiss announcement"
@@ -164,7 +164,7 @@
       "items": {
         "commission": {
           "title": "Keep more of what you earn",
-          "description": "Every sale matters. Fibidy is built so a bigger share of your revenue stays where it belongs — with you."
+          "description": "Every sale matters. Fibidy is built so a bigger share of your revenue stays where it belongs with you."
         },
         "expensiveSlow": {
           "title": "Launch in minutes, not months",
@@ -179,7 +179,7 @@
     "features": {
       "eyebrow": "Features",
       "headline": "Everything you need to start selling.",
-      "subheadline": "Four building blocks that turn an idea into your first sale today — clear, focused, and ready to use.",
+      "subheadline": "Four building blocks that turn an idea into your first sale today clear, focused, and ready to use.",
       "cta": "Learn more",
       "items": {
         "studio": {
@@ -199,15 +199,15 @@
     "scale": {
       "eyebrow": "Real stores, real sellers",
       "headline": "Sellers are already open for business.",
-      "subheadline": "From coffee roasters to handmade studios — these are live Fibidy storefronts, each on its own address, each secured by default. Yours can be next.",
+      "subheadline": "From coffee roasters to handmade studios these are live Fibidy storefronts, each on its own address, each secured by default. Yours can be next.",
       "features": {
         "infiniteDomains": {
           "title": "One link per store",
-          "description": "Every seller gets a clean your-name.fibidy.com — or brings their own .com or .id. Run as many storefronts as you grow into."
+          "description": "Every seller gets a clean your-name.fibidy.com or brings their own .com or .id. Run as many storefronts as you grow into."
         },
         "instantSsl": {
           "title": "Secure from minute one",
-          "description": "Every store above is HTTPS by default — free SSL the second it goes live, custom domains included. Nothing to set up."
+          "description": "Every store above is HTTPS by default free SSL the second it goes live, custom domains included. Nothing to set up."
         },
         "zeroMaintenance": {
           "title": "Nothing to maintain",
@@ -223,7 +223,7 @@
         "build": {
           "eyebrow": "Build",
           "title": "Pick a template, make it yours",
-          "description": "Choose from designer-curated storefront templates. Swap the colors, edit the copy — every change shows up live. Simple, visual, and familiar."
+          "description": "Choose from designer-curated storefront templates. Swap the colors, edit the copy every change shows up live. Simple, visual, and familiar."
         },
         "share": {
           "eyebrow": "Share",
@@ -233,21 +233,21 @@
         "sell": {
           "eyebrow": "Sell",
           "title": "Take orders right in WhatsApp",
-          "description": "Customer taps Order, you reply with payment details, ship it out. You stay in control of the conversation and the payment — start to finish."
+          "description": "Customer taps Order, you reply with payment details, ship it out. You stay in control of the conversation and the payment start to finish."
         }
       }
     },
     "pricing": {
       "eyebrow": "Pricing",
       "headline": "Three plans. One ladder. Honest pricing.",
-      "subheadline": "Start free, upgrade when you're ready. The same plans you see post-signup — clear, predictable, and easy to compare.",
+      "subheadline": "Start free, upgrade when you're ready. The same plans you see post-signup clear, predictable, and easy to compare.",
       "popularBadge": "Popular",
-      "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below — we'll switch them on for everyone at the same time when those features ship."
+      "roadmapNote": "Digital downloads, KYC payouts, and the per-tier platform fees are still being polished. Marked as Coming Soon below we'll switch them on for everyone at the same time when those features ship."
     },
     "storeBuilder": {
       "eyebrow": "Try it first, sign up later",
       "headline": "Grab your link before someone else does.",
-      "subheadline": "Claim your free your-name.fibidy.com address now. It's yours the moment you sign up — about a minute, no card needed.",
+      "subheadline": "Claim your free your-name.fibidy.com address now. It's yours the moment you sign up about a minute, no card needed.",
       "subdomainStep": {
         "label": "Your store address",
         "placeholder": "your-store",
@@ -277,15 +277,15 @@
       "items": {
         "isFree": {
           "q": "Is Fibidy really free?",
-          "a": "Yes — the Free plan is free forever, with no card required and no trial expiry. You can run a real storefront on it indefinitely. Paid plans (Starter and Business) unlock higher limits and lower platform fees when you're ready to scale."
+          "a": "Yes the Free plan is free forever, with no card required and no trial expiry. You can run a real storefront on it indefinitely. Paid plans (Starter and Business) unlock higher limits and lower platform fees when you're ready to scale."
         },
         "paymentNoStripe": {
           "q": "How do customers pay me?",
-          "a": "Customers tap 'Order via WhatsApp' on your storefront and you take it from there. Bank transfer, OVO, GoPay, COD — whichever method works best for you and your customer. You stay in full control of the transaction. Direct payouts via Stripe IDR are coming as part of the Business plan roadmap."
+          "a": "Customers tap 'Order via WhatsApp' on your storefront and you take it from there. Bank transfer, OVO, GoPay, COD whichever method works best for you and your customer. You stay in full control of the transaction. Direct payouts via Stripe IDR are coming as part of the Business plan roadmap."
         },
         "customDomain": {
           "q": "Can I use my own domain?",
-          "a": "Yes — Fibidy supports custom domains. Point your-shop.com at us and we'll handle the rest. Or stay on your-name.fibidy.com — entirely your call."
+          "a": "Yes Fibidy supports custom domains. Point your-shop.com at us and we'll handle the rest. Or stay on your-name.fibidy.com entirely your call."
         },
         "paidPlans": {
           "q": "What do paid plans unlock?",
@@ -297,15 +297,15 @@
         },
         "whatToSell": {
           "q": "What can I sell on Fibidy?",
-          "a": "Physical goods (fashion, food, crafts) and services (coaching, consultations, salon, studio time) — anything customers can buy from you via WhatsApp today. Digital products (templates, ebooks, courses) are coming with paid plans."
+          "a": "Physical goods (fashion, food, crafts) and services (coaching, consultations, salon, studio time) anything customers can buy from you via WhatsApp today. Digital products (templates, ebooks, courses) are coming with paid plans."
         },
         "dataExport": {
           "q": "Can I export my products if I leave?",
-          "a": "Yes. Your data belongs to you. CSV export is on the roadmap. In the meantime, our team is happy to help any seller migrate out manually — just reach out and we'll take care of it."
+          "a": "Yes. Your data belongs to you. CSV export is on the roadmap. In the meantime, our team is happy to help any seller migrate out manually just reach out and we'll take care of it."
         },
         "migrate": {
           "q": "Can I move from another platform?",
-          "a": "Yes. Bring your product photos, descriptions, and prices over and we'll get you set up. Sellers also get hands-on migration help — just send us a message and we'll do the heavy lifting."
+          "a": "Yes. Bring your product photos, descriptions, and prices over and we'll get you set up. Sellers also get hands-on migration help just send us a message and we'll do the heavy lifting."
         }
       }
     },

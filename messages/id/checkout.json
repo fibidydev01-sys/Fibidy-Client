@@ -1,9 +1,9 @@
 {
   "checkout": {
     "metadata": {
-      "successTitle": "Pembelian Berhasil — Fibidy",
+      "successTitle": "Pembelian Berhasil Fibidy",
       "successDescription": "Produk digital kamu sekarang tersedia di Library",
-      "cancelTitle": "Pembelian Dibatalkan — Fibidy"
+      "cancelTitle": "Pembelian Dibatalkan Fibidy"
     },
     "success": {
       "verifying": {

@@ -136,7 +136,7 @@
       "subtitle": "Alat untuk menjaga database dan platform tetap sehat",
       "cleanup": {
         "title": "Bersihkan Log",
-        "description": "Hapus data DownloadLog dan WebhookEvent lama untuk mencegah pembengkakan database. Aman dijalankan kapan saja — data historis yang dibutuhkan untuk akuntansi tidak akan dihapus.",
+        "description": "Hapus data DownloadLog dan WebhookEvent lama untuk mencegah pembengkakan database. Aman dijalankan kapan saja data historis yang dibutuhkan untuk akuntansi tidak akan dihapus.",
         "downloadLogsLabel": "Log Download (hari)",
         "downloadLogsHelper": "Hapus data lebih lama dari {days} hari",
         "webhookEventsLabel": "Webhook Event (hari)",

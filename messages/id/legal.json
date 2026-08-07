@@ -42,7 +42,7 @@
     "terms": {
       "title": "Syarat Layanan",
       "summary": [
-        "Fibidy adalah platform POS kasir offline dan toko online untuk UMKM — bukan marketplace.",
+        "Fibidy adalah platform POS kasir offline dan toko online untuk UMKM bukan marketplace.",
         "Semua transaksi jual-beli terjadi di luar Fibidy, langsung antara kamu (Seller) dan pelangganmu.",
         "Fibidy tidak menerima, menyimpan, atau meneruskan uang dalam bentuk apa pun.",
         "Kamu bisa berhenti kapan saja. Data tokomu tetap ada, cuma turun ke limit Free."
@@ -62,7 +62,7 @@
           "title": "Akun kamu.",
           "content": [
             "Untuk pakai Fibidy, kamu perlu daftar dan mengisi data bisnis dasar (nama toko, kontak, jenis usaha). Kamu bertanggung jawab menjaga kerahasiaan akun dan aktivitas yang terjadi di dalamnya.",
-            "Fibidy bisa dipakai untuk berbagai jenis usaha — warung, salon, coffee shop, bengkel, dan lainnya — selama kamu memakainya sesuai fungsinya: mencatat transaksi dan menampilkan informasi bisnismu."
+            "Fibidy bisa dipakai untuk berbagai jenis usaha warung, salon, coffee shop, bengkel, dan lainnya selama kamu memakainya sesuai fungsinya: mencatat transaksi dan menampilkan informasi bisnismu."
           ]
         },
         {
@@ -79,7 +79,7 @@
           "number": "04",
           "title": "Tanggung jawab kamu sebagai penjual.",
           "content": [
-            "Karena transaksi terjadi langsung antara kamu dan pelanggan, kamu yang bertanggung jawab atas kebenaran informasi produk/layanan yang kamu tampilkan, kesepakatan harga, pembayaran, dan pengiriman dengan pelangganmu, serta penyelesaian komplain, refund, atau garansi — sesuai kebijakan yang kamu tetapkan sendiri ke pelangganmu.",
+            "Karena transaksi terjadi langsung antara kamu dan pelanggan, kamu yang bertanggung jawab atas kebenaran informasi produk/layanan yang kamu tampilkan, kesepakatan harga, pembayaran, dan pengiriman dengan pelangganmu, serta penyelesaian komplain, refund, atau garansi sesuai kebijakan yang kamu tetapkan sendiri ke pelangganmu.",
             "Fibidy tidak menengahi, menjamin, atau ikut menanggung hasil dari transaksi tersebut."
           ]
         },
@@ -96,7 +96,7 @@
           "title": "Plan dan pembayaran ke Fibidy.",
           "content": [
             "Fibidy punya plan Free dan Starter. Rincian fitur dan harga masing-masing plan tercantum di halaman Harga.",
-            "Pembayaran plan Starter adalah pembayaran kamu ke Fibidy untuk memakai layanan (bukan bagian dari transaksi jual-belimu dengan pelanggan). Kalau kamu berhenti membayar Starter, akunmu turun ke limit Free — datamu tetap ada, cuma sebagian fitur (termasuk POS kasir offline) jadi tidak aktif sampai kamu berlangganan lagi."
+            "Pembayaran plan Starter adalah pembayaran kamu ke Fibidy untuk memakai layanan (bukan bagian dari transaksi jual-belimu dengan pelanggan). Kalau kamu berhenti membayar Starter, akunmu turun ke limit Free datamu tetap ada, cuma sebagian fitur (termasuk POS kasir offline) jadi tidak aktif sampai kamu berlangganan lagi."
           ]
         },
         {
@@ -104,7 +104,7 @@
           "title": "Data tokomu.",
           "content": [
             "Data yang kamu isi ke Fibidy (produk, foto, info bisnis, riwayat transaksi POS) tetap milikmu. Kamu bisa mengunduh backup data kapan saja lewat fitur yang tersedia di akunmu.",
-            "Kalau kamu berhenti berlangganan, data tidak dihapus — hanya turun ke limit plan Free."
+            "Kalau kamu berhenti berlangganan, data tidak dihapus hanya turun ke limit plan Free."
           ]
         },
         {
@@ -133,7 +133,7 @@
     "privacy": {
       "title": "Kebijakan Privasi",
       "summary": [
-        "Fibidy menyimpan data pemilik toko (Seller) — bukan data pelanggan pembeli.",
+        "Fibidy menyimpan data pemilik toko (Seller) bukan data pelanggan pembeli.",
         "Data pelanggan yang lewat lewat WhatsApp tidak pernah disimpan Fibidy.",
         "Data POS kasir offline tersimpan di perangkatmu, disinkronkan saat ada koneksi.",
         "Kamu bisa unduh backup atau minta hapus data akunmu kapan saja."
@@ -144,7 +144,7 @@
           "title": "Data yang kami kumpulkan.",
           "content": [
             "Fibidy mengumpulkan data yang kamu berikan sebagai pemilik toko (Seller), yaitu: data akun (nama, nomor WhatsApp, email, jenis usaha), data toko (nama produk, foto, harga, deskripsi, dan info bisnis lain yang kamu isi), dan data transaksi POS (catatan transaksi harian yang kamu input lewat aplikasi kasir offline).",
-            "Fibidy tidak mengumpulkan atau menyimpan data pelangganmu (pembeli). Saat pelanggan menghubungimu lewat WhatsApp dari toko onlinemu, percakapan dan datanya terjadi langsung di WhatsApp — tidak melewati atau tersimpan di server Fibidy."
+            "Fibidy tidak mengumpulkan atau menyimpan data pelangganmu (pembeli). Saat pelanggan menghubungimu lewat WhatsApp dari toko onlinemu, percakapan dan datanya terjadi langsung di WhatsApp tidak melewati atau tersimpan di server Fibidy."
           ]
         },
         {
@@ -166,15 +166,15 @@
           "number": "04",
           "title": "Siapa yang bisa melihat data toko online kamu.",
           "content": [
-            "Informasi yang kamu tampilkan di halaman toko online (produk, foto, deskripsi, kontak) bersifat publik — bisa dilihat siapa saja yang mengakses linknya, karena itu memang fungsinya (supaya calon pelanggan bisa lihat dan menghubungimu).",
-            "Data transaksi POS dan data akun kamu bersifat privat — hanya bisa diakses olehmu lewat akunmu."
+            "Informasi yang kamu tampilkan di halaman toko online (produk, foto, deskripsi, kontak) bersifat publik bisa dilihat siapa saja yang mengakses linknya, karena itu memang fungsinya (supaya calon pelanggan bisa lihat dan menghubungimu).",
+            "Data transaksi POS dan data akun kamu bersifat privat hanya bisa diakses olehmu lewat akunmu."
           ]
         },
         {
           "number": "05",
           "title": "Penyimpanan dan keamanan.",
           "content": [
-            "Data disimpan di server yang kami jaga dengan praktik keamanan standar. Meski begitu, tidak ada sistem yang 100% bebas risiko — kami berusaha menjaga datamu seaman mungkin, dan menyarankan kamu juga menjaga kerahasiaan akun (password, akses perangkat)."
+            "Data disimpan di server yang kami jaga dengan praktik keamanan standar. Meski begitu, tidak ada sistem yang 100% bebas risiko kami berusaha menjaga datamu seaman mungkin, dan menyarankan kamu juga menjaga kerahasiaan akun (password, akses perangkat)."
           ]
         },
         {
@@ -212,7 +212,7 @@
           "number": "01",
           "title": "Apa itu cookie.",
           "content": [
-            "Cookie adalah file kecil yang disimpan browser atau aplikasi kamu supaya website/aplikasi bisa \"mengingat\" kamu — misalnya tetap dalam kondisi login saat berpindah halaman."
+            "Cookie adalah file kecil yang disimpan browser atau aplikasi kamu supaya website/aplikasi bisa \"mengingat\" kamu misalnya tetap dalam kondisi login saat berpindah halaman."
           ]
         },
         {
@@ -227,7 +227,7 @@
           "number": "03",
           "title": "Kenapa cookie ini diperlukan.",
           "content": [
-            "Cookie sesi login bersifat penting untuk fungsi dasar Fibidy — tanpa itu, kamu harus login ulang setiap pindah halaman. Karena itu cookie ini tidak bisa dimatikan selama kamu memakai Fibidy."
+            "Cookie sesi login bersifat penting untuk fungsi dasar Fibidy tanpa itu, kamu harus login ulang setiap pindah halaman. Karena itu cookie ini tidak bisa dimatikan selama kamu memakai Fibidy."
           ]
         },
         {
@@ -264,11 +264,11 @@
           "items": [
             {
               "question": "POS kasirnya beneran gratis?",
-              "answer": "POS kasir offline aktif di plan Starter (Rp 35.000/bulan) — sekali bayar, langsung bisa dipakai. Plan Free tetap bisa punya toko online, tapi versi terbatas dan belum termasuk POS kasir."
+              "answer": "POS kasir offline aktif di plan Starter (Rp 35.000/bulan) sekali bayar, langsung bisa dipakai. Plan Free tetap bisa punya toko online, tapi versi terbatas dan belum termasuk POS kasir."
             },
             {
               "question": "Kenapa harus POS + toko online, bukan salah satu aja?",
-              "answer": "Karena dua hal itu kebutuhan yang beda tapi sering nyambung. POS kasir offline mencatat semua transaksi harian kamu — jual-beli, stok, laporan omzet, riwayat — bisa diakses kapan saja, bahkan tanpa sinyal. Sementara toko online membuat bisnismu bisa ditemukan dan dihubungi calon pelanggan dari luar. Satu untuk operasional di dalam, satu untuk jangkauan ke luar — Fibidy menggabungkan dua-duanya jadi satu platform."
+              "answer": "Karena dua hal itu kebutuhan yang beda tapi sering nyambung. POS kasir offline mencatat semua transaksi harian kamu jual-beli, stok, laporan omzet, riwayat bisa diakses kapan saja, bahkan tanpa sinyal. Sementara toko online membuat bisnismu bisa ditemukan dan dihubungi calon pelanggan dari luar. Satu untuk operasional di dalam, satu untuk jangkauan ke luar Fibidy menggabungkan dua-duanya jadi satu platform."
             },
             {
               "question": "Cocok untuk bisnis apa aja?",
@@ -281,7 +281,7 @@
           "items": [
             {
               "question": "Pelanggan bayar gimana di toko onlineku?",
-              "answer": "Pelanggan melihat produk di website kamu, lalu menghubungimu langsung — via WhatsApp, telepon, atau kontak yang kamu pasang. Pembayaran lewat QRIS. Fibidy tidak terlibat dalam transaksi sama sekali."
+              "answer": "Pelanggan melihat produk di website kamu, lalu menghubungimu langsung via WhatsApp, telepon, atau kontak yang kamu pasang. Pembayaran lewat QRIS. Fibidy tidak terlibat dalam transaksi sama sekali."
             },
             {
               "question": "Fibidy pegang uang hasil jualan saya?",
@@ -294,11 +294,11 @@
           "items": [
             {
               "question": "Kalau mau pindah, data bisa dibawa?",
-              "answer": "Bisa. Data bisnis kamu tetap milikmu — ada tombol backup untuk menyimpan datanya kapan saja. Butuh bantuan proses migrasi? Tim kami siap bantu — hubungi kami, kami yang urus."
+              "answer": "Bisa. Data bisnis kamu tetap milikmu ada tombol backup untuk menyimpan datanya kapan saja. Butuh bantuan proses migrasi? Tim kami siap bantu hubungi kami, kami yang urus."
             },
             {
               "question": "Bisa pindah dari platform lain ke Fibidy?",
-              "answer": "Bisa. Bawa foto produk, deskripsi, harga — semua bisa dipindahkan ke Fibidy. Tim kami siap bantu proses migrasi langsung — tinggal kirim pesan, kami yang kerjakan bagian beratnya."
+              "answer": "Bisa. Bawa foto produk, deskripsi, harga semua bisa dipindahkan ke Fibidy. Tim kami siap bantu proses migrasi langsung tinggal kirim pesan, kami yang kerjakan bagian beratnya."
             },
             {
               "question": "Kalau saya berhenti bayar Starter, data toko saya hilang?",
@@ -324,7 +324,7 @@
         },
         "location": {
           "label": "Lokasi",
-          "value": "Madiun, Jawa Timur — Indonesia"
+          "value": "Madiun, Jawa Timur Indonesia"
         }
       }
     }

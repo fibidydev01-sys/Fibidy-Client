@@ -260,7 +260,7 @@
     },
     "offline": {
       "bannerTitle": "You're offline",
-      "bannerDescription": "Some actions are unavailable. Your local work is safe — we'll reconnect automatically.",
+      "bannerDescription": "Some actions are unavailable. Your local work is safe we'll reconnect automatically.",
       "checking": "Reconnecting…",
       "backOnlineTitle": "Back online",
       "backOnlineDescription": "Connection restored. You can continue where you left off.",

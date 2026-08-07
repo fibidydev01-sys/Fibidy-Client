@@ -6,7 +6,7 @@
         "tooltip": "Ini akun simulasi. Fitur langganan dan pembayaran tidak tersedia."
       },
       "banner": {
-        "text": "Kamu di Mode Pelajar — toko ini hanya untuk simulasi belajar. Fitur langganan dan pembayaran dinonaktifkan.",
+        "text": "Kamu di Mode Pelajar toko ini hanya untuk simulasi belajar. Fitur langganan dan pembayaran dinonaktifkan.",
         "learnMore": "Pelajari"
       },
       "restricted": {
@@ -17,7 +17,7 @@
         },
         "onboard": {
           "title": "Tidak tersedia di Mode Pelajar",
-          "description": "Akun kamu adalah simulasi pembelajaran. Verifikasi identitas tidak diperlukan — kamu bisa praktik alur seller lengkap tanpa itu.",
+          "description": "Akun kamu adalah simulasi pembelajaran. Verifikasi identitas tidak diperlukan kamu bisa praktik alur seller lengkap tanpa itu.",
           "featureName": "Verifikasi identitas"
         },
         "generic": {
@@ -96,8 +96,8 @@
         "title": "Saatnya isi toko kamu! 🛍️",
         "step1": "Tambahkan nama produk dan set harga kamu",
         "step2": "Upload foto cover (opsional tapi disarankan)",
-        "step3": "Publish — produk langsung tampil ke pelanggan",
-        "hint": "Pelanggan bisa lihat dan pesan via WhatsApp — tanpa perlu checkout.",
+        "step3": "Publish produk langsung tampil ke pelanggan",
+        "hint": "Pelanggan bisa lihat dan pesan via WhatsApp tanpa perlu checkout.",
         "cta": "Tambah Produk Pertama",
         "later": "Nanti dulu"
       },
@@ -165,7 +165,7 @@
           "nameRequired": "Nama produk wajib diisi.",
           "namePlaceholder": "Beri produk kamu nama yang menarik",
           "descriptionLabel": "Deskripsi",
-          "descriptionPlaceholder": "Ceritakan apa yang bikin produk ini spesial — apa yang pembeli dapat, kenapa mereka bakal suka",
+          "descriptionPlaceholder": "Ceritakan apa yang bikin produk ini spesial apa yang pembeli dapat, kenapa mereka bakal suka",
           "descriptionHelper": "Deskripsi yang jelas dan jujur bantu pembeli memutuskan dengan tenang.",
           "priceLabel": "Harga (Rp)",
           "priceRequired": "Mohon masukkan harga minimal Rp 1.000.",
@@ -174,19 +174,19 @@
           "priceHelperNoDigital": "Harga yang dilihat pembeli di toko kamu.",
           "comparePriceLabel": "Harga pembanding",
           "comparePricePlaceholder": "75000",
-          "comparePriceHelper": "Harga asli sebelum diskon — ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
+          "comparePriceHelper": "Harga asli sebelum diskon ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
         },
         "validation": {
-          "nameRequired": "Nama produk wajib diisi — minimal 2 karakter.",
+          "nameRequired": "Nama produk wajib diisi minimal 2 karakter.",
           "priceRequired": "Mohon isi harga jual minimal Rp 1.000."
         },
         "upload": {
-          "editModeNote": "File produk — file tidak bisa diubah setelah diupload. Hapus produk dan buat baru jika perlu ganti file.",
+          "editModeNote": "File produk file tidak bisa diubah setelah diupload. Hapus produk dan buat baru jika perlu ganti file.",
           "editFileFallback": "FILE",
           "kycTitle": "Verifikasi dibutuhkan",
           "kycCta": "Selesaikan Verifikasi di Pengaturan",
           "kycDropzoneDisabled": "Upload tersedia setelah verifikasi selesai",
-          "dropzoneInfo": "Upload file produk — {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
+          "dropzoneInfo": "Upload file produk {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
           "dropzoneInfoLoading": "Memuat info penyimpanan...",
           "dropzoneLoading": "Memuat konfigurasi penyimpanan...",
           "kycStates": {
@@ -338,7 +338,7 @@
       "comingSoonBadge": "Segera Hadir",
       "comingSoon": {
         "sectionLabel": "Segera Hadir",
-        "sectionHint": "Lagi dipoles biar pas untuk seller Indonesia — segera ya.",
+        "sectionHint": "Lagi dipoles biar pas untuk seller Indonesia segera ya.",
         "fullPlanLabel": "Segera Hadir",
         "fullPlanHint": "Kami lagi finalisasi paket ini."
       },
@@ -456,8 +456,8 @@
         "viaQris": "QRIS",
         "renewsOn": "Diperpanjang otomatis pada",
         "activeUntilDate": "Aktif sampai",
-        "cardNotice": "Langganan diperpanjang otomatis setiap periode. Kamu bisa berhenti kapan saja — akses tetap jalan sampai periode berjalan habis.",
-        "qrisNotice": "Pembayaran QRIS tidak diperpanjang otomatis. Akses berakhir sendiri saat periode habis — tidak perlu dibatalkan. Kalau mau lanjut, cukup bayar lagi sebelum tanggal berakhir.",
+        "cardNotice": "Langganan diperpanjang otomatis setiap periode. Kamu bisa berhenti kapan saja akses tetap jalan sampai periode berjalan habis.",
+        "qrisNotice": "Pembayaran QRIS tidak diperpanjang otomatis. Akses berakhir sendiri saat periode habis tidak perlu dibatalkan. Kalau mau lanjut, cukup bayar lagi sebelum tanggal berakhir.",
         "qrisNoAutoRenewToast": "Langganan QRIS tidak diperpanjang otomatis, jadi tidak ada yang perlu dibatalkan."
       },
       "paymentMethod": {
@@ -468,7 +468,7 @@
         "qris": {
           "title": "QRIS",
           "subtitle": "Scan pakai GoPay, OVO, DANA, ShopeePay, atau m-banking.",
-          "noAutoRenew": "Sekali bayar — tidak diperpanjang otomatis"
+          "noAutoRenew": "Sekali bayar tidak diperpanjang otomatis"
         },
         "card": {
           "title": "Kartu kredit / debit",
@@ -499,21 +499,21 @@
         "failedDescription": "Tagihan ini tidak bisa diproses. Silakan coba lagi dari halaman langganan.",
         "loadError": "Tidak bisa memuat status pembayaran.",
         "retry": "Coba lagi",
-        "reusedNotice": "Kamu masih punya tagihan yang aktif — kami tampilkan kode QR yang sama, bukan membuat tagihan baru.",
-        "unreachable": "Belum bisa terhubung ke penyedia pembayaran. Cek halaman langganan sebentar lagi — tagihannya mungkin sudah terbuat."
+        "reusedNotice": "Kamu masih punya tagihan yang aktif kami tampilkan kode QR yang sama, bukan membuat tagihan baru.",
+        "unreachable": "Belum bisa terhubung ke penyedia pembayaran. Cek halaman langganan sebentar lagi tagihannya mungkin sudah terbuat."
       }
     },
     "comingSoon": {
       "digitalProducts": {
-        "title": "File Produk — Segera Hadir",
-        "description": "Kami lagi sempurnakan pengalaman jualan produk berbasis file untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi — segera."
+        "title": "File Produk Segera Hadir",
+        "description": "Kami lagi sempurnakan pengalaman jualan produk berbasis file untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi segera."
       },
       "discover": {
-        "title": "Marketplace Digital Produk — Segera Hadir",
+        "title": "Marketplace Digital Produk Segera Hadir",
         "description": "Halaman Jelajah akan memungkinkan pembeli menelusuri produk dari seller di seluruh Fibidy. Pantau terus!"
       },
       "library": {
-        "title": "Library — Segera Hadir",
+        "title": "Library Segera Hadir",
         "description": "Produk yang sudah kamu beli akan tersimpan di sini. Library akan siap saat marketplace kami diluncurkan."
       },
       "cta": {
@@ -578,8 +578,8 @@
       },
       "seller": {
         "title": "Bangun Toko Kamu",
-        "subtitle": "Hampir selesai — isi detailnya biar toko kamu siap tampil",
-        "autofillBadge": "Terisi otomatis — ketuk untuk edit",
+        "subtitle": "Hampir selesai isi detailnya biar toko kamu siap tampil",
+        "autofillBadge": "Terisi otomatis ketuk untuk edit",
         "stepIndicator": "Langkah {current} dari {total}",
         "steps": {
           "visual": {
@@ -609,7 +609,7 @@
         },
         "visual": {
           "logoLabel": "Logo Toko",
-          "logoHelper": "Gambar persegi, JPG/PNG, min 200×200 px. Ini brand kamu — bikin berkesan.",
+          "logoHelper": "Gambar persegi, JPG/PNG, min 200×200 px. Ini brand kamu bikin berkesan.",
           "uploadLogo": "Upload Logo",
           "logoGenerate": "Buatkan dari nama toko",
           "logoGenerating": "Membuat...",
@@ -632,7 +632,7 @@
           "heroTitleRequired": "Headline terlalu pendek (min. 5 karakter)",
           "heroSubtitleLabel": "Tagline",
           "heroSubtitlePlaceholder": "Ceritakan apa yang kamu jual dalam satu kalimat",
-          "heroSubtitleHelper": "Dukung headline — jelaskan apa yang kamu jual (10–300 karakter).",
+          "heroSubtitleHelper": "Dukung headline jelaskan apa yang kamu jual (10–300 karakter).",
           "heroSubtitleRequired": "Tagline terlalu pendek (min. 10 karakter)",
           "heroCtaLabel": "Teks Tombol",
           "heroCtaPlaceholder": "Belanja Sekarang",
@@ -673,7 +673,7 @@
           "hasPhysicalLocationLabel": "Apakah punya lokasi fisik?",
           "hasPhysicalLocationHelper": "Matikan jika hanya melayani online atau dengan janji temu.",
           "mapLabel": "Lokasi peta",
-          "mapRequired": "Mohon atur lokasi — gunakan tombol atau tempel URL peta",
+          "mapRequired": "Mohon atur lokasi gunakan tombol atau tempel URL peta",
           "geoUseMyLocation": "📍 Gunakan lokasi saya saat ini",
           "geoLocating": "Mengambil lokasi...",
           "geoSuccess": "Lokasi tersimpan",
@@ -682,7 +682,7 @@
           "geoShowManual": "Tempel URL embed manual",
           "geoHideManual": "Sembunyikan URL manual",
           "geoQuickstartNote": "Kami akan buatkan peta embed dari koordinat ini. Anda bisa upgrade ke Google Business Profile nanti di Settings.",
-          "onlineNote": "Bisnis Anda online-only — tidak perlu alamat fisik. Pelanggan menghubungi via form kontak dan media sosial.",
+          "onlineNote": "Bisnis Anda online-only tidak perlu alamat fisik. Pelanggan menghubungi via form kontak dan media sosial.",
           "mapUrlLabel": "URL Embed Google Maps",
           "mapUrlPlaceholder": "Tempel URL embed Google Maps atau kode iframe di sini",
           "mapUrlHelper": "Tempel URL embed dari Google Maps. Kami ekstrak otomatis.",
@@ -693,7 +693,7 @@
         "social": {
           "intro": "Tambah minimal satu link sosial agar pengunjung bisa mengikuti toko kamu.",
           "statusFilled": "{count} platform ditambahkan",
-          "statusEmpty": "Belum ada — minimal 1 harus diisi",
+          "statusEmpty": "Belum ada minimal 1 harus diisi",
           "emptyReminder": "Kamu perlu isi minimal satu link sosial sebelum bisa lanjut."
         },
         "review": {
@@ -702,7 +702,7 @@
           "highlights": "Highlight",
           "contact": "Cara Menemukan",
           "social": "Media Sosial",
-          "socialEmpty": "Belum ada link sosial — kembali dan tambah minimal satu.",
+          "socialEmpty": "Belum ada link sosial kembali dan tambah minimal satu.",
           "launchNote": "Kelihatan oke! Setelah launch, toko kamu langsung live dan bisa ditemukan pembeli. Semuanya bisa diubah lagi di Pengaturan."
         },
         "cta": {
@@ -711,13 +711,13 @@
         },
         "done": {
           "title": "Setup selesai! 🎉",
-          "subtitle": "Toko kamu siap. Selanjutnya, pilih tampilan storefront di Studio — lalu publish.",
+          "subtitle": "Toko kamu siap. Selanjutnya, pilih tampilan storefront di Studio lalu publish.",
           "ctaBuildStore": "Pilih Tampilan Toko",
           "ctaPreview": "Lihat toko",
           "helpFooter": "Butuh bantuan? Kunjungi guide.fibidy.com kapan saja.",
           "goToStudioDialog": {
             "title": "Satu langkah lagi!",
-            "description": "Pilih tampilan toko di Studio, lalu publish — toko langsung live. Cuma 1-2 menit.",
+            "description": "Pilih tampilan toko di Studio, lalu publish toko langsung live. Cuma 1-2 menit.",
             "cta": "Lanjut ke Studio",
             "ctaPreview": "Lihat toko dulu"
           }
@@ -735,7 +735,7 @@
           "phoneRequired": "Nomor telepon wajib diisi",
           "addressMin": "Alamat terlalu pendek (min 10 karakter)",
           "mapUrlInvalid": "Mohon tempel URL embed Google Maps yang valid",
-          "mapRequired": "Mohon atur lokasi — gunakan tombol atau tempel URL peta",
+          "mapRequired": "Mohon atur lokasi gunakan tombol atau tempel URL peta",
           "contactTitleMin": "Judul section terlalu pendek (min 3 karakter)",
           "contactSubtitleMin": "Subjudul section terlalu pendek (min 5 karakter)",
           "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan",
@@ -817,7 +817,7 @@
       "loading": "Memuat status verifikasi...",
       "polling": "Memeriksa status verifikasi...",
       "states": {
-        "comingSoon": "Verifikasi pembayaran bakal aktif begitu fitur file produk rilis. Sabar ya — kami pasti kabari.",
+        "comingSoon": "Verifikasi pembayaran bakal aktif begitu fitur file produk rilis. Sabar ya kami pasti kabari.",
         "notStartedFresh": "Setup pembayaran untuk mulai jualan.",
         "notStartedReturning": "Kamu belum selesai setup pembayaran. Lanjutkan dari tempat terakhir.",
         "pending": "Verifikasi sedang diproses. Biasanya butuh 1–2 hari kerja.",
@@ -825,7 +825,7 @@
         "needsMoreInfoGeneric": "Butuh informasi tambahan untuk melanjutkan verifikasi akun.",
         "pastDueHeadline": "URGENT: Batas waktu verifikasi sudah lewat.",
         "pastDueBody": "Akun kamu terancam dinonaktifkan. Selesaikan verifikasi sekarang.",
-        "chargesOnly": "Akun aktif menerima pembayaran. Payout ke bank belum aktif — selesaikan verifikasi untuk aktifkan payout.",
+        "chargesOnly": "Akun aktif menerima pembayaran. Payout ke bank belum aktif selesaikan verifikasi untuk aktifkan payout.",
         "activeWithFutureReq": "Akun aktif. Ada update persyaratan baru yang perlu diselesaikan",
         "activeWithFutureReqDeadline": " sebelum {date}",
         "activeClean": "Akun terverifikasi. Kamu bisa menerima pembayaran dan tarik dana.",
@@ -882,8 +882,8 @@
     "upgradeModal": {
       "defaultTitle": "Limit paket tercapai",
       "defaultDescription": "Upgrade paket untuk unlock limit lebih tinggi dan fitur premium.",
-      "upgradeStarterLabel": "Upgrade ke Starter — Rp 35.000/bln",
-      "upgradeBusinessLabel": "Upgrade ke Business — Rp 149.000/bln",
+      "upgradeStarterLabel": "Upgrade ke Starter Rp 35.000/bln",
+      "upgradeBusinessLabel": "Upgrade ke Business Rp 149.000/bln",
       "viewAllPlans": "Lihat semua paket",
       "viewUpgradePlans": "Lihat paket upgrade",
       "maybeLater": "Mungkin nanti"

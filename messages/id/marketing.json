@@ -1,11 +1,11 @@
 {
   "marketing": {
     "metadata": {
-      "title": "Fibidy — Buka toko, langsung jualan",
+      "title": "Fibidy Buka toko, langsung jualan",
       "description": "Cara paling cepat buat UMKM dan kreator Indonesia bikin toko online. Susun katalog, share link toko, pelanggan order via WhatsApp. Gratis selamanya buat mulai."
     },
     "announcement": {
-      "messageDesktop": "🚀 Bikin toko gratis dalam 5 menit — daftar cepat dan gampang.",
+      "messageDesktop": "🚀 Bikin toko gratis dalam 5 menit daftar cepat dan gampang.",
       "messageMobile": "🚀 Bikin toko gratis dalam 5 menit.",
       "ctaLabel": "Mulai",
       "dismissLabel": "Tutup pengumuman"
@@ -164,7 +164,7 @@
       "items": {
         "commission": {
           "title": "Hasilnya buat kamu, bukan platform",
-          "description": "Setiap penjualan berarti. Fibidy dirancang biar bagian terbesar dari hasil jualanmu tetap di kantongmu — di mana memang seharusnya."
+          "description": "Setiap penjualan berarti. Fibidy dirancang biar bagian terbesar dari hasil jualanmu tetap di kantongmu di mana memang seharusnya."
         },
         "expensiveSlow": {
           "title": "Buka dalam menit, bukan bulan",
@@ -179,7 +179,7 @@
     "features": {
       "eyebrow": "Fitur",
       "headline": "Semua yang kamu butuhin buat mulai jualan.",
-      "subheadline": "Empat fondasi yang bawa ide kamu ke jualan pertama hari ini juga — jelas, fokus, siap pakai.",
+      "subheadline": "Empat fondasi yang bawa ide kamu ke jualan pertama hari ini juga jelas, fokus, siap pakai.",
       "cta": "Pelajari lebih lanjut",
       "items": {
         "studio": {
@@ -199,15 +199,15 @@
     "scale": {
       "eyebrow": "Toko nyata, seller nyata",
       "headline": "Seller-seller ini udah buka toko.",
-      "subheadline": "Dari roaster kopi sampai studio handmade — ini storefront Fibidy yang beneran online, masing-masing punya alamat sendiri, aman by default. Toko kamu bisa jadi yang berikutnya.",
+      "subheadline": "Dari roaster kopi sampai studio handmade ini storefront Fibidy yang beneran online, masing-masing punya alamat sendiri, aman by default. Toko kamu bisa jadi yang berikutnya.",
       "features": {
         "infiniteDomains": {
           "title": "Satu link per toko",
-          "description": "Tiap seller dapat alamat rapi nama-kamu.fibidy.com — atau pakai .com / .id sendiri. Buka sebanyak toko yang kamu butuhkan seiring tumbuh."
+          "description": "Tiap seller dapat alamat rapi nama-kamu.fibidy.com atau pakai .com / .id sendiri. Buka sebanyak toko yang kamu butuhkan seiring tumbuh."
         },
         "instantSsl": {
           "title": "Aman sejak menit pertama",
-          "description": "Semua toko di atas HTTPS by default — SSL gratis aktif begitu launch, termasuk custom domain. Nggak ada yang perlu disetel."
+          "description": "Semua toko di atas HTTPS by default SSL gratis aktif begitu launch, termasuk custom domain. Nggak ada yang perlu disetel."
         },
         "zeroMaintenance": {
           "title": "Tanpa perawatan",
@@ -223,7 +223,7 @@
         "build": {
           "eyebrow": "Bikin",
           "title": "Pilih template, jadikan punya kamu",
-          "description": "Pilih dari template toko yang udah dikurasi tim desain. Ubah warnanya, ganti teksnya — perubahan langsung kelihatan. Simpel, visual, dan terasa familier."
+          "description": "Pilih dari template toko yang udah dikurasi tim desain. Ubah warnanya, ganti teksnya perubahan langsung kelihatan. Simpel, visual, dan terasa familier."
         },
         "share": {
           "eyebrow": "Share",
@@ -233,21 +233,21 @@
         "sell": {
           "eyebrow": "Jualan",
           "title": "Terima orderan langsung di WhatsApp",
-          "description": "Pelanggan tap Order, kamu balas detail pembayaran, kirim barangnya. Kamu yang pegang kendali — dari obrolan sampai transaksinya."
+          "description": "Pelanggan tap Order, kamu balas detail pembayaran, kirim barangnya. Kamu yang pegang kendali dari obrolan sampai transaksinya."
         }
       }
     },
     "pricing": {
       "eyebrow": "Harga",
       "headline": "Tiga paket. Satu tangga. Pricing jujur.",
-      "subheadline": "Mulai dari gratis, upgrade kalau udah siap. Sama persis kayak yang kamu lihat setelah daftar — jelas, predictable, gampang dibandingin.",
+      "subheadline": "Mulai dari gratis, upgrade kalau udah siap. Sama persis kayak yang kamu lihat setelah daftar jelas, predictable, gampang dibandingin.",
       "popularBadge": "Populer",
-      "roadmapNote": "Download digital, payout, dan platform fee masih dipoles — ditandai 'Coming Soon' di bawah. Semua aktif barengan pas fitur-fitur itu rilis."
+      "roadmapNote": "Download digital, payout, dan platform fee masih dipoles ditandai 'Coming Soon' di bawah. Semua aktif barengan pas fitur-fitur itu rilis."
     },
     "storeBuilder": {
       "eyebrow": "Coba dulu, daftar kemudian",
       "headline": "Amankan link tokomu sebelum keduluan.",
-      "subheadline": "Klaim alamat gratis nama-kamu.fibidy.com sekarang. Jadi milikmu begitu daftar — sekitar semenit, tanpa kartu.",
+      "subheadline": "Klaim alamat gratis nama-kamu.fibidy.com sekarang. Jadi milikmu begitu daftar sekitar semenit, tanpa kartu.",
       "subdomainStep": {
         "label": "Alamat toko kamu",
         "placeholder": "toko-kamu",
@@ -277,15 +277,15 @@
       "items": {
         "isFree": {
           "q": "Beneran gratis nih Fibidy?",
-          "a": "Iya — paket Free gratis selamanya, tanpa kartu, tanpa trial yang habis. Kamu bisa jalanin toko beneran di sini tanpa batas waktu. Paket berbayar (Starter dan Business) buat unlock limit lebih tinggi dan platform fee lebih rendah pas kamu udah siap scale."
+          "a": "Iya paket Free gratis selamanya, tanpa kartu, tanpa trial yang habis. Kamu bisa jalanin toko beneran di sini tanpa batas waktu. Paket berbayar (Starter dan Business) buat unlock limit lebih tinggi dan platform fee lebih rendah pas kamu udah siap scale."
         },
         "paymentNoStripe": {
           "q": "Pelanggan bayar gimana?",
-          "a": "Pelanggan tap 'Order via WhatsApp' di toko kamu, sisanya kamu yang pegang. Transfer bank, OVO, GoPay, COD — pilih yang paling pas buat kamu dan pelanggan. Kamu yang kontrol penuh transaksinya. Payout langsung via Stripe IDR jadi bagian dari roadmap paket Business."
+          "a": "Pelanggan tap 'Order via WhatsApp' di toko kamu, sisanya kamu yang pegang. Transfer bank, OVO, GoPay, COD pilih yang paling pas buat kamu dan pelanggan. Kamu yang kontrol penuh transaksinya. Payout langsung via Stripe IDR jadi bagian dari roadmap paket Business."
         },
         "customDomain": {
           "q": "Bisa pakai domain sendiri?",
-          "a": "Bisa — Fibidy support custom domain. Tinggal arahin tokomu.com ke kami, sisanya kami yang urus. Mau tetap di nama-kamu.fibidy.com juga bebas, sepenuhnya pilihan kamu."
+          "a": "Bisa Fibidy support custom domain. Tinggal arahin tokomu.com ke kami, sisanya kami yang urus. Mau tetap di nama-kamu.fibidy.com juga bebas, sepenuhnya pilihan kamu."
         },
         "paidPlans": {
           "q": "Paket berbayar dapet apa?",
@@ -293,19 +293,19 @@
         },
         "fibidyVsLinktree": {
           "q": "Apa yang bikin Fibidy beda?",
-          "a": "Fibidy itu storefront lengkap, bukan sekadar halaman link. Foto produk, harga, kategori, search, dan custom domain udah siap pakai. Pelanggan bisa order langsung via WhatsApp tanpa harus loncat ke situs lain — pengalaman belanja jadi mulus dari awal sampai akhir."
+          "a": "Fibidy itu storefront lengkap, bukan sekadar halaman link. Foto produk, harga, kategori, search, dan custom domain udah siap pakai. Pelanggan bisa order langsung via WhatsApp tanpa harus loncat ke situs lain pengalaman belanja jadi mulus dari awal sampai akhir."
         },
         "whatToSell": {
           "q": "Bisa jual apa aja di Fibidy?",
-          "a": "Barang fisik (fashion, makanan, kerajinan) dan jasa (coaching, konsultasi, salon, sewa studio) — apa pun yang biasa pelanggan beli dari kamu via WhatsApp. Produk digital (template, ebook, kursus) ikut paket berbayar nanti."
+          "a": "Barang fisik (fashion, makanan, kerajinan) dan jasa (coaching, konsultasi, salon, sewa studio) apa pun yang biasa pelanggan beli dari kamu via WhatsApp. Produk digital (template, ebook, kursus) ikut paket berbayar nanti."
         },
         "dataExport": {
           "q": "Kalau mau pindah, bisa export data?",
-          "a": "Bisa. Data toko kamu ya punya kamu. Export CSV semua produk lagi disiapin; sementara ini, tim kami siap bantu seller yang mau pindahan manual — silakan hubungi kami, kami yang urus."
+          "a": "Bisa. Data toko kamu ya punya kamu. Export CSV semua produk lagi disiapin; sementara ini, tim kami siap bantu seller yang mau pindahan manual silakan hubungi kami, kami yang urus."
         },
         "migrate": {
           "q": "Bisa pindah dari platform lain?",
-          "a": "Bisa. Bawa foto produk, deskripsi, harga — semua pindah ke sini, kami siapin. Seller juga dapet bantuan migrasi langsung dari tim kami — tinggal kirim pesan, kami yang kerjain bagian beratnya."
+          "a": "Bisa. Bawa foto produk, deskripsi, harga semua pindah ke sini, kami siapin. Seller juga dapet bantuan migrasi langsung dari tim kami tinggal kirim pesan, kami yang kerjain bagian beratnya."
         }
       }
     },

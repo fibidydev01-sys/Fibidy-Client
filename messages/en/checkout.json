@@ -1,9 +1,9 @@
 {
   "checkout": {
     "metadata": {
-      "successTitle": "Purchase Successful — Fibidy",
+      "successTitle": "Purchase Successful Fibidy",
       "successDescription": "Your digital product is now available in your Library",
-      "cancelTitle": "Purchase Canceled — Fibidy"
+      "cancelTitle": "Purchase Canceled Fibidy"
     },
     "success": {
       "verifying": {

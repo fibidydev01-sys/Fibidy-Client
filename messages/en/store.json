@@ -6,7 +6,7 @@
     },
     "eduOrder": {
       "title": "Simulation Store",
-      "description": "This store is in Student Mode — it's a learning simulation only. Orders cannot be placed here.",
+      "description": "This store is in Student Mode it's a learning simulation only. Orders cannot be placed here.",
       "understood": "Got it",
       "learnMore": "Learn about Student Mode"
     },
@@ -65,8 +65,8 @@
       "detail": {
         "shareLabel": "Share this product:",
         "buyFallbackDescription": "Buy {name} at {tenant}",
-        "imageAlt": "{name} — image {index}",
-        "thumbAlt": "{name} — thumbnail {index}",
+        "imageAlt": "{name} image {index}",
+        "thumbAlt": "{name} thumbnail {index}",
         "descriptionHeading": "Product description",
         "actionsDivider": "or",
         "imagePosition": "{current} / {total}"
@@ -156,7 +156,7 @@
       },
       "stripe": {
         "signInToBuy": "Sign in to Buy",
-        "buyNow": "Buy Now — {price}",
+        "buyNow": "Buy Now {price}",
         "loading": "Loading...",
         "redirecting": "Redirecting to Stripe...",
         "stillProcessingTitle": "Still processing your previous checkout",
