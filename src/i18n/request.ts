@@ -8,7 +8,6 @@
 // File is referenced by next.config.ts via createNextIntlPlugin.
 //
 // [MARKETING REBUILD — May 2026]
-// Added `marketing` namespace (15th file). marketing.json drives
 // all copy in the (marketing) route group — header, hero, problem,
 // features bento, pricing cards, how-it-works, FAQ, final CTA, footer.
 // Without this registration, getTranslations({namespace:'marketing.*'})
@@ -42,7 +41,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../../messages/${locale}/toast.json`)).default,
     ...(await import(`../../messages/${locale}/error.json`)).default,
     ...(await import(`../../messages/${locale}/og.json`)).default,
-    ...(await import(`../../messages/${locale}/marketing.json`)).default,
   };
 
   return {
