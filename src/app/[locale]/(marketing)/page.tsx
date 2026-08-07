@@ -42,18 +42,18 @@ function HeroSection() {
           variant="outline"
           className="mb-6 text-xs font-medium text-muted-foreground px-4 py-1.5"
         >
-          Kasir Offline + Toko Online Satu Platform
+          🚀 POS Kasir Offline & Toko Online
         </Badge>
 
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
           Solusi POS Kasir Offline dan{" "}
-          <span className="text-primary">Manajemen Toko Online</span> untuk
-          UMKM Indonesia
+          <span className="text-primary">Manajemen Toko Online</span> Terpadu
+          untuk UMKM Indonesia
         </h1>
 
         <p className="text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed mb-10">
-          Kelola Toko Online dan Operasikan POS Kasir untuk Bisnis
-          Sehari-hari
+          Bisnismu kelihatan lebih siap di mata pelanggan dari toko online
+          sampai catatan transaksi.
         </p>
 
         <Button size="lg" asChild className="min-w-[200px]">
@@ -64,7 +64,7 @@ function HeroSection() {
         </Button>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Langsung pakai · Gampang dipasang sendiri · POS offline included
+          ⚡ Gampang dipakai, setup 5 menit langsung jualan
         </p>
       </div>
 
@@ -89,25 +89,25 @@ const whyFibidy = [
     icon: ShoppingBag,
     title: "Stop catat transaksi manual",
     description:
-      "Buku kas, kalkulator, transfer manual semua bisa digantikan. POS kasir offline Fibidy catat transaksi harian otomatis, rapi, dan bisa diakses kapan aja.",
+      "Semua jauh lebih mudah bila pakai POS kasir offline. Transaksi harian dengan pelanggan tersimpan rapi, riwayatnya juga bisa diakses kapan aja, di mana aja, tanpa hambatan kuota internet.",
   },
   {
     icon: Zap,
     title: "Website bisnis, isi sendiri dalam hitungan menit",
     description:
-      "Punya toko online lengkap about, produk, kontak dalam hitungan menit. Isi sekali, langsung otomatis terisi ke semua bagian. Ganti template sesuka hati.",
+      "Punya toko online lengkap — about, produk, kontak — dalam hitungan menit. Ganti template sesuka hati, sesuaikan dengan momen dan promo produkmu.",
   },
   {
     icon: Globe,
-    title: "Satu link, semua info bisnismu",
+    title: "Satu link, untuk semua informasi bisnismu",
     description:
-      "Pasang link toko di bio TikTok, Instagram, YouTube. Pelanggan tap sekali, langsung lihat produk dan cara pesan. Simpel, rapi, profesional.",
+      "Pasang link toko online di bio TikTok, Instagram, YouTube. Pelanggan bisa langsung explore produk hingga detail, dan pesanan pun lebih mudah didapat.",
   },
   {
     icon: Smartphone,
     title: "Dirancang untuk UMKM Indonesia",
     description:
-      "Harga dalam Rupiah, kasir offline untuk area sinyal lemah, dan toko online yang bisa diakses dari HP. Dua kebutuhan utama UMKM dalam satu platform.",
+      "Harga dalam Rupiah dan kasir offline untuk area sinyal lemah — dua kebutuhan utama UMKM dalam satu platform.",
   },
 ];
 
@@ -120,15 +120,32 @@ function WhySection() {
             variant="outline"
             className="mb-4 text-xs font-medium text-muted-foreground"
           >
-            # Kenapa Fibidy
+            Kenapa Harus Fibidy?
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
-            Operasional bisnis harusnya lebih simpel dari ini.
+            Pencatatan setiap transaksi secara digital dan toko online yang
+            belum kamu punya, kini beres dalam satu ekosistem
           </h2>
           <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Dua masalah terbesar UMKM catat transaksi manual dan tidak
-            punya toko online plus dua kebutuhan yang sering kelewat,
-            selesai dalam satu platform.
+            Dua hal yang paling bikin pusing saat jualan.
+          </p>
+        </div>
+
+        {/* Problem → Agitate */}
+        <div className="max-w-lg mx-auto mb-10">
+          <ol className="flex flex-col gap-2 text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
+            <li>
+              Catat dan rekapan transaksi masih manual, yang membuat arus kas
+              jadi sedikit berantakan.
+            </li>
+            <li>
+              Belum punya toko online, yang membuat detail produk tidak bisa
+              dilihat pelanggan.
+            </li>
+          </ol>
+          <p className="text-sm text-foreground leading-relaxed mt-4 text-center">
+            Tenang, Fibidy jawab keduanya sekaligus dalam satu ekosistem. Ini
+            yang kamu dapat:
           </p>
         </div>
 
