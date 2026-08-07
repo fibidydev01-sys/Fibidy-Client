@@ -69,20 +69,36 @@ function HeroSection() {
         </p>
       </div>
 
-      {/* Visual — iPhone mockup dengan video demo */}
-      <div className="flex justify-center w-full px-6">
-        <div className="w-[280px] sm:w-[320px] md:w-[380px] lg:w-[420px]">
-          {/* Placeholder frame saat video belum ada */}
-          <div className="relative aspect-[9/19.5] w-full rounded-[3rem] border-[8px] border-foreground/10 bg-muted overflow-hidden shadow-2xl shadow-primary/10">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Smartphone className="w-6 h-6 text-primary" />
-              </div>
-              <p className="text-xs text-center text-muted-foreground font-medium">
-                Demo POS Kasir & Toko Digital
-                <br />
-                <span className="text-primary">Segera hadir</span>
-              </p>
+      {/* Visual — foto UMKM berjualan dengan overlay badge */}
+      <div className="flex justify-center w-full px-6 pb-16">
+        <div className="relative w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl shadow-primary/10 border border-border">
+          <img
+            src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=80"
+            alt="UMKM menggunakan kasir digital"
+            className="w-full h-[280px] sm:h-[360px] md:h-[420px] object-cover"
+          />
+          {/* Gradient overlay bawah */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
+
+          {/* Badge floating bottom-left — POS */}
+          <div className="absolute bottom-5 left-5 bg-card/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 flex items-center gap-3 shadow-lg">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Smartphone className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-foreground">POS Kasir Offline</p>
+              <p className="text-[10px] text-muted-foreground">Transaksi tetap jalan tanpa sinyal</p>
+            </div>
+          </div>
+
+          {/* Badge floating bottom-right — Website */}
+          <div className="absolute bottom-5 right-5 bg-card/90 backdrop-blur-sm border border-border rounded-xl px-4 py-3 flex items-center gap-3 shadow-lg">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Globe className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-foreground">Toko Digital</p>
+              <p className="text-[10px] text-muted-foreground">nama-kamu.fibidy.com</p>
             </div>
           </div>
         </div>
@@ -140,6 +156,23 @@ function WhySection() {
             Dua masalah terbesar UMKM — catat transaksi manual dan tidak punya
             toko online — selesai dalam satu platform.
           </p>
+        </div>
+
+        {/* Banner foto UMKM sebelum grid */}
+        <div className="relative w-full rounded-2xl overflow-hidden mb-10 border border-border shadow-sm">
+          <img
+            src="https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=1200&q=80"
+            alt="Pemilik UMKM menggunakan platform digital"
+            className="w-full h-[200px] sm:h-[240px] object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-transparent" />
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 max-w-xs">
+            <p className="text-sm font-semibold text-foreground leading-snug">
+              Dua masalah utama UMKM,
+              <br />
+              <span className="text-primary">satu platform solusinya.</span>
+            </p>
+          </div>
         </div>
 
         {/* 4-kolom grid */}
@@ -660,8 +693,8 @@ function ContactSection() {
         <div className="bg-muted rounded-2xl overflow-hidden flex flex-col md:flex-row">
           <div className="w-full md:w-[45%] flex-shrink-0">
             <img
-              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
-              alt="UMKM berjualan"
+              src="https://images.unsplash.com/photo-1556742111-a301076d9d18?w=800&q=80"
+              alt="Tim support Fibidy siap membantu"
               className="w-full h-[240px] md:h-full min-h-[300px] md:min-h-[400px] object-cover"
             />
           </div>
