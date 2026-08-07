@@ -3,18 +3,9 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import {
   HelpCircle,
-  Phone,
   ScrollText,
   Shield,
   Cookie,
-  CreditCard,
-  Receipt,
-  RefreshCcw,
-  UserCheck,
-  Banknote,
-  Handshake,
-  FileWarning,
-  Copyright,
   ChevronRight,
   ArrowLeft,
 } from 'lucide-react';
@@ -29,8 +20,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Group + item structure — labels/descriptions come from i18n
+// Item structure — labels/descriptions come from i18n
 // Only icons and hrefs are hardcoded here.
+//
+// Kept only the 4 pages linked from the marketing footer
+// (Dukungan → Pusat Bantuan, Legal → Syarat Layanan / Privasi /
+// Cookies). Removed acceptable-use, contact, copyright, fees,
+// kyc, payment, payout, refund, seller-agreement — none of these
+// are linked anywhere in the footer.
 // ──────────────────────────────────────────────────────────────
 
 interface Item {
@@ -39,50 +36,11 @@ interface Item {
   href: string;
 }
 
-interface Group {
-  key: string;
-  items: Item[];
-}
-
-const GROUPS: Group[] = [
-  {
-    key: 'info',
-    items: [
-      { key: 'faq', icon: HelpCircle, href: '/legal/faq' },
-      { key: 'contact', icon: Phone, href: '/legal/contact' },
-    ],
-  },
-  {
-    key: 'payment',
-    items: [
-      { key: 'fees', icon: Receipt, href: '/legal/fees' },
-      { key: 'payment', icon: CreditCard, href: '/legal/payment' },
-      { key: 'refund', icon: RefreshCcw, href: '/legal/refund' },
-    ],
-  },
-  {
-    key: 'seller',
-    items: [
-      { key: 'kyc', icon: UserCheck, href: '/legal/kyc' },
-      { key: 'payout', icon: Banknote, href: '/legal/payout' },
-      { key: 'sellerAgreement', icon: Handshake, href: '/legal/seller-agreement' },
-    ],
-  },
-  {
-    key: 'rights',
-    items: [
-      { key: 'acceptableUse', icon: FileWarning, href: '/legal/acceptable-use' },
-      { key: 'copyright', icon: Copyright, href: '/legal/copyright' },
-    ],
-  },
-  {
-    key: 'core',
-    items: [
-      { key: 'terms', icon: ScrollText, href: '/legal/terms' },
-      { key: 'privacy', icon: Shield, href: '/legal/privacy' },
-      { key: 'cookies', icon: Cookie, href: '/legal/cookies' },
-    ],
-  },
+const ITEMS: Item[] = [
+  { key: 'faq', icon: HelpCircle, href: '/legal/faq' },
+  { key: 'terms', icon: ScrollText, href: '/legal/terms' },
+  { key: 'privacy', icon: Shield, href: '/legal/privacy' },
+  { key: 'cookies', icon: Cookie, href: '/legal/cookies' },
 ];
 
 export default async function LegalIndexPage() {
@@ -107,40 +65,31 @@ export default async function LegalIndexPage() {
           <p className="text-sm text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
 
-        {/* Groups */}
-        <div className="space-y-6">
-          {GROUPS.map((group) => (
-            <div key={group.key}>
-              <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2 px-1">
-                {t(`groups.${group.key}`)}
-              </p>
-              <div className="rounded-xl border divide-y overflow-hidden bg-card">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="flex items-center gap-4 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
-                        <Icon className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground leading-tight">
-                          {t(`items.${item.key}.label`)}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {t(`items.${item.key}.description`)}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        {/* Items — single flat list, no group headers needed at 5 items */}
+        <div className="rounded-xl border divide-y overflow-hidden bg-card">
+          {ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-4 px-4 py-3.5 hover:bg-muted/50 active:bg-muted transition-colors"
+              >
+                <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted shrink-0">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground leading-tight">
+                    {t(`items.${item.key}.label`)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    {t(`items.${item.key}.description`)}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+              </Link>
+            );
+          })}
         </div>
 
         <Separator className="bg-border/60 mt-10 mb-6" />

@@ -163,7 +163,7 @@ export async function proxy(request: NextRequest) {
     pathname === '/manifest.json' ||
     pathname === '/robots.txt' ||
     pathname.startsWith('/server-sitemap') ||
-    pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|xml|json|txt|map)$/)
+    pathname.match(/\.(mp4|ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|xml|json|txt|map)$/)
   ) {
     if (DEBUG && (pathname.includes('/opengraph-image') || pathname.includes('/twitter-image'))) {
       console.log('[Proxy] Skipping OG image route:', pathname);
@@ -283,7 +283,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|xml|json|txt|map|woff|woff2|ttf|css|js)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:mp4|svg|png|jpg|jpeg|gif|webp|ico|xml|json|txt|map|woff|woff2|ttf|css|js)$).*)',
   ],
 };
 
