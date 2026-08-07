@@ -124,17 +124,29 @@ export function ContactSection({ onBack }: ContactSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-      {/* DESKTOP */}
+      {/* DESKTOP — always ≥lg (1024px), always inside WizardNav's `sticky`
+          range (md+): no fixed-position pill to reserve clearance for, so
+          just a small breathing-room gap instead of the mobile block's
+          big reserve. */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
-        <div className="flex-1 min-h-[340px] pb-20">
+        <div className="flex-1 min-h-[340px] pb-4">
           {currentStep === 0 && <StepContactInfo {...stepProps} isDesktop />}
           {currentStep === 1 && <StepLocation {...stepProps} isDesktop />}
           {currentStep === 2 && <StepSectionHeading {...stepProps} isDesktop />}
         </div>
       </div>
 
-      {/* MOBILE */}
-      <div className="lg:hidden flex flex-col pb-24">
+      {/* MOBILE — shown 0-1023px, spanning BOTH WizardNav position modes:
+          pb-24 (big reserve) only applies below md, where the pill is
+          `fixed`/out-of-flow and needs real clearance from scrolled
+          content; md:pb-6 takes over from md up, where the pill is
+          `sticky`/in-flow (tablet width already renders this "mobile"
+          field layout below lg, but the pill itself is already sticky
+          there) and an artificial 96px reserve was just dead space
+          before the pill, not to mention the slack was long enough for
+          the sticky-to-normal-flow handoff at the very end of a scroll
+          to visibly shift/flick. */}
+      <div className="lg:hidden flex flex-col pb-24 md:pb-6">
         <div className="min-h-[300px]">
           {currentStep === 0 && <StepContactInfo {...stepProps} />}
           {currentStep === 1 && <StepLocation {...stepProps} />}

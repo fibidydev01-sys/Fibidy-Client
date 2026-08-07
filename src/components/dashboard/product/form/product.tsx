@@ -394,7 +394,12 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
       <Form {...form}>
         <form onSubmit={(e) => e.preventDefault()} className="h-full flex flex-col">
-          <div className="flex flex-col pb-24 lg:pb-20 min-h-[260px] lg:min-h-[300px] lg:flex-1">
+          {/* pb-24 (fixed-pill clearance) only matters below md; md:pb-6
+              takes over from md up where WizardNav is `sticky`/in-flow
+              and doesn't need an artificial reserve — see
+              wizard-nav.tsx's v6 note and contact.tsx's equivalent
+              comment for the full story. */}
+          <div className="flex flex-col pb-24 md:pb-6 min-h-[260px] lg:min-h-[300px] lg:flex-1">
             {renderStep()}
           </div>
 

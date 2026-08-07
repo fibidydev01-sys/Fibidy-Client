@@ -110,7 +110,11 @@ export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps
   if (isLoading) {
     return (
       <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-        <div className="flex-1 pb-20 space-y-6">
+        {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
+            takes over from md up where WizardNav is `sticky`/in-flow and
+            doesn't need an artificial reserve — see wizard-nav.tsx's v6
+            note and contact.tsx's equivalent comment for the full story. */}
+        <div className="flex-1 pb-20 md:pb-6 space-y-6">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-40 w-full" />
           <div className="grid gap-4 md:grid-cols-3">
@@ -134,7 +138,11 @@ export function SubscriptionPageContent({ onBack }: SubscriptionPageContentProps
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-      <div className="flex-1 pb-20 space-y-6">
+      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
+          takes over from md up where WizardNav is `sticky`/in-flow and
+          doesn't need an artificial reserve — see wizard-nav.tsx's v6
+          note and contact.tsx's equivalent comment for the full story. */}
+      <div className="flex-1 pb-20 md:pb-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>

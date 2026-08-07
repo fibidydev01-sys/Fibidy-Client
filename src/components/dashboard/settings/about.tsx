@@ -131,7 +131,11 @@ export function AboutSection({ onBack }: AboutSectionProps) {
         description={t('upgradePrompt.description')}
       />
 
-      <div className="flex-1 pb-20">
+      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
+          takes over from md up where WizardNav is `sticky`/in-flow and
+          doesn't need an artificial reserve — see wizard-nav.tsx's v6
+          note and contact.tsx's equivalent comment for the full story. */}
+      <div className="flex-1 pb-20 md:pb-6">
         <StepHighlights
           formData={formData}
           updateFormData={updateFormData}

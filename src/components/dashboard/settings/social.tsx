@@ -107,7 +107,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
     return (
       <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
         <div className="hidden lg:flex lg:flex-col lg:h-full">
-          <div className="flex-1 pb-20 min-h-[280px]">
+          <div className="flex-1 pb-4 min-h-[280px]">
             <div className="space-y-7">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-[11px] w-24 rounded-full" />
@@ -129,7 +129,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
             </div>
           </div>
         </div>
-        <div className="lg:hidden flex flex-col pb-24">
+        <div className="lg:hidden flex flex-col pb-24 md:pb-6">
           <div className="space-y-3 max-w-sm mx-auto w-full">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-1.5">
@@ -146,15 +146,21 @@ export function SocialSection({ onBack }: SocialSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-      {/* DESKTOP */}
+      {/* DESKTOP — always ≥lg, always within WizardNav's `sticky` range:
+          small breathing-room gap, no fixed-pill clearance needed. */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
-        <div className="flex-1 pb-20 min-h-[280px]">
+        <div className="flex-1 pb-4 min-h-[280px]">
           <StepSocialLinks formData={formData} onSocialLinkChange={handleSocialLinkChange} isDesktop />
         </div>
       </div>
 
-      {/* MOBILE */}
-      <div className="lg:hidden flex flex-col pb-24">
+      {/* MOBILE — shown 0-1023px, spans both WizardNav position modes.
+          pb-24 (fixed-pill clearance) only matters below md; md:pb-6
+          takes over from md up (sticky, in-flow — the old unconditional
+          pb-24 was 96px of dead space before the pill on tablet width,
+          slack long enough that the sticky-to-flow handoff at the very
+          end of a scroll visibly shifted). */}
+      <div className="lg:hidden flex flex-col pb-24 md:pb-6">
         <div className="min-h-[260px]">
           <StepSocialLinks formData={formData} onSocialLinkChange={handleSocialLinkChange} />
         </div>

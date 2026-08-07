@@ -113,7 +113,11 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
-      <div className="flex-1 pb-20 space-y-6">
+      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
+          takes over from md up where WizardNav is `sticky`/in-flow and
+          doesn't need an artificial reserve — see wizard-nav.tsx's v6
+          note and contact.tsx's equivalent comment for the full story. */}
+      <div className="flex-1 pb-20 md:pb-6 space-y-6">
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
