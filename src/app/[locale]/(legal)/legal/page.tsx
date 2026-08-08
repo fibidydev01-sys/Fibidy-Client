@@ -8,6 +8,7 @@ import {
   Cookie,
   ChevronRight,
   ArrowLeft,
+  Info,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -37,6 +38,7 @@ interface Item {
 }
 
 const ITEMS: Item[] = [
+  { key: 'about', icon: Info, href: '/legal/about' },
   { key: 'faq', icon: HelpCircle, href: '/legal/faq' },
   { key: 'terms', icon: ScrollText, href: '/legal/terms' },
   { key: 'privacy', icon: Shield, href: '/legal/privacy' },

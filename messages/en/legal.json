@@ -17,6 +17,10 @@
         "core": "Core Legal"
       },
       "items": {
+        "about": {
+          "label": "About Fibidy",
+          "description": "Who we are and what we do"
+        },
         "faq": {
           "label": "FAQ",
           "description": "Frequently asked questions"
@@ -38,6 +42,47 @@
           "description": "Session cookies and tracking policy"
         }
       }
+    },
+    "about": {
+      "title": "About Fibidy",
+      "tagline": "POS & Online Store Platform for Indonesian Small Businesses.",
+      "summary": [
+        "Fibidy is not a marketplace — we don't sell your products or take a commission.",
+        "We build tools so your business is easier to record and easier to find."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "What Fibidy is.",
+          "content": [
+            "Fibidy is a SaaS platform that provides two tools for Indonesian small business owners: an offline POS for recording daily transactions, and a storefront builder for creating an online store you can fill in yourself in minutes.",
+            "Fibidy is not a marketplace. Your products are not displayed alongside other sellers', we take no commission from your sales, and we never hold money from your transactions. All buying and selling happens directly between you and your customers."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Who we serve.",
+          "content": [
+            "Fibidy is designed for small and medium businesses across Indonesia — from warungs, salons, and coffee shops to repair shops, pharmacies, and minimarkets. We have more than 20 industry-specific versions, each with features tailored to that sector's needs.",
+            "Our priority is simplicity: online store setup in 5 minutes, a POS that keeps working without a signal, and pricing that makes sense at the small business scale."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "How we operate.",
+          "content": [
+            "Users register an account, choose a store template, and manage their own product catalog through the Fibidy dashboard. The resulting online store can be linked directly in social media bios — customers tap, view products, and contact the seller.",
+            "For full feature access (including the offline POS), users can upgrade to the Starter plan (Rp 35,000 per month, one payment per period via QRIS). The Free plan remains available at no cost with a more limited online store."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Contact.",
+          "content": [
+            "For questions, feedback, or partnerships, reach us at admin@fibidy.com or WhatsApp +62 858-1508-6235. Our team is based in Madiun, East Java, Indonesia."
+          ]
+        }
+      ]
     },
     "terms": {
       "title": "Terms of Service",

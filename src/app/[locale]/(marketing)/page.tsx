@@ -745,11 +745,11 @@ const footerLinks = {
 } as const;
 
 const legalLinks = [
+  { label: "Tentang Kami", href: "/legal/about" },
   { label: "Syarat Layanan", href: "/legal/terms" },
   { label: "Privasi", href: "/legal/privacy" },
   { label: "Cookies", href: "/legal/cookies" },
 ];
-
 function FooterSection() {
   return (
     <footer className="w-full bg-background px-6 pt-10 pb-6">

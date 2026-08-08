@@ -17,6 +17,10 @@
         "core": "Legal Inti"
       },
       "items": {
+        "about": {
+          "label": "Tentang Fibidy",
+          "description": "Siapa kami dan apa yang kami kerjakan"
+        },
         "faq": {
           "label": "FAQ",
           "description": "Pertanyaan yang sering ditanya"
@@ -38,6 +42,47 @@
           "description": "Cookie sesi dan kebijakan tracking"
         }
       }
+    },
+    "about": {
+      "title": "Tentang Fibidy",
+      "tagline": "Platform POS Kasir & Toko Online untuk UMKM Indonesia.",
+      "summary": [
+        "Fibidy bukan marketplace — kami tidak jual produkmu, tidak ambil komisi.",
+        "Kami bikin alat supaya bisnismu lebih mudah dicatat dan lebih mudah ditemukan."
+      ],
+      "sections": [
+        {
+          "number": "01",
+          "title": "Apa itu Fibidy.",
+          "content": [
+            "Fibidy adalah platform SaaS yang menyediakan dua alat untuk pelaku UMKM Indonesia: POS kasir offline untuk mencatat transaksi harian, dan storefront builder untuk membuat toko online yang bisa diisi sendiri dalam hitungan menit.",
+            "Fibidy bukan marketplace. Produkmu tidak ditampilkan bersama produk penjual lain, kami tidak mengambil komisi dari penjualanmu, dan kami tidak pernah memegang uang hasil transaksimu. Semua jual-beli terjadi langsung antara kamu dan pelangganmu."
+          ]
+        },
+        {
+          "number": "02",
+          "title": "Siapa yang kami layani.",
+          "content": [
+            "Fibidy dirancang untuk pelaku usaha kecil dan menengah di Indonesia — dari warung, salon, coffee shop, bengkel, hingga apotek dan minimarket. Kami punya lebih dari 20 versi industri, masing-masing dengan fitur yang disesuaikan untuk kebutuhan sektor itu.",
+            "Prioritas kami adalah kemudahan: setup toko online dalam 5 menit, kasir yang tetap jalan tanpa sinyal, dan harga yang masuk akal untuk skala UMKM."
+          ]
+        },
+        {
+          "number": "03",
+          "title": "Cara kami beroperasi.",
+          "content": [
+            "Pengguna mendaftar akun, memilih template toko, dan mengelola katalog produk mereka sendiri melalui dashboard Fibidy. Toko online yang dihasilkan bisa langsung dipasang di bio media sosial — pelanggan tap, langsung lihat produk dan menghubungi penjual.",
+            "Untuk akses fitur lengkap (termasuk POS kasir offline), pengguna bisa upgrade ke paket Starter (Rp 35.000 per bulan, bayar sekali per periode via QRIS). Paket Free tetap tersedia tanpa biaya dengan fitur toko online yang lebih terbatas."
+          ]
+        },
+        {
+          "number": "04",
+          "title": "Kontak.",
+          "content": [
+            "Untuk pertanyaan, masukan, atau kemitraan, hubungi kami di admin@fibidy.com atau WhatsApp +62 858-1508-6235. Tim kami berbasis di Madiun, Jawa Timur, Indonesia."
+          ]
+        }
+      ]
     },
     "terms": {
       "title": "Syarat Layanan",
