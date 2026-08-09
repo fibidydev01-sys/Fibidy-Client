@@ -20,6 +20,22 @@
 //
 // User TIDAK perlu klik apapun di drawer — semua otomatis.
 // Drawer ditampilkan sebagai "showcase" fitur, bukan action required.
+//
+// [COLLAPSED TRIGGER — Aug 2026]
+// Sebelumnya, collapsed-state trigger tiap platform beda filosofi:
+//   - Mobile: pill kecil "Pilih Tampilan" mengambang bottom-right, dempet
+//     dengan bottom nav (Produk/Studio/Pengaturan) — tidak match desktop.
+//   - Desktop: strip w-12 siku (no border-radius) nempel di right edge.
+//
+// Sekarang KEDUANYA disamakan filosofinya jadi "rounded strip chevron"
+// yang nempel di edge masing-masing, cuma orientasi beda:
+//   - Desktop: strip VERTIKAL nempel RIGHT edge, rounded di sisi KIRI
+//     (sisi yang menghadap konten) — w-12, full height.
+//   - Mobile: strip HORIZONTAL nempel BOTTOM (di atas bottom nav, TIDAK
+//     menggantikannya), rounded di sisi ATAS (sisi yang menghadap
+//     konten) — h-12, lebar mengikuti container (ada margin kiri-kanan
+//     agar terlihat floating, bukan full-bleed).
+// Isi kedua strip: 1 chevron di tengah (arah sesuai orientasi buka).
 // ============================================================================
 
 import { useState, useEffect, memo, useCallback, useRef } from 'react';
@@ -45,9 +61,10 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
 import {
   Check,
-  Crown,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Crown,
   ExternalLink,
   Save,
   Sparkles,
@@ -145,10 +162,10 @@ function DrawerToolbar({
   const tooltipReason: string | null = isSaving
     ? null
     : heroOff
-    ? tDisabled('heroOff')
-    : nothingToSave
-    ? tDisabled('nothingToSave')
-    : null;
+      ? tDisabled('heroOff')
+      : nothingToSave
+        ? tDisabled('nothingToSave')
+        : null;
 
   const publishButton = (
     <Button
@@ -241,7 +258,7 @@ function useAutoFlow({
     }, 400);
 
     return () => clearTimeout(pulseTimer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpen]);
 
   useEffect(() => {
@@ -259,7 +276,7 @@ function useAutoFlow({
     }, AUTO_PUBLISH_DELAY_MS);
 
     return () => clearTimeout(publishTimer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPublish]);
 }
 
@@ -305,15 +322,24 @@ function MobileDrawer({
 
   return (
     <>
-      {/* [UI/UX — Aug 2026] Right-anchored pill, not a full-width centered
-          bar — stays clear of thumb-reach on the left and matches the
-          desktop collapsed tab's right-side position. */}
+      {/* [ROUNDED STRIP — Aug 2026] Horizontal strip nempel BOTTOM, DI ATAS
+          bottom nav (tidak menggantikannya) — bukan pill mengambang lagi.
+          Lebar mengikuti container (left-4 right-4) agar terlihat floating
+          dengan margin kiri-kanan, tinggi h-12 menyamai desktop's w-12.
+          Rounded di sisi ATAS (rounded-t-2xl) — sisi yang menghadap konten
+          saat dibuka ke atas — mencerminkan desktop yang rounded di sisi
+          KIRI (sisi yang menghadap konten saat dibuka ke kiri).
+          `bottom-16` mempertahankan jarak di atas bottom nav yang sudah ada. */}
       {!open && (
-        <div
-          onClick={() => setOpen(true)}
-          className="fixed bottom-16 right-4 z-40 flex items-center rounded-full border bg-background px-5 py-3 shadow-2xl cursor-pointer select-none"
-        >
-          <p className="text-xs font-medium text-foreground">{t('open')}</p>
+        <div className="fixed inset-x-4 bottom-16 z-40 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label={t('open')}
+            className="flex h-12 w-full items-center justify-center rounded-t-2xl border border-b-0 bg-background shadow-2xl"
+          >
+            <ChevronDown className="h-5 w-5 rotate-180 text-foreground" />
+          </button>
         </div>
       )}
 
@@ -410,8 +436,14 @@ function DesktopSheet({
 
   return (
     <>
+      {/* [ROUNDED STRIP — Aug 2026] Sebelumnya siku total (no radius, border-l
+          doang). Sekarang rounded di sisi KIRI (rounded-l-2xl) — sisi yang
+          menghadap konten/canvas saat Sheet dibuka ke kiri. Sisi kanan
+          (nempel viewport edge) tetap siku karena tidak akan pernah
+          terlihat rounded di situ. `right-0` tidak diubah — strip tetap
+          menempel viewport edge, hanya border-radius yang ditambah. */}
       {!open && !isClosing && (
-        <div className="fixed right-0 top-0 bottom-0 w-12 bg-background border-l shadow-lg z-40 flex items-center justify-center">
+        <div className="fixed right-0 top-0 bottom-0 w-12 bg-background border border-r-0 rounded-l-2xl shadow-lg z-40 flex items-center justify-center">
           <Button
             variant="ghost"
             size="sm"
