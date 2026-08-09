@@ -27,6 +27,18 @@
 // ROOT_DOMAIN memprioritaskan NEXT_PUBLIC_ROOT_DOMAIN (explicit override),
 // lalu fallback ke derive dari NEXT_PUBLIC_APP_URL, lalu hardcode 'fibidy.com'.
 // Satu env var sebagai source of truth — tidak ada lagi kemungkinan drift.
+//
+// [BREADCRUMB FIX — 2026-08-09]
+// Step 2, 3, dan 4 sekarang inject header `x-routing-mode` ('subdomain'
+// atau 'path') ke response rewrite. Ini sinyal eksplisit yang dibaca oleh
+// store-url.ts (versi *Server, lib/public/store-url.ts) untuk menentukan
+// basePath breadcrumb/URL yang benar di Server Component — menggantikan
+// tebakan lama berbasis NODE_ENV yang salah setiap kali storefront diakses
+// via path-based studio-preview URL (www.fibidy.com/store/{slug}/...) di
+// production. Tanpa sinyal ini, Server Component tidak punya cara
+// membedakan apakah request datang dari subdomain asli atau dari
+// path-based /store/{slug}, karena keduanya di-rewrite ke struktur route
+// App Router yang SAMA PERSIS (/[locale]/store/[slug]/...).
 // ==========================================
 
 import { NextResponse } from 'next/server';
@@ -186,7 +198,11 @@ export async function proxy(request: NextRequest) {
       : `/${locale}/store/${subdomain}${cleanPath}`;
 
     if (DEBUG) console.log('[Proxy] Subdomain rewrite:', url.pathname);
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+    // [BREADCRUMB FIX] Sinyal ke Server Component: request ini dari
+    // subdomain asli → basePath breadcrumb/URL harus KOSONG.
+    response.headers.set('x-routing-mode', 'subdomain');
+    return response;
   }
 
   // ==========================================
@@ -209,6 +225,9 @@ export async function proxy(request: NextRequest) {
       const response = NextResponse.rewrite(url);
       response.headers.set('x-custom-domain', hostname);
       response.headers.set('x-tenant-slug', slug);
+      // [BREADCRUMB FIX] Custom domain berperilaku sama seperti
+      // subdomain asli — basePath breadcrumb/URL harus KOSONG.
+      response.headers.set('x-routing-mode', 'subdomain');
       return response;
     }
   }
@@ -224,7 +243,12 @@ export async function proxy(request: NextRequest) {
     url.pathname = `/${locale}${cleanPath}`;
 
     if (DEBUG) console.log('[Proxy] Path-based store rewrite:', url.pathname);
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+    // [BREADCRUMB FIX] Sinyal ke Server Component: request ini dari
+    // path-based URL (mis. studio preview www.fibidy.com/store/{slug}/...)
+    // → basePath breadcrumb/URL harus /store/{slug}.
+    response.headers.set('x-routing-mode', 'path');
+    return response;
   }
 
   // ==========================================

@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # ================================================================
-# CLIENT — SETTINGS BIO FILES COLLECTOR
+# CLIENT — STOREFRONT BREADCRUMB FILES COLLECTOR
 # 
-# Collect file yang berkaitan dengan BIO/Profile/About toko:
-#   - Settings about/bio
-#   - Setup store story & highlights
-#   - Tenant types (bio, description, highlights)
-#   - Hooks terkait tenant/landing config
+# Collect file yang berkaitan dengan breadcrumb storefront:
+#   - store-breadcrumb.tsx (komponen render breadcrumb)
+#   - store product detail page (manggil breadcrumb)
+#   - seo.ts (logic generate breadcrumb)
+#   - store-url.ts (helper URL)
 #
 # Run dari: root direktori client (tempat src/ ada)
-#   bash collect-bio-files.sh
+#   bash collect-breadcrumb-files.sh
 # ================================================================
 
 GREEN='\033[0;32m'
@@ -81,6 +81,31 @@ section_header() {
 }
 
 # ================================================================
+# ORPHAN CHECK
+# ================================================================
+
+check_missing_file() {
+    local file=$1
+    local output=$2
+    local rel="${file#$PROJECT_ROOT/}"
+    
+    echo -e "\n  ${YELLOW}🔍 Checking: $rel${NC}"
+    echo "" >> "$output"
+    echo "--- STATUS CHECK: $rel ---" >> "$output"
+    
+    if [ -f "$file" ]; then
+        local lines
+        lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+        echo -e "  ${GREEN}✓ EXISTS${NC} (${lines} lines)"
+        echo "STATUS: EXISTS (${lines} lines)" >> "$output"
+    else
+        echo -e "  ${RED}✗ MISSING${NC} — FILE TIDAK ADA!"
+        echo "STATUS: *** FILE NOT FOUND ***" >> "$output"
+    fi
+    echo "" >> "$output"
+}
+
+# ================================================================
 # MAIN
 # ================================================================
 
@@ -93,63 +118,90 @@ main() {
 
     local timestamp
     timestamp=$(date '+%Y%m%d-%H%M%S')
-    local output_file="$OUT/BIO-FILES-$timestamp.txt"
+    local output_file="$OUT/BREADCRUMB-FILES-$timestamp.txt"
 
     {
         echo "################################################################"
-        echo "##  CLIENT — SETTINGS BIO FILES"
+        echo "##  CLIENT — STOREFRONT BREADCRUMB FILES"
         echo "##  Generated: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "##  Working dir: $(pwd)"
         echo "################################################################"
         echo ""
         echo "##  FOCUS AREAS:"
-        echo "##    1. Settings About/Bio"
-        echo "##    2. Setup Store Story & Highlights"
-        echo "##    3. Tenant Types (bio, description, highlights)"
-        echo "##    4. Hooks & API"
+        echo "##    1. Breadcrumb component (store-breadcrumb.tsx)"
+        echo "##    2. Store product detail page (manggil breadcrumb)"
+        echo "##    3. SEO logic (generate breadcrumb)"
+        echo "##    4. Store URL helper (store-url.ts)"
         echo "################################################################"
         echo ""
     } > "$output_file"
 
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}  SETTINGS BIO FILES COLLECTOR                           ${NC}"
+    echo -e "${BLUE}  STOREFRONT BREADCRUMB FILES COLLECTOR                  ${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
-    # ── 1. SETTINGS ABOUT/BIO ──────────────────────────────────────
-    section_header "1. SETTINGS — ABOUT/BIO" "$output_file"
-    
-    collect_file "$SRC_DIR/components/dashboard/settings/about.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/settings/form/about/step-highlights.tsx" "$output_file"
+    # ── 1. BREADCRUMB COMPONENT ──────────────────────────────────
+    section_header "1. BREADCRUMB COMPONENT" "$output_file"
+    collect_file "$SRC_DIR/components/layout/store/store-breadcrumb.tsx" "$output_file"
 
-    # ── 2. SETUP STORE — STORY & HIGHLIGHTS ───────────────────────
-    section_header "2. SETUP STORE — STORY & HIGHLIGHTS" "$output_file"
+    # ── 2. STORE PRODUCT DETAIL PAGE ─────────────────────────────
+    section_header "2. STORE PRODUCT DETAIL PAGE" "$output_file"
     
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/setup-store/seller/step-story.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/setup-store/seller/step-highlights.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/setup-store/seller/use-seller-setup-autofill.ts" "$output_file"
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/setup-store/seller/autofill-badge.tsx" "$output_file"
+    # Cari semua file page.tsx di store product detail
+    echo -e "\n  ${CYAN}📋 Finding store product detail pages...${NC}"
+    echo "" >> "$output_file"
+    echo "--- STORE PRODUCT DETAIL PAGES ---" >> "$output_file"
+    
+    find "$SRC_DIR/app/[locale]/store" -path "*/products/[id]/page.tsx" 2>/dev/null | while read -r f; do
+        collect_file "$f" "$output_file"
+    done
+    
+    # Kalau ga nemu, coba cari alternative
+    if [ $(find "$SRC_DIR/app/[locale]/store" -path "*/products/[id]/page.tsx" 2>/dev/null | wc -l) -eq 0 ]; then
+        echo -e "  ${YELLOW}⚠ No product detail page found at expected path${NC}"
+        echo "WARNING: No product detail page found at expected path" >> "$output_file"
+        
+        # Coba cari semua page.tsx di store
+        echo "" >> "$output_file"
+        echo "--- ALL STORE PAGES (fallback) ---" >> "$output_file"
+        find "$SRC_DIR/app/[locale]/store" -name "page.tsx" 2>/dev/null | while read -r f; do
+            collect_file "$f" "$output_file"
+        done
+    fi
 
-    # ── 3. SETTINGS HERO ───────────────────────────────────────────
-    section_header "3. SETTINGS — HERO (Story)" "$output_file"
+    # ── 3. STORE LAYOUT ──────────────────────────────────────────
+    section_header "3. STORE LAYOUT" "$output_file"
     
-    collect_file "$SRC_DIR/components/dashboard/settings/hero.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/settings/form/hero/step-story.tsx" "$output_file"
+    # Cari layout store yang mungkin manggil breadcrumb
+    find "$SRC_DIR/app/[locale]/store" -name "layout.tsx" 2>/dev/null | while read -r f; do
+        collect_file "$f" "$output_file"
+    done
 
-    # ── 4. TYPES ────────────────────────────────────────────────────
-    section_header "4. TYPES — TENANT (Bio/Description/Highlights)" "$output_file"
-    
-    collect_file "$SRC_DIR/types/tenant.ts" "$output_file"
+    # ── 4. SEO LOGIC ──────────────────────────────────────────────
+    section_header "4. SEO — BREADCRUMB SCHEMA" "$output_file"
+    collect_file "$SRC_DIR/lib/shared/seo.ts" "$output_file"
+    collect_file "$SRC_DIR/components/store/shared/breadcrumb-schema.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/store/shared/json-ld.tsx" "$output_file"
 
-    # ── 5. HOOKS ────────────────────────────────────────────────────
-    section_header "5. HOOKS — TENANT & LANDING CONFIG" "$output_file"
-    
-    collect_file "$SRC_DIR/hooks/dashboard/use-tenant.ts" "$output_file"
-    collect_file "$SRC_DIR/hooks/dashboard/use-landing-config.ts" "$output_file"
+    # ── 5. STORE URL HELPER ──────────────────────────────────────
+    section_header "5. STORE URL HELPER" "$output_file"
+    collect_file "$SRC_DIR/lib/public/store-url.ts" "$output_file"
+    collect_file "$SRC_DIR/lib/public/use-store-urls.ts" "$output_file"
 
-    # ── 6. API ──────────────────────────────────────────────────────
-    section_header "6. API — TENANTS" "$output_file"
+    # ── 6. RELATED UTILITIES ─────────────────────────────────────
+    section_header "6. RELATED UTILITIES" "$output_file"
+    collect_file "$SRC_DIR/lib/shared/schema.ts" "$output_file"
+
+    # ── 7. CHECK MISSING FILES ──────────────────────────────────
+    section_header "7. FILE STATUS CHECK" "$output_file"
     
-    collect_file "$SRC_DIR/lib/api/tenants.ts" "$output_file"
+    echo "" >> "$output_file"
+    echo "## CRITICAL FILES STATUS" >> "$output_file"
+    echo "" >> "$output_file"
+    
+    check_missing_file "$SRC_DIR/components/layout/store/store-breadcrumb.tsx" "$output_file"
+    check_missing_file "$SRC_DIR/lib/public/store-url.ts" "$output_file"
+    check_missing_file "$SRC_DIR/lib/shared/seo.ts" "$output_file"
 
     # ── SUMMARY ──────────────────────────────────────────────────
     local pct=0
@@ -161,12 +213,33 @@ main() {
 
     echo ""
     echo -e "${color}╔════════════════════════════════════════════════════╗${NC}"
-    echo -e "${color}║  BIO FILES — SUMMARY                              ║${NC}"
+    echo -e "${color}║  BREADCRUMB FILES — SUMMARY                       ║${NC}"
     echo -e "${color}╠════════════════════════════════════════════════════╣${NC}"
     printf "${color}║  ✓ Found   : %-3d / %-3d                             ║${NC}\n" "$FOUND" "$TOTAL"
     printf "${color}║  ✗ Missing : %-3d                                    ║${NC}\n" "$MISSING"
     printf "${color}║  Coverage  : %-3d%%                                  ║${NC}\n" "$pct"
     echo -e "${color}╚════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    # Show critical files status
+    echo -e "${YELLOW}📋 CRITICAL FILES STATUS:${NC}"
+    if [ -f "$SRC_DIR/components/layout/store/store-breadcrumb.tsx" ]; then
+        echo -e "  ${GREEN}✓${NC} store-breadcrumb.tsx — EXISTS"
+    else
+        echo -e "  ${RED}✗${NC} store-breadcrumb.tsx — MISSING (ini yang render breadcrumb!)"
+    fi
+    
+    if [ -f "$SRC_DIR/lib/public/store-url.ts" ]; then
+        echo -e "  ${GREEN}✓${NC} store-url.ts — EXISTS"
+    else
+        echo -e "  ${RED}✗${NC} store-url.ts — MISSING (ini helper URL!)"
+    fi
+    
+    if [ -f "$SRC_DIR/lib/shared/seo.ts" ]; then
+        echo -e "  ${GREEN}✓${NC} seo.ts — EXISTS"
+    else
+        echo -e "  ${RED}✗${NC} seo.ts — MISSING (logic breadcrumb ada di sini!)"
+    fi
     echo ""
 
     echo -e "${CYAN}📂 Output: $output_file${NC}"
@@ -181,13 +254,10 @@ main() {
         echo "Missing : $MISSING"
         echo "Coverage: $pct%"
         echo ""
-        echo "## FILES COLLECTED"
-        echo "Settings About/Bio: 2"
-        echo "Setup Store Story & Highlights: 4"
-        echo "Settings Hero (Story): 2"
-        echo "Types (Tenant): 1"
-        echo "Hooks: 2"
-        echo "API: 1"
+        echo "## CRITICAL FILES STATUS"
+        echo "store-breadcrumb.tsx: $([ -f "$SRC_DIR/components/layout/store/store-breadcrumb.tsx" ] && echo "EXISTS" || echo "MISSING")"
+        echo "store-url.ts: $([ -f "$SRC_DIR/lib/public/store-url.ts" ] && echo "EXISTS" || echo "MISSING")"
+        echo "seo.ts: $([ -f "$SRC_DIR/lib/shared/seo.ts" ] && echo "EXISTS" || echo "MISSING")"
     } >> "$output_file"
 
     [ $MISSING -gt 0 ] && exit 1

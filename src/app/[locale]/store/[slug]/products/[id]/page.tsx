@@ -17,7 +17,7 @@ import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
 import { SocialShare } from '@/components/store/shared/social-share';
 import { generateProductBreadcrumbs } from '@/lib/shared/seo';
 import { createProductMetadata } from '@/lib/shared/seo';
-import { productsUrl } from '@/lib/public/store-url';
+import { productsUrlServer } from '@/lib/public/store-url';
 import { Separator } from '@/components/ui/separator';
 
 // ==========================================
@@ -44,6 +44,23 @@ import { Separator } from '@/components/ui/separator';
 // `createProductMetadata` composes the happy-path metadata from
 // user-authored fields; that helper is outside this audit scope and
 // already handles its own description composition.
+//
+// [BREADCRUMB FIX — 2026-08-09]
+// `productsUrl(slug)` diganti jadi `productsUrlServer(slug)` — versi async
+// yang baca sinyal 'x-routing-mode' dari header (di-inject proxy.ts),
+// bukan menebak dari NODE_ENV. Dihitung ke variabel `productsHref` SEBELUM
+// return, lalu di-await, karena Server Component tidak bisa await inline
+// di dalam JSX. Root cause lengkap ada di komentar store-url.ts.
+//
+// Tanpa fix ini, breadcrumb "Products" di halaman ini generate href
+// `/products` (basePath kosong) setiap kali diakses lewat path-based
+// studio-preview URL (www.fibidy.com/store/{slug}/products/{id}), yang
+// setelah di-prefix locale oleh next-intl jadi `/id/products` — route yang
+// tidak pernah ada di App Router, sehingga 404. Breadcrumb "demo123" (home)
+// tidak kena karena dia dihitung terpisah lewat useStoreUrls hook di
+// StoreBreadcrumb (Client Component), yang sempat "dibetulkan" ulang saat
+// hydration di browser — mekanisme itu tidak berlaku untuk href yang
+// dikirim sebagai props statis dari Server Component seperti di sini.
 // ==========================================
 
 interface ProductPageProps {
@@ -138,6 +155,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const relatedProducts = await getRelatedProducts(slug, id, product.category);
   const productUrl = `https://www.fibidy.com/store/${tenant.slug}/products/${product.id}`;
 
+  // [BREADCRUMB FIX] dihitung & di-await di sini, sebelum JSX — Server
+  // Component tidak bisa await inline di dalam props/JSX.
+  const productsHref = await productsUrlServer(slug);
+
   const breadcrumbs = generateProductBreadcrumbs(
     { name: tenant.name, slug: tenant.slug },
     { name: product.name, id: product.id, slug: product.slug, category: product.category }
@@ -178,7 +199,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             storeSlug={slug}
             storeName={tenant.name}
             items={[
-              { label: tBreadcrumb('products'), href: productsUrl(slug) },
+              { label: tBreadcrumb('products'), href: productsHref },
               { label: product.name },
             ]}
           />
