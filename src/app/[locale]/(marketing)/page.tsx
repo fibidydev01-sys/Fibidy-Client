@@ -42,18 +42,17 @@ function HeroSection() {
           variant="outline"
           className="mb-6 text-xs font-medium text-muted-foreground px-4 py-1.5"
         >
-          🚀 POS Kasir Offline & Toko Online
+          🚀 Toko Online untuk UMKM
         </Badge>
 
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-          Solusi POS Kasir Offline dan{" "}
-          <span className="text-primary">Manajemen Toko Online</span> Terpadu
-          untuk UMKM Indonesia
+          Solusi <span className="text-primary">Manajemen Toko Online</span>{" "}
+          Terpadu untuk UMKM Indonesia
         </h1>
 
         <p className="text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed mb-10">
-          Bisnismu kelihatan lebih siap di mata pelanggan dari toko online
-          sampai catatan transaksi.
+          Bikin pelanggan makin percaya, dengan toko online yang rapi dan cara
+          pesan yang super gampang.
         </p>
 
         <Button size="lg" asChild className="min-w-[200px]">
@@ -87,15 +86,15 @@ function HeroSection() {
 const whyFibidy = [
   {
     icon: ShoppingBag,
-    title: "Stop catat transaksi manual",
+    title: "Pelanggan pesan langsung via WhatsApp",
     description:
-      "Semua jauh lebih mudah bila pakai POS kasir offline. Transaksi harian dengan pelanggan tersimpan rapi, riwayatnya juga bisa diakses kapan aja, di mana aja, tanpa hambatan kuota internet.",
+      "Setiap produk di toko onlinemu ada tombol kontak langsung ke WhatsApp. Pelanggan lihat produk, tinggal chat, nggak perlu muter-muter cari kontak kamu di tempat lain.",
   },
   {
     icon: Zap,
     title: "Website bisnis, isi sendiri dalam hitungan menit",
     description:
-      "Punya toko online lengkap — about, produk, kontak — dalam hitungan menit. Ganti template sesuka hati, sesuaikan dengan momen dan promo produkmu.",
+      "Punya toko online lengkap about, produk, kontak dalam hitungan menit. Ganti template sesuka hati, sesuaikan dengan momen dan promo produkmu.",
   },
   {
     icon: Globe,
@@ -107,7 +106,7 @@ const whyFibidy = [
     icon: Smartphone,
     title: "Dirancang untuk UMKM Indonesia",
     description:
-      "Harga dalam Rupiah dan kasir offline untuk area sinyal lemah — dua kebutuhan utama UMKM dalam satu platform.",
+      "Harga dalam Rupiah dan dibangun untuk area sinyal lemah dua kebutuhan utama UMKM dalam satu platform.",
   },
 ];
 
@@ -123,11 +122,10 @@ function WhySection() {
             Kenapa Harus Fibidy?
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
-            Pencatatan setiap transaksi secara digital dan toko online yang
-            belum kamu punya, kini beres dalam satu ekosistem
+            Toko online yang belum kamu punya, kini beres dalam satu platform
           </h2>
           <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Dua hal yang paling bikin pusing saat jualan.
+            Ini yang paling bikin pusing saat jualan.
           </p>
         </div>
 
@@ -135,12 +133,12 @@ function WhySection() {
         <div className="max-w-lg mx-auto mb-10">
           <ol className="flex flex-col gap-2 text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
             <li>
-              Catat dan rekapan transaksi masih manual, yang membuat arus kas
-              jadi sedikit berantakan.
-            </li>
-            <li>
               Belum punya toko online, yang membuat detail produk tidak bisa
               dilihat pelanggan.
+            </li>
+            <li>
+              Pelanggan bingung cara pesan, karena info kontak dan produk
+              berserakan di mana-mana.
             </li>
           </ol>
           <p className="text-sm text-foreground leading-relaxed mt-4 text-center">
@@ -216,18 +214,6 @@ const setupSteps = [
   },
 ];
 
-const operationalStep = {
-  number: "03",
-  eyebrow: "POS Kasir Offline",
-  badge: "Plan Starter",
-  title: "Pakai POS kasir untuk transaksi harian",
-  description:
-    "Download aplikasi POS kasir offline, langsung catat transaksi tanpa internet. Cocok untuk area sinyal lemah. Semua transaksi tersimpan rapi, bisa dilihat kapan aja.",
-  image:
-    "https://res.cloudinary.com/dxxds8jkx/image/upload/v1786104587/SCREENSHOT-3_dc9sol.png",
-  imageAlt: "Kasir digital POS UMKM",
-};
-
 function StepDeviceMock({ image }: { image: string }) {
   return (
     <div className="w-40 sm:w-44 md:w-48 flex-shrink-0">
@@ -250,7 +236,7 @@ function HowItWorksSection() {
   return (
     <section id="timeline" className="w-full bg-background py-16 md:py-20 px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Header — center-aligned on both mobile and desktop */}
+        {/* Header center-aligned on both mobile and desktop */}
         <div className="mb-12 md:mb-16 text-center">
           <Badge
             variant="outline"
@@ -259,11 +245,10 @@ function HowItWorksSection() {
             # Cara Kerjanya
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
-            Dari daftar ke toko online jadi, dalam 5 menit.
+            Bikin toko online, dalam waktu 5 menit.
           </h2>
           <p className="text-sm text-primary max-w-md leading-relaxed mx-auto">
-            Dua langkah setup toko online. Isi sekali, langsung jadi lalu
-            POS kasir siap dipakai kapan aja di plan Starter.
+            Dua langkah setup toko online. Isi sekali, langsung jadi.
           </p>
         </div>
 
@@ -326,36 +311,6 @@ function HowItWorksSection() {
           </div>
         </div>
 
-        {/* Divider antar grup */}
-        <div className="flex items-center gap-4 my-8 md:my-10">
-          <Separator className="flex-1" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
-            Lalu, Operasional Harian
-          </span>
-          <Separator className="flex-1" />
-        </div>
-
-        {/* Grup 2: Operasional Harian */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 py-6 md:py-8">
-          <StepDeviceMock image={operationalStep.image} />
-          <div className="max-w-[280px] text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-              <p className="text-xs font-semibold text-primary uppercase tracking-widest">
-                {operationalStep.eyebrow}
-              </p>
-              <Badge variant="secondary" className="text-[10px] px-2 py-0">
-                {operationalStep.badge}
-              </Badge>
-            </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">
-              {operationalStep.title}
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {operationalStep.description}
-            </p>
-          </div>
-        </div>
-
         <div className="flex justify-center mt-12">
           <Button size="lg" asChild>
             <Link href="/register">
@@ -398,11 +353,6 @@ const pricingFeatures: {
       starter: { type: "text", value: "12 pilihan", highlight: true },
     },
     {
-      label: "POS kasir offline",
-      free: { type: "dash" },
-      starter: { type: "check" },
-    },
-    {
       label: "Data otomatis terisi",
       free: { type: "check" },
       starter: { type: "check" },
@@ -441,14 +391,13 @@ function PricingSection() {
             # Harga
           </Badge>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Harga jujur. Langsung pakai.
+            Harga Terjangkau
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Toko online bisa langsung dipakai gratis.
           </p>
           <p className="text-sm text-primary mt-1">
-            POS kasir offline + toko online lengkap mulai Rp 35.000 bayar
-            sekali, langsung aktif.
+            Toko online lengkap mulai Rp 35.000 bayar sekali, langsung aktif.
           </p>
         </div>
 
@@ -461,7 +410,7 @@ function PricingSection() {
                   Free
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Toko online terbatas, tanpa POS kasir.
+                  Toko online terbatas.
                 </p>
               </div>
               <div className="text-center">
@@ -484,7 +433,7 @@ function PricingSection() {
                   Starter
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Toko online lengkap + POS kasir offline aktif.
+                  Toko online lengkap dengan semua fitur aktif.
                 </p>
               </div>
               <div className="text-center">
@@ -535,20 +484,20 @@ function PricingSection() {
 // ─────────────────────────────────────────────
 const faqs = [
   {
-    q: "POS kasirnya beneran gratis?",
-    a: "POS kasir offline aktif di plan Starter (Rp 35.000/bulan) sekali bayar, langsung bisa dipakai. Plan Free tetep bisa punya toko online, tapi versi terbatas dan belum termasuk POS kasir.",
+    q: "Beneran gratis?",
+    a: "Plan Free bisa langsung dipakai tanpa biaya, tapi versinya terbatas. Kalau mau fitur lengkap lebih banyak produk, foto, dan pilihan tampilan plan Starter cuma Rp 35.000/bulan, sekali bayar langsung aktif.",
   },
   {
     q: "Pelanggan bayar gimana di toko onlineku?",
     a: "Pelanggan lihat produk di website kamu, lalu hubungi kamu langsung via WhatsApp, telepon, atau kontak yang kamu pasang. Pembayaran lewat QRIS. Fibidy tidak terlibat dalam transaksi sama sekali.",
   },
   {
-    q: "Kenapa harus POS + toko online, bukan salah satu aja?",
-    a: "Karena dua hal itu kebutuhan yang beda tapi sering nyambung. POS kasir offline nyatet semua transaksi harian kamu jual-beli, stok, laporan omzet, riwayat bisa diakses kapan aja, bahkan tanpa sinyal. Sementara toko online yang bikin bisnismu bisa ditemuin dan dihubungi calon pelanggan dari luar. Satu buat operasional di dalam, satu buat jangkauan ke luar Fibidy gabungin dua-duanya jadi satu platform.",
+    q: "Beda Free sama Starter apa aja?",
+    a: "Starter ngasih kamu jauh lebih banyak ruang buat berkembang dari 20 jadi 50 produk, 2 jadi 3 foto per produk, dan 3 jadi 12 pilihan tampilan halaman. Cocok kalau tokomu udah mulai rame dan butuh tampil lebih maksimal.",
   },
   {
     q: "Cocok untuk bisnis apa aja?",
-    a: "Fibidy punya versi khusus buat lebih dari 20 jenis usaha, masing-masing dengan fitur yang emang dibutuhin sektor itu. Beberapa contoh: Apotek dapet sistem FEFO (obat kadaluarsa lebih dulu keluar), tracking batch & kadaluarsa, form resep obat keras. Bakery dapet freshness tracking harian, pre-order dengan DP dan pelunasan. Barbershop dapet antrian, booking, komisi stylist. Gym dapet keanggotaan, perpanjang, bekukan member. Kos-kosan dapet kelola kamar, check-in/out, tagihan sewa otomatis. Laundry dapet status order real-time. Bengkel dapet kanban servis, data kendaraan dan mekanik. Toko tani dapet sistem kasbon/tempo. Minimarket dapet Purchase Order dan kelola supplier. Apa pun bisnismu, kemungkinan besar Fibidy udah punya versi yang pas.",
+    a: "Fibidy punya 41 pilihan kategori bisnis, dari kuliner sampai jasa profesional. Pas kamu pilih kategori, landing page kamu otomatis ke-setting sesuai tema bisnismu warna, judul hero, dan 3 highlight utama semua udah pas, tinggal disesuaikan lagi kalau mau. Beberapa contoh grup kategori yang tersedia: Makanan & Minuman (restoran, cafe, bakery, katering, street food), Kesehatan & Kecantikan (salon, barbershop, spa, klinik skincare, gym, apotek), Retail (fashion, sepatu, elektronik, sembako, kosmetik, furnitur), Jasa Rumah Tangga (cleaning service, laundry, tukang ledeng, listrik, servis AC, desain interior, taman), Otomotif (bengkel mobil, bengkel motor, cuci mobil, sparepart), Lifestyle & Hiburan (fotografi, travel, hotel, venue event, bimbel), dan Jasa Profesional (penjahit, pet shop, pet grooming, percetakan, sewa properti, jasa pindahan). Kategori kamu nggak ada di list? Tetap bisa daftar landing page-mu pakai tampilan default yang tetap bisa kamu kustom sendiri.",
   },
 ];
 
@@ -768,7 +717,7 @@ function FooterSection() {
             </span>
           </Link>
           <p className="text-xs text-muted-foreground max-w-xs">
-            Platform POS Kasir & Toko Online untuk UMKM Indonesia.
+            Platform Toko Online untuk UMKM Indonesia.
           </p>
         </div>
 

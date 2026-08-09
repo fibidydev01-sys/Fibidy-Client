@@ -45,17 +45,17 @@
     },
     "about": {
       "title": "About Fibidy",
-      "tagline": "POS & Online Store Platform for Indonesian Small Businesses.",
+      "tagline": "Online Store Platform for Indonesian Small Businesses.",
       "summary": [
         "Fibidy is not a marketplace — we don't sell your products or take a commission.",
-        "We build tools so your business is easier to record and easier to find."
+        "We build tools so your business is easier to present online and easier to find."
       ],
       "sections": [
         {
           "number": "01",
           "title": "What Fibidy is.",
           "content": [
-            "Fibidy is a SaaS platform that provides two tools for Indonesian small business owners: an offline POS for recording daily transactions, and a storefront builder for creating an online store you can fill in yourself in minutes.",
+            "Fibidy is a SaaS platform that provides a storefront builder for Indonesian small business owners: create an online store you can fill in yourself in minutes, complete with products, an about section, and contact details.",
             "Fibidy is not a marketplace. Your products are not displayed alongside other sellers', we take no commission from your sales, and we never hold money from your transactions. All buying and selling happens directly between you and your customers."
           ]
         },
@@ -63,8 +63,8 @@
           "number": "02",
           "title": "Who we serve.",
           "content": [
-            "Fibidy is designed for small and medium businesses across Indonesia — from warungs, salons, and coffee shops to repair shops, pharmacies, and minimarkets. We have more than 20 industry-specific versions, each with features tailored to that sector's needs.",
-            "Our priority is simplicity: online store setup in 5 minutes, a POS that keeps working without a signal, and pricing that makes sense at the small business scale."
+            "Fibidy is designed for small and medium businesses across Indonesia — from warungs, salons, and coffee shops to fashion sellers and service providers. We offer a wide range of business-category templates, each with a layout and highlights tailored to that category.",
+            "Our priority is simplicity: online store setup in 5 minutes, a page that stays usable in low-signal areas, and pricing that makes sense at the small business scale."
           ]
         },
         {
@@ -72,7 +72,7 @@
           "title": "How we operate.",
           "content": [
             "Users register an account, choose a store template, and manage their own product catalog through the Fibidy dashboard. The resulting online store can be linked directly in social media bios — customers tap, view products, and contact the seller.",
-            "For full feature access (including the offline POS), users can upgrade to the Starter plan (Rp 35,000 per month, one payment per period via QRIS). The Free plan remains available at no cost with a more limited online store."
+            "For more room to grow (more products, more photos per product, and more layout options), users can upgrade to the Starter plan (Rp 35,000 per month, one payment per period via QRIS). The Free plan remains available at no cost with a more limited online store."
           ]
         },
         {
@@ -87,7 +87,7 @@
     "terms": {
       "title": "Terms of Service",
       "summary": [
-        "Fibidy is an offline POS and online store platform for small businesses not a marketplace.",
+        "Fibidy is an online store platform for small businesses not a marketplace.",
         "All transactions happen outside Fibidy, directly between you (the Seller) and your customers.",
         "Fibidy never receives, holds, or transfers money of any kind.",
         "You can leave anytime. Your store data stays intact, just downgraded to the Free plan limits."
@@ -97,7 +97,7 @@
           "number": "01",
           "title": "About Fibidy.",
           "content": [
-            "Fibidy is a platform that helps small businesses manage two things: daily transaction recording through an offline POS, and an online presence through a self-managed online store.",
+            "Fibidy is a platform that helps small businesses build and manage an online presence through a self-managed online store.",
             "Fibidy is not a marketplace. We do not sell your products, display your products alongside other sellers' in a shared catalog for buyers to compare, or take a commission from your sales.",
             "For all official communication regarding these Terms of Service, use admin@fibidy.com."
           ]
@@ -107,7 +107,7 @@
           "title": "Your account.",
           "content": [
             "To use Fibidy, you need to register and fill in basic business information (store name, contact, business type). You are responsible for keeping your account credentials confidential and for all activity that occurs within your account.",
-            "Fibidy can be used for many types of businesses warungs, salons, coffee shops, repair shops, and more as long as you use it for its intended purpose: recording transactions and displaying your business information."
+            "Fibidy can be used for many types of businesses warungs, salons, coffee shops, fashion sellers, and more as long as you use it for its intended purpose: presenting your business and products online."
           ]
         },
         {
@@ -116,7 +116,6 @@
           "content": [
             "This is the most important part: Fibidy is not involved in any transactions between you and your customers.",
             "What happens in the online store: customers view your products or services on your store page, then contact you directly via WhatsApp, phone, or other contact details you provide. Price agreements, payments (e.g. via QRIS), and delivery happen directly between you and the customer, outside of Fibidy.",
-            "What happens in the offline POS: you record transactions that occur at your own store (cash, or other methods you accept directly). These records are saved on your device and can be synced when a connection is available.",
             "Fibidy never holds, temporarily stores, or forwards money from these transactions in any form."
           ]
         },
@@ -141,14 +140,14 @@
           "title": "Plans and payments to Fibidy.",
           "content": [
             "Fibidy offers a Free plan and a Starter plan. Feature details and pricing for each plan are listed on the Pricing page.",
-            "Payment for the Starter plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). If you stop paying for Starter, your account downgrades to the Free plan limits your data stays intact, but some features (including the offline POS) become inactive until you resubscribe."
+            "Payment for the Starter plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). If you stop paying for Starter, your account downgrades to the Free plan limits your data stays intact, but the additional product slots, photos, and layout options become unavailable until you resubscribe."
           ]
         },
         {
           "number": "07",
           "title": "Your store data.",
           "content": [
-            "Data you enter into Fibidy (products, photos, business info, POS transaction history) remains yours. You can download a backup anytime through the feature available in your account.",
+            "Data you enter into Fibidy (products, photos, business info) remains yours. You can download a backup anytime through the feature available in your account.",
             "If you cancel your subscription, your data is not deleted it simply downgrades to the Free plan limits."
           ]
         },
@@ -180,7 +179,7 @@
       "summary": [
         "Fibidy stores store owner (Seller) data not buyer customer data.",
         "Customer data that flows through WhatsApp is never stored by Fibidy.",
-        "Offline POS data is stored on your device and synced when a connection is available.",
+        "Your store data stays accessible from anywhere through your account.",
         "You can download a backup or request deletion of your account data at any time."
       ],
       "sections": [
@@ -188,56 +187,49 @@
           "number": "01",
           "title": "Data we collect.",
           "content": [
-            "Fibidy collects data you provide as a store owner (Seller), including: account data (name, WhatsApp number, email, business type), store data (product names, photos, prices, descriptions, and other business information you fill in), and POS transaction data (daily transaction records you input through the offline cashier app).",
+            "Fibidy collects data you provide as a store owner (Seller), including: account data (name, WhatsApp number, email, business type) and store data (product names, photos, prices, descriptions, and other business information you fill in).",
             "Fibidy does not collect or store your customers' (buyers') data. When a customer contacts you via WhatsApp from your online store, the conversation and their data flow directly through WhatsApp they do not pass through or get stored on Fibidy's servers."
           ]
         },
         {
           "number": "02",
-          "title": "Offline POS data.",
-          "content": [
-            "Because the POS is designed to work without internet, daily transaction data is first stored on your device. When your device connects to the internet, this data is synced to Fibidy's servers so you can access it from anywhere and it won't be lost if your device is damaged or lost."
-          ]
-        },
-        {
-          "number": "03",
           "title": "Why we collect this data.",
           "content": [
-            "The data we collect is used to run the online store and POS features as you use them, sync POS transaction data across devices and sessions, contact you about your account, plan, or service updates, and provide support when you reach out to our team.",
+            "The data we collect is used to run and display your online store as you set it up, contact you about your account, plan, or service updates, and provide support when you reach out to our team.",
             "We do not sell or rent your account data to third parties for advertising purposes."
           ]
         },
         {
-          "number": "04",
+          "number": "03",
           "title": "Who can see your online store data.",
           "content": [
             "Information you display on your online store page (products, photos, descriptions, contact details) is public anyone who accesses the link can see it, because that is its purpose (so potential customers can view and contact you).",
-            "Your POS transaction data and account data are private only accessible by you through your account."
+            "Your account data is private only accessible by you through your account."
           ]
         },
         {
-          "number": "05",
+          "number": "04",
           "title": "Storage and security.",
           "content": [
             "Data is stored on servers we maintain with standard security practices. That said, no system is 100% risk-free we do our best to keep your data as secure as possible, and we recommend you also keep your account credentials confidential (password, device access)."
           ]
         },
         {
-          "number": "06",
+          "number": "05",
           "title": "Your rights over your data.",
           "content": [
             "You can download a backup of your store data anytime through the feature available in your account, request us to delete your account data by contacting admin@fibidy.com, and update your account or store data anytime through the dashboard."
           ]
         },
         {
-          "number": "07",
+          "number": "06",
           "title": "Policy changes.",
           "content": [
             "If there are changes to this policy, we will notify you via email or a notification in your account."
           ]
         },
         {
-          "number": "08",
+          "number": "07",
           "title": "Contact us.",
           "content": [
             "Questions about your data privacy? Contact us at admin@fibidy.com."
@@ -308,16 +300,12 @@
           "category": "Product & Features",
           "items": [
             {
-              "question": "Is the POS really free?",
-              "answer": "The offline POS is active on the Starter plan (Rp 35,000/month) one payment and you're ready to go. The Free plan still includes an online store, but in a limited version and without the POS."
+              "question": "Is it really free?",
+              "answer": "The Free plan lets you use the online store right away, no cost, but in a limited version. For full features more products, more photos, and more layout options the Starter plan is Rp 35,000/month, one payment and you're ready to go."
             },
             {
-              "question": "Why POS + online store together, not just one?",
-              "answer": "Because they serve different needs that often go hand in hand. The offline POS records all your daily transactions sales, stock, revenue reports, history accessible anytime, even without a signal. The online store makes your business discoverable and reachable by potential customers from outside. One for internal operations, one for external reach Fibidy brings both together in one platform."
-            },
-            {
-              "question": "What types of businesses is it suitable for?",
-              "answer": "Fibidy has dedicated versions for more than 20 business types, each with features built for that sector. A few examples: Pharmacy (FEFO system, batch & expiry tracking, prescription forms), Bakery (daily freshness tracking, pre-orders with deposit), Barbershop (queue management, booking, stylist commissions), Gym (memberships, renewals, member freezing), Boarding house (room management, check-in/out, automated rent billing), Laundry (real-time order status), Auto repair (service kanban, vehicle and mechanic records), Farm supply store (credit/installment system), and Minimarket (Purchase Orders and supplier management). Whatever your business, Fibidy most likely already has a version that fits."
+              "question": "What's the difference between Free and Starter?",
+              "answer": "Starter gives you a lot more room to grow going from 20 to 50 products, 2 to 3 photos per product, and 3 to 12 layout options. It's the right fit once your store starts getting busier and needs to look its best."
             }
           ]
         },
@@ -347,7 +335,7 @@
             },
             {
               "question": "If I stop paying for Starter, will my store data be deleted?",
-              "answer": "No. Your account downgrades to the Free plan limits, but your data (products, photos, POS transaction history) stays intact. You can resubscribe to Starter anytime to reactivate the restricted features."
+              "answer": "No. Your account downgrades to the Free plan limits, but your data (products and photos) stays intact. You can resubscribe to Starter anytime to reactivate the additional slots and layout options."
             }
           ]
         }
