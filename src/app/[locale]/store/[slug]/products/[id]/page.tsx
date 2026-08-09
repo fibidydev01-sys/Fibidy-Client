@@ -17,7 +17,7 @@ import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
 import { SocialShare } from '@/components/store/shared/social-share';
 import { generateProductBreadcrumbs } from '@/lib/shared/seo';
 import { createProductMetadata } from '@/lib/shared/seo';
-import { productsUrlServer } from '@/lib/public/store-url';
+import { productsUrlServer } from '@/lib/public/store-url.server';
 import { Separator } from '@/components/ui/separator';
 
 // ==========================================
