@@ -7,23 +7,23 @@
 //   - "Deactivate" button still works as normal (top action row)
 //
 // [i18n FIX — 2026-04-19]
-// Replaced hardcoded fallback string `'FILE'` in the digital-product
-// icon fallback block with a proper i18n key from `common.productType`.
-// Previously: `{product.fileType?.toUpperCase() ?? 'FILE'}` would always
+// Replaced hardcoded fallback string 'FILE' in the digital-product
+// icon fallback block with a proper i18n key from common.productType.
+// Previously: product.fileType?.toUpperCase() ?? 'FILE' would always
 // render the English word "FILE" regardless of locale. Now uses
-// `tProductType('fileFallback')` so it stays consistent with the rest
+// tProductType('fileFallback') so it stays consistent with the rest
 // of the product-type labels ("Digital", "Custom", etc.) and gets
 // translated once new locales are added in Phase 2.
 //
 // [IDR MIGRATION FOLLOW-UP — May 2026] — Bug #22 fix
-// Replaced hardcoded `${(product.price ?? 0).toFixed(2)}` and
-// `${product.comparePrice.toFixed(2)}` with `formatPrice()` from
-// `@/lib/shared/format`, defaulting currency to `'IDR'` to match the
+// Replaced hardcoded ${(product.price ?? 0).toFixed(2)} and
+// ${product.comparePrice.toFixed(2)} with formatPrice() from
+// @/lib/shared/format, defaulting currency to 'IDR' to match the
 // rest of the IDR migration. Was rendering "$50000.00" for IDR products
 // — wrong on every dimension (symbol, separator, decimal rule).
 // Now renders "Rp 50.000".
 //
-// `product.currency` carries the actual currency from BE; we fall back
+// product.currency carries the actual currency from BE; we fall back
 // to 'IDR' for legacy/null values consistent with format.ts default.
 //
 // [UI/UX CONSISTENCY AUDIT]
@@ -32,9 +32,47 @@
 // a hand-rolled sticky-on-scroll IntersectionObserver. Header and footer
 // now sit outside the scroll container as regular flex siblings, so they
 // stay put by construction — only the middle section scrolls.
+//
+// [RESPONSIVE DIRECTION FIX — Aug 2026]
+// Was always rendering with the vaul default direction="bottom",
+// regardless of viewport — so desktop got the same full-width bottom
+// sheet as mobile instead of a right-side panel. drawer.tsx's
+// DrawerContent already has full styling for
+// data-[vaul-drawer-direction=right] (inset-y-0 right-0, w-3/4,
+// sm:max-w-sm, border-l, drag handle correctly hidden for non-bottom
+// directions) — it was just never given direction="right" to key off.
+//
+// Fix: useIsMobile() (src/hooks/shared/use-media-query.ts, breakpoint
+// (max-width: 639px) — i.e. below Tailwind's sm) decides direction
+// per-render:
+//   isMobile → direction="bottom"  (existing behavior, unchanged)
+//   !isMobile → direction="right"  (new — 384px side panel, slide from right)
+//
+// max-h-[92vh] is likewise only applied on mobile — for direction="right"
+// the primitive already sets inset-y-0 (full viewport height); capping
+// height on top of that left the leftover space pooling under the footer
+// instead of the panel filling edge-to-edge. Desktop uses h-full instead.
+//
+// No SSR flash concern here: this drawer only mounts once a product is
+// clicked (ProductPreviewDrawer returns product-less content otherwise),
+// by which point window exists and useIsMobile's client snapshot is
+// already accurate — unlike a drawer present in the initial server-rendered
+// tree, where the hook's getServerSnapshot hardcoded to false could
+// cause a first-paint flash.
+//
+// [IMAGE LOADING SKELETON — Aug 2026]
+// Main image and thumbnails were plain next/image <Image> with no
+// placeholder — on a cold cache (hard refresh, first open) the Cloudinary
+// URL is still in flight when the drawer opens, so the box rendered empty
+// (only the alt text briefly visible) until the fetch completed. Reopening
+// the same drawer in the same session looked fine because the browser
+// already had the image cached from the first attempt — same underlying
+// cause, just invisible once warm. Switched both to OptimizedImage
+// (src/components/ui/optimized-image.tsx), which now renders a Skeleton
+// overlay that fades out on onLoad/onError, matching the pattern
+// already used in product-grid-card.tsx.
 
 import { useState, useCallback } from 'react';
-import Image from 'next/image';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { useTranslations } from 'next-intl';
 import {
@@ -60,12 +98,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/shared/utils';
 import {
   formatDateShort,
   formatFileSizeFromMb,
   formatPrice,
 } from '@/lib/shared/format';
+import { useIsMobile } from '@/hooks/shared/use-media-query';
 import type { Product } from '@/types/product';
 
 interface ProductPreviewDrawerProps {
@@ -154,10 +194,13 @@ function DrawerInner({
           <div className="relative w-full max-w-2xl mx-auto">
             <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-muted">
               {currentImage ? (
-                <Image
+                <OptimizedImage
                   src={currentImage}
                   alt={product.name}
                   fill
+                  crop="fill"
+                  gravity="auto"
+                  sizes="(max-width: 640px) 100vw, 448px"
                   className="object-cover"
                   priority
                 />
@@ -193,10 +236,13 @@ function DrawerInner({
                         : 'border-transparent hover:border-muted-foreground/20',
                     )}
                   >
-                    <Image
+                    <OptimizedImage
                       src={img}
                       alt={`${product.name} ${idx + 1}`}
                       fill
+                      crop="fill"
+                      gravity="auto"
+                      sizes="120px"
                       className="object-cover"
                     />
                   </button>
@@ -360,9 +406,31 @@ export function ProductPreviewDrawer({
   onDelete,
   onToggleActive,
 }: ProductPreviewDrawerProps) {
+  // [RESPONSIVE DIRECTION FIX] Below sm (639px and under) → bottom sheet,
+  // matching the original/mobile behavior. sm and up → right side panel,
+  // per the desktop spec (slide from right, sm:max-w-sm — already styled
+  // in drawer.tsx's DrawerContent, just never keyed off before).
+  const isMobile = useIsMobile();
+
+  // max-h-[92vh] only makes sense for direction="bottom": it caps how far
+  // up the sheet can rise, leaving intentional breathing room above it.
+  // For direction="right", the primitive already sets inset-y-0 (full
+  // viewport height, top-0 to bottom-0) — layering max-h-[92vh] on top of
+  // that caps the panel's height without moving where it's anchored, so
+  // the leftover 8% collects entirely at the bottom instead of being
+  // centered, leaving a visible gap under the footer and making the
+  // header/content/footer read as disconnected from the viewport edge.
+  // Applying the cap only when isMobile keeps the intentional mobile
+  // spacing while letting the desktop side panel fill edge-to-edge.
+  const contentHeightClass = isMobile ? 'max-h-[92vh]' : 'h-full';
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="z-[60] max-h-[92vh]">
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      direction={isMobile ? 'bottom' : 'right'}
+    >
+      <DrawerContent className={cn('z-[60]', contentHeightClass)}>
         {product && (
           <DrawerInner
             key={product.id}
