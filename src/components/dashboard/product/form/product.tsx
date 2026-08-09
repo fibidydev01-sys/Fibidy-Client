@@ -35,6 +35,29 @@
 // step, dan validasi semua ngikut daftar yang sudah difilter. Produk LAMA
 // yang sudah punya file (dibuat sebelum flag dimatikan) tetap bisa lihat
 // & edit step itu, supaya data lama nggak jadi nggak bisa diakses.
+//
+// [EDIT-SAVE FIX — Aug 2026]
+// handleSave's isEditing branch was calling useUpdateProductFile(), whose
+// input type (UpdateProductFileInput) only carries name/description/price/
+// isActive. category, comparePrice, and — critically — images were silently
+// dropped on every edit save, even though the form collects all of them.
+// This is why editing an existing product and adding cover photos in Step 3
+// would show the photos in the in-form preview (step-preview.tsx, which
+// reads live form state) but they'd vanish the moment "Save changes" was
+// clicked: the PATCH request itself never carried an `images` field, so the
+// backend had nothing to persist and the stored value stayed `[]` — a
+// backend-persistence check confirmed the request payload was already
+// `images: []` before it left the client, i.e. purely an FE bug, not a
+// backend one.
+//
+// useUpdateProduct() (mutation over UpdateProductInput = Partial
+// <CreateProductInput>, which DOES include images/category/comparePrice)
+// was already being used elsewhere in this component for the "new digital
+// product, attach extra fields after upload" path (see updateExtras below)
+// — it just wasn't the one wired into the plain-edit branch. Editing now
+// goes through the same updateProduct() mutation, sending the full field
+// set the form actually collected. useUpdateProductFile() import removed
+// since this was its only call site in this file.
 // ============================================================================
 
 import { useState, useMemo, useCallback } from 'react';
@@ -47,7 +70,6 @@ import { Form } from '@/components/ui/form';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import {
   useUploadProduct,
-  useUpdateProductFile,
   useCreateProduct,
   useUpdateProduct,
   useStorageUsage,
@@ -167,7 +189,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
   // ── Mutation hooks ────────────────────────────────────────────────────────
   const { upload, isUploading, uploadProgress } = useUploadProduct();
-  const { updateProduct: updateFileProduct, isLoading: isUpdatingFile } = useUpdateProductFile();
   const { createProduct, isLoading: isCreating } = useCreateProduct();
   const { updateProduct, isLoading: isUpdating } = useUpdateProduct();
 
@@ -175,7 +196,7 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
   const { data: kyc } = useKycStatus();
   const { tier } = useSubscriptionPlan();
 
-  const isSaving = isUploading || isUpdatingFile || isCreating || isUpdating;
+  const isSaving = isUploading || isCreating || isUpdating;
 
   // ── Local state ───────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(0);
@@ -256,13 +277,24 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
     try {
       if (isEditing) {
-        updateFileProduct(
+        // [EDIT-SAVE FIX] Was useUpdateProductFile() with a hardcoded
+        // 4-field payload (name/description/price/isActive) — category,
+        // comparePrice, and images were never sent, so cover photos added
+        // while editing an existing product never persisted. Now routes
+        // through updateProduct() (UpdateProductInput = Partial
+        // <CreateProductInput>), sending everything the form collected,
+        // the same way the "new digital product" path already does via
+        // updateExtras() below.
+        updateProduct(
           {
             id: product.id,
             data: {
               name: data.name,
               description: data.description,
+              category: data.category,
               price: data.price,
+              comparePrice: data.comparePrice,
+              images: data.images,
               isActive: data.isActive,
             },
           },

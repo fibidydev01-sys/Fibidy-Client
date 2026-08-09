@@ -18,10 +18,36 @@
 //   - LockedSlot  → inline locked UI (button with Crown badge)
 // Also removed `multiple` from useCloudinaryUpload options (not in type)
 // and added required `label` prop to EmptySlot.
+//
+// [CROP FIX — Aug 2026]
+// Product photos never had the crop flow wired in — openWidget() was a
+// plain no-crop file picker (openFilePicker alias), unlike every other
+// image-upload surface in the app (Settings > About highlights, Setup
+// wizard highlights, hero/appearance), which all go through
+// useImageCrop() + ImageCropModal before uploading.
+//
+// This step now follows that same pattern 1:1. Upload + crop for a
+// single slot is extracted into ProductImageUploadSlot below, mirroring
+// HighlightImageUpload in step-highlights.tsx:
+//   - useCloudinaryUpload({ maxFiles: 1, onFileSelected: openCrop, ... })
+//   - useImageCrop() owns the crop modal's open/close/confirm state
+//   - uploadBlob() sends the CROPPED blob, not the raw file
+//
+// Each empty slot gets its OWN upload+crop hook instance (mounted only
+// while that slot is being filled), so concurrent crop modals across
+// slots can't collide. Multi-file selection is intentionally dropped —
+// every other slot-based image uploader in this codebase is one-file-
+// per-click, and mixing "select 3 files" with "crop each one" has no
+// existing precedent to follow, so we don't invent one here.
+//
+// Aspect is locked to CROP_ASPECT.SQUARE (no Square/Landscape toggle
+// exposed) since every product photo slot renders as aspect-square.
 
-import { useRef } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Crown, GripVertical, Lock } from 'lucide-react';
+import type { Area } from 'react-easy-crop';
 import {
   DndContext,
   PointerSensor,
@@ -41,7 +67,12 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { useCloudinaryUpload } from '@/hooks/shared/use-cloudinary-upload';
+import {
+  useCloudinaryUpload,
+  type CloudinaryUploadError,
+} from '@/hooks/shared/use-cloudinary-upload';
+import { useImageCrop, CROP_ASPECT } from '@/hooks/shared/use-image-crop';
+import { ImageCropModal, type AspectChoice } from '@/components/dashboard/shared/image-crop-modal';
 import { TOTAL_SLOTS } from '@/lib/constants/shared/constants';
 import { FilledImageSlot, EmptySlot } from '@/components/dashboard/shared/image-slot';
 import type { UseFormReturn } from 'react-hook-form';
@@ -70,21 +101,100 @@ function LockedSlotInline({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) {
-  const t = useTranslations('dashboard.products.form.media');
-  const imagesRef = useRef<string[]>([]);
+// ─── ProductImageUploadSlot — one empty slot, own upload+crop state ──────────
+//
+// Mirrors HighlightImageUpload in step-highlights.tsx. Mounted for the
+// next-empty slot only; unmounting after a successful upload (the slot
+// becomes a FilledImageSlot instead, rendered by the parent) tears down
+// this hook instance and its crop modal state automatically.
+interface ProductImageUploadSlotProps {
+  index: number;
+  label: string;
+  onUploaded: (url: string) => void;
+}
 
-  const { isUploading, openWidget } = useCloudinaryUpload({
+function ProductImageUploadSlot({ index, label, onUploaded }: ProductImageUploadSlotProps) {
+  const tToast = useTranslations('toast.upload');
+  const [isCropProcessing, setIsCropProcessing] = useState(false);
+
+  const { isOpen: cropOpen, imageSrc, aspect, openCrop, closeCrop, confirmCrop } = useImageCrop();
+
+  const handleUploadError = useCallback(
+    (retry: () => void) => (error: CloudinaryUploadError) => {
+      const descKey =
+        error.code === 'FILE_TOO_LARGE' ? 'fileTooLarge' :
+          error.code === 'INVALID_FILE_TYPE' ? 'invalidFileType' :
+            error.code === 'NETWORK_ERROR' ? 'networkError' :
+              error.code === 'CONFIG_MISSING' ? 'configMissing' : 'generic';
+      toast.error(tToast('logoFailed'), {
+        description: tToast(descKey),
+        action:
+          error.code === 'NETWORK_ERROR' || error.code === 'CLOUDINARY_REJECTED' || error.code === 'UNKNOWN'
+            ? { label: tToast('retryAction'), onClick: retry }
+            : undefined,
+      });
+    },
+    [tToast],
+  );
+
+  const { isUploading, progress, openFilePicker, uploadBlob } = useCloudinaryUpload({
     folder: 'fibidy/products',
-    // `multiple` is not part of CloudinaryUploadOptions — removed.
-    // Pass maxFiles via openWidget(slots) call instead.
+    maxFiles: 1,
     onSuccess: (url) => {
-      const cur = imagesRef.current;
-      if (!cur.includes(url)) {
-        form.setValue('images', [...cur, url]);
-      }
+      onUploaded(url);
+      toast.success(tToast('logoSuccess'));
+    },
+    onError: handleUploadError(() => openFilePicker(1)),
+    onFileSelected: (file) => {
+      openCrop(file, CROP_ASPECT.SQUARE);
     },
   });
+
+  const handleFileDrop = useCallback((file: File) => {
+    openCrop(file, CROP_ASPECT.SQUARE);
+  }, [openCrop]);
+
+  const handleCropConfirm = useCallback(
+    async (croppedAreaPixels: Area, chosenAspect: AspectChoice) => {
+      setIsCropProcessing(true);
+      try {
+        const blob = await confirmCrop(croppedAreaPixels, chosenAspect);
+        closeCrop();
+        await uploadBlob(blob, `product-${index + 1}.jpg`);
+      } catch {
+        toast.error(tToast('logoFailed'), { description: tToast('generic') });
+      } finally {
+        setIsCropProcessing(false);
+      }
+    },
+    [confirmCrop, closeCrop, uploadBlob, index, tToast],
+  );
+
+  return (
+    <>
+      <EmptySlot
+        index={index}
+        label={label}
+        onClick={() => openFilePicker(1)}
+        onFileDrop={handleFileDrop}
+        isLoading={isUploading}
+        progress={progress}
+      />
+
+      <ImageCropModal
+        open={cropOpen}
+        imageSrc={imageSrc}
+        aspect={aspect}
+        onConfirm={handleCropConfirm}
+        onCancel={() => closeCrop()}
+        isProcessing={isCropProcessing}
+      />
+    </>
+  );
+}
+
+export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) {
+  const t = useTranslations('dashboard.products.form.media');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -115,12 +225,13 @@ export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) 
       control={form.control}
       name="images"
       render={({ field }) => {
-        imagesRef.current = field.value || [];
         const images: string[] = field.value || [];
 
-        const handleOpen = () => {
-          const slots = maxImages - images.length;
-          openWidget(slots);
+        const handleUploaded = (url: string) => {
+          const cur = field.value || [];
+          if (!cur.includes(url)) {
+            field.onChange([...cur, url]);
+          }
         };
 
         const handleRemove = (url: string) =>
@@ -166,13 +277,19 @@ export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) 
                             <LockedSlotInline key={`locked-${i}`} onClick={onUpgrade} />
                           );
                         }
+                        // Every empty, unlocked slot gets its own upload+crop
+                        // hook instance — clicking slot 2 before slot 1 works
+                        // exactly like it did pre-crop. `onUploaded` always
+                        // appends to `images`, so whichever slot the seller
+                        // fills first becomes images[0], and so on — slot
+                        // *position* here is just "which empty slot did they
+                        // click", not a fixed index into the final array.
                         return (
-                          <EmptySlot
-                            key={`empty-${i}`}
+                          <ProductImageUploadSlot
+                            key={`upload-slot-${i}`}
                             index={i}
                             label={t('photoFallback', { index: i + 1 })}
-                            onClick={handleOpen}
-                            isLoading={isUploading && i === images.length}
+                            onUploaded={handleUploaded}
                           />
                         );
                       })}
