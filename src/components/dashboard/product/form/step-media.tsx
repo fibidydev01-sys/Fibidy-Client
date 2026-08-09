@@ -42,6 +42,27 @@
 //
 // Aspect is locked to CROP_ASPECT.SQUARE (no Square/Landscape toggle
 // exposed) since every product photo slot renders as aspect-square.
+//
+// [DRAG-REORDER WIRE FIX — Aug 2026]
+// DndContext/SortableContext/arrayMove were already present and correctly
+// wired to field.onChange via handleDragEnd — but the filled slots
+// rendered inside SortableContext were plain FilledImageSlot instances
+// with zero dnd-kit sortable behavior. SortableContext tracks `items` by
+// id and expects each corresponding child to register itself via
+// useSortable() (ref, transform, listeners, attributes); FilledImageSlot
+// never called it, so the drag events users start on a photo never fire
+// — DndContext.onDragEnd only ever gets called for a drag that never
+// finds a draggable target.
+//
+// FilledImageSlot itself is intentionally left untouched: it's a shared
+// component also used by non-sortable callers (e.g. HighlightImageUpload
+// in step-highlights.tsx), so baking dnd-kit hooks into it would leak
+// sortable-specific behavior into contexts that never asked for it.
+// Instead, SortableImageSlot below is a thin per-caller wrapper: it's the
+// one that calls useSortable(), and forwards the resulting ref/transform/
+// listeners onto a wrapping div around FilledImageSlot. This is the same
+// "wrapper owns the DnD contract, leaf component stays dumb" pattern
+// dnd-kit's own docs use for grid reordering.
 
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -60,7 +81,9 @@ import {
   SortableContext,
   arrayMove,
   rectSortingStrategy,
+  useSortable,
 } from '@dnd-kit/sortable';
+import { cn } from '@/lib/shared/utils';
 import {
   FormControl,
   FormField,
@@ -98,6 +121,84 @@ function LockedSlotInline({ onClick }: { onClick: () => void }) {
       <Lock className="h-5 w-5 text-amber-500/70" aria-hidden />
       <Crown className="h-3.5 w-3.5 text-amber-500" aria-hidden />
     </button>
+  );
+}
+
+// ─── SortableImageSlot — dnd-kit wrapper around FilledImageSlot ──────────────
+//
+// FilledImageSlot stays a plain, DnD-agnostic component (it's shared with
+// non-sortable callers). This wrapper is what actually registers the slot
+// with dnd-kit: useSortable() gives us setNodeRef/transform/transition to
+// place on the wrapping div, and listeners/attributes to spread onto it so
+// pointer-down starts a drag. `id` must match the string used in the
+// parent's `items={images}` array (the image URL itself) so dnd-kit can
+// correlate drag source/target with `arrayMove` in handleDragEnd.
+//
+// isDragging swaps in a reduced-opacity + no-pointer-events treatment so
+// the slot being dragged reads as "lifted" rather than duplicating itself
+// at both the origin and the cursor position.
+//
+// [DEPENDENCY FIX — Aug 2026] serializeTransform() replaces
+// @dnd-kit/utilities' CSS.Transform.toString(). package.json only lists
+// @dnd-kit/core and @dnd-kit/sortable — utilities is a transitive dep of
+// sortable (it uses the same Transform shape internally, confirmed by
+// inspecting @dnd-kit/sortable's own useSortable.d.ts: its `transform`
+// return field is typed as `import("@dnd-kit/utilities").Transform |
+// null`) but that type is never re-exported from either @dnd-kit/core or
+// @dnd-kit/sortable's public entrypoints, so there is no resolvable
+// top-level import path for the *name* `Transform` without adding
+// @dnd-kit/utilities as a direct dependency.
+//
+// Rather than add a third dnd-kit package for one string formatter, the
+// parameter here is an inline structural type — {x, y, scaleX, scaleY} —
+// matching the shape @dnd-kit's Transform actually has. TypeScript's
+// structural typing means this accepts whatever useSortable()'s
+// `transform` field returns with zero named import, since it's checking
+// shape, not a type identity. Output is byte-for-byte identical to
+// @dnd-kit/utilities' CSS.Transform.toString() — this is a dependency
+// removal, not a behavior change.
+function serializeTransform(
+  transform: { x: number; y: number; scaleX: number; scaleY: number } | null,
+): string | undefined {
+  if (!transform) return undefined;
+  return `translate3d(${transform.x}px, ${transform.y}px, 0) scaleX(${transform.scaleX}) scaleY(${transform.scaleY})`;
+}
+
+interface SortableImageSlotProps {
+  id: string;
+  url: string;
+  alt: string;
+  onRemove: () => void;
+}
+
+function SortableImageSlot({ id, url, alt, onRemove }: SortableImageSlotProps) {
+  const {
+    setNodeRef,
+    transform,
+    transition,
+    listeners,
+    attributes,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: serializeTransform(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        'touch-none cursor-grab active:cursor-grabbing',
+        isDragging && 'opacity-40 z-10',
+      )}
+    >
+      <FilledImageSlot url={url} alt={alt} onRemove={onRemove} />
+    </div>
   );
 }
 
@@ -264,8 +365,9 @@ export function StepMedia({ form, maxImages, tier, onUpgrade }: StepMediaProps) 
                       {Array.from({ length: TOTAL_SLOTS }).map((_, i) => {
                         if (i < images.length) {
                           return (
-                            <FilledImageSlot
+                            <SortableImageSlot
                               key={images[i]}
+                              id={images[i]}
                               url={images[i]}
                               alt={t('photoFallback', { index: i + 1 })}
                               onRemove={() => handleRemove(images[i])}

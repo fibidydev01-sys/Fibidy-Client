@@ -17,10 +17,52 @@
 //      value sourced from `formData` or a tenant-level currency field.
 //
 // No behavioral changes elsewhere.
+//
+// [PREVIEW IMAGE + STATUS + COVER GRID FIX — Aug 2026]
+//
+// Three fixes bundled together because they all touched the same
+// render pass and were easiest to verify as one visual diff:
+//
+//   1. THUMBNAIL RACE CONDITION — the header thumbnail used a bare
+//      next/image <Image>, not the shared <OptimizedImage> wrapper every
+//      other product-image surface in the app uses (product-grid-card.tsx,
+//      product-preview-drawer.tsx). Bare next/image has no loading skeleton
+//      of its own here (no placeholder/blurDataURL was wired), so on a
+//      cold cache the box rendered visually empty until the Cloudinary
+//      fetch resolved — reads as "image didn't load, needs a second
+//      click/reopen to appear" even though it was really just an
+//      unskeletoned network wait. Swapped to OptimizedImage, which already
+//      owns the skeleton-fade-in behavior (see optimized-image.tsx) — same
+//      fix pattern product-preview-drawer.tsx already got.
+//
+//   2. STATUS SECTION REMOVED — this Sheet had its own read-only
+//      "Visibility: Active/Inactive" row sourced from `formData.isActive`.
+//      The live, single source of truth for that toggle is the
+//      Activate/Deactivate pill in ProductPreviewDrawer's header
+//      (product-preview-drawer.tsx) — that one is interactive and
+//      optimistic; this one was a second, non-interactive readout of the
+//      same fact rendered in a completely different place. Two displays of
+//      one boolean, one of which can't be acted on from here, invites the
+//      reading "this is a separate status from the other one" when it
+//      isn't. Removed the whole PreviewSection so isActive has exactly one
+//      place it's shown: the drawer header pill.
+//
+//   3. COVER IMAGES — was a single PreviewRow reading
+//      "X photos uploaded" as plain text, no thumbnails. Replaced with an
+//      actual thumbnail grid (reusing OptimizedImage per tile) so what the
+//      seller is about to publish is visible here, not just counted.
+//      This is a REVIEW surface, not the edit surface — StepMedia (the
+//      actual Cover step) already owns drag-to-reorder via dnd-kit
+//      (DndContext/SortableContext/useSortable — see step-media.tsx's
+//      SortableImageSlot). Wiring another independent drag context into
+//      this read-only summary would let the seller reorder from two
+//      different places with two different interaction models converging
+//      on the same form field, which is a race condition waiting to
+//      happen, not a feature. Order shown here always mirrors
+//      formData.images, which StepMedia is the only writer of.
 
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { FileText } from 'lucide-react';
+import { FileText, ImageIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -30,6 +72,7 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/shared/utils';
 import {
   formatFileSizeFromBytes,
@@ -131,14 +174,31 @@ export function PreviewProduct({
 
           {/* Thumbnail */}
           <div className="flex items-start gap-4">
+            {/*
+              [FIX 1 — THUMBNAIL RACE CONDITION]
+              relative + fixed box is required here — OptimizedImage's
+              `fill` mode expects a positioned ancestor to fill, same
+              contract next/image's fill prop already had. Swapped bare
+              next/image for OptimizedImage so this thumbnail gets the same
+              skeleton-while-loading treatment product-grid-card.tsx and
+              product-preview-drawer.tsx already have, instead of
+              rendering an empty box until the Cloudinary fetch resolves.
+            */}
             <div className="relative w-20 h-20 rounded-xl overflow-hidden border bg-muted shrink-0">
               {firstImage ? (
-                <Image
+                <OptimizedImage
                   src={firstImage}
-                  alt="Product thumbnail"
+                  alt={t('thumbnailAlt')}
                   fill
-                  className="object-cover"
+                  crop="fill"
+                  gravity="auto"
                   sizes="80px"
+                  className="object-cover"
+                  fallback={
+                    <div className="flex items-center justify-center h-full">
+                      <FileText className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
+                  }
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -189,16 +249,45 @@ export function PreviewProduct({
             </PreviewSection>
           )}
 
-          {/* Cover Images */}
+          {/*
+            [FIX 3 — COVER IMAGES GRID]
+            Was a single text row ("X photos uploaded"). Now an actual
+            thumbnail strip so the seller can see what they're about to
+            publish, not just a count. Read-only by design — see file-header
+            note above for why drag-reorder intentionally does NOT live
+            here (StepMedia already owns it as the single writer of
+            formData.images' order).
+          */}
           <PreviewSection label={t('sectionCoverImages')}>
-            <div className="rounded-xl border bg-card px-3 py-1">
-              <PreviewRow
-                label={t('rowPhotos')}
-                value={images.length > 0 ? t('photosUploaded', { count: images.length }) : null}
-                missing={t('noPhotos')}
-                valueClass={images.length > 0 ? 'text-emerald-600' : undefined}
-              />
-            </div>
+            {images.length > 0 ? (
+              <div className="grid grid-cols-5 gap-2">
+                {images.map((img, idx) => (
+                  <div
+                    key={img}
+                    className="relative aspect-square rounded-lg overflow-hidden border bg-muted"
+                  >
+                    <OptimizedImage
+                      src={img}
+                      alt={t('photoFallback', { index: idx + 1 })}
+                      fill
+                      crop="fill"
+                      gravity="auto"
+                      sizes="80px"
+                      className="object-cover"
+                      fallback={
+                        <div className="flex items-center justify-center h-full">
+                          <ImageIcon className="h-4 w-4 text-muted-foreground/30" />
+                        </div>
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border bg-card px-3 py-1">
+                <PreviewRow label={t('rowPhotos')} value={null} missing={t('noPhotos')} />
+              </div>
+            )}
           </PreviewSection>
 
           {/* Pricing */}
@@ -226,16 +315,17 @@ export function PreviewProduct({
             </div>
           </PreviewSection>
 
-          {/* Status */}
-          <PreviewSection label={t('sectionStatus')}>
-            <div className="rounded-xl border bg-card px-3 py-1">
-              <PreviewRow
-                label={t('rowVisibility')}
-                value={formData.isActive ? t('active') : t('inactive')}
-                valueClass={formData.isActive ? 'text-emerald-600' : 'text-muted-foreground'}
-              />
-            </div>
-          </PreviewSection>
+          {/*
+            [FIX 2 — STATUS SECTION REMOVED]
+            Previously rendered a read-only "Visibility: Active/Inactive"
+            row here, sourced from formData.isActive. That's a second,
+            non-interactive display of the same boolean the
+            Activate/Deactivate pill in ProductPreviewDrawer's header
+            already owns as the single source of truth — see file-header
+            note above. isActive itself is untouched in formData and still
+            gets sent on save (handleSave in product.tsx reads it
+            unconditionally); only this redundant readout is gone.
+          */}
         </div>
 
         <SheetFooter className="px-6 py-4 border-t bg-muted/30 shrink-0 flex-row gap-2">

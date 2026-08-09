@@ -71,8 +71,54 @@
 // (src/components/ui/optimized-image.tsx), which now renders a Skeleton
 // overlay that fades out on onLoad/onError, matching the pattern
 // already used in product-grid-card.tsx.
+//
+// [ACTIVATE TOGGLE RELOCATION + REALTIME — Aug 2026]
+// Moved Activate/Deactivate out of the footer action grid and into the
+// header, top-left corner, as a standalone icon-pill button. Footer now
+// only holds Edit + Delete (Delete conditionally hidden per FIX #9 above).
+//
+// "Realtime" here means the button's own icon/label flips the instant
+// it's clicked — it does NOT wait for the update mutation's network
+// round-trip. This requires local optimistic state:
+//
+//   - `optimisticIsActive` seeds from `product.isActive` on mount/product
+//     change (via the `key={product.id}` remount on DrawerInner — see
+//     ProductPreviewDrawer below — so switching products always reseeds
+//     correctly rather than carrying over the previous product's state).
+//   - On click: flip `optimisticIsActive` immediately (button updates
+//     synchronously), THEN fire the mutation.
+//   - On mutation error: revert `optimisticIsActive` back and surface the
+//     existing toast error (useUpdateProductFile's onError already toasts
+//     via getErrorMessage — no duplicate handling needed here).
+//   - On mutation success: no action needed — optimisticIsActive already
+//     holds the correct new value; the eventual query refetch (via
+//     invalidateQueries in the hook) will confirm it server-side, but the
+//     drawer doesn't need to wait for that to reflect the change.
+//
+// Why not just use `product.isActive` directly: `product` is a prop
+// snapshot captured at click-time by the parent (see product-grid.tsx's
+// `selectedProduct` state) and is never reassigned from fresh query data
+// after the initial click — so reading `product.isActive` post-mutation
+// would keep showing the stale pre-toggle value until the drawer is
+// closed and reopened. Local optimistic state sidesteps that entirely.
+//
+// [TITLE NUDGE RIGHT — Aug 2026]
+// The header wrapper stays `relative` + `justify-center` with the toggle
+// button `absolute left-0`, exactly as before — the button is pulled out
+// of flex flow, so it never pushes the <h2> sideways on its own. The
+// title previously sat dead-center via `text-center` + symmetric
+// `px-[92px]` on both sides. To nudge the title right of center (not all
+// the way to the corner), the padding was made ASYMMETRIC: more on the
+// left (`pl-[128px]`) than the right (`pr-[56px]`). Since the text is
+// still `text-center` *within its own box*, widening the left padding
+// relative to the right shifts where that box's center — and therefore
+// the centered text — falls, without touching the button or the
+// wrapper's own centering logic. `pl` stays comfortably above the
+// button's `min-w-[92px]` so the title never overlaps it even at its
+// leftmost extent; `pr` was reduced so the net effect is a rightward
+// shift rather than just widening the box on both sides.
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { useTranslations } from 'next-intl';
 import {
@@ -138,6 +184,20 @@ function DrawerInner({
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // [REALTIME TOGGLE] Local optimistic mirror of product.isActive.
+  // Seeded from the product prop; flipped instantly on click, reverted
+  // only if the mutation actually fails. See file-header note above for
+  // why we can't just read product.isActive directly post-click.
+  const [optimisticIsActive, setOptimisticIsActive] = useState(product.isActive);
+
+  // Re-seed if the underlying product identity changes while mounted.
+  // In practice DrawerInner is remounted via key={product.id} whenever
+  // the selected product changes (see ProductPreviewDrawer below), so
+  // this mainly guards against any future call site that doesn't remount.
+  useEffect(() => {
+    setOptimisticIsActive(product.isActive);
+  }, [product.id, product.isActive]);
+
   const handleEdit = useCallback(() => {
     if (onEdit) {
       onEdit(product);
@@ -152,9 +212,26 @@ function DrawerInner({
     }
   }, [product, onDelete, onOpenChange]);
 
+  // [REALTIME TOGGLE] Flip the visible state immediately, then fire the
+  // mutation. If the mutation rejects, revert. onToggleActive's own
+  // mutation hook already handles the error toast (getErrorMessage), so
+  // we only need to undo our local optimistic flip here — no duplicate
+  // error UI.
   const handleToggleActive = useCallback(() => {
-    if (onToggleActive) onToggleActive(product);
-  }, [product, onToggleActive]);
+    if (!onToggleActive) return;
+    const next = !optimisticIsActive;
+    setOptimisticIsActive(next);
+    try {
+      const result = onToggleActive(product) as unknown;
+      if (result && typeof (result as Promise<unknown>).catch === 'function') {
+        (result as Promise<unknown>).catch(() => {
+          setOptimisticIsActive(!next);
+        });
+      }
+    } catch {
+      setOptimisticIsActive(!next);
+    }
+  }, [product, onToggleActive, optimisticIsActive]);
 
   const hasImages = product.images && product.images.length > 0;
   const currentImage = hasImages ? product.images[selectedImageIndex] : null;
@@ -182,9 +259,51 @@ function DrawerInner({
             {product.description || t('descriptionFallback', { name: product.name || '' })}
           </VisuallyHidden.Root>
         </DrawerDescription>
-        <h2 className="font-semibold text-base text-center truncate">
-          {product.name}
-        </h2>
+
+        {/*
+          [ACTIVATE TOGGLE RELOCATION] Top-left pill button WITH label text
+          (icon + "Activate"/"Deactivate"), absolutely positioned against
+          this header. `relative` on the header wrapper div below anchors
+          it. `min-w-[92px]` reserves enough width for the LONGER of the
+          two labels ("Deactivate") so the button doesn't change width
+          when the label text swaps after toggling.
+
+          [TITLE NUDGE RIGHT] The h2 below no longer uses symmetric
+          px-[92px] — see file-header note for the asymmetric pl/pr
+          reasoning. Title sits right-of-center now instead of dead
+          center, while the button keeps its original left-pinned spot.
+        */}
+        <div className="relative flex items-center justify-center min-h-8">
+          {onToggleActive && (
+            <button
+              type="button"
+              onClick={handleToggleActive}
+              aria-label={optimisticIsActive ? t('deactivate') : t('activate')}
+              className={cn(
+                'absolute left-0 inline-flex items-center justify-center gap-1.5 min-w-[92px] h-8 px-2.5 rounded-full text-xs font-medium transition-colors',
+                'hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                optimisticIsActive
+                  ? 'text-muted-foreground'
+                  : 'text-amber-600 dark:text-amber-400',
+              )}
+            >
+              {optimisticIsActive ? (
+                <>
+                  <EyeOff className="h-3.5 w-3.5 shrink-0" />
+                  {t('deactivate')}
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3.5 w-3.5 shrink-0" />
+                  {t('activate')}
+                </>
+              )}
+            </button>
+          )}
+          <h2 className="font-semibold text-base text-center truncate pl-[128px] pr-[56px]">
+            {product.name}
+          </h2>
+        </div>
       </DrawerHeader>
 
       {/* Scrollable content — the only part that scrolls */}
@@ -277,7 +396,7 @@ function DrawerInner({
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
                 {t('description')}
               </h3>
-              <p className="text-sm leading-relaxed">{product.description}</p>
+              <p className="text-sm leading-relaxed break-words">{product.description}</p>
             </div>
           )}
 
@@ -331,28 +450,18 @@ function DrawerInner({
         </div>
       </div>
 
-      {/* Sticky footer — outside the scroll container, always reachable */}
+      {/*
+        Sticky footer — outside the scroll container, always reachable.
+        [ACTIVATE TOGGLE RELOCATION] Activate/Deactivate moved to the
+        header (top-left) — footer now holds Edit + Delete side by side
+        in the same 2-column grid the footer originally used for
+        Toggle+Edit. When Delete is hidden (product has purchases, see
+        FIX #9 below), Edit still renders alone inside the grid rather
+        than stretching to fill both columns, matching how this grid
+        already behaved for the Toggle+Edit pairing before this change.
+      */}
       <DrawerFooter className="border-t">
         <div className="grid grid-cols-2 gap-3">
-          {onToggleActive && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleToggleActive}
-            >
-              {product.isActive ? (
-                <>
-                  <EyeOff className="h-4 w-4 mr-2" />
-                  {t('deactivate')}
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 mr-2" />
-                  {t('activate')}
-                </>
-              )}
-            </Button>
-          )}
           {onEdit && (
             <Button
               variant="default"
@@ -363,19 +472,19 @@ function DrawerInner({
               {t('edit')}
             </Button>
           )}
-        </div>
 
-        {/* [FIX #9] Delete button — only shown if product has NO purchases */}
-        {onDelete && canDelete && (
-          <Button
-            variant="outline"
-            className="w-full text-destructive hover:text-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            {t('deleteProduct')}
-          </Button>
-        )}
+          {/* [FIX #9] Delete button — only shown if product has NO purchases */}
+          {onDelete && canDelete && (
+            <Button
+              variant="outline"
+              className="w-full text-destructive hover:text-destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t('deleteProduct')}
+            </Button>
+          )}
+        </div>
 
         {/* [FIX #9] Info hint when product has purchases (delete blocked) */}
         {onDelete && !canDelete && (

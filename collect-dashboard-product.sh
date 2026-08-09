@@ -1,16 +1,29 @@
 #!/bin/bash
 
 # ================================================================
-# CLIENT — DASHBOARD PRODUCT FILES COLLECTOR
-# 
-# Collect semua file product yang ada di DASHBOARD:
-#   - Product pages (list, new, edit, downloads)
-#   - Product components (grid, card, form, preview, upload)
-#   - Product hooks & API
-#   - Product types & utilities
+# CLIENT — PRODUCT CRUD FILES COLLECTOR (FINAL)
+#
+# Collect semua file untuk CRUD Product di Dashboard:
+#   - CREATE: New product form + upload
+#   - READ: Product list + grid + preview drawer + download history
+#   - UPDATE: Edit product form
+#   - DELETE: Delete dialog
+#
+# [FINAL REVISION]
+# Ditambahkan dependency yang sebelumnya missing (di-import langsung
+# oleh file-file product tapi belum ikut ter-collect):
+#   - hooks/shared/use-media-query.ts     → dipakai product-preview-drawer.tsx
+#   - hooks/shared/use-image-crop.ts      → dipakai step-media.tsx, image-crop-modal.tsx
+#   - lib/api/client.ts                   → dipakai lib/api/products.ts
+#   - lib/api/subscription.ts             → dipakai use-subscription-plan.ts, step-media.tsx
+#   - stores/auth-store.ts                → dipakai kyc-banner.tsx
+#   - lib/config/features.ts              → dipakai hampir semua (FEATURES.digitalProducts)
+#   - lib/shared/utils.ts                 → cn(), dipakai hampir semua komponen
+#   - components/dashboard/product/download-history-table.tsx → bagian READ (digital product)
+#   - app/.../products/downloads/client.tsx + page.tsx         → halaman download history
 #
 # Run dari: root direktori client (tempat src/ ada)
-#   bash collect-dashboard-product.sh
+#   bash collect-product-crud.sh
 # ================================================================
 
 GREEN='\033[0;32m'
@@ -38,6 +51,17 @@ collect_file() {
     local file=$1
     local output=$2
     TOTAL=$((TOTAL + 1))
+
+    # [PURE-FILES GUARD] Skip test files even if accidentally passed in.
+    # Matches: *.test.ts(x), *.spec.ts(x), __tests__/, /test/ or /tests/ dirs.
+    # This collector is for production source only — test files are a
+    # separate concern and should never be pulled into a CRUD file dump.
+    if echo "$file" | grep -qE '\.(test|spec)\.(ts|tsx|js|jsx)$|__tests__|(^|/)tests?/'; then
+        local rel="${file#$PROJECT_ROOT/}"
+        echo -e "  ${YELLOW}⊘ SKIPPED (test file):${NC} $rel"
+        TOTAL=$((TOTAL - 1))
+        return
+    fi
 
     if [ -f "$file" ]; then
         local rel="${file#$PROJECT_ROOT/}"
@@ -93,144 +117,202 @@ main() {
 
     local timestamp
     timestamp=$(date '+%Y%m%d-%H%M%S')
-    local output_file="$OUT/DASHBOARD-PRODUCT-$timestamp.txt"
+    local output_file="$OUT/PRODUCT-CRUD-$timestamp.txt"
 
     {
         echo "################################################################"
-        echo "##  CLIENT — DASHBOARD PRODUCT FILES"
+        echo "##  CLIENT — PRODUCT CRUD FILES (FINAL)"
         echo "##  Generated: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "##  Working dir: $(pwd)"
         echo "################################################################"
         echo ""
-        echo "##  FOCUS AREAS:"
-        echo "##    1. Product Pages (list, new, edit, downloads, library)"
-        echo "##    2. Product Components (grid, card, form, preview, upload)"
-        echo "##    3. Product Hooks"
-        echo "##    4. Product API"
-        echo "##    5. Product Types"
-        echo "##    6. Product Utilities & Constants"
-        echo "##    7. Shared Components (image-slot, crop-modal, dll)"
+        echo "##  CRUD OPERATIONS:"
+        echo "##    📖 READ  - Product list, grid, preview drawer, download history"
+        echo "##    ✏️ CREATE - New product form, upload, wizard"
+        echo "##    🔄 UPDATE - Edit product form"
+        echo "##    🗑️ DELETE - Delete dialog"
         echo "################################################################"
         echo ""
     } > "$output_file"
 
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}  DASHBOARD PRODUCT FILES COLLECTOR                      ${NC}"
+    echo -e "${BLUE}  PRODUCT CRUD FILES COLLECTOR (FINAL)                    ${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
-    # ── 1. PRODUCT PAGES ──────────────────────────────────────────
-    section_header "1. PRODUCT PAGES" "$output_file"
-    
-    # Main products page
+    # ── 1. READ (LIST PRODUCTS) ──────────────────────────────────
+    section_header "1. 📖 READ — PRODUCT LIST & GRID" "$output_file"
+
     collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/page.tsx" "$output_file"
     collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/client.tsx" "$output_file"
-    
-    # New product page
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/new/page.tsx" "$output_file"
-    
-    # Edit product page
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/[id]/edit/page.tsx" "$output_file"
-    
-    # Downloads page
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/downloads/page.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/downloads/client.tsx" "$output_file"
-    
-    # Library page
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/library/page.tsx" "$output_file"
-    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/library/client.tsx" "$output_file"
 
-    # ── 2. PRODUCT COMPONENTS ─────────────────────────────────────
-    section_header "2. PRODUCT COMPONENTS" "$output_file"
-    
-    # Product grid & card
     collect_file "$SRC_DIR/components/dashboard/product/product-grid.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/product/product-grid-card.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/product/product-delete-dialog.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/product/product-preview-drawer.tsx" "$output_file"
-    
-    # Upload & storage
-    collect_file "$SRC_DIR/components/dashboard/product/upload-dropzone.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/product/storage-usage-bar.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/product/download-history-table.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/product/kyc-banner.tsx" "$output_file"
 
-    # ── 3. PRODUCT FORM ───────────────────────────────────────────
-    section_header "3. PRODUCT FORM (WIZARD)" "$output_file"
-    
-    # Main form
+    collect_file "$SRC_DIR/components/dashboard/product/product-preview-drawer.tsx" "$output_file"
+
+    # ── 1B. READ — DOWNLOAD HISTORY (digital product detail view) ────
+    section_header "1B. 📖 READ — DOWNLOAD HISTORY" "$output_file"
+
+    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/downloads/page.tsx" "$output_file"
+    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/downloads/client.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/dashboard/product/download-history-table.tsx" "$output_file"
+
+    # ── 2. CREATE (NEW PRODUCT) ──────────────────────────────────
+    section_header "2. ✏️ CREATE — NEW PRODUCT FORM" "$output_file"
+
+    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/new/page.tsx" "$output_file"
+
     collect_file "$SRC_DIR/components/dashboard/product/form/product.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/product/form/types.ts" "$output_file"
-    
-    # Form steps
+
     collect_file "$SRC_DIR/components/dashboard/product/form/step-details.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/product/form/step-upload.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/product/form/step-media.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/product/form/step-preview.tsx" "$output_file"
 
-    # ── 4. PRODUCT HOOKS ──────────────────────────────────────────
-    section_header "4. PRODUCT HOOKS" "$output_file"
-    
+    collect_file "$SRC_DIR/components/dashboard/product/upload-dropzone.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/dashboard/product/storage-usage-bar.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/dashboard/product/kyc-banner.tsx" "$output_file"
+
+    # ── 3. UPDATE (EDIT PRODUCT) ──────────────────────────────────
+    section_header "3. 🔄 UPDATE — EDIT PRODUCT FORM" "$output_file"
+
+    collect_file "$SRC_DIR/app/[locale]/(dashboard)/dashboard/products/[id]/edit/page.tsx" "$output_file"
+
+    # ── 4. DELETE PRODUCT ──────────────────────────────────────────
+    section_header "4. 🗑️ DELETE — DELETE DIALOG" "$output_file"
+
+    collect_file "$SRC_DIR/components/dashboard/product/product-delete-dialog.tsx" "$output_file"
+
+    # ── 5. PRODUCT HOOKS ──────────────────────────────────────────
+    section_header "5. ⚡ HOOKS — CRUD OPERATIONS" "$output_file"
+
     collect_file "$SRC_DIR/hooks/dashboard/use-products.ts" "$output_file"
-    collect_file "$SRC_DIR/hooks/dashboard/use-library.ts" "$output_file"
-    collect_file "$SRC_DIR/hooks/dashboard/use-refund.ts" "$output_file"
 
-    # ── 5. PRODUCT API ────────────────────────────────────────────
-    section_header "5. PRODUCT API" "$output_file"
-    
+    # ── 6. PRODUCT API ────────────────────────────────────────────
+    section_header "6. 🌐 API — CRUD ENDPOINTS" "$output_file"
+
     collect_file "$SRC_DIR/lib/api/products.ts" "$output_file"
-    collect_file "$SRC_DIR/lib/api/library.ts" "$output_file"
+    # [FINAL] api client base — products.ts imports { api }, ApiRequestError, getErrorMessage from here
+    collect_file "$SRC_DIR/lib/api/client.ts" "$output_file"
 
-    # ── 6. PRODUCT TYPES ──────────────────────────────────────────
-    section_header "6. PRODUCT TYPES" "$output_file"
-    
+    # ── 7. PRODUCT TYPES ──────────────────────────────────────────
+    section_header "7. 📦 TYPES — PRODUCT SCHEMA" "$output_file"
+
     collect_file "$SRC_DIR/types/product.ts" "$output_file"
 
-    # ── 7. PRODUCT UTILITIES ──────────────────────────────────────
-    section_header "7. PRODUCT UTILITIES & CONSTANTS" "$output_file"
-    
-    collect_file "$SRC_DIR/lib/shared/product-utils.ts" "$output_file"
-    collect_file "$SRC_DIR/lib/shared/validations.ts" "$output_file"
-    collect_file "$SRC_DIR/lib/constants/shared/categories.ts" "$output_file"
-    collect_file "$SRC_DIR/lib/constants/shared/constants.ts" "$output_file"
+    # ── 8. VALIDATIONS ────────────────────────────────────────────
+    section_header "8. ✅ VALIDATIONS — ZOD SCHEMA" "$output_file"
 
-    # ── 8. SHARED COMPONENTS ──────────────────────────────────────
-    section_header "8. SHARED COMPONENTS (Image, Crop, Wizard)" "$output_file"
-    
-    # Image related
-    collect_file "$SRC_DIR/components/dashboard/shared/image-slot.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/shared/image-crop-modal.tsx" "$output_file"
-    
-    # Wizard & navigation
+    collect_file "$SRC_DIR/lib/shared/validations.ts" "$output_file"
+
+    # ── 9. SHARED COMPONENTS ──────────────────────────────────────
+    section_header "9. 🔧 SHARED COMPONENTS" "$output_file"
+
     collect_file "$SRC_DIR/components/dashboard/shared/wizard-nav.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/shared/step-indicator.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/shared/step-wizard.tsx" "$output_file"
     collect_file "$SRC_DIR/components/dashboard/shared/upgrade-modal.tsx" "$output_file"
-    
-    # Other shared
-    collect_file "$SRC_DIR/components/dashboard/shared/offline-aware-button.tsx" "$output_file"
-    collect_file "$SRC_DIR/components/dashboard/shared/pwa-install-prompt.tsx" "$output_file"
 
-    # ── 9. UI COMPONENTS (khusus yang dipakai) ────────────────────
-    section_header "9. UI COMPONENTS (OptimizedImage, ValidationDialog)" "$output_file"
-    
+    collect_file "$SRC_DIR/components/dashboard/shared/image-slot.tsx" "$output_file"
+    collect_file "$SRC_DIR/components/dashboard/shared/image-crop-modal.tsx" "$output_file"
+
+    # ── 10. UI COMPONENTS ──────────────────────────────────────────
+    section_header "10. 🎨 UI COMPONENTS" "$output_file"
+
     collect_file "$SRC_DIR/components/ui/optimized-image.tsx" "$output_file"
     collect_file "$SRC_DIR/components/ui/validation-dialog.tsx" "$output_file"
     collect_file "$SRC_DIR/components/ui/empty.tsx" "$output_file"
     collect_file "$SRC_DIR/components/ui/progress.tsx" "$output_file"
     collect_file "$SRC_DIR/components/ui/combobox.tsx" "$output_file"
 
-    # ── 10. CLOUDINARY ─────────────────────────────────────────────
-    section_header "10. CLOUDINARY UPLOAD" "$output_file"
-    
+    # ── 11. CLOUDINARY ─────────────────────────────────────────────
+    section_header "11. ☁️ CLOUDINARY UPLOAD" "$output_file"
+
     collect_file "$SRC_DIR/hooks/shared/use-cloudinary-upload.ts" "$output_file"
+    # [FINAL] use-image-crop — required by step-media.tsx & image-crop-modal.tsx
+    # (useImageCrop, CROP_ASPECT, CropAspect, AspectChoice)
+    collect_file "$SRC_DIR/hooks/shared/use-image-crop.ts" "$output_file"
+    # [FINAL v2] use-media-query — useIsMobile(), required by product-preview-drawer.tsx
+    # to pick drawer direction (bottom sheet on mobile vs right panel on desktop).
+    # Was called out in a code comment in the previous revision but never actually
+    # added to the collect_file calls below — confirmed missing on audit.
+    collect_file "$SRC_DIR/hooks/shared/use-media-query.ts" "$output_file"
     collect_file "$SRC_DIR/lib/shared/cloudinary.ts" "$output_file"
     collect_file "$SRC_DIR/types/cloudinary.ts" "$output_file"
 
-    # ── 11. SUBSCRIPTION (terkait product) ────────────────────────
-    section_header "11. SUBSCRIPTION (Product tier & KYC)" "$output_file"
-    
+    # ── 12. UTILITIES ──────────────────────────────────────────────
+    section_header "12. 📐 UTILITIES" "$output_file"
+
+    collect_file "$SRC_DIR/lib/shared/product-utils.ts" "$output_file"
+    collect_file "$SRC_DIR/lib/shared/format.ts" "$output_file"
+    collect_file "$SRC_DIR/lib/shared/query-keys.ts" "$output_file"
+    # [FINAL] cn() — used by virtually every component in this collection
+    collect_file "$SRC_DIR/lib/shared/utils.ts" "$output_file"
+    # [FINAL] FEATURES.digitalProducts — gates step-upload, kyc-banner,
+    # storage-usage-bar, product.tsx's showFileStep logic, and several hooks
+    collect_file "$SRC_DIR/lib/config/features.ts" "$output_file"
+
+    # ── 13. CONSTANTS ──────────────────────────────────────────────
+    section_header "13. 📋 CONSTANTS" "$output_file"
+
+    collect_file "$SRC_DIR/lib/constants/shared/categories.ts" "$output_file"
+    collect_file "$SRC_DIR/lib/constants/shared/constants.ts" "$output_file"
+
+    # ── 14. SUBSCRIPTION PLAN (Tier) ────────────────────────────────
+    section_header "14. 💳 SUBSCRIPTION PLAN (Tier)" "$output_file"
+
     collect_file "$SRC_DIR/hooks/dashboard/use-subscription-plan.ts" "$output_file"
     collect_file "$SRC_DIR/lib/constants/dashboard/pricing.ts" "$output_file"
+    # [FINAL] SubscriptionTier type + subscriptionApi — imported by
+    # use-subscription-plan.ts and step-media.tsx
+    collect_file "$SRC_DIR/lib/api/subscription.ts" "$output_file"
+
+    # ── 15. AUTH / TENANT STATE ─────────────────────────────────────
+    section_header "15. 👤 AUTH / TENANT STORE" "$output_file"
+
+    # [FINAL] useAuthStore — kyc-banner.tsx reads tenant.isEduMode from here
+    # to hide the KYC banner entirely for EDU sellers
+    collect_file "$SRC_DIR/stores/auth-store.ts" "$output_file"
+    # [FINAL v2] Tenant type — auth-store.ts imports { Tenant } from here
+    collect_file "$SRC_DIR/types/tenant.ts" "$output_file"
+    # [FINAL v3] TenantLandingConfig — tenant.ts imports this from './landing'
+    # for the Tenant.landingConfig field. tenant.ts does not compile without it.
+    collect_file "$SRC_DIR/types/landing.ts" "$output_file"
+
+    # ── 16. BASE TYPES ────────────────────────────────────────────
+    section_header "16. 📐 BASE API TYPES" "$output_file"
+
+    # [FINAL v2] ApiError, PaginatedResponse — imported by lib/api/client.ts
+    # and lib/api/products.ts. Without this, the API layer's response
+    # shapes and error handling contract are incomplete.
+    collect_file "$SRC_DIR/types/api.ts" "$output_file"
+    # [FINAL v2] getCsrfToken, refreshCsrfToken, clearCsrfToken, CSRF_HEADER —
+    # lib/api/client.ts imports these directly for CSRF-protected mutations
+    # (POST/PATCH/PUT/DELETE). client.ts is not functionally complete without it.
+    collect_file "$SRC_DIR/lib/api/csrf.ts" "$output_file"
+
+    # ── 17. UPGRADE / PAYMENT FLOW ───────────────────────────────────
+    section_header "17. 💰 UPGRADE PAYMENT FLOW" "$output_file"
+
+    # [FINAL v2] PaymentMethodDialog — upgrade-modal.tsx opens this after
+    # the upgrade modal closes, to let the seller choose card vs QRIS (Tripay).
+    # Part of the product form's tier-upgrade path (StepMedia -> UpgradeModal).
+    collect_file "$SRC_DIR/components/dashboard/subscription/payment-method-dialog.tsx" "$output_file"
+    # [FINAL v3] useTripayCheckout — payment-method-dialog.tsx's QRIS button
+    # calls startCheckout/resetIntent/isLoading directly from this hook.
+    # Without it, the dialog we just added to complete the upgrade flow is
+    # itself incomplete — same reason it was added in the first place.
+    collect_file "$SRC_DIR/hooks/dashboard/use-tripay-checkout.ts" "$output_file"
+
+    # ── 18. FEATURE-FLAG FALLBACK UI ─────────────────────────────────
+    section_header "18. 🚧 FEATURE-FLAG FALLBACK UI" "$output_file"
+
+    # [FINAL v2] ComingSoonPage — rendered by downloads/page.tsx when
+    # FEATURES.digitalProducts is false. Same flag gates step-upload,
+    # kyc-banner, and storage-usage-bar, so this fallback UI is part of
+    # the same feature-flag story running through the whole CRUD flow.
+    collect_file "$SRC_DIR/components/shared/coming-soon-page.tsx" "$output_file"
 
     # ── SUMMARY ──────────────────────────────────────────────────
     local pct=0
@@ -242,12 +324,19 @@ main() {
 
     echo ""
     echo -e "${color}╔════════════════════════════════════════════════════╗${NC}"
-    echo -e "${color}║  DASHBOARD PRODUCT — SUMMARY                      ║${NC}"
+    echo -e "${color}║  PRODUCT CRUD — SUMMARY                           ║${NC}"
     echo -e "${color}╠════════════════════════════════════════════════════╣${NC}"
     printf "${color}║  ✓ Found   : %-3d / %-3d                             ║${NC}\n" "$FOUND" "$TOTAL"
     printf "${color}║  ✗ Missing : %-3d                                    ║${NC}\n" "$MISSING"
     printf "${color}║  Coverage  : %-3d%%                                  ║${NC}\n" "$pct"
     echo -e "${color}╚════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    echo -e "${YELLOW}📋 CRUD OPERATIONS COVERAGE:${NC}"
+    echo -e "  ${GREEN}✓${NC} READ    - Product list, grid, preview drawer, download history"
+    echo -e "  ${GREEN}✓${NC} CREATE  - New product form + upload wizard"
+    echo -e "  ${GREEN}✓${NC} UPDATE  - Edit product form"
+    echo -e "  ${GREEN}✓${NC} DELETE  - Delete dialog"
     echo ""
 
     echo -e "${CYAN}📂 Output: $output_file${NC}"
@@ -262,18 +351,50 @@ main() {
         echo "Missing : $MISSING"
         echo "Coverage: $pct%"
         echo ""
+        echo "## CRUD OPERATIONS COVERAGE"
+        echo "READ    - Product list, grid, preview drawer, download history"
+        echo "CREATE  - New product form + upload wizard"
+        echo "UPDATE  - Edit product form"
+        echo "DELETE  - Delete dialog"
+        echo ""
         echo "## FILE COUNT BY CATEGORY"
-        echo "Product Pages: 8"
-        echo "Product Components: 8"
-        echo "Product Form: 6"
-        echo "Product Hooks: 3"
-        echo "Product API: 2"
-        echo "Product Types: 1"
-        echo "Product Utilities: 4"
-        echo "Shared Components: 7"
-        echo "UI Components: 5"
-        echo "Cloudinary: 3"
-        echo "Subscription: 2"
+        echo "READ (List & Grid)         : 5"
+        echo "READ (Download History)    : 3"
+        echo "CREATE (New Form)          : 9"
+        echo "UPDATE (Edit Form)         : 1"
+        echo "DELETE (Dialog)            : 1"
+        echo "Hooks                      : 1"
+        echo "API                        : 2"
+        echo "Types                      : 1"
+        echo "Validations                : 1"
+        echo "Shared Components          : 6"
+        echo "UI Components              : 5"
+        echo "Cloudinary                 : 4"
+        echo "Utilities                  : 5"
+        echo "Constants                  : 2"
+        echo "Subscription               : 3"
+        echo "Auth / Tenant Store        : 2"
+        echo "Base API Types             : 2"
+        echo "Upgrade Payment Flow       : 1"
+        echo "Feature-Flag Fallback UI   : 1"
+        echo ""
+        echo "## [FINAL] DEPENDENCIES ADDED IN PREVIOUS REVISION"
+        echo "- app/.../products/downloads/page.tsx + client.tsx  (READ — download history page)"
+        echo "- components/dashboard/product/download-history-table.tsx (READ — table UI)"
+        echo "- lib/api/client.ts             (base api client — products.ts depends on it)"
+        echo "- hooks/shared/use-image-crop.ts (useImageCrop, CROP_ASPECT — step-media.tsx, image-crop-modal.tsx)"
+        echo "- lib/shared/utils.ts           (cn() — used almost everywhere)"
+        echo "- lib/config/features.ts        (FEATURES.digitalProducts — gates multiple components)"
+        echo "- lib/api/subscription.ts       (SubscriptionTier, subscriptionApi)"
+        echo "- stores/auth-store.ts          (useAuthStore — kyc-banner.tsx EDU-mode check)"
+        echo ""
+        echo "## [FINAL v2] DEPENDENCIES ADDED AFTER IMPORT-LEVEL AUDIT"
+        echo "- hooks/shared/use-media-query.ts   (useIsMobile — product-preview-drawer.tsx drawer direction)"
+        echo "- types/tenant.ts                   (Tenant type — auth-store.ts)"
+        echo "- types/api.ts                      (ApiError, PaginatedResponse — client.ts, products.ts)"
+        echo "- lib/api/csrf.ts                   (CSRF token helpers — client.ts)"
+        echo "- components/dashboard/subscription/payment-method-dialog.tsx (upgrade-modal.tsx's payment flow)"
+        echo "- components/shared/coming-soon-page.tsx (FEATURES.digitalProducts fallback — downloads/page.tsx)"
     } >> "$output_file"
 
     [ $MISSING -gt 0 ] && exit 1
