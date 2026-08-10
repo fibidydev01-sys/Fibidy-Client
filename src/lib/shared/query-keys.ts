@@ -17,6 +17,30 @@ export const queryKeys = {
       ['products', 'downloads', params ?? {}] as const,
   },
 
+  kasir: {
+    all: ['kasir'] as const,
+    config: () => ['kasir', 'config'] as const,
+    products: (params?: Record<string, unknown>) =>
+      ['kasir', 'products', params ?? {}] as const,
+    categories: () => ['kasir', 'categories'] as const,
+    /** Laporan stok — dipakai halaman Kelola Stok dan kartu dashboard. */
+    stock: () => ['kasir', 'stock'] as const,
+    stockLog: (productId: string, params?: Record<string, unknown>) =>
+      ['kasir', 'stock', 'log', productId, params ?? {}] as const,
+    presets: () => ['kasir', 'presets'] as const,
+    promos: () => ['kasir', 'promos'] as const,
+    promosAktif: () => ['kasir', 'promos', 'aktif'] as const,
+    transaksis: (params?: Record<string, unknown>) =>
+      ['kasir', 'transaksi', 'list', params ?? {}] as const,
+    transaksi: (id: string) => ['kasir', 'transaksi', 'detail', id] as const,
+    struk: (id: string) => ['kasir', 'transaksi', 'struk', id] as const,
+    dashboard: () => ['kasir', 'dashboard'] as const,
+    omzet: () => ['kasir', 'dashboard', 'omzet'] as const,
+    topProduk: (limit?: number) =>
+      ['kasir', 'dashboard', 'top-produk', limit ?? 5] as const,
+    analisaDiskon: () => ['kasir', 'dashboard', 'analisa-diskon'] as const,
+  },
+
   subscription: {
     all: ['subscription'] as const,
     plan: () => ['subscription', 'plan'] as const,

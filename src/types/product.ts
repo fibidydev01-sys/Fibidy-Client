@@ -61,6 +61,13 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
 
+  // ── [KASIR] Inventory ─────────────────────
+  // Satu stok dipakai bersama storefront dan kasir — tidak ada angka kedua
+  // yang perlu disinkronkan. Opsional karena endpoint publik lama tidak
+  // selalu menyertakannya.
+  stok?: number;
+  minStock?: number;
+
   // ── File fields (nullable) ────────────────
   currency?: string;
   fileKey?: string | null;
@@ -91,6 +98,11 @@ export interface CreateProductInput {
   images?: string[];
   metadata?: Record<string, unknown>;
   isActive?: boolean;
+
+  // [KASIR] Stok awal + ambang stok menipis. Keduanya opsional: produk
+  // tetap bisa dibuat tanpa stok, dan minStock punya default di server.
+  stok?: number;
+  minStock?: number;
 }
 
 export type UpdateProductInput = Partial<CreateProductInput>;

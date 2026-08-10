@@ -225,6 +225,10 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
       comparePrice: product?.comparePrice || undefined,
       images: product?.images || [],
       isActive: product?.isActive ?? true,
+      // [KASIR] Saat edit, form menampilkan stok yang sekarang; saat produk
+      // baru, dibiarkan kosong supaya seller sadar mengisinya (atau tidak).
+      stok: product?.stok,
+      minStock: product?.minStock,
     },
   });
 
@@ -296,6 +300,10 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
               comparePrice: data.comparePrice,
               images: data.images,
               isActive: data.isActive,
+              // [KASIR] Perubahan stok lewat form edit dicatat server
+              // sebagai OPNAME — dikirim hanya kalau field-nya memang diisi.
+              ...(data.stok !== undefined && { stok: data.stok }),
+              ...(data.minStock !== undefined && { minStock: data.minStock }),
             },
           },
           { onSuccess: () => router.back() },
@@ -319,6 +327,8 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           if (data.isActive !== undefined) {
             extraFields.isActive = data.isActive;
           }
+          if (data.stok !== undefined) extraFields.stok = data.stok;
+          if (data.minStock !== undefined) extraFields.minStock = data.minStock;
           if (Object.keys(extraFields).length > 0) {
             await updateExtras(newProduct.id, extraFields);
           }
@@ -336,6 +346,9 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
               comparePrice: data.comparePrice,
               images: data.images,
               isActive: data.isActive ?? true,
+              // [KASIR] Stok awal > 0 tercatat sebagai StockLog 'IN' di server.
+              ...(data.stok !== undefined && { stok: data.stok }),
+              ...(data.minStock !== undefined && { minStock: data.minStock }),
             },
             {
               onSuccess: () => { router.push('/dashboard/products'); resolve(); },

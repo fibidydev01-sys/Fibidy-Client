@@ -120,6 +120,8 @@ export function StepDetails({
 
   const price = watch('price') ?? 0;
   const comparePrice = watch('comparePrice');
+  const stok = watch('stok');
+  const minStock = watch('minStock');
   const selectedCategory = watch('category') ?? '';
   // [MAX-LENGTH GUARDRAIL] watch() drives the live counters below.
   const nameValue = watch('name') ?? '';
@@ -373,6 +375,70 @@ export function StepDetails({
         {errors.comparePrice && (
           <p className="text-sm text-destructive">{errors.comparePrice.message}</p>
         )}
+      </div>
+
+      {/* ── [KASIR] Stok & stok minimum ───────────────────────────────── */}
+      {/*
+        Dua angka, dua arti berbeda, jadi dua field:
+          stok     → berapa yang ada sekarang. Saat produk baru dibuat,
+                     server mencatatnya sebagai "Stok awal produk" di log;
+                     saat diubah lewat form edit, tercatat sebagai opname.
+          minStock → ambang badge "SISA N" di kasir. Default server 5.
+        Keduanya opsional — produk tetap bisa dibuat dengan stok 0, dan
+        produk stok 0 tetap boleh dijual di kasir.
+      */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="stok">{t('stokLabel')}</Label>
+          <Input
+            id="stok"
+            type="number"
+            inputMode="numeric"
+            min="0"
+            step="1"
+            placeholder="0"
+            value={stok === undefined || stok === null ? '' : stok}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setValue(
+                'stok',
+                raw === '' ? undefined : Math.max(0, Math.trunc(Number(raw) || 0)),
+                { shouldValidate: true },
+              );
+            }}
+            aria-invalid={!!errors.stok}
+          />
+          <p className="text-xs text-muted-foreground">{t('stokHelper')}</p>
+          {errors.stok && (
+            <p className="text-sm text-destructive">{errors.stok.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="minStock">{t('minStockLabel')}</Label>
+          <Input
+            id="minStock"
+            type="number"
+            inputMode="numeric"
+            min="0"
+            step="1"
+            placeholder="5"
+            value={minStock === undefined || minStock === null ? '' : minStock}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setValue(
+                'minStock',
+                raw === '' ? undefined : Math.max(0, Math.trunc(Number(raw) || 0)),
+                { shouldValidate: true },
+              );
+            }}
+            aria-invalid={!!errors.minStock}
+          />
+          <p className="text-xs text-muted-foreground">{t('minStockHelper')}</p>
+          {errors.minStock && (
+            <p className="text-sm text-destructive">{errors.minStock.message}</p>
+          )}
+        </div>
       </div>
 
     </div>

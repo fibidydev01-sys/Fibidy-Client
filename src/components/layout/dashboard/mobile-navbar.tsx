@@ -21,6 +21,7 @@ import {
   History,
   BookOpen,
   Store,
+  ShoppingCart,
   LogOut,
   type LucideIcon,
 } from 'lucide-react';
@@ -41,6 +42,9 @@ interface NavItemDef {
 
 const sellerNavItems: NavItemDef[] = [
   { href: '/dashboard/products', icon: LayoutDashboard, labelKey: 'products', requiresSetup: true },
+  // [KASIR] Aksi paling sering dipakai seller yang berjualan offline, jadi
+  // ikut masuk tab bar mobile — bukan disembunyikan di menu lain.
+  { href: '/dashboard/kasir', icon: ShoppingCart, labelKey: 'kasir', requiresSetup: true },
   { href: '/dashboard/studio', icon: Layout, labelKey: 'studio', requiresSetup: true },
   ...(FEATURES.digitalProducts
     ? [

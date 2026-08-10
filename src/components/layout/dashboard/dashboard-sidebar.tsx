@@ -32,6 +32,7 @@ import {
   History,
   CreditCard,
   ShieldCheck,
+  ShoppingCart,
   LogOut,
   type LucideIcon,
 } from 'lucide-react';
@@ -59,6 +60,13 @@ interface NavItem {
 
 const sellerNavItems: NavItem[] = [
   { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard, requiresSetup: true },
+  // [KASIR] Satu entri untuk seluruh modul kasir; Jual/Riwayat/Stok/Laporan
+  // dipisah lewat sub-nav di dalamnya (KasirTabs). Ditaruh tepat setelah
+  // Produk karena keduanya dipakai berdampingan setiap hari.
+  // Tenant FREE tetap melihat entri ini — KasirPlanGate yang menjelaskan
+  // kenapa belum bisa dipakai. Menyembunyikannya total membuat fitur
+  // berbayar tidak pernah ditemukan orang yang mungkin mau membelinya.
+  { titleKey: 'kasir', href: '/dashboard/kasir', icon: ShoppingCart, requiresSetup: true },
   { titleKey: 'studio', href: '/dashboard/studio', icon: Layout, requiresSetup: true },
   ...(FEATURES.digitalProducts
     ? [

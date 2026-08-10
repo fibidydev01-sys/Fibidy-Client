@@ -60,7 +60,13 @@
       "setupStoreTitle": "Mulai Jualan",
       "setupStoreDescription": "Siapkan toko kamu dan mulai jualan",
       "settingsTitle": "Pengaturan",
-      "settingsDescription": "Kelola pengaturan toko kamu"
+      "settingsDescription": "Kelola pengaturan toko kamu",
+      "kasirTitle": "Kasir",
+      "kasirDescription": "Catat transaksi walk-in, kelola stok, dan cetak struk digital.",
+      "keranjangTitle": "Keranjang",
+      "riwayatTitle": "Riwayat Transaksi",
+      "stokTitle": "Kelola Stok",
+      "laporanTitle": "Laporan Kasir"
     },
     "nav": {
       "main": "Utama",
@@ -76,7 +82,8 @@
       "discover": "Jelajah",
       "signOut": "Keluar",
       "logout": "Logout",
-      "onboard": "Verifikasi"
+      "onboard": "Verifikasi",
+      "kasir": "Kasir"
     },
     "products": {
       "title": "Produk",
@@ -174,7 +181,11 @@
           "priceHelperNoDigital": "Harga yang dilihat pembeli di toko kamu.",
           "comparePriceLabel": "Harga pembanding",
           "comparePricePlaceholder": "75000",
-          "comparePriceHelper": "Harga asli sebelum diskon ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon."
+          "comparePriceHelper": "Harga asli sebelum diskon ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon.",
+          "stokLabel": "Stok",
+          "stokHelper": "Opsional. Stok awal tercatat di log stok; produk stok 0 tetap bisa dijual di kasir.",
+          "minStockLabel": "Stok minimum",
+          "minStockHelper": "Batas bawah untuk badge \"stok menipis\" di kasir. Default 5."
         },
         "validation": {
           "nameRequired": "Nama produk wajib diisi minimal 2 karakter.",
@@ -752,7 +763,8 @@
         "channels": "Channel",
         "preferences": "Preferensi",
         "account": "Akun",
-        "legal": "Legal"
+        "legal": "Legal",
+        "kasir": "Diskon & Promo"
       },
       "store": {
         "bio": {
@@ -807,6 +819,16 @@
       "signOut": {
         "label": "Keluar",
         "description": "Logout dari akun kamu"
+      },
+      "kasir": {
+        "diskonPreset": {
+          "label": "Preset Diskon",
+          "description": "Diskon siap pakai yang dipilih kasir saat transaksi"
+        },
+        "promo": {
+          "label": "Program Promo",
+          "description": "Promo beli-gratis yang berjalan otomatis di kasir"
+        }
       }
     },
     "onboard": {
@@ -897,6 +919,287 @@
       "next": "Selanjutnya",
       "save": "Simpan",
       "saving": "Menyimpan..."
+    },
+    "kasir": {
+      "title": "Kasir",
+      "subtitle": "Pilih produk, lalu buka keranjang untuk menyelesaikan pembayaran.",
+      "searchPlaceholder": "Cari produk…",
+      "clearSearch": "Hapus pencarian",
+      "error": {
+        "title": "Gagal memuat produk",
+        "description": "Daftar produk tidak bisa diambil. Periksa koneksi lalu coba lagi.",
+        "retry": "Coba lagi",
+        "retrying": "Mencoba…"
+      },
+      "tabs": {
+        "ariaLabel": "Navigasi kasir",
+        "jual": "Jual",
+        "riwayat": "Riwayat",
+        "stok": "Stok",
+        "laporan": "Laporan"
+      },
+      "badge": {
+        "habis": "HABIS",
+        "sisa": "SISA {jumlah}",
+        "gratis": "GRATIS"
+      },
+      "status": {
+        "completed": "Selesai",
+        "void": "Void",
+        "refund": "Refund"
+      },
+      "filter": {
+        "all": "Semua",
+        "categoryLabel": "Filter kategori"
+      },
+      "product": {
+        "addToCart": "Tambah {nama} ke keranjang",
+        "inCart": "{qty} di keranjang"
+      },
+      "empty": {
+        "noProductTitle": "Belum ada produk",
+        "noProductDescription": "Tambah produk dulu di halaman Produk, baru kasir bisa dipakai berjualan.",
+        "addProduct": "Tambah produk",
+        "noMatchTitle": "Tidak ada yang cocok",
+        "noMatchDescription": "Coba kata kunci lain atau pilih kategori Semua.",
+        "resetFilter": "Reset filter"
+      },
+      "cart": {
+        "viewCart": "Lihat Keranjang",
+        "title": "Keranjang",
+        "back": "Kembali",
+        "itemCount": "{jumlah} item",
+        "clear": "Kosongkan",
+        "increase": "Tambah jumlah",
+        "decrease": "Kurangi jumlah",
+        "removeItem": "Hapus item",
+        "cashReceived": "Uang diterima",
+        "exactAmount": "Uang pas",
+        "shortBy": "Kurang {nominal}",
+        "change": "Kembalian {nominal}",
+        "discount": "Diskon",
+        "discountNone": "Tanpa diskon",
+        "discountLine": "Diskon {persen}%",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "pay": "Bayar {nominal}",
+        "paying": "Menyimpan…",
+        "emptyTitle": "Keranjang masih kosong",
+        "emptyDescription": "Pilih produk dulu di halaman Kasir.",
+        "emptyCta": "Pilih produk",
+        "clearConfirmTitle": "Kosongkan keranjang?",
+        "clearConfirmDescription": "Semua item, diskon, dan uang yang sudah diisi akan dihapus. Tindakan ini tidak bisa dibatalkan.",
+        "clearCancel": "Batal",
+        "clearConfirm": "Ya, kosongkan",
+        "payFailedTitle": "Pembayaran gagal disimpan",
+        "payFailedClose": "Mengerti"
+      },
+      "payment": {
+        "label": "Metode pembayaran",
+        "tunai": "Tunai",
+        "transfer": "Transfer",
+        "debit": "Debit"
+      },
+      "diskon": {
+        "title": "Pilih diskon",
+        "back": "Kembali ke keranjang",
+        "none": "Tanpa diskon",
+        "savePreview": "Hemat {nominal}",
+        "emptyPresets": "Belum ada preset diskon. Buat dulu di Pengaturan.",
+        "managePresets": "Kelola preset diskon"
+      },
+      "struk": {
+        "title": "Struk",
+        "successTitle": "Transaksi berhasil",
+        "share": "Bagikan struk",
+        "sharing": "Menyiapkan…",
+        "done": "Selesai",
+        "close": "Tutup",
+        "copied": "Struk disalin ke papan klip",
+        "openedWhatsapp": "WhatsApp dibuka dengan teks struk",
+        "shareFailed": "Struk gagal dibagikan",
+        "freeLabel": "GRATIS"
+      },
+      "riwayat": {
+        "title": "Riwayat transaksi",
+        "subtitle": "200 transaksi terakhir. Ketuk salah satu untuk melihat struk dan aksinya.",
+        "searchPlaceholder": "Cari nomor order…",
+        "clearSearch": "Hapus pencarian",
+        "allStatus": "Semua",
+        "errorTitle": "Gagal memuat riwayat",
+        "errorDescription": "Daftar transaksi tidak bisa diambil. Periksa koneksi lalu coba lagi.",
+        "retry": "Coba lagi",
+        "emptyTitle": "Belum ada transaksi",
+        "emptyDescription": "Transaksi yang sudah dibayar akan muncul di sini.",
+        "noMatchTitle": "Tidak ada yang cocok",
+        "noMatchDescription": "Coba nomor order lain atau ubah filter status.",
+        "itemCount": "{jumlah} item",
+        "detailTitle": "Detail transaksi",
+        "subtotal": "Subtotal",
+        "discount": "Diskon {persen}%",
+        "total": "Total",
+        "method": "Metode",
+        "cash": "Tunai diterima",
+        "change": "Kembalian",
+        "viewStruk": "Lihat struk",
+        "void": "Void",
+        "refund": "Refund",
+        "reasonLabel": "Alasan",
+        "reasonRequiredLabel": "Alasan (wajib)",
+        "reasonRequired": "Alasan refund wajib diisi",
+        "reasonPlaceholder": "Contoh: salah input jumlah",
+        "voidConfirmTitle": "Void transaksi ini?",
+        "voidConfirmDescription": "Transaksi dikeluarkan dari rekap omzet. Stok TIDAK dikembalikan karena barang kemungkinan sudah keluar. Tindakan ini tidak bisa dibatalkan.",
+        "refundConfirmTitle": "Refund transaksi ini?",
+        "refundConfirmDescription": "Transaksi dikeluarkan dari rekap omzet dan stok DIKEMBALIKAN ke sistem. Tindakan ini tidak bisa dibatalkan.",
+        "cancel": "Batal",
+        "confirm": "Ya, lanjutkan",
+        "processing": "Memproses…"
+      },
+      "stok": {
+        "title": "Kelola stok",
+        "subtitle": "Restock barang masuk dan opname hasil hitung fisik.",
+        "searchPlaceholder": "Cari produk…",
+        "clearSearch": "Hapus pencarian",
+        "errorTitle": "Gagal memuat stok",
+        "errorDescription": "Laporan stok tidak bisa diambil. Periksa koneksi lalu coba lagi.",
+        "retry": "Coba lagi",
+        "totalValue": "Nilai stok",
+        "lowCount": "Menipis",
+        "outCount": "Habis",
+        "emptyTitle": "Belum ada produk",
+        "emptyDescription": "Tambah produk dulu untuk mulai mencatat stok.",
+        "noMatchTitle": "Tidak ada yang cocok",
+        "noMatchDescription": "Coba kata kunci lain.",
+        "rowValue": "{nilai} · min {min}",
+        "unit": "unit",
+        "currentStock": "Stok sistem {stok}",
+        "stockValue": "nilai {nilai}",
+        "restockTab": "Restock",
+        "opnameTab": "Opname",
+        "restockHelp": "Isi JUMLAH barang yang masuk. Stok akan ditambah sebanyak angka ini.",
+        "restockLabel": "Jumlah masuk",
+        "restockPreview": "Stok {sebelum} menjadi {sesudah}",
+        "restockSubmit": "Tambah stok",
+        "opnameHelp": "Isi angka stok SEBENARNYA hasil hitung fisik, bukan selisihnya.",
+        "opnameLabel": "Hitung fisik",
+        "opnamePreview": "Selisih {selisih} dari stok sistem",
+        "opnameNoDiff": "Sama dengan stok sistem, tidak ada selisih",
+        "opnameSubmit": "Simpan opname",
+        "opnameDone": "Opname tersimpan, selisih {selisih}",
+        "saving": "Menyimpan…",
+        "bigDiffTitle": "Selisih terlalu besar",
+        "bigDiffDescription": "Selisihnya jauh dari stok sistem. Periksa lagi hitungannya sebelum disimpan — stok yang salah akan terbawa ke laporan.",
+        "bigDiffSystem": "Stok sistem",
+        "bigDiffPhysical": "Hitung fisik",
+        "bigDiffDelta": "Selisih",
+        "bigDiffRecheck": "Periksa lagi",
+        "bigDiffConfirm": "Ya, simpan"
+      },
+      "laporan": {
+        "title": "Laporan kasir",
+        "subtitle": "Ringkasan omzet, produk terlaris, dan kondisi stok.",
+        "errorTitle": "Gagal memuat laporan",
+        "errorDescription": "Ringkasan tidak bisa diambil. Periksa koneksi lalu coba lagi.",
+        "retry": "Coba lagi",
+        "hari": "Hari ini",
+        "minggu": "Minggu ini",
+        "bulan": "Bulan ini",
+        "trxCount": "{jumlah} transaksi",
+        "chartTitle": "Tren 7 hari",
+        "chartAria": "Grafik omzet tujuh hari terakhir",
+        "chartUnit": "dalam ribuan rupiah",
+        "chartEmpty": "Belum ada transaksi minggu ini.",
+        "topProdukTitle": "Produk terlaris bulan ini",
+        "topProdukEmpty": "Belum ada penjualan bulan ini.",
+        "qtySold": "{qty} terjual",
+        "stokTitle": "Kondisi stok",
+        "stokValue": "Nilai stok",
+        "stokLow": "Menipis",
+        "stokOut": "Habis",
+        "diskonTitle": "Diskon bulan ini",
+        "diskonEmpty": "Belum ada transaksi berdiskon bulan ini.",
+        "diskonTotal": "Total diskon diberikan",
+        "diskonUsed": "{jumlah}×"
+      },
+      "planGate": {
+        "title": "Kasir tersedia di paket berbayar",
+        "description": "Fitur kasir untuk penjualan langsung di toko termasuk dalam paket STARTER dan BUSINESS.",
+        "point1": "Catat transaksi walk-in lengkap dengan struk digital",
+        "point2": "Stok otomatis berkurang setiap penjualan, dengan log yang bisa diaudit",
+        "point3": "Rekap omzet harian, produk terlaris, dan peringatan stok kritis",
+        "cta": "Lihat paket"
+      },
+      "toast": {
+        "configSaved": "Pengaturan struk tersimpan",
+        "restockDone": "Stok bertambah {jumlah}",
+        "presetCreated": "Preset diskon dibuat",
+        "presetUpdated": "Preset diskon diperbarui",
+        "presetDeleted": "Preset diskon dinonaktifkan",
+        "promoCreated": "Program promo dibuat",
+        "promoDeleted": "Program promo dinonaktifkan",
+        "voidDone": "Transaksi di-void",
+        "refundDone": "Transaksi di-refund, stok dikembalikan"
+      },
+      "settingsDiskon": {
+        "title": "Preset diskon",
+        "subtitle": "Daftar diskon siap pakai yang bisa dipilih kasir saat transaksi.",
+        "addTitle": "Tambah preset diskon",
+        "editTitle": "Ubah preset diskon",
+        "formSubtitle": "Kasir memilih preset ini di keranjang — tidak perlu mengetik persen manual tiap transaksi.",
+        "namaLabel": "Nama preset",
+        "namaPlaceholder": "Contoh: Member",
+        "persenLabel": "Persen diskon",
+        "persenPreview": "Dari {subtotal}, pelanggan hemat {hemat}",
+        "errorNamaRequired": "Nama preset wajib diisi",
+        "errorPersenRequired": "Persen diskon wajib diisi",
+        "errorPersenRange": "Persen diskon antara 1 sampai 100",
+        "save": "Simpan",
+        "saving": "Menyimpan…",
+        "emptyTitle": "Belum ada preset diskon",
+        "emptyDescription": "Buat preset supaya kasir tinggal memilih, bukan mengetik persen tiap kali.",
+        "addButton": "Tambah preset",
+        "editAria": "Ubah preset {nama}",
+        "deleteAria": "Nonaktifkan preset {nama}",
+        "deleteTitle": "Nonaktifkan preset ini?",
+        "deleteDescription": "Preset \"{nama}\" tidak lagi muncul di pilihan kasir. Transaksi lama yang memakainya tetap utuh.",
+        "deleteCancel": "Batal",
+        "deleteConfirm": "Ya, nonaktifkan"
+      },
+      "settingsPromo": {
+        "title": "Program promo",
+        "subtitle": "Promo beli-gratis yang berjalan otomatis di kasir sesuai tanggal berlaku.",
+        "addTitle": "Tambah program promo",
+        "formSubtitle": "Promo berjalan sendiri di kasir. Kasir tidak perlu mengaktifkannya saat melayani pelanggan.",
+        "productLabel": "Produk",
+        "productPlaceholder": "Pilih produk",
+        "noProductHint": "Belum ada produk yang bisa dipilih. Tambah produk dulu di halaman Produk.",
+        "tipeLabel": "Jenis promo",
+        "bogoHelp": "Tiap kelipatan 2, satu gratis",
+        "buy2get1Help": "Tiap kelipatan 3, satu gratis",
+        "periodeLabel": "Masa berlaku",
+        "mulaiLabel": "Mulai",
+        "sampaiLabel": "Sampai",
+        "periodeHint": "Kosongkan kalau promo berlaku terus tanpa batas tanggal.",
+        "errorProductRequired": "Produk wajib dipilih",
+        "errorTanggalTerbalik": "Tanggal selesai tidak boleh sebelum tanggal mulai",
+        "save": "Simpan",
+        "saving": "Menyimpan…",
+        "emptyTitle": "Belum ada program promo",
+        "emptyDescription": "Buat promo beli-gratis yang otomatis berjalan di kasir.",
+        "addButton": "Tambah promo",
+        "deletedProduct": "Produk sudah dihapus",
+        "inactive": "Nonaktif",
+        "periode": "{mulai} — {sampai}",
+        "sinceNow": "sekarang",
+        "noEnd": "tanpa batas",
+        "alwaysActive": "Berlaku terus",
+        "deactivateAria": "Nonaktifkan promo",
+        "deactivateTitle": "Nonaktifkan promo ini?",
+        "deactivateDescription": "Promo berhenti berjalan di kasir. Riwayat transaksi yang sudah memakainya tetap utuh.",
+        "deactivateCancel": "Batal",
+        "deactivateConfirm": "Ya, nonaktifkan"
+      }
     }
   }
 }

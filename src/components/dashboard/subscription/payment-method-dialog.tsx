@@ -18,13 +18,6 @@
 //
 // Label harga dibaca dari i18n `subscription.plans.{TIER}.price` yang SUDAH
 // ADA — tidak diduplikat ke konstanta baru.
-//
-// [FEATURE FLAG — Aug 2026]
-// Metode Kartu (LemonSqueezy) dikontrol oleh FEATURES.cardPayment.
-// Saat false → hanya QRIS yang tampil (Tripay).
-// Saat true  → kedua metode tersedia.
-// Untuk mengaktifkan: set NEXT_PUBLIC_CARD_PAYMENT_ENABLED=true di env
-// lalu rebuild. Pastikan backend LS credentials sudah terkonfigurasi.
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -41,7 +34,6 @@ import { toast } from 'sonner';
 import { subscriptionApi, type SubscriptionTier } from '@/lib/api/subscription';
 import { getErrorMessage } from '@/lib/api/client';
 import { useTripayCheckout } from '@/hooks/dashboard/use-tripay-checkout';
-import { FEATURES } from '@/lib/config/features';
 
 interface Props {
   open: boolean;
@@ -82,8 +74,6 @@ export function PaymentMethodDialog({ open, onOpenChange, tier }: Props) {
     }
   };
 
-  // busy mempertimbangkan lsLoading hanya kalau cardPayment aktif,
-  // tapi tetap dihitung supaya tidak ada stale state kalau flag dinyalakan.
   const busy = tripayLoading || lsLoading;
 
   return (
@@ -135,36 +125,32 @@ export function PaymentMethodDialog({ open, onOpenChange, tier }: Props) {
           </button>
 
           {/* ── Kartu / LemonSqueezy ─────────────────────────────── */}
-          {/* [FEATURE FLAG] Dikontrol NEXT_PUBLIC_CARD_PAYMENT_ENABLED  */}
-          {/* Untuk mengaktifkan: set flag ke "true" + rebuild.          */}
-          {FEATURES.cardPayment && (
-            <button
-              type="button"
-              onClick={() => void handleLemonSqueezy()}
-              disabled={busy}
-              className="w-full rounded-lg border p-4 text-left transition hover:border-primary hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                  {lsLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  ) : (
-                    <CreditCard className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">{t('paymentMethod.card.title')}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {t('paymentMethod.card.subtitle')}
-                  </p>
-                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                    <RefreshCw className="h-3 w-3" />
-                    {t('paymentMethod.card.autoRenew')}
-                  </p>
-                </div>
+          <button
+            type="button"
+            onClick={() => void handleLemonSqueezy()}
+            disabled={busy}
+            className="w-full rounded-lg border p-4 text-left transition hover:border-primary hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                {lsLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                ) : (
+                  <CreditCard className="h-5 w-5 text-primary" />
+                )}
               </div>
-            </button>
-          )}
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{t('paymentMethod.card.title')}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {t('paymentMethod.card.subtitle')}
+                </p>
+                <p className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  <RefreshCw className="h-3 w-3" />
+                  {t('paymentMethod.card.autoRenew')}
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
 
         <Button

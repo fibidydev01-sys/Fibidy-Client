@@ -38,6 +38,8 @@ import {
   Languages,
   GraduationCap,
   ExternalLink,
+  Percent,
+  Gift,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -49,6 +51,10 @@ import { SocialSection } from '@/components/dashboard/settings/social';
 import { PasswordSection } from '@/components/dashboard/settings/password';
 import { LanguageSection } from '@/components/dashboard/settings/language';
 import { SubscriptionPageContent } from '@/components/dashboard/subscription/subscription-page-content';
+// [KASIR] Preset diskon & program promo — aturan yang dikonfigurasi
+// sesekali oleh pemilik toko, bukan pekerjaan harian kasir.
+import { KasirDiskonPresetSection } from '@/components/dashboard/settings/kasir-diskon-preset';
+import { KasirPromoSection } from '@/components/dashboard/settings/kasir-promo';
 
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
@@ -71,9 +77,17 @@ type SettingId =
   | 'subscription'
   | 'password'
   | 'language'
+  | 'diskon-preset'
+  | 'promo'
   | 'about-fibidy';
 
-type GroupKey = 'store' | 'channels' | 'preferences' | 'account' | 'legal';
+type GroupKey =
+  | 'store'
+  | 'kasir'
+  | 'channels'
+  | 'preferences'
+  | 'account'
+  | 'legal';
 
 interface SettingRow {
   id: SettingId | 'theme-toggle' | 'sign-out';
@@ -190,6 +204,22 @@ export function SettingsClient() {
           descriptionKey: 'store.contact.description',
         },
       ],
+      // [KASIR] Diskon & Promo. Kasir hanya MEMILIH preset saat transaksi;
+      // pembuatan aturannya sesekali saja — itu persis definisi Pengaturan.
+      kasir: [
+        {
+          id: 'diskon-preset',
+          icon: Percent,
+          labelKey: 'kasir.diskonPreset.label',
+          descriptionKey: 'kasir.diskonPreset.description',
+        },
+        {
+          id: 'promo',
+          icon: Gift,
+          labelKey: 'kasir.promo.label',
+          descriptionKey: 'kasir.promo.description',
+        },
+      ],
       channels: [
         {
           id: 'social',
@@ -247,6 +277,7 @@ export function SettingsClient() {
 
   const groupOrder: GroupKey[] = [
     'store',
+    'kasir',
     'channels',
     'preferences',
     'account',
@@ -266,6 +297,8 @@ export function SettingsClient() {
       subscription: <SubscriptionPageContent onBack={handleBack} />,
       password: <PasswordSection onBack={handleBack} />,
       language: <LanguageSection onBack={handleBack} />,
+      'diskon-preset': <KasirDiskonPresetSection onBack={handleBack} />,
+      promo: <KasirPromoSection onBack={handleBack} />,
       'about-fibidy': null,
     };
 

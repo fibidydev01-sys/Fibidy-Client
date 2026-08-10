@@ -25,7 +25,11 @@
       "priceInteger": "Harga harus bilangan bulat Rupiah tidak menggunakan desimal",
       "priceMin": "Harga minimal Rp {min}",
       "comparePriceNegative": "Harga pembanding tidak boleh negatif",
-      "comparePriceInteger": "Harga pembanding harus bilangan bulat Rupiah tidak menggunakan desimal"
+      "comparePriceInteger": "Harga pembanding harus bilangan bulat Rupiah tidak menggunakan desimal",
+      "stokInteger": "Stok harus bilangan bulat",
+      "stokNegative": "Stok tidak boleh negatif",
+      "minStockInteger": "Stok minimum harus bilangan bulat",
+      "minStockNegative": "Stok minimum tidak boleh negatif"
     },
     "store": {
       "slugTaken": "URL ini sudah dipakai",

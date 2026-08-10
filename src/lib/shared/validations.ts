@@ -96,6 +96,22 @@ export const createProductSchema = (t: TranslateFn) =>
       .optional(),
     images: z.array(z.string()).optional(),
     isActive: z.boolean().optional(),
+
+    // ── [KASIR] Inventory ────────────────────────────────────────────
+    // stok     : stok awal (produk baru) / stok saat ini (edit). Server
+    //            mencatat perubahannya ke StockLog — 'IN' saat produk
+    //            dibuat, 'OPNAME' saat diubah manual lewat form edit.
+    // minStock : ambang badge "stok menipis" di kasir (default server 5).
+    stok: z
+      .number()
+      .int(t('validation.product.stokInteger'))
+      .min(0, t('validation.product.stokNegative'))
+      .optional(),
+    minStock: z
+      .number()
+      .int(t('validation.product.minStockInteger'))
+      .min(0, t('validation.product.minStockNegative'))
+      .optional(),
   });
 
 export type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
@@ -164,4 +180,20 @@ export const productSchema = z.object({
     .optional(),
   images: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
+
+  // ── [KASIR] Inventory ──────────────────────────────────────────────
+  // stok     : stok awal (create) / stok saat ini (edit). Server mencatat
+  //            perubahannya ke StockLog — 'IN' saat produk baru dibuat,
+  //            'OPNAME' saat diubah manual lewat form edit.
+  // minStock : ambang badge "stok menipis" di kasir.
+  stok: z
+    .number()
+    .int('Stok harus bilangan bulat')
+    .min(0, 'Stok tidak boleh negatif')
+    .optional(),
+  minStock: z
+    .number()
+    .int('Stok minimum harus bilangan bulat')
+    .min(0, 'Stok minimum tidak boleh negatif')
+    .optional(),
 });

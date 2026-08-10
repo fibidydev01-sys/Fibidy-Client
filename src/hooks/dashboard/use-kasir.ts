@@ -1,0 +1,360 @@
+'use client';
+
+// ============================================================================
+// USE KASIR — semua hook modul kasir
+// File: src/hooks/dashboard/use-kasir.ts
+//
+// Pola invalidasi mengikuti kenyataan di server: satu transaksi menyentuh
+// stok, daftar produk, dan ringkasan dashboard sekaligus. Karena itu mutasi
+// yang menggeser stok meng-invalidate `queryKeys.kasir.all` — lebih murah
+// daripada melacak satu per satu dan lupa satu.
+//
+// Toast sukses / dialog gagal mengikuti aturan UI: aksi berhasil cukup toast
+// yang hilang sendiri, aksi gagal dilempar ke pemanggil supaya bisa
+// ditampilkan sebagai dialog yang harus ditutup manual.
+// ============================================================================
+
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions,
+} from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { kasirApi } from '@/lib/api/kasir';
+import { getErrorMessage } from '@/lib/api/client';
+import { queryKeys } from '@/lib/shared/query-keys';
+import type {
+  CreateDiskonPresetInput,
+  CreatePromoRuleInput,
+  CreateTransaksiInput,
+  QueryTransaksiParams,
+  UpdateKasirConfigInput,
+} from '@/types/kasir';
+
+// Data kasir berubah terus (stok, omzet), tapi tidak perlu se-fresh milidetik.
+const STALE_PENDEK = 1000 * 30;
+const STALE_SEDANG = 1000 * 60 * 5;
+
+// Gerbang paket (403 KASIR_PLAN_REQUIRED) tidak akan berubah kalau dicoba
+// ulang — retry hanya menunda tampilnya layar upgrade.
+function retryKecualiKlien(failureCount: number, error: unknown) {
+  const status = (error as { statusCode?: number })?.statusCode;
+  if (status === 403 || status === 404) return false;
+  return failureCount < 1;
+}
+
+// ── Config ──────────────────────────────────────────────────────────────────
+
+export function useKasirConfig(
+  options?: Partial<UseQueryOptions<Awaited<ReturnType<typeof kasirApi.getConfig>>>>,
+) {
+  return useQuery({
+    queryKey: queryKeys.kasir.config(),
+    queryFn: () => kasirApi.getConfig(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+    ...options,
+  });
+}
+
+export function useUpdateKasirConfig() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateKasirConfigInput) => kasirApi.updateConfig(data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.kasir.config(), data);
+      toast.success(t('configSaved'));
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  });
+}
+
+// ── Produk kasir ────────────────────────────────────────────────────────────
+
+export function useKasirProducts(params?: { search?: string; category?: string }) {
+  return useQuery({
+    queryKey: queryKeys.kasir.products(params as Record<string, unknown>),
+    queryFn: () => kasirApi.getProducts(params),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useKasirCategories() {
+  return useQuery({
+    queryKey: queryKeys.kasir.categories(),
+    queryFn: () => kasirApi.getCategories(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}
+
+// ── Stok ────────────────────────────────────────────────────────────────────
+
+export function useStockReport() {
+  return useQuery({
+    queryKey: queryKeys.kasir.stock(),
+    queryFn: () => kasirApi.getStockReport(),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useStockLog(
+  productId: string | undefined,
+  params?: { page?: number; limit?: number },
+) {
+  return useQuery({
+    queryKey: queryKeys.kasir.stockLog(
+      productId ?? '',
+      params as Record<string, unknown>,
+    ),
+    queryFn: () => kasirApi.getStockLog(productId as string, params),
+    enabled: !!productId,
+    staleTime: STALE_PENDEK,
+  });
+}
+
+export function useRestock() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      jumlah,
+      catatan,
+    }: {
+      productId: string;
+      jumlah: number;
+      catatan?: string;
+    }) => kasirApi.restock(productId, { jumlah, catatan }),
+    onSuccess: (hasil) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      toast.success(t('restockDone', { jumlah: hasil.ditambahkan }));
+    },
+  });
+}
+
+export function useOpname() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      stokFisik,
+      catatan,
+    }: {
+      productId: string;
+      stokFisik: number;
+      catatan?: string;
+    }) => kasirApi.opname(productId, { stokFisik, catatan }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+    },
+  });
+}
+
+// ── Preset diskon ───────────────────────────────────────────────────────────
+
+export function useDiskonPresets() {
+  return useQuery({
+    queryKey: queryKeys.kasir.presets(),
+    queryFn: () => kasirApi.getDiskonPresets(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useCreateDiskonPreset() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateDiskonPresetInput) =>
+      kasirApi.createDiskonPreset(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.presets() });
+      toast.success(t('presetCreated'));
+    },
+  });
+}
+
+export function useUpdateDiskonPreset() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<CreateDiskonPresetInput>;
+    }) => kasirApi.updateDiskonPreset(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.presets() });
+      toast.success(t('presetUpdated'));
+    },
+  });
+}
+
+export function useDeleteDiskonPreset() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => kasirApi.deleteDiskonPreset(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.presets() });
+      toast.success(t('presetDeleted'));
+    },
+  });
+}
+
+// ── Program promo ───────────────────────────────────────────────────────────
+
+export function usePromoRules() {
+  return useQuery({
+    queryKey: queryKeys.kasir.promos(),
+    queryFn: () => kasirApi.getPromoRules(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function usePromoRulesAktif() {
+  return useQuery({
+    queryKey: queryKeys.kasir.promosAktif(),
+    queryFn: () => kasirApi.getPromoRulesAktif(),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useCreatePromoRule() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreatePromoRuleInput) => kasirApi.createPromoRule(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promos() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promosAktif() });
+      toast.success(t('promoCreated'));
+    },
+  });
+}
+
+export function useDeletePromoRule() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => kasirApi.deletePromoRule(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promos() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promosAktif() });
+      toast.success(t('promoDeleted'));
+    },
+  });
+}
+
+// ── Transaksi ───────────────────────────────────────────────────────────────
+
+export function useCreateTransaksi() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateTransaksiInput) => kasirApi.createTransaksi(data),
+    onSuccess: () => {
+      // Transaksi menggeser stok, omzet, dan daftar produk sekaligus.
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+    },
+  });
+}
+
+export function useTransaksis(params?: QueryTransaksiParams) {
+  return useQuery({
+    queryKey: queryKeys.kasir.transaksis(params as Record<string, unknown>),
+    queryFn: () => kasirApi.getTransaksis(params),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useTransaksi(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.kasir.transaksi(id ?? ''),
+    queryFn: () => kasirApi.getTransaksi(id as string),
+    enabled: !!id,
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useStruk(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.kasir.struk(id ?? ''),
+    queryFn: () => kasirApi.getStruk(id as string),
+    enabled: !!id,
+    staleTime: STALE_SEDANG,
+  });
+}
+
+export function useVoidTransaksi() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, alasan }: { id: string; alasan?: string }) =>
+      kasirApi.voidTransaksi(id, alasan),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      toast.success(t('voidDone'));
+    },
+  });
+}
+
+export function useRefundTransaksi() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, alasan }: { id: string; alasan: string }) =>
+      kasirApi.refundTransaksi(id, alasan),
+    onSuccess: () => {
+      // Refund mengembalikan stok — daftar produk ikut berubah.
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      toast.success(t('refundDone'));
+    },
+  });
+}
+
+// ── Dashboard / laporan ─────────────────────────────────────────────────────
+
+export function useKasirRingkasan() {
+  return useQuery({
+    queryKey: queryKeys.kasir.dashboard(),
+    queryFn: () => kasirApi.getRingkasan(),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useAnalisaDiskon() {
+  return useQuery({
+    queryKey: queryKeys.kasir.analisaDiskon(),
+    queryFn: () => kasirApi.getAnalisaDiskon(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}

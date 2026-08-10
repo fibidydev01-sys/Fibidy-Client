@@ -60,7 +60,13 @@
       "setupStoreTitle": "Start Selling",
       "setupStoreDescription": "Set up your store and start selling",
       "settingsTitle": "Settings",
-      "settingsDescription": "Manage your store settings"
+      "settingsDescription": "Manage your store settings",
+      "kasirTitle": "Cashier",
+      "kasirDescription": "Record walk-in sales, manage stock, and share digital receipts.",
+      "keranjangTitle": "Cart",
+      "riwayatTitle": "Transaction History",
+      "stokTitle": "Stock Management",
+      "laporanTitle": "Cashier Reports"
     },
     "nav": {
       "main": "Main",
@@ -76,7 +82,8 @@
       "discover": "Discover",
       "signOut": "Sign out",
       "logout": "Logout",
-      "onboard": "Verification"
+      "onboard": "Verification",
+      "kasir": "Cashier"
     },
     "products": {
       "title": "Products",
@@ -174,7 +181,11 @@
           "priceHelperNoDigital": "The price shown to buyers on your storefront.",
           "comparePriceLabel": "Compare-at price",
           "comparePricePlaceholder": "75000",
-          "comparePriceHelper": "Original price before discount shown with a strikethrough. Leave empty if not on sale."
+          "comparePriceHelper": "Original price before discount shown with a strikethrough. Leave empty if not on sale.",
+          "stokLabel": "Stock",
+          "stokHelper": "Optional. Initial stock is written to the stock log; products at 0 can still be sold.",
+          "minStockLabel": "Minimum stock",
+          "minStockHelper": "Threshold for the \"low stock\" badge at the till. Defaults to 5."
         },
         "validation": {
           "nameRequired": "Product name is required at least 2 characters.",
@@ -752,7 +763,8 @@
         "channels": "Channels",
         "preferences": "Preferences",
         "account": "Account",
-        "legal": "Legal"
+        "legal": "Legal",
+        "kasir": "Discounts & Promos"
       },
       "store": {
         "bio": {
@@ -807,6 +819,16 @@
       "signOut": {
         "label": "Sign Out",
         "description": "Log out from your account"
+      },
+      "kasir": {
+        "diskonPreset": {
+          "label": "Discount Presets",
+          "description": "Ready-made discounts the cashier picks during a sale"
+        },
+        "promo": {
+          "label": "Promo Programs",
+          "description": "Buy-and-get-free promos that run automatically at the till"
+        }
       }
     },
     "onboard": {
@@ -897,6 +919,287 @@
       "next": "Next",
       "save": "Save",
       "saving": "Saving..."
+    },
+    "kasir": {
+      "title": "Cashier",
+      "subtitle": "Pick products, then open the cart to complete the payment.",
+      "searchPlaceholder": "Search products…",
+      "clearSearch": "Clear search",
+      "error": {
+        "title": "Couldn't load products",
+        "description": "The product list couldn't be fetched. Check your connection and try again.",
+        "retry": "Try again",
+        "retrying": "Retrying…"
+      },
+      "tabs": {
+        "ariaLabel": "Cashier navigation",
+        "jual": "Sell",
+        "riwayat": "History",
+        "stok": "Stock",
+        "laporan": "Reports"
+      },
+      "badge": {
+        "habis": "OUT",
+        "sisa": "{jumlah} LEFT",
+        "gratis": "FREE"
+      },
+      "status": {
+        "completed": "Completed",
+        "void": "Void",
+        "refund": "Refund"
+      },
+      "filter": {
+        "all": "All",
+        "categoryLabel": "Category filter"
+      },
+      "product": {
+        "addToCart": "Add {nama} to cart",
+        "inCart": "{qty} in cart"
+      },
+      "empty": {
+        "noProductTitle": "No products yet",
+        "noProductDescription": "Add a product on the Products page first — the cashier needs something to sell.",
+        "addProduct": "Add product",
+        "noMatchTitle": "Nothing matches",
+        "noMatchDescription": "Try another keyword or switch back to All categories.",
+        "resetFilter": "Reset filter"
+      },
+      "cart": {
+        "viewCart": "View Cart",
+        "title": "Cart",
+        "back": "Back",
+        "itemCount": "{jumlah} items",
+        "clear": "Clear",
+        "increase": "Increase quantity",
+        "decrease": "Decrease quantity",
+        "removeItem": "Remove item",
+        "cashReceived": "Cash received",
+        "exactAmount": "Exact",
+        "shortBy": "Short by {nominal}",
+        "change": "Change {nominal}",
+        "discount": "Discount",
+        "discountNone": "No discount",
+        "discountLine": "Discount {persen}%",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "pay": "Pay {nominal}",
+        "paying": "Saving…",
+        "emptyTitle": "Your cart is empty",
+        "emptyDescription": "Pick some products on the Cashier page first.",
+        "emptyCta": "Pick products",
+        "clearConfirmTitle": "Clear the cart?",
+        "clearConfirmDescription": "All items, the selected discount, and the cash entered will be removed. This can't be undone.",
+        "clearCancel": "Cancel",
+        "clearConfirm": "Yes, clear it",
+        "payFailedTitle": "Payment wasn't saved",
+        "payFailedClose": "Got it"
+      },
+      "payment": {
+        "label": "Payment method",
+        "tunai": "Cash",
+        "transfer": "Transfer",
+        "debit": "Debit"
+      },
+      "diskon": {
+        "title": "Choose a discount",
+        "back": "Back to cart",
+        "none": "No discount",
+        "savePreview": "Saves {nominal}",
+        "emptyPresets": "No discount presets yet. Create one in Settings first.",
+        "managePresets": "Manage discount presets"
+      },
+      "struk": {
+        "title": "Receipt",
+        "successTitle": "Payment recorded",
+        "share": "Share receipt",
+        "sharing": "Preparing…",
+        "done": "Done",
+        "close": "Close",
+        "copied": "Receipt copied to clipboard",
+        "openedWhatsapp": "WhatsApp opened with the receipt text",
+        "shareFailed": "Couldn't share the receipt",
+        "freeLabel": "FREE"
+      },
+      "riwayat": {
+        "title": "Transaction history",
+        "subtitle": "The last 200 transactions. Tap one to see its receipt and actions.",
+        "searchPlaceholder": "Search order number…",
+        "clearSearch": "Clear search",
+        "allStatus": "All",
+        "errorTitle": "Couldn't load history",
+        "errorDescription": "The transaction list couldn't be fetched. Check your connection and try again.",
+        "retry": "Try again",
+        "emptyTitle": "No transactions yet",
+        "emptyDescription": "Completed payments will show up here.",
+        "noMatchTitle": "Nothing matches",
+        "noMatchDescription": "Try another order number or change the status filter.",
+        "itemCount": "{jumlah} items",
+        "detailTitle": "Transaction detail",
+        "subtotal": "Subtotal",
+        "discount": "Discount {persen}%",
+        "total": "Total",
+        "method": "Method",
+        "cash": "Cash received",
+        "change": "Change",
+        "viewStruk": "View receipt",
+        "void": "Void",
+        "refund": "Refund",
+        "reasonLabel": "Reason",
+        "reasonRequiredLabel": "Reason (required)",
+        "reasonRequired": "A refund reason is required",
+        "reasonPlaceholder": "e.g. wrong quantity entered",
+        "voidConfirmTitle": "Void this transaction?",
+        "voidConfirmDescription": "It drops out of the revenue summary. Stock is NOT restored, since the goods have likely already left. This can't be undone.",
+        "refundConfirmTitle": "Refund this transaction?",
+        "refundConfirmDescription": "It drops out of the revenue summary and the stock IS restored. This can't be undone.",
+        "cancel": "Cancel",
+        "confirm": "Yes, continue",
+        "processing": "Processing…"
+      },
+      "stok": {
+        "title": "Stock management",
+        "subtitle": "Restock incoming goods and reconcile physical counts.",
+        "searchPlaceholder": "Search products…",
+        "clearSearch": "Clear search",
+        "errorTitle": "Couldn't load stock",
+        "errorDescription": "The stock report couldn't be fetched. Check your connection and try again.",
+        "retry": "Try again",
+        "totalValue": "Stock value",
+        "lowCount": "Low",
+        "outCount": "Out",
+        "emptyTitle": "No products yet",
+        "emptyDescription": "Add a product first to start tracking stock.",
+        "noMatchTitle": "Nothing matches",
+        "noMatchDescription": "Try another keyword.",
+        "rowValue": "{nilai} · min {min}",
+        "unit": "units",
+        "currentStock": "System stock {stok}",
+        "stockValue": "worth {nilai}",
+        "restockTab": "Restock",
+        "opnameTab": "Stock count",
+        "restockHelp": "Enter HOW MANY came in. That amount is added to the current stock.",
+        "restockLabel": "Quantity in",
+        "restockPreview": "Stock goes from {sebelum} to {sesudah}",
+        "restockSubmit": "Add stock",
+        "opnameHelp": "Enter the ACTUAL count on the shelf, not the difference.",
+        "opnameLabel": "Physical count",
+        "opnamePreview": "{selisih} against system stock",
+        "opnameNoDiff": "Matches system stock, no difference",
+        "opnameSubmit": "Save count",
+        "opnameDone": "Count saved, difference {selisih}",
+        "saving": "Saving…",
+        "bigDiffTitle": "That's a large difference",
+        "bigDiffDescription": "The count is far off from system stock. Double-check it before saving — a wrong number carries straight into your reports.",
+        "bigDiffSystem": "System stock",
+        "bigDiffPhysical": "Physical count",
+        "bigDiffDelta": "Difference",
+        "bigDiffRecheck": "Check again",
+        "bigDiffConfirm": "Yes, save it"
+      },
+      "laporan": {
+        "title": "Cashier reports",
+        "subtitle": "Revenue summary, best sellers, and stock health.",
+        "errorTitle": "Couldn't load reports",
+        "errorDescription": "The summary couldn't be fetched. Check your connection and try again.",
+        "retry": "Try again",
+        "hari": "Today",
+        "minggu": "This week",
+        "bulan": "This month",
+        "trxCount": "{jumlah} transactions",
+        "chartTitle": "7-day trend",
+        "chartAria": "Revenue chart for the last seven days",
+        "chartUnit": "in thousands of rupiah",
+        "chartEmpty": "No transactions this week yet.",
+        "topProdukTitle": "Best sellers this month",
+        "topProdukEmpty": "No sales this month yet.",
+        "qtySold": "{qty} sold",
+        "stokTitle": "Stock health",
+        "stokValue": "Stock value",
+        "stokLow": "Low",
+        "stokOut": "Out",
+        "diskonTitle": "Discounts this month",
+        "diskonEmpty": "No discounted transactions this month yet.",
+        "diskonTotal": "Total discount given",
+        "diskonUsed": "{jumlah}×"
+      },
+      "planGate": {
+        "title": "Cashier is a paid plan feature",
+        "description": "In-store selling with the cashier module is included in the STARTER and BUSINESS plans.",
+        "point1": "Record walk-in sales with a digital receipt",
+        "point2": "Stock drops automatically on every sale, with an auditable log",
+        "point3": "Daily revenue summary, best sellers, and low-stock warnings",
+        "cta": "See plans"
+      },
+      "toast": {
+        "configSaved": "Receipt settings saved",
+        "restockDone": "Stock increased by {jumlah}",
+        "presetCreated": "Discount preset created",
+        "presetUpdated": "Discount preset updated",
+        "presetDeleted": "Discount preset deactivated",
+        "promoCreated": "Promo program created",
+        "promoDeleted": "Promo program deactivated",
+        "voidDone": "Transaction voided",
+        "refundDone": "Transaction refunded, stock restored"
+      },
+      "settingsDiskon": {
+        "title": "Discount presets",
+        "subtitle": "Ready-made discounts the cashier can pick during a sale.",
+        "addTitle": "Add discount preset",
+        "editTitle": "Edit discount preset",
+        "formSubtitle": "The cashier picks these in the cart — no typing a percentage on every sale.",
+        "namaLabel": "Preset name",
+        "namaPlaceholder": "e.g. Member",
+        "persenLabel": "Discount percent",
+        "persenPreview": "On {subtotal}, the customer saves {hemat}",
+        "errorNamaRequired": "Preset name is required",
+        "errorPersenRequired": "Discount percent is required",
+        "errorPersenRange": "Discount percent must be between 1 and 100",
+        "save": "Save",
+        "saving": "Saving…",
+        "emptyTitle": "No discount presets yet",
+        "emptyDescription": "Create presets so the cashier just picks one instead of typing a percentage each time.",
+        "addButton": "Add preset",
+        "editAria": "Edit preset {nama}",
+        "deleteAria": "Deactivate preset {nama}",
+        "deleteTitle": "Deactivate this preset?",
+        "deleteDescription": "\"{nama}\" stops appearing in the cashier's picker. Past transactions that used it stay intact.",
+        "deleteCancel": "Cancel",
+        "deleteConfirm": "Yes, deactivate"
+      },
+      "settingsPromo": {
+        "title": "Promo programs",
+        "subtitle": "Buy-one-get-one style promos that run automatically at the till.",
+        "addTitle": "Add promo program",
+        "formSubtitle": "Promos run on their own at the till. The cashier never has to switch them on mid-sale.",
+        "productLabel": "Product",
+        "productPlaceholder": "Pick a product",
+        "noProductHint": "No products available yet. Add one on the Products page first.",
+        "tipeLabel": "Promo type",
+        "bogoHelp": "One free for every 2 bought",
+        "buy2get1Help": "One free for every 3 bought",
+        "periodeLabel": "Active period",
+        "mulaiLabel": "From",
+        "sampaiLabel": "Until",
+        "periodeHint": "Leave empty if the promo runs indefinitely.",
+        "errorProductRequired": "Please pick a product",
+        "errorTanggalTerbalik": "The end date can't be before the start date",
+        "save": "Save",
+        "saving": "Saving…",
+        "emptyTitle": "No promo programs yet",
+        "emptyDescription": "Create a buy-and-get-free promo that runs automatically at the till.",
+        "addButton": "Add promo",
+        "deletedProduct": "Product deleted",
+        "inactive": "Inactive",
+        "periode": "{mulai} — {sampai}",
+        "sinceNow": "now",
+        "noEnd": "no end date",
+        "alwaysActive": "Always active",
+        "deactivateAria": "Deactivate promo",
+        "deactivateTitle": "Deactivate this promo?",
+        "deactivateDescription": "It stops running at the till. Past transactions that used it stay intact.",
+        "deactivateCancel": "Cancel",
+        "deactivateConfirm": "Yes, deactivate"
+      }
     }
   }
 }
