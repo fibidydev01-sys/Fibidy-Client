@@ -1018,7 +1018,10 @@
           "PROSES": "Start Work",
           "SELESAI": "Mark Done",
           "SIAP_AMBIL": "Ready for Pickup"
-        }
+        },
+        "detailAria": "Card details",
+        "picLabel": "Handled by",
+        "progressAria": "Stage {sekarang} of {total}"
       },
       "empty": {
         "noProductTitle": "No products yet",
@@ -1064,7 +1067,13 @@
         "clearCancel": "Cancel",
         "clearConfirm": "Yes, clear it",
         "payFailedTitle": "Payment wasn't saved",
-        "payFailedClose": "Got it"
+        "payFailedClose": "Got it",
+        "summaryTitle": "Payment summary",
+        "itemsTitle": "Order items",
+        "cashTitle": "Cash",
+        "methodTitle": "Payment method",
+        "breadcrumbKasir": "Cashier",
+        "breadcrumbCart": "Cart"
       },
       "payment": {
         "label": "Payment method",
@@ -1087,7 +1096,8 @@
         "none": "No discount",
         "savePreview": "Saves {nominal}",
         "emptyPresets": "No discount presets yet. Create one in Settings first.",
-        "managePresets": "Manage discount presets"
+        "managePresets": "Manage discount presets",
+        "groupLabel": "Choose discount"
       },
       "struk": {
         "title": "Receipt",
@@ -1142,7 +1152,26 @@
         "batalConfirmDescription": "The order is closed and can no longer be paid. Since it was never paid, no money is returned and revenue is unchanged. This can't be undone.",
         "cancel": "Cancel",
         "confirm": "Yes, continue",
-        "processing": "Processing…"
+        "processing": "Processing…",
+        "colOrder": "Order no.",
+        "colTime": "Time",
+        "colMethod": "Method",
+        "colItems": "Items",
+        "colStatus": "Status",
+        "colTotal": "Total",
+        "rowActions": "Transaction actions",
+        "viewDetail": "View detail",
+        "copyOrder": "Copy order number",
+        "copiedOrder": "Order number copied",
+        "dateFilter": "Date range",
+        "dateAll": "All dates",
+        "dateReset": "Clear range",
+        "hideVoid": "Hide voided & refunded",
+        "pageInfo": "Page {page} of {total}",
+        "prevPage": "Previous",
+        "nextPage": "Next",
+        "tableCaption": "Showing {tampil} of {total} transactions",
+        "actionsColumn": "Actions"
       },
       "stok": {
         "title": "Stock management",
@@ -1182,7 +1211,28 @@
         "bigDiffPhysical": "Physical count",
         "bigDiffDelta": "Difference",
         "bigDiffRecheck": "Check again",
-        "bigDiffConfirm": "Yes, save it"
+        "bigDiffConfirm": "Yes, save it",
+        "colName": "Product",
+        "colCategory": "Category",
+        "colStock": "Stock",
+        "colMin": "Min",
+        "colValue": "Value",
+        "actionsColumn": "Actions",
+        "rowActions": "Product actions",
+        "manage": "Manage stock",
+        "filterAll": "All",
+        "filterLow": "Low",
+        "filterOut": "Out",
+        "sortLabel": "Sort",
+        "sortCritical": "Most critical",
+        "sortName": "Name A–Z",
+        "sortValue": "Highest value",
+        "stockLevel": "Stock level",
+        "tableCaption": "Showing {tampil} of {total} products",
+        "noFilterMatchTitle": "No products in this filter",
+        "noFilterMatchDescription": "Change the filter above to see other products.",
+        "resetFilter": "Show all",
+        "onlyActionNeeded": "Only needs action"
       },
       "laporan": {
         "title": "Cashier reports",
@@ -1217,7 +1267,17 @@
         "pekerjaanOnTrack": "Everything is still on estimate",
         "basisKas": "Revenue is counted on the PAYMENT date, not the order date. An order taken on Monday and paid on Wednesday lands in Wednesday’s revenue.",
         "topBarang": "Goods",
-        "topLayanan": "Services"
+        "topLayanan": "Services",
+        "omzetLabel": "Revenue",
+        "colProduct": "Product",
+        "colQty": "Sold",
+        "colOmzet": "Revenue",
+        "colDiskonName": "Discount",
+        "colDiskonUsed": "Used",
+        "colDiskonTotal": "Value",
+        "showDetail": "Show details",
+        "hideDetail": "Hide details",
+        "stokKritisTitle": "Most critical products"
       },
       "planGate": {
         "title": "Cashier is a paid plan feature",

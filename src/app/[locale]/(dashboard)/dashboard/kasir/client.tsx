@@ -11,23 +11,23 @@
 // pemuatan pertama benar-benar selesai. Kalau tidak, setiap kali kasir
 // membuka tab ini ia melihat kedipan "belum ada produk" padahal produknya ada
 // — dan kepercayaan ke aplikasi rusak dalam milidetik pertama.
+//
+// [UI/UX — Agu 2026]
+//   • Lebar halaman datang dari KasirPageShell, bukan `mx-auto max-w-2xl`.
+//     Sebelumnya layar ini menciut jadi 672px sementara Papan Kerja memakai
+//     lebar penuh, jadi berpindah tab menggeser judul dan strip tab.
+//   • Ruang yang didapat dipakai untuk membagi katalog jadi beberapa kolom,
+//     BUKAN untuk menambah pintu ke keranjang. Cart bar tetap satu-satunya
+//     jalan masuk ke checkout.
+//   • Saat mengetik di pencarian, daftar lama tetap di tempatnya dan hanya
+//     diredupkan. Sebelumnya tiap ketikan mengganti daftar dengan skeleton.
 // ============================================================================
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, Package, Plus, RefreshCw, Search, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Package, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 import {
   useKasirConfig,
@@ -40,6 +40,7 @@ import {
   hitungTotalItem,
   useKasirCartStore,
 } from '@/stores/kasir-cart-store';
+import { cn } from '@/lib/shared/utils';
 import { CartBar } from '@/components/dashboard/kasir/cart-bar';
 import { CategoryChips } from '@/components/dashboard/kasir/category-chips';
 import {
@@ -47,12 +48,19 @@ import {
   type KatalogMode,
 } from '@/components/dashboard/kasir/katalog-toggle';
 import { LayananRow } from '@/components/dashboard/kasir/layanan-row';
-import { KasirPageHeader } from '@/components/dashboard/kasir/kasir-page-header';
+import { KasirPageShell } from '@/components/dashboard/kasir/kasir-page-shell';
+import { KasirSearchField } from '@/components/dashboard/kasir/kasir-search-field';
 import {
-  ProductRow,
-  ProductRowSkeleton,
-} from '@/components/dashboard/kasir/product-row';
+  KasirEmptyState,
+  KasirErrorState,
+  KasirRowsSkeleton,
+} from '@/components/dashboard/kasir/kasir-state';
+import { ProductRow } from '@/components/dashboard/kasir/product-row';
 import type { TipePromo } from '@/types/kasir';
+
+/** Katalog dipecah jadi beberapa kolom di layar lebar. Baris selebar 1900px
+ *  menyisakan ruang kosong di tengah antara nama produk dan tombol tambah. */
+const GRID = 'grid gap-2 md:grid-cols-2 xl:grid-cols-3';
 
 export function KasirClient() {
   const t = useTranslations('dashboard.kasir');
@@ -160,40 +168,13 @@ export function KasirClient() {
   const { grandTotal } = hitungTotal(lines, diskon?.persen ?? 0);
   const totalItem = hitungTotalItem(lines);
 
+  const adaFilter = Boolean(debouncedSearch || kategori);
 
-  // ── Error ─────────────────────────────────────────────────────────────
-  if (isError) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-6">
-        <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" aria-hidden />
-          <AlertTitle>{t('error.title')}</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>{t('error.description')}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="gap-2"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${isFetching ? 'animate-spin' : ''}`}
-                aria-hidden
-              />
-              {isFetching ? t('error.retrying') : t('error.retry')}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
-
+  // Toolbar tetap dirender di semua keadaan — termasuk saat daftarnya kosong.
+  // Menyembunyikan kolom pencarian saat hasilnya nihil mengunci kasir di
+  // layar kosong tanpa cara membatalkan pencariannya.
+  const toolbar = (
+    <div className="flex flex-col gap-3">
       {/* Toggle katalog — hanya toko hybrid yang punya dua sisi untuk dipilih */}
       {hybrid && (
         <KatalogToggle
@@ -205,101 +186,102 @@ export function KasirClient() {
             // menghasilkan layar kosong yang membingungkan.
             setKategori(null);
           }}
+          className="sm:max-w-sm"
         />
       )}
 
-      {/* Pencarian + filter kategori */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              lihatJasa ? t('searchLayananPlaceholder') : t('searchPlaceholder')
-            }
-            className="pl-9 pr-9"
-            aria-label={
-              lihatJasa ? t('searchLayananPlaceholder') : t('searchPlaceholder')
-            }
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              aria-label={t('clearSearch')}
-              className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-            >
-              <X className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          )}
-        </div>
+      <KasirSearchField
+        value={search}
+        onChange={setSearch}
+        busy={isFetching && !isLoading}
+        placeholder={
+          lihatJasa ? t('searchLayananPlaceholder') : t('searchPlaceholder')
+        }
+        clearLabel={t('clearSearch')}
+        className="sm:max-w-md"
+      />
 
-        <CategoryChips
-          categories={categories}
-          value={kategori}
-          onChange={setKategori}
+      <CategoryChips
+        categories={categories}
+        value={kategori}
+        onChange={setKategori}
+        className="sm:max-w-md"
+      />
+    </div>
+  );
+
+  // ── Error ─────────────────────────────────────────────────────────────
+  if (isError) {
+    return (
+      <KasirPageShell title={t('title')} subtitle={t('subtitle')}>
+        <KasirErrorState
+          title={t('error.title')}
+          description={t('error.description')}
+          retryLabel={isFetching ? t('error.retrying') : t('error.retry')}
+          onRetry={() => refetch()}
+          retrying={isFetching}
         />
-      </div>
+      </KasirPageShell>
+    );
+  }
 
-      {/* Daftar produk */}
+  return (
+    <KasirPageShell
+      title={t('title')}
+      subtitle={t('subtitle')}
+      toolbar={toolbar}
+    >
       {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <ProductRowSkeleton key={i} />
-          ))}
-        </div>
+        <KasirRowsSkeleton rows={6} className={cn(GRID, 'space-y-0')} />
       ) : daftarTampil.length === 0 ? (
-        <div className="py-6">
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Package />
-              </EmptyMedia>
-              <EmptyTitle>
-                {debouncedSearch || kategori
-                  ? tEmpty('noMatchTitle')
-                  : lihatJasa
-                    ? tEmpty('noLayananTitle')
-                    : tEmpty('noProductTitle')}
-              </EmptyTitle>
-              <EmptyDescription>
-                {debouncedSearch || kategori
-                  ? tEmpty('noMatchDescription')
-                  : lihatJasa
-                    ? tEmpty('noLayananDescription')
-                    : tEmpty('noProductDescription')}
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              {debouncedSearch || kategori ? (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearch('');
-                    setKategori(null);
-                  }}
-                >
-                  {tEmpty('resetFilter')}
-                </Button>
-              ) : (
-                // Satu-satunya jembatan silang yang wajar: tanpa produk,
-                // kasir memang tidak bisa apa-apa.
-                <Button asChild className="gap-2">
-                  <Link href="/dashboard/products/new">
-                    <Plus className="h-4 w-4" aria-hidden />
-                    {lihatJasa ? tEmpty('addLayanan') : tEmpty('addProduct')}
-                  </Link>
-                </Button>
-              )}
-            </EmptyContent>
-          </Empty>
-        </div>
+        <KasirEmptyState
+          icon={<Package />}
+          title={
+            adaFilter
+              ? tEmpty('noMatchTitle')
+              : lihatJasa
+                ? tEmpty('noLayananTitle')
+                : tEmpty('noProductTitle')
+          }
+          description={
+            adaFilter
+              ? tEmpty('noMatchDescription')
+              : lihatJasa
+                ? tEmpty('noLayananDescription')
+                : tEmpty('noProductDescription')
+          }
+        >
+          {adaFilter ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearch('');
+                setKategori(null);
+              }}
+            >
+              {tEmpty('resetFilter')}
+            </Button>
+          ) : (
+            // Satu-satunya jembatan silang yang wajar: tanpa produk,
+            // kasir memang tidak bisa apa-apa.
+            <Button asChild className="gap-2">
+              <Link href="/dashboard/products/new">
+                <Plus className="h-4 w-4" aria-hidden />
+                {lihatJasa ? tEmpty('addLayanan') : tEmpty('addProduct')}
+              </Link>
+            </Button>
+          )}
+        </KasirEmptyState>
       ) : (
-        <div className="space-y-2 pb-2">
+        <div
+          className={cn(
+            GRID,
+            'pb-2 transition-opacity',
+            // Konten lama tetap terbaca saat hasil pencarian berikutnya
+            // sedang diambil — diredupkan, bukan dihapus dan diganti skeleton.
+            isFetching && 'opacity-60',
+          )}
+        >
           {lihatJasa
             ? layanan.map((l) => (
                 <LayananRow
@@ -327,6 +309,6 @@ export function KasirClient() {
       )}
 
       <CartBar totalItem={totalItem} total={grandTotal} />
-    </div>
+    </KasirPageShell>
   );
 }

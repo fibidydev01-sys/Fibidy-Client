@@ -17,18 +17,20 @@
 // Opname dengan selisih besar dikonfirmasi DULU lewat tabel perbandingan.
 // Ambangnya disamakan dengan server (>50% stok sistem DAN >=10 unit) supaya
 // yang dikonfirmasi di layar sama persis dengan yang dianggap server janggal.
+//
+// [UI/UX — Agu 2026]
+//   • Panel ini paling sering dibuka dari ponsel sambil berdiri di depan rak,
+//     jadi di bawah md ia jadi Drawer (masuk dari bawah, bisa ditarik turun)
+//     lewat ResponsiveSheet. Di desktop tetap Sheet dari kanan.
+//   • Tombol simpan pindah ke footer yang menempel. Sebelumnya ia ikut
+//     mengalir di akhir konten dan bisa ter-scroll keluar layar.
+//   • Label manual → Field/FieldLabel/FieldDescription; input angka →
+//     InputGroup dengan satuan di ujung; tabel perbandingan → Table.
 // ============================================================================
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, PackagePlus, ClipboardCheck } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { PackagePlus, ClipboardCheck } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,13 +42,34 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { Spinner } from '@/components/ui/spinner';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { getErrorMessage } from '@/lib/api/client';
 import { useOpname, useRestock } from '@/hooks/dashboard/use-kasir';
+import {
+  ResponsiveSheet,
+  ResponsiveSheetBody,
+  ResponsiveSheetContent,
+  ResponsiveSheetDescription,
+  ResponsiveSheetFooter,
+  ResponsiveSheetHeader,
+  ResponsiveSheetTitle,
+} from './responsive-sheet';
 import type { StokProdukRingkas } from '@/types/kasir';
 
 const OPNAME_SELISIH_MINIMAL = 10;
@@ -74,6 +97,7 @@ export function StokKelolaSheet({
   const { mutate: restock, isPending: restockPending } = useRestock();
   const { mutate: opname, isPending: opnamePending } = useOpname();
 
+  const [tab, setTab] = useState<'restock' | 'opname'>('restock');
   const [jumlahRestock, setJumlahRestock] = useState('');
   const [stokFisik, setStokFisik] = useState('');
   const [konfirmasiOpname, setKonfirmasiOpname] = useState(false);
@@ -85,13 +109,7 @@ export function StokKelolaSheet({
     onClose();
   };
 
-  if (!produk) {
-    return (
-      <Sheet open={false} onOpenChange={() => undefined}>
-        <SheetContent />
-      </Sheet>
-    );
-  }
+  if (!produk) return null;
 
   const angkaRestock = Number(jumlahRestock.replace(/\D/g, '')) || 0;
   const angkaFisik = stokFisik === '' ? null : Number(stokFisik.replace(/\D/g, ''));
@@ -127,22 +145,30 @@ export function StokKelolaSheet({
     );
   };
 
+  const pending = restockPending || opnamePending;
+
   return (
     <>
-      <Sheet open onOpenChange={(open) => !open && tutup()}>
-        <SheetContent side="right" className="w-full sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle className="truncate">{produk.name}</SheetTitle>
-            <SheetDescription>
+      <ResponsiveSheet open onOpenChange={(open) => !open && tutup()}>
+        <ResponsiveSheetContent>
+          <ResponsiveSheetHeader>
+            <ResponsiveSheetTitle className="truncate">
+              {produk.name}
+            </ResponsiveSheetTitle>
+            <ResponsiveSheetDescription>
               {t('currentStock', { stok: produk.stok })} ·{' '}
               {t('stockValue', {
                 nilai: formatPriceIDR(produk.price * produk.stok),
               })}
-            </SheetDescription>
-          </SheetHeader>
+            </ResponsiveSheetDescription>
+          </ResponsiveSheetHeader>
 
-          <div className="px-4 pb-6">
-            <Tabs defaultValue="restock">
+          <Tabs
+            value={tab}
+            onValueChange={(v) => setTab(v as 'restock' | 'opname')}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <ResponsiveSheetBody className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="restock" className="gap-1.5">
                   <PackagePlus className="h-3.5 w-3.5" aria-hidden />
@@ -155,101 +181,118 @@ export function StokKelolaSheet({
               </TabsList>
 
               {/* ── Restock ─────────────────────────────────────── */}
-              <TabsContent value="restock" className="mt-4 space-y-3">
+              <TabsContent value="restock" className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   {t('restockHelp')}
                 </p>
 
-                <div className="space-y-1.5">
-                  <label htmlFor="jumlah-restock" className="text-sm font-medium">
+                <Field>
+                  <FieldLabel htmlFor="jumlah-restock">
                     {t('restockLabel')}
-                  </label>
-                  <Input
-                    id="jumlah-restock"
-                    inputMode="numeric"
-                    value={jumlahRestock}
-                    onChange={(e) =>
-                      setJumlahRestock(e.target.value.replace(/\D/g, ''))
-                    }
-                    placeholder="0"
-                    className="h-11 text-lg font-semibold tabular-nums"
-                  />
+                  </FieldLabel>
+                  <InputGroup className="h-11">
+                    <InputGroupInput
+                      id="jumlah-restock"
+                      inputMode="numeric"
+                      value={jumlahRestock}
+                      onChange={(e) =>
+                        setJumlahRestock(e.target.value.replace(/\D/g, ''))
+                      }
+                      placeholder="0"
+                      className="text-lg font-semibold tabular-nums"
+                    />
+                    <InputGroupAddon align="inline-end">
+                      {t('unit')}
+                    </InputGroupAddon>
+                  </InputGroup>
+
                   {angkaRestock > 0 && (
-                    <p className="text-sm text-muted-foreground" aria-live="polite">
+                    <FieldDescription aria-live="polite">
                       {t('restockPreview', {
                         sebelum: produk.stok,
                         sesudah: produk.stok + angkaRestock,
                       })}
-                    </p>
+                    </FieldDescription>
                   )}
-                </div>
-
-                <Button
-                  onClick={submitRestock}
-                  disabled={angkaRestock < 1 || restockPending}
-                  className="w-full"
-                >
-                  {restockPending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                  )}
-                  {restockPending ? t('saving') : t('restockSubmit')}
-                </Button>
+                </Field>
               </TabsContent>
 
               {/* ── Opname ──────────────────────────────────────── */}
-              <TabsContent value="opname" className="mt-4 space-y-3">
+              <TabsContent value="opname" className="space-y-3">
                 <p className="text-sm text-muted-foreground">{t('opnameHelp')}</p>
 
-                <div className="space-y-1.5">
-                  <label htmlFor="stok-fisik" className="text-sm font-medium">
+                <Field>
+                  <FieldLabel htmlFor="stok-fisik">
                     {t('opnameLabel')}
-                  </label>
-                  <Input
-                    id="stok-fisik"
-                    inputMode="numeric"
-                    value={stokFisik}
-                    onChange={(e) => setStokFisik(e.target.value.replace(/\D/g, ''))}
-                    placeholder="0"
-                    className="h-11 text-lg font-semibold tabular-nums"
-                  />
+                  </FieldLabel>
+                  <InputGroup className="h-11">
+                    <InputGroupInput
+                      id="stok-fisik"
+                      inputMode="numeric"
+                      value={stokFisik}
+                      onChange={(e) =>
+                        setStokFisik(e.target.value.replace(/\D/g, ''))
+                      }
+                      placeholder="0"
+                      className="text-lg font-semibold tabular-nums"
+                    />
+                    <InputGroupAddon align="inline-end">
+                      {t('unit')}
+                    </InputGroupAddon>
+                  </InputGroup>
+
                   {angkaFisik !== null && (
-                    <p
+                    <FieldDescription
+                      aria-live="polite"
                       className={cn(
-                        'text-sm',
                         selisih === 0
-                          ? 'text-muted-foreground'
+                          ? undefined
                           : selisih > 0
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : 'text-destructive',
                       )}
-                      aria-live="polite"
                     >
                       {selisih === 0
                         ? t('opnameNoDiff')
                         : t('opnamePreview', {
-                            selisih: selisih > 0 ? `+${selisih}` : `${selisih}`,
+                            selisih:
+                              selisih > 0 ? `+${selisih}` : `${selisih}`,
                           })}
-                    </p>
+                    </FieldDescription>
                   )}
-                </div>
+                </Field>
+              </TabsContent>
+            </ResponsiveSheetBody>
 
+            {/* Satu footer untuk kedua tab: tombolnya berada di posisi yang
+                sama persis saat kasir berpindah tab, jadi jempolnya tidak
+                perlu mencari ulang. */}
+            <ResponsiveSheetFooter>
+              {tab === 'restock' ? (
+                <Button
+                  onClick={submitRestock}
+                  disabled={angkaRestock < 1 || pending}
+                  className="w-full"
+                >
+                  {restockPending && <Spinner className="mr-2 size-4" />}
+                  {restockPending ? t('saving') : t('restockSubmit')}
+                </Button>
+              ) : (
                 <Button
                   onClick={() =>
                     perluKonfirmasi ? setKonfirmasiOpname(true) : submitOpname()
                   }
-                  disabled={angkaFisik === null || opnamePending}
+                  disabled={angkaFisik === null || pending}
                   className="w-full"
                 >
-                  {opnamePending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                  )}
+                  {opnamePending && <Spinner className="mr-2 size-4" />}
                   {opnamePending ? t('saving') : t('opnameSubmit')}
                 </Button>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </SheetContent>
-      </Sheet>
+              )}
+            </ResponsiveSheetFooter>
+          </Tabs>
+        </ResponsiveSheetContent>
+      </ResponsiveSheet>
 
       {/* Konfirmasi selisih besar — tabel perbandingan, bukan sekadar
           "Anda yakin?". Kasir perlu melihat angkanya berdampingan untuk
@@ -263,29 +306,43 @@ export function StokKelolaSheet({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <dl className="divide-y rounded-lg border text-sm">
-            <div className="flex justify-between px-3 py-2">
-              <dt className="text-muted-foreground">{t('bigDiffSystem')}</dt>
-              <dd className="font-medium tabular-nums">{produk.stok}</dd>
-            </div>
-            <div className="flex justify-between px-3 py-2">
-              <dt className="text-muted-foreground">{t('bigDiffPhysical')}</dt>
-              <dd className="font-medium tabular-nums">{angkaFisik}</dd>
-            </div>
-            <div className="flex justify-between px-3 py-2">
-              <dt className="text-muted-foreground">{t('bigDiffDelta')}</dt>
-              <dd
-                className={cn(
-                  'font-bold tabular-nums',
-                  selisih > 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-destructive',
-                )}
-              >
-                {selisih > 0 ? `+${selisih}` : selisih}
-              </dd>
-            </div>
-          </dl>
+          <div className="rounded-lg border">
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="px-3 text-muted-foreground">
+                    {t('bigDiffSystem')}
+                  </TableCell>
+                  <TableCell className="px-3 text-right font-medium tabular-nums">
+                    {produk.stok}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="px-3 text-muted-foreground">
+                    {t('bigDiffPhysical')}
+                  </TableCell>
+                  <TableCell className="px-3 text-right font-medium tabular-nums">
+                    {angkaFisik}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="px-3 text-muted-foreground">
+                    {t('bigDiffDelta')}
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      'px-3 text-right font-bold tabular-nums',
+                      selisih > 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-destructive',
+                    )}
+                  >
+                    {selisih > 0 ? `+${selisih}` : selisih}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={opnamePending}>
@@ -298,9 +355,7 @@ export function StokKelolaSheet({
               }}
               disabled={opnamePending}
             >
-              {opnamePending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-              )}
+              {opnamePending && <Spinner className="mr-2 size-4" />}
               {t('bigDiffConfirm')}
             </AlertDialogAction>
           </AlertDialogFooter>

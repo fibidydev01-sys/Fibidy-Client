@@ -6,45 +6,59 @@
 //
 // Aturan warna dipakai konsisten di seluruh aplikasi:
 //   merah  = butuh tindakan (HABIS, VOID)
-//   kuning = peringatan     (SISA N)
+//   kuning = peringatan     (SISA N, BELUM BAYAR)
 //   biru   = informasi      (REFUND, GRATIS)
 //   hijau  = aman           (SELESAI)
 //
 // Semua status kasir WAJIB lewat komponen ini — kalau tiap halaman
 // menggambar badge sendiri, "HABIS" akan tampil merah di satu layar dan
 // abu-abu di layar lain.
+//
+// [UI/UX — Agu 2026] Dibangun di atas <Badge> milik design system, bukan
+// `span` dengan kelas sendiri. Sebelumnya ada dua sistem badge yang berjalan
+// paralel (BASE+TONE di sini, badgeVariants di ui/badge) plus badge ketiga
+// yang ditulis langsung di JSX halaman Papan. Sekarang radius, tinggi baris,
+// ukuran ikon, dan cincin fokusnya datang dari satu tempat; berkas ini tinggal
+// memetakan MAKNA (tone) ke warna.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/shared/utils';
 import type { KasirTransaksiStatus } from '@/types/kasir';
 
-const BASE =
-  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none whitespace-nowrap';
-
 const TONE = {
   danger:
-    'bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-red-300',
+    'border-transparent bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-red-300',
   warning:
-    'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300',
-  info: 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300',
+    'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300',
+  info: 'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300',
   success:
-    'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300',
-  muted: 'bg-muted text-muted-foreground',
+    'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300',
+  muted: 'border-transparent bg-muted text-muted-foreground',
 } as const;
 
-type Tone = keyof typeof TONE;
+export type KasirTone = keyof typeof TONE;
 
 export function KasirBadge({
   tone,
-  children,
   className,
-}: {
-  tone: Tone;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <span className={cn(BASE, TONE[tone], className)}>{children}</span>;
+  children,
+  ...props
+}: React.ComponentProps<typeof Badge> & { tone: KasirTone }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        'px-2 py-0.5 text-[11px] font-semibold leading-none',
+        TONE[tone],
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Badge>
+  );
 }
 
 // ── Badge stok ──────────────────────────────────────────────────────────────
@@ -96,7 +110,7 @@ export function StatusTransaksiBadge({
 
   // BELUM_BAYAR = kuning: butuh perhatian tapi bukan masalah — ada uang yang
   // masih harus ditagih. Beda dari VOID (merah, sesuatu dibatalkan).
-  const tone: Tone =
+  const tone: KasirTone =
     status === 'VOID'
       ? 'danger'
       : status === 'REFUND'

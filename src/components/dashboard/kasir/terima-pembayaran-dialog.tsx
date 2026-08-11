@@ -12,11 +12,17 @@
 //
 // Sejak dialog ini berhasil, transaksinya masuk omzet HARI INI — bukan hari
 // pesanan diterima.
+//
+// [UI/UX — Agu 2026] "Sama dengan keranjang" kini benar sampai ke komponennya,
+// bukan cuma mirip secara visual: RadioGroup untuk metode, InputGroup dengan
+// awalan "Rp" untuk nominal, dan Field untuk pesan kurang/kembalian. Sebelum
+// ini kedua layar menulis markup-nya sendiri-sendiri dan sudah mulai
+// berselisih (tinggi tombol metode berbeda 4px).
 // ============================================================================
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Banknote, CreditCard, Landmark, Loader2 } from 'lucide-react';
+import { Banknote, CreditCard, Landmark } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,9 +32,21 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/field';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
-import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { getErrorMessage } from '@/lib/api/client';
 import { useBayarTransaksi } from '@/hooks/dashboard/use-kasir';
@@ -112,91 +130,93 @@ export function TerimaPembayaranDialog({
 
         <div className="space-y-4">
           {/* Metode */}
-          <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {tMetode('label')}
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {METODE.map((m) => {
-                const aktif = paymentMethod === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(m.id)}
-                    aria-pressed={aktif}
-                    className={cn(
-                      'flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-sm font-medium transition-colors',
-                      aktif
-                        ? 'border-primary bg-primary/[0.06] text-primary'
-                        : 'text-muted-foreground hover:bg-muted/50',
-                    )}
-                  >
-                    <m.icon className="h-4 w-4" aria-hidden />
-                    {tMetode(m.labelKey)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <RadioGroup
+            value={paymentMethod}
+            onValueChange={(v) => setPaymentMethod(v as KasirPaymentMethod)}
+            aria-label={tMetode('label')}
+            className="grid-cols-3 gap-2"
+          >
+            {METODE.map((m) => (
+              <FieldLabel key={m.id} htmlFor={`bayar-metode-${m.id}`}>
+                <Card className="w-full items-center gap-1.5 py-3 text-center transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
+                  <CardContent className="flex flex-col items-center gap-1.5 px-2">
+                    <m.icon className="size-4" aria-hidden />
+                    <span className="text-sm font-medium">
+                      {tMetode(m.labelKey)}
+                    </span>
+                    <RadioGroupItem
+                      value={m.id}
+                      id={`bayar-metode-${m.id}`}
+                      className="sr-only"
+                    />
+                  </CardContent>
+                </Card>
+              </FieldLabel>
+            ))}
+          </RadioGroup>
 
           {/* Uang tunai — hanya untuk TUNAI, sama seperti di keranjang */}
           {paymentMethod === 'TUNAI' && (
-            <div>
-              <label
-                htmlFor="bayar-uang"
-                className="text-xs font-medium text-muted-foreground"
-              >
-                {t('cashReceived')}
-              </label>
-              <Input
-                id="bayar-uang"
-                inputMode="numeric"
-                value={
-                  uangDiterima ? Number(uangDiterima).toLocaleString('id-ID') : ''
-                }
-                onChange={(e) =>
-                  setUangDiterima(e.target.value.replace(/\D/g, ''))
-                }
-                placeholder="0"
-                className="mt-1 h-11 text-lg font-semibold tabular-nums"
-              />
+            <div className="space-y-3">
+              <Field>
+                <FieldLabel htmlFor="bayar-uang">
+                  {t('cashReceived')}
+                </FieldLabel>
+                <InputGroup className="h-11">
+                  <InputGroupAddon>Rp</InputGroupAddon>
+                  <InputGroupInput
+                    id="bayar-uang"
+                    inputMode="numeric"
+                    value={
+                      uangDiterima
+                        ? Number(uangDiterima).toLocaleString('id-ID')
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setUangDiterima(e.target.value.replace(/\D/g, ''))
+                    }
+                    placeholder="0"
+                    className="text-lg font-semibold tabular-nums"
+                  />
+                </InputGroup>
 
-              <div className="mt-2 flex flex-wrap gap-1.5">
+                {uangDiterima !== '' &&
+                  (kurang > 0 ? (
+                    <FieldError className="tabular-nums">
+                      {t('shortBy', { nominal: formatPriceIDR(kurang) })}
+                    </FieldError>
+                  ) : (
+                    <FieldDescription
+                      className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400"
+                      aria-live="polite"
+                    >
+                      {t('change', { nominal: formatPriceIDR(kembalian) })}
+                    </FieldDescription>
+                  ))}
+              </Field>
+
+              <div className="flex flex-wrap gap-1.5">
                 {NOMINAL_CEPAT.map((nominal) => (
-                  <button
+                  <Button
                     key={nominal}
                     type="button"
+                    variant="outline"
+                    size="sm"
+                    className="tabular-nums"
                     onClick={() => setUangDiterima(String(nominal))}
-                    className="rounded-lg border px-2.5 py-1 text-xs font-medium tabular-nums transition-colors hover:bg-muted"
                   >
                     {nominal / 1000}rb
-                  </button>
+                  </Button>
                 ))}
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setUangDiterima(String(grandTotal))}
-                  className="rounded-lg border border-primary/40 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
                 >
                   {t('exactAmount')}
-                </button>
+                </Button>
               </div>
-
-              {uangDiterima !== '' && (
-                <p
-                  className={cn(
-                    'mt-2 text-sm font-medium tabular-nums',
-                    kurang > 0
-                      ? 'text-destructive'
-                      : 'text-emerald-600 dark:text-emerald-400',
-                  )}
-                  aria-live="polite"
-                >
-                  {kurang > 0
-                    ? t('shortBy', { nominal: formatPriceIDR(kurang) })
-                    : t('change', { nominal: formatPriceIDR(kembalian) })}
-                </p>
-              )}
             </div>
           )}
         </div>
@@ -209,7 +229,7 @@ export function TerimaPembayaranDialog({
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                <Spinner className="mr-2 size-4" />
                 {t('saving')}
               </>
             ) : (

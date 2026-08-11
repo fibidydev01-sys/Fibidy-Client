@@ -15,6 +15,7 @@
 // ============================================================================
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -38,6 +39,16 @@ import type {
 // Data kasir berubah terus (stok, omzet), tapi tidak perlu se-fresh milidetik.
 const STALE_PENDEK = 1000 * 30;
 const STALE_SEDANG = 1000 * 60 * 5;
+
+// [UI/UX — Agu 2026] Query yang query key-nya ikut berubah saat pengguna
+// mengetik (pencarian), menggeser halaman, atau berganti filter WAJIB memakai
+// ini. Tanpa keepPreviousData, setiap perubahan key menghasilkan cache miss →
+// isLoading true → daftar diganti skeleton → daftar muncul lagi. Di layar
+// kasir itu terbaca sebagai layar yang berkedip setiap ketikan.
+//
+// Dengan keepPreviousData, data lama bertahan sampai yang baru datang dan
+// halaman cukup meredupkannya lewat isFetching.
+const jagaDataSebelumnya = { placeholderData: keepPreviousData } as const;
 
 // Gerbang paket (403 KASIR_PLAN_REQUIRED) tidak akan berubah kalau dicoba
 // ulang — retry hanya menunda tampilnya layar upgrade.
@@ -83,6 +94,7 @@ export function useKasirProducts(params?: { search?: string; category?: string }
     queryFn: () => kasirApi.getProducts(params),
     staleTime: STALE_PENDEK,
     retry: retryKecualiKlien,
+    ...jagaDataSebelumnya,
   });
 }
 
@@ -106,6 +118,7 @@ export function useKasirLayanan(params?: {
     queryFn: () => kasirApi.getLayanan(params),
     staleTime: STALE_PENDEK,
     retry: retryKecualiKlien,
+    ...jagaDataSebelumnya,
   });
 }
 
@@ -126,6 +139,7 @@ export function useStockReport() {
     queryFn: () => kasirApi.getStockReport(),
     staleTime: STALE_PENDEK,
     retry: retryKecualiKlien,
+    ...jagaDataSebelumnya,
   });
 }
 
@@ -312,6 +326,7 @@ export function useTransaksis(params?: QueryTransaksiParams) {
     queryFn: () => kasirApi.getTransaksis(params),
     staleTime: STALE_PENDEK,
     retry: retryKecualiKlien,
+    ...jagaDataSebelumnya,
   });
 }
 

@@ -1018,7 +1018,10 @@
           "PROSES": "Mulai Kerjakan",
           "SELESAI": "Tandai Selesai",
           "SIAP_AMBIL": "Siap Diambil"
-        }
+        },
+        "detailAria": "Rincian kartu",
+        "picLabel": "Dikerjakan",
+        "progressAria": "Tahap {sekarang} dari {total}"
       },
       "empty": {
         "noProductTitle": "Belum ada produk",
@@ -1064,7 +1067,13 @@
         "clearCancel": "Batal",
         "clearConfirm": "Ya, kosongkan",
         "payFailedTitle": "Pembayaran gagal disimpan",
-        "payFailedClose": "Mengerti"
+        "payFailedClose": "Mengerti",
+        "summaryTitle": "Rincian pembayaran",
+        "itemsTitle": "Item pesanan",
+        "cashTitle": "Uang tunai",
+        "methodTitle": "Metode pembayaran",
+        "breadcrumbKasir": "Kasir",
+        "breadcrumbCart": "Keranjang"
       },
       "payment": {
         "label": "Metode pembayaran",
@@ -1087,7 +1096,8 @@
         "none": "Tanpa diskon",
         "savePreview": "Hemat {nominal}",
         "emptyPresets": "Belum ada preset diskon. Buat dulu di Pengaturan.",
-        "managePresets": "Kelola preset diskon"
+        "managePresets": "Kelola preset diskon",
+        "groupLabel": "Pilih diskon"
       },
       "struk": {
         "title": "Struk",
@@ -1142,7 +1152,26 @@
         "batalConfirmDescription": "Pesanan ditutup dan tidak bisa dibayar lagi. Karena belum pernah dibayar, tidak ada uang yang dikembalikan dan omzet tidak berubah. Tindakan ini tidak bisa dibatalkan.",
         "cancel": "Batal",
         "confirm": "Ya, lanjutkan",
-        "processing": "Memproses…"
+        "processing": "Memproses…",
+        "colOrder": "Nomor order",
+        "colTime": "Waktu",
+        "colMethod": "Metode",
+        "colItems": "Item",
+        "colStatus": "Status",
+        "colTotal": "Total",
+        "rowActions": "Aksi transaksi",
+        "viewDetail": "Lihat detail",
+        "copyOrder": "Salin nomor order",
+        "copiedOrder": "Nomor order disalin",
+        "dateFilter": "Rentang tanggal",
+        "dateAll": "Semua tanggal",
+        "dateReset": "Hapus rentang",
+        "hideVoid": "Sembunyikan batal & refund",
+        "pageInfo": "Halaman {page} dari {total}",
+        "prevPage": "Sebelumnya",
+        "nextPage": "Berikutnya",
+        "tableCaption": "Menampilkan {tampil} dari {total} transaksi",
+        "actionsColumn": "Aksi"
       },
       "stok": {
         "title": "Kelola stok",
@@ -1182,7 +1211,28 @@
         "bigDiffPhysical": "Hitung fisik",
         "bigDiffDelta": "Selisih",
         "bigDiffRecheck": "Periksa lagi",
-        "bigDiffConfirm": "Ya, simpan"
+        "bigDiffConfirm": "Ya, simpan",
+        "colName": "Produk",
+        "colCategory": "Kategori",
+        "colStock": "Stok",
+        "colMin": "Min",
+        "colValue": "Nilai",
+        "actionsColumn": "Aksi",
+        "rowActions": "Aksi produk",
+        "manage": "Kelola stok",
+        "filterAll": "Semua",
+        "filterLow": "Menipis",
+        "filterOut": "Habis",
+        "sortLabel": "Urutkan",
+        "sortCritical": "Paling kritis",
+        "sortName": "Nama A–Z",
+        "sortValue": "Nilai terbesar",
+        "stockLevel": "Tingkat stok",
+        "tableCaption": "Menampilkan {tampil} dari {total} produk",
+        "noFilterMatchTitle": "Tidak ada produk pada filter ini",
+        "noFilterMatchDescription": "Ganti filter di atas untuk melihat produk lain.",
+        "resetFilter": "Tampilkan semua",
+        "onlyActionNeeded": "Hanya yang perlu tindakan"
       },
       "laporan": {
         "title": "Laporan kasir",
@@ -1217,7 +1267,17 @@
         "pekerjaanOnTrack": "Semua masih sesuai estimasi",
         "basisKas": "Omzet dihitung dari tanggal PEMBAYARAN, bukan tanggal pesanan masuk. Pesanan yang diterima Senin lalu dibayar Rabu akan tercatat di omzet hari Rabu.",
         "topBarang": "Barang",
-        "topLayanan": "Layanan"
+        "topLayanan": "Layanan",
+        "omzetLabel": "Omzet",
+        "colProduct": "Produk",
+        "colQty": "Terjual",
+        "colOmzet": "Omzet",
+        "colDiskonName": "Diskon",
+        "colDiskonUsed": "Dipakai",
+        "colDiskonTotal": "Nilai",
+        "showDetail": "Lihat rincian",
+        "hideDetail": "Sembunyikan rincian",
+        "stokKritisTitle": "Produk paling kritis"
       },
       "planGate": {
         "title": "Kasir tersedia di paket berbayar",

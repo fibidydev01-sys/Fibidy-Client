@@ -12,15 +12,18 @@
 //
 // Perilaku tap-nya sama persis: satu tap menambah, baris yang sudah di
 // keranjang berubah jadi stepper dan tidak bisa ditap lagi.
+//
+// [UI/UX — Agu 2026] Ikut memakai KasirRowCard, jadi baris layanan dan baris
+// barang benar-benar satu bentuk — bukan dua salinan yang kebetulan mirip.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
 import { Clock, Plus } from 'lucide-react';
-import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { formatDurasiLayanan } from '@/lib/shared/product-utils';
 import { KasirBadge } from './kasir-badges';
 import { QtyStepper } from './qty-stepper';
+import { KasirRowButton, KasirRowCard, KasirRowContent } from './kasir-row-card';
 import { labelPromo } from '@/lib/shared/kasir-promo';
 import type { KasirLayanan, TipePromo } from '@/types/kasir';
 
@@ -83,7 +86,7 @@ export function LayananRow({
           onDecrement={onDecrement}
         />
       ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Plus className="h-4 w-4" aria-hidden />
         </span>
       )}
@@ -92,23 +95,20 @@ export function LayananRow({
 
   if (adaDiKeranjang) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/[0.04] px-3 py-3">
-        {isi}
-      </div>
+      <KasirRowCard selected>
+        <KasirRowContent>{isi}</KasirRowContent>
+      </KasirRowCard>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={onAdd}
-      aria-label={t('addToCart', { nama: layanan.name })}
-      className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
-        'hover:border-primary/40 hover:bg-muted/50 active:scale-[0.995]',
-      )}
-    >
-      {isi}
-    </button>
+    <KasirRowCard>
+      <KasirRowButton
+        onClick={onAdd}
+        aria-label={t('addToCart', { nama: layanan.name })}
+      >
+        {isi}
+      </KasirRowButton>
+    </KasirRowCard>
   );
 }

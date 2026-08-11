@@ -9,30 +9,82 @@
 //
 // Baris VOID dan REFUND diberi badge warna berbeda supaya terlihat sekilas
 // saat menyisir daftar, tanpa perlu membuka satu per satu.
+//
+// [UI/UX — Agu 2026]
+//   • Lebar dari KasirPageShell, bukan `mx-auto max-w-2xl`.
+//   • Di ≥md daftarnya jadi <Table>: riwayat memang data tabular (nomor,
+//     waktu, metode, jumlah item, total), dan enam kolom yang sejajar jauh
+//     lebih cepat disisir daripada enam baris kartu. Di bawah md tetap kartu —
+//     tabel enam kolom di layar 5 inci tidak terbaca.
+//   • Pencarian, filter status, dan rentang tanggal semuanya dikirim ke server;
+//     halaman berpindah lewat <Pagination>, bukan mengambil 200 baris sekaligus.
+//   • Data lama tidak pernah diganti skeleton saat pindah halaman atau mengetik
+//     (keepPreviousData di use-kasir), hanya diredupkan.
 // ============================================================================
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, History, RefreshCw, Search, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Eye,
+  History,
+  MoreHorizontal,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import type { DateRange } from 'react-day-picker';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card } from '@/components/ui/card';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from '@/components/ui/pagination';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 import { useTransaksis } from '@/hooks/dashboard/use-kasir';
-import { KasirPageHeader } from '@/components/dashboard/kasir/kasir-page-header';
+import { KasirPageShell } from '@/components/dashboard/kasir/kasir-page-shell';
+import { KasirFilterGroup } from '@/components/dashboard/kasir/kasir-filter-group';
+import { KasirSearchField } from '@/components/dashboard/kasir/kasir-search-field';
+import {
+  KasirEmptyState,
+  KasirErrorState,
+  KasirRowsSkeleton,
+} from '@/components/dashboard/kasir/kasir-state';
+import {
+  KasirRowButton,
+  KasirRowCard,
+} from '@/components/dashboard/kasir/kasir-row-card';
 import { StatusTransaksiBadge } from '@/components/dashboard/kasir/kasir-badges';
 import { TransaksiDetailSheet } from '@/components/dashboard/kasir/transaksi-detail-sheet';
-import type { KasirTransaksiStatus } from '@/types/kasir';
+import type { KasirTransaksiRingkas, KasirTransaksiStatus } from '@/types/kasir';
 
 // BELUM_BAYAR ditaruh tepat setelah "Semua": itu satu-satunya status yang
 // menuntut tindakan, jadi ia harus paling mudah dijangkau.
@@ -44,9 +96,18 @@ const FILTER_STATUS: Array<KasirTransaksiStatus | null> = [
   'REFUND',
 ];
 
-// Guide menyebut "200 transaksi terakhir" — cukup untuk rekap harian tanpa
-// membuat halaman ini jadi arsip tak berujung.
-const LIMIT = 200;
+const SEMUA = '__semua__';
+
+// Satu layar penuh tanpa perlu scroll panjang. Sisanya lewat Pagination —
+// mengambil 200 baris sekaligus membuat permintaan pertama lambat padahal
+// yang dilihat kasir hampir selalu halaman pertama.
+const PER_HALAMAN = 20;
+
+function tanggalISO(d: Date): string {
+  // Zona waktu lokal, bukan UTC: "hari ini" bagi kasir adalah hari di tokonya.
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export function RiwayatClient() {
   const t = useTranslations('dashboard.kasir.riwayat');
@@ -54,175 +115,385 @@ export function RiwayatClient() {
 
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<KasirTransaksiStatus | null>(null);
+  const [rentang, setRentang] = useState<DateRange | undefined>();
+  const [halaman, setHalaman] = useState(1);
   const [dipilih, setDipilih] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
 
+  // Filter apa pun mengembalikan pembaca ke halaman 1. Tanpa ini, menyaring
+  // dari halaman 5 menghasilkan layar kosong yang tampak seperti "tidak ada
+  // data" padahal datanya ada di halaman 1.
+  //
+  // Dilakukan di dalam handler, bukan useEffect yang mengintai perubahan
+  // filter: efek semacam itu menjalankan satu render tambahan dengan kombinasi
+  // (filter baru × halaman lama) yang sempat dikirim ke server sebagai
+  // permintaan yang langsung dibatalkan.
+  const ubahSearch = (v: string) => {
+    setSearch(v);
+    setHalaman(1);
+  };
+
+  const ubahStatus = (v: KasirTransaksiStatus | null) => {
+    setStatus(v);
+    setHalaman(1);
+  };
+
+  const ubahRentang = (v: DateRange | undefined) => {
+    setRentang(v);
+    setHalaman(1);
+  };
+
   const { data, isLoading, isError, refetch, isFetching } = useTransaksis({
-    limit: LIMIT,
+    page: halaman,
+    limit: PER_HALAMAN,
     ...(status ? { status } : {}),
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    ...(rentang?.from ? { tanggalMulai: tanggalISO(rentang.from) } : {}),
+    ...(rentang?.to ? { tanggalSelesai: tanggalISO(rentang.to) } : {}),
   });
 
   const transaksis = data?.data ?? [];
+  const meta = data?.meta;
+  const totalHalaman = meta?.totalPages ?? 1;
 
+  const adaFilter = Boolean(debouncedSearch || status || rentang?.from);
+
+  const labelRentang = useMemo(() => {
+    if (!rentang?.from) return t('dateAll');
+    const fmt = (d: Date) =>
+      d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+    return rentang.to && rentang.to.getTime() !== rentang.from.getTime()
+      ? `${fmt(rentang.from)} – ${fmt(rentang.to)}`
+      : fmt(rentang.from);
+  }, [rentang, t]);
+
+  const salinNomor = async (nomorOrder: string) => {
+    try {
+      await navigator.clipboard.writeText(nomorOrder);
+      toast.success(t('copiedOrder'));
+    } catch {
+      // Clipboard ditolak (konteks non-HTTPS / izin). Tidak ada yang perlu
+      // dilaporkan ke kasir — nomornya toh masih terbaca di layar.
+    }
+  };
+
+  const waktuSingkat = (iso: string) =>
+    new Date(iso).toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  // VOID/REFUND dicoret: angkanya masih ada di riwayat, tapi tidak lagi
+  // dihitung sebagai omzet. BELUM_BAYAR TIDAK dicoret — uangnya belum masuk,
+  // tapi tagihannya masih hidup dan justru harus terbaca jelas.
+  const kelasTotal = (trx: KasirTransaksiRingkas) =>
+    cn(
+      'font-semibold tabular-nums',
+      (trx.status === 'VOID' || trx.status === 'REFUND') &&
+        'text-muted-foreground line-through',
+      trx.status === 'BELUM_BAYAR' && 'text-amber-600 dark:text-amber-400',
+    );
+
+  const aksiBaris = (trx: KasirTransaksiRingkas) => (
+    <>
+      <DropdownMenuItem onClick={() => setDipilih(trx.id)}>
+        <Eye className="size-4" aria-hidden />
+        {t('viewDetail')}
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => salinNomor(trx.nomorOrder)}>
+        <Copy className="size-4" aria-hidden />
+        {t('copyOrder')}
+      </DropdownMenuItem>
+    </>
+  );
+
+  const toolbar = (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <KasirSearchField
+          value={search}
+          onChange={ubahSearch}
+          busy={isFetching && !isLoading}
+          placeholder={t('searchPlaceholder')}
+          clearLabel={t('clearSearch')}
+          className="sm:max-w-md"
+        />
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="justify-start gap-2 sm:w-auto">
+              <CalendarDays className="size-4" aria-hidden />
+              {labelRentang}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="range"
+              selected={rentang}
+              onSelect={ubahRentang}
+              numberOfMonths={1}
+              autoFocus
+            />
+            {rentang?.from && (
+              <div className="border-t p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => ubahRentang(undefined)}
+                >
+                  {t('dateReset')}
+                </Button>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <KasirFilterGroup
+        ariaLabel={t('colStatus')}
+        value={status ?? SEMUA}
+        onChange={(next) =>
+          ubahStatus(next === SEMUA ? null : (next as KasirTransaksiStatus))
+        }
+        options={FILTER_STATUS.map((s) => ({
+          value: s ?? SEMUA,
+          label: s ? tStatus(s.toLowerCase()) : t('allStatus'),
+        }))}
+      />
+    </div>
+  );
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6">
-        <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" aria-hidden />
-          <AlertTitle>{t('errorTitle')}</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>{t('errorDescription')}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="gap-2"
-            >
-              <RefreshCw
-                className={cn('h-3.5 w-3.5', isFetching && 'animate-spin')}
-                aria-hidden
-              />
-              {t('retry')}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      </div>
+      <KasirPageShell title={t('title')} subtitle={t('subtitle')}>
+        <KasirErrorState
+          title={t('errorTitle')}
+          description={t('errorDescription')}
+          retryLabel={t('retry')}
+          onRetry={() => refetch()}
+          retrying={isFetching}
+        />
+      </KasirPageShell>
     );
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
-
-      {/* Cari + filter status */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            className="pl-9 pr-9"
-            aria-label={t('searchPlaceholder')}
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              aria-label={t('clearSearch')}
-              className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-            >
-              <X className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-          {FILTER_STATUS.map((s) => {
-            const aktif = status === s;
-            return (
-              <button
-                key={s ?? 'all'}
-                type="button"
-                onClick={() => setStatus(s)}
-                aria-pressed={aktif}
-                className={cn(
-                  'shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-                  aktif
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )}
-              >
-                {s ? tStatus(s.toLowerCase()) : t('allStatus')}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Daftar */}
+    <KasirPageShell
+      title={t('title')}
+      subtitle={t('subtitle')}
+      toolbar={toolbar}
+    >
       {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-[70px] w-full rounded-xl" />
-          ))}
-        </div>
+        <KasirRowsSkeleton rows={6} trailing="amount" />
       ) : transaksis.length === 0 ? (
-        <div className="py-6">
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <History />
-              </EmptyMedia>
-              <EmptyTitle>
-                {search || status ? t('noMatchTitle') : t('emptyTitle')}
-              </EmptyTitle>
-              <EmptyDescription>
-                {search || status
-                  ? t('noMatchDescription')
-                  : t('emptyDescription')}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {transaksis.map((trx) => (
-            <button
-              key={trx.id}
-              type="button"
-              onClick={() => setDipilih(trx.id)}
-              className="flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors hover:bg-muted/50"
+        <KasirEmptyState
+          icon={<History />}
+          title={adaFilter ? t('noMatchTitle') : t('emptyTitle')}
+          description={
+            adaFilter ? t('noMatchDescription') : t('emptyDescription')
+          }
+        >
+          {adaFilter && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearch('');
+                setStatus(null);
+                setRentang(undefined);
+                setHalaman(1);
+              }}
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-medium tabular-nums">
-                    {trx.nomorOrder}
-                  </span>
-                  {trx.status !== 'COMPLETED' && (
-                    <StatusTransaksiBadge status={trx.status} />
-                  )}
-                </div>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {new Date(trx.createdAt).toLocaleString('id-ID', {
-                    day: '2-digit',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  {' · '}
-                  {/* Pesanan yang belum dibayar belum punya metode — menulis
-                      "null" di situ lebih buruk daripada menyebut keadaannya. */}
-                  {trx.paymentMethod ?? t('unpaidMethod')}
-                  {' · '}
-                  {t('itemCount', { jumlah: trx._count?.items ?? 0 })}
-                </p>
-              </div>
+              {t('dateReset')}
+            </Button>
+          )}
+        </KasirEmptyState>
+      ) : (
+        <div className={cn('space-y-4 transition-opacity', isFetching && 'opacity-60')}>
+          {/* ── Ponsel: kartu ─────────────────────────────────────────── */}
+          <div className="space-y-2 md:hidden">
+            {transaksis.map((trx) => (
+              <KasirRowCard key={trx.id}>
+                <KasirRowButton onClick={() => setDipilih(trx.id)}>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate font-medium tabular-nums">
+                        {trx.nomorOrder}
+                      </span>
+                      {trx.status !== 'COMPLETED' && (
+                        <StatusTransaksiBadge status={trx.status} />
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {waktuSingkat(trx.createdAt)}
+                      {' · '}
+                      {/* Pesanan yang belum dibayar belum punya metode — menulis
+                          "null" di situ lebih buruk daripada menyebut keadaannya. */}
+                      {trx.paymentMethod ?? t('unpaidMethod')}
+                      {' · '}
+                      {t('itemCount', { jumlah: trx._count?.items ?? 0 })}
+                    </p>
+                  </div>
 
-              <span
-                className={cn(
-                  'shrink-0 font-semibold tabular-nums',
-                  // VOID/REFUND dicoret: angkanya masih ada di riwayat, tapi
-                  // tidak lagi dihitung sebagai omzet.
-                  // BELUM_BAYAR TIDAK dicoret — uangnya belum masuk, tapi
-                  // tagihannya masih hidup dan justru harus terbaca jelas.
-                  (trx.status === 'VOID' || trx.status === 'REFUND') &&
-                    'text-muted-foreground line-through',
-                  trx.status === 'BELUM_BAYAR' &&
-                    'text-amber-600 dark:text-amber-400',
-                )}
-              >
-                {formatPriceIDR(trx.grandTotal)}
-              </span>
-            </button>
-          ))}
+                  <span className={cn('shrink-0', kelasTotal(trx))}>
+                    {formatPriceIDR(trx.grandTotal)}
+                  </span>
+                </KasirRowButton>
+              </KasirRowCard>
+            ))}
+          </div>
+
+          {/* ── Desktop: tabel ────────────────────────────────────────── */}
+          <Card className="hidden py-0 md:block">
+            <Table>
+              {/* <caption> wajib jadi anak pertama <table>; kelas
+                  `caption-bottom` bawaan Table yang menaruhnya di bawah
+                  secara visual. */}
+              {meta && (
+                <TableCaption className="mb-4">
+                  {t('tableCaption', {
+                    tampil: transaksis.length,
+                    total: meta.total,
+                  })}
+                </TableCaption>
+              )}
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-4">{t('colOrder')}</TableHead>
+                  <TableHead>{t('colTime')}</TableHead>
+                  <TableHead>{t('colMethod')}</TableHead>
+                  <TableHead className="text-right">{t('colItems')}</TableHead>
+                  <TableHead>{t('colStatus')}</TableHead>
+                  <TableHead className="text-right">{t('colTotal')}</TableHead>
+                  <TableHead className="w-10 pr-4">
+                    <span className="sr-only">{t('actionsColumn')}</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {transaksis.map((trx) => (
+                  <ContextMenu key={trx.id}>
+                    <ContextMenuTrigger asChild>
+                      <TableRow
+                        onClick={() => setDipilih(trx.id)}
+                        className="cursor-pointer"
+                      >
+                        <TableCell className="pl-4 font-medium tabular-nums">
+                          {trx.nomorOrder}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {waktuSingkat(trx.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {trx.paymentMethod ?? t('unpaidMethod')}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                          {trx._count?.items ?? 0}
+                        </TableCell>
+                        <TableCell>
+                          <StatusTransaksiBadge status={trx.status} />
+                        </TableCell>
+                        <TableCell className={cn('text-right', kelasTotal(trx))}>
+                          {formatPriceIDR(trx.grandTotal)}
+                        </TableCell>
+                        <TableCell className="pr-4">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={t('rowActions')}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreHorizontal className="size-4" aria-hidden />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {aksiBaris(trx)}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    </ContextMenuTrigger>
+
+                    {/* Klik kanan di desktop — jalur yang sama dengan menu titik
+                        tiga, untuk tangan yang sudah terbiasa dengan mouse. */}
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => setDipilih(trx.id)}>
+                        <Eye className="size-4" aria-hidden />
+                        {t('viewDetail')}
+                      </ContextMenuItem>
+                      <ContextMenuItem onClick={() => salinNomor(trx.nomorOrder)}>
+                        <Copy className="size-4" aria-hidden />
+                        {t('copyOrder')}
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                ))}
+              </TableBody>
+
+            </Table>
+          </Card>
+
+          {totalHalaman > 1 && (
+            <Pagination>
+              <PaginationContent>
+                {/* PaginationLink dipakai langsung, bukan PaginationPrevious /
+                    PaginationNext: keduanya menulis "Previous"/"Next" sebagai
+                    teks tetap berbahasa Inggris dan mengabaikan children, jadi
+                    label terjemahan tidak akan pernah muncul. */}
+                <PaginationItem>
+                  <PaginationLink
+                    href="#"
+                    size="default"
+                    aria-label={t('prevPage')}
+                    aria-disabled={halaman <= 1}
+                    className={cn(
+                      'gap-1 px-2.5',
+                      halaman <= 1 && 'pointer-events-none opacity-50',
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHalaman((p) => Math.max(1, p - 1));
+                    }}
+                  >
+                    <ChevronLeft className="size-4" aria-hidden />
+                    <span className="hidden sm:block">{t('prevPage')}</span>
+                  </PaginationLink>
+                </PaginationItem>
+
+                <PaginationItem>
+                  <span className="px-3 text-sm tabular-nums text-muted-foreground">
+                    {t('pageInfo', { page: halaman, total: totalHalaman })}
+                  </span>
+                </PaginationItem>
+
+                <PaginationItem>
+                  <PaginationLink
+                    href="#"
+                    size="default"
+                    aria-label={t('nextPage')}
+                    aria-disabled={halaman >= totalHalaman}
+                    className={cn(
+                      'gap-1 px-2.5',
+                      halaman >= totalHalaman &&
+                        'pointer-events-none opacity-50',
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHalaman((p) => Math.min(totalHalaman, p + 1));
+                    }}
+                  >
+                    <span className="hidden sm:block">{t('nextPage')}</span>
+                    <ChevronRight className="size-4" aria-hidden />
+                  </PaginationLink>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       )}
 
@@ -230,6 +501,6 @@ export function RiwayatClient() {
         transaksiId={dipilih}
         onClose={() => setDipilih(null)}
       />
-    </div>
+    </KasirPageShell>
   );
 }

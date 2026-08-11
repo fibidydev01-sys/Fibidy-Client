@@ -9,18 +9,28 @@
 // itu meninggalkan isi keranjang tetap utuh (state ada di store, bukan di
 // halaman ini).
 //
-// Tiga zona wajib:
-//   1. Sticky sub-header — input uang tunai + nominal cepat (hanya TUNAI)
-//   2. Body scrollable   — item + stepper, baris gratis promo, diskon, metode
-//   3. Sticky footer     — rincian angka + satu tombol bayar besar
-//
 // Angka di layar ini adalah PRATINJAU. Yang tersimpan dihitung ulang server:
 // harga diambil dari database, baris gratis dihitung engine promo di sana.
 // Kalau keduanya berbeda, yang benar adalah server.
+//
+// [UI/UX — Agu 2026]
+//   • Ini satu-satunya layar kasir yang lebarnya dibatasi, dan batas itu kini
+//     datang dari KasirPageShell width="focused" — bukan `max-w-2xl` yang
+//     diketik ulang di empat tempat dalam berkas ini.
+//   • Di ≥lg isinya dua kolom: item di kiri, pembayaran di kanan yang menempel
+//     (sticky). Kasir tidak perlu menggulir bolak-balik antara daftar item dan
+//     kolom uang. Di bawah lg susunannya tetap satu kolom dengan ringkasan
+//     menempel di bawah — persis alur yang sudah dikenal.
+//   • Metode pembayaran jadi RadioGroup (memang satu-dari-tiga), field PIC
+//     jadi Field, tiap zona jadi Card dengan Header/Content/Footer, dan input
+//     uang jadi InputGroup dengan awalan "Rp".
+//   • Sub-nav dimatikan: dari keranjang cuma ada dua arah — selesai, atau
+//     kembali. Breadcrumb menunjukkan posisi itu tanpa menawarkan pintu ketiga.
 // ============================================================================
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
@@ -29,7 +39,6 @@ import {
   Clock,
   CreditCard,
   Gift,
-  Loader2,
   Landmark,
   ShoppingCart,
   Trash2,
@@ -37,15 +46,36 @@ import {
   Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +86,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { getErrorMessage } from '@/lib/api/client';
 import { hitungBarisGratis } from '@/lib/shared/kasir-promo';
@@ -69,6 +98,12 @@ import {
   useCreateTransaksi,
   usePromoRulesAktif,
 } from '@/hooks/dashboard/use-kasir';
+import { KasirPageShell } from '@/components/dashboard/kasir/kasir-page-shell';
+import { KasirEmptyState } from '@/components/dashboard/kasir/kasir-state';
+import {
+  KasirRowButton,
+  KasirRowCard,
+} from '@/components/dashboard/kasir/kasir-row-card';
 import { QtyStepper } from '@/components/dashboard/kasir/qty-stepper';
 import { DiskonPicker } from '@/components/dashboard/kasir/diskon-picker';
 import { StrukDialog } from '@/components/dashboard/kasir/struk-dialog';
@@ -190,44 +225,64 @@ export function KeranjangClient() {
     router.push('/dashboard/kasir');
   };
 
+  const tombolKembali = (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => router.push('/dashboard/kasir')}
+      aria-label={t('back')}
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden />
+    </Button>
+  );
+
+  const jejak = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/dashboard/kasir">{t('breadcrumbKasir')}</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>{t('breadcrumbCart')}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+
   // ── Keranjang kosong ──────────────────────────────────────────────────
   if (lines.length === 0 && !struk) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-4 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push('/dashboard/kasir')}
-            aria-label={t('back')}
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
+      <KasirPageShell
+        title={t('title')}
+        showTabs={false}
+        width="focused"
+        leading={tombolKembali}
+      >
+        <KasirEmptyState
+          icon={<ShoppingCart />}
+          title={t('emptyTitle')}
+          description={t('emptyDescription')}
+        >
+          <Button onClick={() => router.push('/dashboard/kasir')}>
+            {t('emptyCta')}
           </Button>
-          <h1 className="text-lg font-semibold">{t('title')}</h1>
-        </div>
-
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ShoppingCart />
-            </EmptyMedia>
-            <EmptyTitle>{t('emptyTitle')}</EmptyTitle>
-            <EmptyDescription>{t('emptyDescription')}</EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={() => router.push('/dashboard/kasir')}>
-              {t('emptyCta')}
-            </Button>
-          </EmptyContent>
-        </Empty>
-      </div>
+        </KasirEmptyState>
+      </KasirPageShell>
     );
   }
 
   // ── Mode picker diskon (tukar isi, bukan modal) ───────────────────────
   if (mode === 'diskon') {
     return (
-      <div className="mx-auto max-w-2xl">
+      <KasirPageShell
+        title={t('title')}
+        showTabs={false}
+        width="focused"
+        leading={tombolKembali}
+      >
         <DiskonPicker
           subtotal={subtotal}
           terpilihId={diskon?.id ?? null}
@@ -241,29 +296,86 @@ export function KeranjangClient() {
           }}
           onBack={() => setMode('cart')}
         />
-      </div>
+      </KasirPageShell>
     );
   }
 
+  // ── Ringkasan angka + tombol bayar ────────────────────────────────────
+  //
+  // Didefinisikan sekali, dipasang di dua tempat: kolom kanan di desktop dan
+  // bar menempel di bawah pada ponsel. Hanya satu yang terlihat pada satu
+  // waktu — menyalin markupnya dua kali adalah cara tercepat membuat dua
+  // total yang berbeda di layar yang sama.
+  const rincianAngka = (
+    <dl className="space-y-1 text-sm">
+      <div className="flex justify-between">
+        <dt className="text-muted-foreground">{t('subtotal')}</dt>
+        <dd className="tabular-nums">{formatPriceIDR(subtotal)}</dd>
+      </div>
+      {diskonNominal > 0 && (
+        <div className="flex justify-between">
+          <dt className="text-muted-foreground">
+            {t('discountLine', { persen: diskon?.persen ?? 0 })}
+          </dt>
+          <dd className="tabular-nums text-emerald-600 dark:text-emerald-400">
+            −{formatPriceIDR(diskonNominal)}
+          </dd>
+        </div>
+      )}
+      <Separator className="my-2" />
+      <div className="flex justify-between text-base font-bold">
+        <dt>{t('total')}</dt>
+        <dd className="tabular-nums">{formatPriceIDR(grandTotal)}</dd>
+      </div>
+    </dl>
+  );
+
+  const tombolBayar = (
+    <div className="flex w-full flex-col gap-2">
+      <Button
+        onClick={handleBayar}
+        disabled={!bisaBayar}
+        size="lg"
+        className="h-12 w-full text-base font-semibold"
+      >
+        {isPending ? (
+          <>
+            <Spinner className="mr-2 size-4" />
+            {t('paying')}
+          </>
+        ) : (
+          t('pay', { nominal: formatPriceIDR(grandTotal) })
+        )}
+      </Button>
+
+      {/* [JASA] Jalur kedua: catat sekarang, bayar saat diambil. Ditaruh
+          di bawah tombol utama dan dengan gaya sekunder — mayoritas
+          transaksi tetap dibayar saat itu juga, dan tombol yang sama
+          menonjolnya akan memperlambat kasus yang paling sering. */}
+      {adaJasa && (
+        <Button
+          onClick={handleBayarNanti}
+          disabled={lines.length === 0 || isPending}
+          variant="outline"
+          className="h-11 w-full gap-2"
+        >
+          <Clock className="h-4 w-4" aria-hidden />
+          {t('payLater')}
+        </Button>
+      )}
+    </div>
+  );
+
   // ── Keranjang ─────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex max-w-2xl flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/dashboard/kasir')}
-          aria-label={t('back')}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold leading-tight">{t('title')}</h1>
-          <p className="text-xs text-muted-foreground">
-            {t('itemCount', { jumlah: totalItem })}
-          </p>
-        </div>
+    <KasirPageShell
+      title={t('title')}
+      subtitle={t('itemCount', { jumlah: totalItem })}
+      showTabs={false}
+      width="focused"
+      leading={tombolKembali}
+      toolbar={jejak}
+      actions={
         <Button
           variant="ghost"
           size="sm"
@@ -273,246 +385,250 @@ export function KeranjangClient() {
           <Trash2 className="h-3.5 w-3.5" aria-hidden />
           {t('clear')}
         </Button>
-      </div>
+      }
+    >
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-6">
+        {/* ZONA 1 — uang tunai (hanya TUNAI).
+            Ditulis PERTAMA di DOM dengan sengaja. Di ponsel kolom ini harus
+            berada DI ATAS daftar item dan menempel saat digulir — kasir
+            mengetik nominal sambil melihat item, dan itu perilaku yang sudah
+            ada sebelum layar ini dibagi dua kolom. Di ≥lg penempatan grid
+            eksplisit memindahkannya ke baris kedua kolom kanan. */}
+        {paymentMethod === 'TUNAI' && (
+          <Card className="sticky top-0 z-20 py-4 lg:static lg:col-start-2 lg:row-start-2">
+            <CardHeader className="px-4">
+              <CardTitle className="text-sm">{t('cashTitle')}</CardTitle>
+            </CardHeader>
 
-      {/* ZONA 1 — sticky sub-header uang tunai (hanya TUNAI) */}
-      {paymentMethod === 'TUNAI' && (
-        <div className="sticky top-0 z-20 -mx-1 mt-3 bg-background/95 px-1 py-3 backdrop-blur">
-          <div className="rounded-xl border bg-card p-3">
-            <label
-              htmlFor="uang-diterima"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              {t('cashReceived')}
-            </label>
-            <Input
-              id="uang-diterima"
-              inputMode="numeric"
-              value={uangDiterima ? Number(uangDiterima).toLocaleString('id-ID') : ''}
-              onChange={(e) => setUangDiterima(e.target.value.replace(/\D/g, ''))}
-              placeholder="0"
-              className="mt-1 h-11 text-lg font-semibold tabular-nums"
-            />
-
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {NOMINAL_CEPAT.map((nominal) => (
-                <button
-                  key={nominal}
-                  type="button"
-                  onClick={() => setUangDiterima(String(nominal))}
-                  className="rounded-lg border px-2.5 py-1 text-xs font-medium tabular-nums transition-colors hover:bg-muted"
-                >
-                  {nominal / 1000}rb
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setUangDiterima(String(grandTotal))}
-                className="rounded-lg border border-primary/40 bg-primary/5 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-              >
-                {t('exactAmount')}
-              </button>
-            </div>
-
-            {/* Peringatan kurang / kembalian — real-time, sebelum bayar. */}
-            {uangDiterima !== '' && (
-              <p
-                className={cn(
-                  'mt-2 text-sm font-medium tabular-nums',
-                  kurang > 0 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400',
-                )}
-                aria-live="polite"
-              >
-                {kurang > 0
-                  ? t('shortBy', { nominal: formatPriceIDR(kurang) })
-                  : t('change', { nominal: formatPriceIDR(kembalian) })}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ZONA 2 — body */}
-      <div className="mt-3 flex-1 space-y-4 pb-4">
-        {/* Item */}
-        <div className="space-y-2">
-          {lines.map((line) => {
-            const gratis = barisGratis.find((g) => g.productId === line.productId);
-
-            return (
-              <div key={line.productId} className="rounded-xl border">
-                <div className="flex items-center gap-3 px-3 py-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <p className="truncate font-medium">{line.namaProduk}</p>
-                      {line.kind === 'JASA' && (
-                        <KasirBadge tone="muted">
-                          <Wrench className="h-2.5 w-2.5" aria-hidden />
-                          {line.durasiLabel || t('layananLabel')}
-                        </KasirBadge>
-                      )}
-                    </div>
-                    <p className="text-sm tabular-nums text-muted-foreground">
-                      {formatPriceIDR(line.hargaSatuan)} × {line.qty} ={' '}
-                      <span className="font-medium text-foreground">
-                        {formatPriceIDR(line.hargaSatuan * line.qty)}
-                      </span>
-                    </p>
-                  </div>
-                  <QtyStepper
-                    qty={line.qty}
-                    onIncrement={() => increment(line.productId)}
-                    onDecrement={() => decrement(line.productId)}
+            <CardContent className="space-y-3 px-4">
+              <Field>
+                <FieldLabel htmlFor="uang-diterima">
+                  {t('cashReceived')}
+                </FieldLabel>
+                <InputGroup className="h-11">
+                  <InputGroupAddon>Rp</InputGroupAddon>
+                  <InputGroupInput
+                    id="uang-diterima"
+                    inputMode="numeric"
+                    value={
+                      uangDiterima
+                        ? Number(uangDiterima).toLocaleString('id-ID')
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setUangDiterima(e.target.value.replace(/\D/g, ''))
+                    }
+                    placeholder="0"
+                    className="text-lg font-semibold tabular-nums"
                   />
-                </div>
+                </InputGroup>
 
-                {/* Baris gratis promo — menempel di item pemicunya supaya
-                    hubungannya terbaca, bukan berdiri sendiri di bawah. */}
-                {gratis && (
-                  <div className="flex items-center gap-2 border-t bg-blue-50/50 px-3 py-2 dark:bg-blue-950/20">
-                    <Gift
-                      className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400"
-                      aria-hidden
-                    />
-                    <span className="flex-1 text-sm text-muted-foreground">
-                      {gratis.namaProduk} × {gratis.qty}
-                    </span>
-                    <GratisBadge />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                {/* Peringatan kurang / kembalian — real-time, sebelum bayar. */}
+                {uangDiterima !== '' &&
+                  (kurang > 0 ? (
+                    <FieldError className="tabular-nums">
+                      {t('shortBy', { nominal: formatPriceIDR(kurang) })}
+                    </FieldError>
+                  ) : (
+                    <FieldDescription
+                      className="font-medium tabular-nums text-emerald-600 dark:text-emerald-400"
+                      aria-live="polite"
+                    >
+                      {t('change', { nominal: formatPriceIDR(kembalian) })}
+                    </FieldDescription>
+                  ))}
+              </Field>
 
-        {/* [JASA] Petugas pengerjaan — satu isian untuk seluruh pesanan.
-            Muncul hanya kalau ada layanan; untuk pesanan barang murni field
-            ini tidak punya arti. */}
-        {adaJasa && (
-          <div className="rounded-xl border px-3 py-3">
-            <label
-              htmlFor="pic-nama"
-              className="flex items-center gap-1.5 text-sm font-medium"
-            >
-              <UserRound className="h-3.5 w-3.5" aria-hidden />
-              {t('picLabel')}
-            </label>
-            <Input
-              id="pic-nama"
-              value={picNama}
-              maxLength={60}
-              onChange={(e) => setPicNama(e.target.value)}
-              placeholder={t('picPlaceholder')}
-              className="mt-1.5"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t('picHelper')}
-            </p>
-          </div>
-        )}
-
-        {/* Diskon */}
-        <button
-          type="button"
-          onClick={() => setMode('diskon')}
-          className="flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors hover:bg-muted/50"
-        >
-          <span className="flex-1">
-            <span className="block text-sm font-medium">{t('discount')}</span>
-            <span className="block text-sm text-muted-foreground">
-              {diskon
-                ? `${diskon.nama} · ${diskon.persen}%`
-                : t('discountNone')}
-            </span>
-          </span>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
-        </button>
-
-        {/* Metode pembayaran */}
-        <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tMetode('label')}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {METODE.map((m) => {
-              const aktif = paymentMethod === m.id;
-              return (
-                <button
-                  key={m.id}
+              <div className="flex flex-wrap gap-1.5">
+                {NOMINAL_CEPAT.map((nominal) => (
+                  <Button
+                    key={nominal}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="tabular-nums"
+                    onClick={() => setUangDiterima(String(nominal))}
+                  >
+                    {nominal / 1000}rb
+                  </Button>
+                ))}
+                <Button
                   type="button"
-                  onClick={() => setPaymentMethod(m.id)}
-                  aria-pressed={aktif}
-                  className={cn(
-                    'flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-sm font-medium transition-colors',
-                    aktif
-                      ? 'border-primary bg-primary/[0.06] text-primary'
-                      : 'text-muted-foreground hover:bg-muted/50',
-                  )}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setUangDiterima(String(grandTotal))}
                 >
-                  <m.icon className="h-4.5 w-4.5" aria-hidden />
-                  {tMetode(m.labelKey)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* ZONA 3 — sticky footer */}
-      <div className="sticky bottom-16 z-20 -mx-1 border-t bg-background/95 px-1 py-3 backdrop-blur md:bottom-0">
-        <dl className="mb-3 space-y-1 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">{t('subtotal')}</dt>
-            <dd className="tabular-nums">{formatPriceIDR(subtotal)}</dd>
-          </div>
-          {diskonNominal > 0 && (
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">
-                {t('discountLine', { persen: diskon?.persen ?? 0 })}
-              </dt>
-              <dd className="tabular-nums text-emerald-600 dark:text-emerald-400">
-                −{formatPriceIDR(diskonNominal)}
-              </dd>
-            </div>
-          )}
-          <div className="flex justify-between border-t pt-1 text-base font-bold">
-            <dt>{t('total')}</dt>
-            <dd className="tabular-nums">{formatPriceIDR(grandTotal)}</dd>
-          </div>
-        </dl>
-
-        <Button
-          onClick={handleBayar}
-          disabled={!bisaBayar}
-          size="lg"
-          className="h-12 w-full text-base font-semibold"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-              {t('paying')}
-            </>
-          ) : (
-            t('pay', { nominal: formatPriceIDR(grandTotal) })
-          )}
-        </Button>
-
-        {/* [JASA] Jalur kedua: catat sekarang, bayar saat diambil. Ditaruh
-            di bawah tombol utama dan dengan gaya sekunder — mayoritas
-            transaksi tetap dibayar saat itu juga, dan tombol yang sama
-            menonjolnya akan memperlambat kasus yang paling sering. */}
-        {adaJasa && (
-          <Button
-            onClick={handleBayarNanti}
-            disabled={lines.length === 0 || isPending}
-            variant="outline"
-            className="mt-2 h-11 w-full gap-2"
-          >
-            <Clock className="h-4 w-4" aria-hidden />
-            {t('payLater')}
-          </Button>
+                  {t('exactAmount')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
+
+        {/* ZONA 2 — isi pesanan. */}
+        <div className="space-y-4 lg:col-start-1 lg:row-start-1 lg:row-span-4">
+          <Card className="py-4">
+            <CardHeader className="px-4">
+              <CardTitle className="text-sm">{t('itemsTitle')}</CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-2 px-4">
+              {lines.map((line) => {
+                const gratis = barisGratis.find(
+                  (g) => g.productId === line.productId,
+                );
+
+                return (
+                  <KasirRowCard key={line.productId}>
+                    <div className="flex items-center gap-3 px-3 py-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <p className="truncate font-medium">
+                            {line.namaProduk}
+                          </p>
+                          {line.kind === 'JASA' && (
+                            <KasirBadge tone="muted">
+                              <Wrench className="h-2.5 w-2.5" aria-hidden />
+                              {line.durasiLabel || t('layananLabel')}
+                            </KasirBadge>
+                          )}
+                        </div>
+                        <p className="text-sm tabular-nums text-muted-foreground">
+                          {formatPriceIDR(line.hargaSatuan)} × {line.qty} ={' '}
+                          <span className="font-medium text-foreground">
+                            {formatPriceIDR(line.hargaSatuan * line.qty)}
+                          </span>
+                        </p>
+                      </div>
+                      <QtyStepper
+                        qty={line.qty}
+                        onIncrement={() => increment(line.productId)}
+                        onDecrement={() => decrement(line.productId)}
+                      />
+                    </div>
+
+                    {/* Baris gratis promo — menempel di item pemicunya supaya
+                        hubungannya terbaca, bukan berdiri sendiri di bawah. */}
+                    {gratis && (
+                      <>
+                        <Separator />
+                        <div className="flex items-center gap-2 bg-blue-50/50 px-3 py-2 dark:bg-blue-950/20">
+                          <Gift
+                            className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400"
+                            aria-hidden
+                          />
+                          <span className="flex-1 text-sm text-muted-foreground">
+                            {gratis.namaProduk} × {gratis.qty}
+                          </span>
+                          <GratisBadge />
+                        </div>
+                      </>
+                    )}
+                  </KasirRowCard>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          {/* [JASA] Petugas pengerjaan — satu isian untuk seluruh pesanan.
+              Muncul hanya kalau ada layanan; untuk pesanan barang murni field
+              ini tidak punya arti. */}
+          {adaJasa && (
+            <Card className="py-4">
+              <CardContent className="px-4">
+                <Field>
+                  <FieldLabel htmlFor="pic-nama">
+                    <UserRound className="h-3.5 w-3.5" aria-hidden />
+                    {t('picLabel')}
+                  </FieldLabel>
+                  <Input
+                    id="pic-nama"
+                    value={picNama}
+                    maxLength={60}
+                    onChange={(e) => setPicNama(e.target.value)}
+                    placeholder={t('picPlaceholder')}
+                  />
+                  <FieldDescription>{t('picHelper')}</FieldDescription>
+                </Field>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Diskon */}
+          <KasirRowCard>
+            <KasirRowButton onClick={() => setMode('diskon')}>
+              <span className="flex-1">
+                <span className="block text-sm font-medium">
+                  {t('discount')}
+                </span>
+                <span className="block text-sm text-muted-foreground">
+                  {diskon
+                    ? `${diskon.nama} · ${diskon.persen}%`
+                    : t('discountNone')}
+                </span>
+              </span>
+              <ChevronRight
+                className="h-4 w-4 text-muted-foreground"
+                aria-hidden
+              />
+            </KasirRowButton>
+          </KasirRowCard>
+        </div>
+
+        {/* ZONA 3 — metode pembayaran. Di ponsel ia jatuh setelah diskon,
+            urutan yang sama dengan sebelum layar dibagi dua kolom. */}
+        <Card className="py-4 lg:col-start-2 lg:row-start-1">
+            <CardHeader className="px-4">
+              <CardTitle className="text-sm">{t('methodTitle')}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4">
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(v) =>
+                  setPaymentMethod(v as KasirPaymentMethod)
+                }
+                aria-label={tMetode('label')}
+                className="grid-cols-3 gap-2"
+              >
+                {METODE.map((m) => (
+                  <FieldLabel key={m.id} htmlFor={`metode-${m.id}`}>
+                    <Card className="w-full items-center gap-1.5 py-3 text-center transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
+                      <CardContent className="flex flex-col items-center gap-1.5 px-2">
+                        <m.icon className="size-4" aria-hidden />
+                        <span className="text-sm font-medium">
+                          {tMetode(m.labelKey)}
+                        </span>
+                        <RadioGroupItem
+                          value={m.id}
+                          id={`metode-${m.id}`}
+                          className="sr-only"
+                        />
+                      </CardContent>
+                    </Card>
+                  </FieldLabel>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
+
+        {/* Ringkasan versi desktop — menempel di kolom kanan. Versi
+            ponselnya adalah bar di bawah, di luar grid ini. */}
+        <Card className="hidden py-4 lg:col-start-2 lg:row-start-3 lg:block lg:sticky lg:top-6">
+          <CardHeader className="px-4">
+            <CardTitle className="text-sm">{t('summaryTitle')}</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">{rincianAngka}</CardContent>
+          <CardFooter className="px-4">{tombolBayar}</CardFooter>
+        </Card>
       </div>
+
+      {/* Ringkasan menempel di bawah — hanya di bawah lg, tempat kolom kanan
+          tidak ada. Offsetnya memakai --kasir-bottom-inset, bukan angka yang
+          ditebak dari tinggi MobileNavbar. */}
+      <Card className="sticky bottom-[calc(var(--kasir-bottom-inset)+0.5rem)] z-20 gap-3 bg-background/95 py-3 shadow-lg backdrop-blur lg:hidden">
+        <CardContent className="px-3">{rincianAngka}</CardContent>
+        <CardFooter className="px-3">{tombolBayar}</CardFooter>
+      </Card>
 
       {/* Konfirmasi kosongkan — aksi tidak bisa dibatalkan */}
       <AlertDialog open={konfirmasiKosong} onOpenChange={setKonfirmasiKosong}>
@@ -566,6 +682,6 @@ export function KeranjangClient() {
           onSelesai={handleSelesai}
         />
       )}
-    </div>
+    </KasirPageShell>
   );
 }

@@ -12,14 +12,19 @@
 //   - Sudah di keranjang → baris berubah jadi stepper, dan baris itu sendiri
 //     TIDAK bisa ditap lagi. Tanpa aturan kedua ini, kasir yang menekan area
 //     kosong baris akan menambah qty tanpa sadar.
+//
+// [UI/UX — Agu 2026] Bentuk barisnya kini KasirRowCard (di atas <Card>), sama
+// dengan baris di Riwayat dan Stok. Skeleton-nya juga tidak lagi memakai
+// `animate-pulse` buatan tangan — ia memakai <Skeleton> di dalam kartu yang
+// sama persis, jadi pergantian memuat → data tidak menggeser apa pun.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
 import { Check, Plus } from 'lucide-react';
-import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { StokBadge, KasirBadge } from './kasir-badges';
 import { QtyStepper } from './qty-stepper';
+import { KasirRowButton, KasirRowCard, KasirRowContent } from './kasir-row-card';
 import type { KasirProduct, TipePromo } from '@/types/kasir';
 import { labelPromo } from '@/lib/shared/kasir-promo';
 
@@ -67,7 +72,7 @@ export function ProductRow({
           onDecrement={onDecrement}
         />
       ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Plus className="h-4 w-4" aria-hidden />
         </span>
       )}
@@ -76,43 +81,25 @@ export function ProductRow({
 
   if (adaDiKeranjang) {
     return (
-      <div
-        className={cn(
-          'flex items-center gap-3 rounded-xl border px-3 py-3 transition-colors',
-          'border-primary/40 bg-primary/[0.04]',
-        )}
-      >
-        <span className="sr-only">
-          <Check aria-hidden /> {t('inCart', { qty: qtyDiKeranjang })}
-        </span>
-        {isi}
-      </div>
+      <KasirRowCard selected>
+        <KasirRowContent>
+          <span className="sr-only">
+            <Check aria-hidden /> {t('inCart', { qty: qtyDiKeranjang })}
+          </span>
+          {isi}
+        </KasirRowContent>
+      </KasirRowCard>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={onAdd}
-      aria-label={t('addToCart', { nama: product.name })}
-      className={cn(
-        'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
-        'hover:border-primary/40 hover:bg-muted/50 active:scale-[0.995]',
-      )}
-    >
-      {isi}
-    </button>
-  );
-}
-
-export function ProductRowSkeleton() {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border px-3 py-3">
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-4 w-2/5 animate-pulse rounded bg-muted" />
-        <div className="h-3 w-1/4 animate-pulse rounded bg-muted" />
-      </div>
-      <div className="h-9 w-9 animate-pulse rounded-lg bg-muted" />
-    </div>
+    <KasirRowCard>
+      <KasirRowButton
+        onClick={onAdd}
+        aria-label={t('addToCart', { nama: product.name })}
+      >
+        {isi}
+      </KasirRowButton>
+    </KasirRowCard>
   );
 }

@@ -12,11 +12,23 @@
 // supaya "sedang melayani transaksi" selalu punya satu arah maju yang sama.
 //
 // Muncul hanya kalau keranjang berisi. Saat kosong, tab Kasir bersih.
+//
+// [UI/UX — Agu 2026] Dua hal yang diperbaiki:
+//
+// 1. Lebarnya tidak lagi dikunci `max-w-2xl` di dalam sini. Bar yang menentukan
+//    lebarnya sendiri akan berhenti sejajar dengan daftar produk begitu
+//    halamannya berubah lebar — dan itu persis yang terjadi. Sekarang ia
+//    mengikuti induknya.
+//
+// 2. Jarak dari bawah memakai --kasir-bottom-inset, bukan `bottom-20 md:bottom-4`
+//    yang ditebak dari tinggi MobileNavbar.
 // ============================================================================
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ShoppingCart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { formatPriceIDR } from '@/lib/shared/format';
 
 export function CartBar({
@@ -31,19 +43,21 @@ export function CartBar({
   if (totalItem <= 0) return null;
 
   return (
-    // bottom-20 di mobile memberi ruang untuk MobileNavbar (h-16) supaya bar
-    // ini tidak menutupi tab bar; di md ke atas navbar itu tidak ada.
-    <div className="pointer-events-none sticky bottom-20 z-30 md:bottom-4">
-      <div className="mx-auto max-w-2xl px-1">
-        <Link
-          href="/dashboard/kasir/keranjang"
-          className="pointer-events-auto flex items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground shadow-lg transition-transform active:scale-[0.99]"
-        >
-          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15">
-            <ShoppingCart className="h-4.5 w-4.5" aria-hidden />
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-background px-1 text-[11px] font-bold tabular-nums text-primary">
+    <div className="pointer-events-none sticky bottom-[calc(var(--kasir-bottom-inset)+0.75rem)] z-30">
+      <Button
+        asChild
+        size="lg"
+        className="pointer-events-auto h-14 w-full justify-between gap-3 px-4 shadow-lg"
+      >
+        <Link href="/dashboard/kasir/keranjang">
+          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15">
+            <ShoppingCart className="size-4" aria-hidden />
+            <Badge
+              variant="secondary"
+              className="absolute -right-2 -top-2 h-5 min-w-5 px-1 text-[11px] font-bold tabular-nums"
+            >
               {totalItem}
-            </span>
+            </Badge>
           </span>
 
           <span className="flex-1 text-left text-sm font-semibold">
@@ -54,7 +68,7 @@ export function CartBar({
             {formatPriceIDR(total)}
           </span>
         </Link>
-      </div>
+      </Button>
     </div>
   );
 }

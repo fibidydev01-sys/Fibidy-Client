@@ -14,11 +14,39 @@
 // berdiri, sering dengan tangan basah atau berminyak, di layar 5 inci. Drag
 // pada layar sekecil itu salah sasaran jauh lebih sering daripada tap, dan
 // setiap kesalahannya memindahkan pekerjaan orang lain.
+//
+// [UI/UX — Agu 2026]
+//   • Dibangun dari <Card> lengkap (Header → Content → Footer), bukan div
+//     `rounded-xl border p-3`. Aksi pindah ke CardFooter, jadi posisinya sama
+//     di setiap kartu berapa pun panjang nama layanannya.
+//   • <Progress> menunjukkan tahap keberapa kartu ini berada. Di papan dengan
+//     empat kolom, batang itu tetap terbaca saat kartu dilihat sendirian di
+//     tampilan ponsel yang cuma menampilkan satu kolom.
+//   • Nama petugas jadi <Avatar> berinisial — lebih cepat dikenali daripada
+//     teks kecil, dan tidak melebar mengikuti panjang nama.
+//   • Tombol mundur yang cuma ikon kini punya <Tooltip>.
 // ============================================================================
 
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRight, Clock, Loader2, Undo2, UserRound } from 'lucide-react';
+import { ArrowRight, Clock, Undo2 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import { Progress } from '@/components/ui/progress';
+import { Spinner } from '@/components/ui/spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/shared/utils';
 import { formatJarakWaktu } from '@/lib/shared/format';
 import { KasirBadge } from './kasir-badges';
@@ -40,6 +68,15 @@ export function statusSebelumnya(status: StatusJasa | null): StatusJasa | null {
   const i = URUTAN.indexOf(status);
   if (i <= 0) return null;
   return URUTAN[i - 1];
+}
+
+function inisial(nama: string): string {
+  return nama
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((kata) => kata[0]?.toUpperCase() ?? '')
+    .join('');
 }
 
 export function PapanKartuItem({
@@ -72,77 +109,138 @@ export function PapanKartuItem({
   const adaEstimasi = kartu.selisihMenit != null;
   const terlambat = kartu.terlambat;
 
+  const tahap = kartu.statusPengerjaan
+    ? URUTAN.indexOf(kartu.statusPengerjaan) + 1
+    : 0;
+
   return (
-    <div
+    <Card
       className={cn(
-        'rounded-xl border bg-card p-3 shadow-sm transition-colors',
+        'gap-3 py-3 shadow-sm transition-colors',
         terlambat && 'border-destructive/40 bg-destructive/[0.03]',
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate font-medium leading-tight">
-            {kartu.namaProduk}
-            {kartu.qty > 1 && (
-              <span className="ml-1 text-muted-foreground">×{kartu.qty}</span>
+      <CardHeader className="gap-1 px-3">
+        <HoverCard openDelay={300}>
+          <HoverCardTrigger asChild>
+            <CardTitle className="truncate text-sm leading-tight">
+              {kartu.namaProduk}
+              {kartu.qty > 1 && (
+                <span className="ml-1 font-normal text-muted-foreground">
+                  ×{kartu.qty}
+                </span>
+              )}
+            </CardTitle>
+          </HoverCardTrigger>
+
+          {/* Nama layanan sering lebih panjang dari lebar kolom Kanban.
+              Di desktop, mengarahkan kursor menampilkannya utuh tanpa
+              perlu membuka apa pun. */}
+          <HoverCardContent className="w-64 text-sm" align="start">
+            <p className="font-medium">{kartu.namaProduk}</p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              {kartu.nomorOrder}
+            </p>
+            {kartu.picNama && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t('picLabel')}: {kartu.picNama}
+              </p>
             )}
-          </p>
-          <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-            {kartu.nomorOrder}
-          </p>
-        </div>
+            {kartu.estimasiDurasi && (
+              <p className="text-xs text-muted-foreground">
+                {kartu.estimasiDurasi}
+              </p>
+            )}
+          </HoverCardContent>
+        </HoverCard>
+
+        <p className="font-mono text-xs text-muted-foreground">
+          {kartu.nomorOrder}
+        </p>
 
         {belumDibayar && (
-          <KasirBadge tone="warning" className="shrink-0">
-            {t('belumDibayar')}
-          </KasirBadge>
+          <CardAction>
+            <KasirBadge tone="warning">{t('belumDibayar')}</KasirBadge>
+          </CardAction>
         )}
-      </div>
+      </CardHeader>
 
-      {/* Baris keterangan — hanya yang ada isinya yang dicetak, supaya kartu
-          tidak penuh label kosong. */}
-      {(adaEstimasi || kartu.picNama || kartu.estimasiDurasi) && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {adaEstimasi && (
-            <span
-              className={cn(
-                'inline-flex items-center gap-1',
-                terlambat && 'font-medium text-destructive',
-              )}
-            >
-              <Clock className="h-3 w-3" aria-hidden />
-              {terlambat
-                ? t('terlambatSejak', {
-                    durasi: formatJarakWaktu(kartu.selisihMenit, locale),
-                  })
-                : t('estimasiDalam', {
-                    durasi: formatJarakWaktu(kartu.selisihMenit, locale),
-                  })}
-            </span>
-          )}
-          {kartu.picNama && (
-            <span className="inline-flex items-center gap-1">
-              <UserRound className="h-3 w-3" aria-hidden />
-              {kartu.picNama}
-            </span>
-          )}
-          {kartu.estimasiDurasi && <span>{kartu.estimasiDurasi}</span>}
-        </div>
-      )}
+      <CardContent className="space-y-2 px-3">
+        {tahap > 0 && (
+          <Progress
+            value={(tahap / URUTAN.length) * 100}
+            aria-label={t('progressAria', {
+              sekarang: tahap,
+              total: URUTAN.length,
+            })}
+            className="h-1"
+          />
+        )}
 
-      {/* Aksi */}
-      <div className="mt-3 flex items-center gap-2">
+        {/* Baris keterangan — hanya yang ada isinya yang dicetak, supaya kartu
+            tidak penuh label kosong. */}
+        {(adaEstimasi || kartu.picNama || kartu.estimasiDurasi) && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {adaEstimasi && (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1',
+                  terlambat && 'font-medium text-destructive',
+                )}
+              >
+                <Clock className="h-3 w-3" aria-hidden />
+                {terlambat
+                  ? t('terlambatSejak', {
+                      durasi: formatJarakWaktu(kartu.selisihMenit, locale),
+                    })
+                  : t('estimasiDalam', {
+                      durasi: formatJarakWaktu(kartu.selisihMenit, locale),
+                    })}
+              </span>
+            )}
+
+            {kartu.picNama && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Avatar className="size-5">
+                      <AvatarFallback className="text-[9px] font-semibold">
+                        {inisial(kartu.picNama)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="max-w-24 truncate">{kartu.picNama}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t('picLabel')}: {kartu.picNama}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {kartu.estimasiDurasi && <span>{kartu.estimasiDurasi}</span>}
+          </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="gap-2 px-3">
         {mundur && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground"
-            onClick={() => onMundur(mundur)}
-            disabled={pending}
-            aria-label={t('mundurKe', { status: t(`status.${mundur}`) })}
-          >
-            <Undo2 className="h-3.5 w-3.5" aria-hidden />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0 text-muted-foreground"
+                onClick={() => onMundur(mundur)}
+                disabled={pending}
+                aria-label={t('mundurKe', { status: t(`status.${mundur}`) })}
+              >
+                <Undo2 className="h-3.5 w-3.5" aria-hidden />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('mundurKe', { status: t(`status.${mundur}`) })}
+            </TooltipContent>
+          </Tooltip>
         )}
 
         {siapAmbil ? (
@@ -161,7 +259,7 @@ export function PapanKartuItem({
               disabled={pending}
             >
               {pending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                <Spinner className="size-3.5" />
               ) : (
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               )}
@@ -178,7 +276,7 @@ export function PapanKartuItem({
               disabled={pending}
             >
               {pending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                <Spinner className="size-3.5" />
               ) : (
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               )}
@@ -186,7 +284,7 @@ export function PapanKartuItem({
             </Button>
           )
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

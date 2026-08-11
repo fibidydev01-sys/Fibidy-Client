@@ -11,17 +11,27 @@
 // Kasir hanya MEMILIH dari preset yang sudah dibuat pemilik toko di
 // Pengaturan — tidak ada pembuatan diskon dadakan di sini. Itu alasan
 // halaman kelola preset tinggal di Pengaturan, bukan di alur transaksi.
+//
+// [UI/UX — Agu 2026] Daftarnya kini <RadioGroup>, bukan tumpukan <button>
+// dengan ikon centang buatan sendiri. Ini memang persis satu-dari-sekian:
+// RadioGroup memberi navigasi panah, pengumuman "terpilih" oleh pembaca layar,
+// dan satu tab stop untuk seluruh daftar — tiga hal yang harus ditulis manual
+// pada versi tombol.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, Check, Percent, Settings2 } from 'lucide-react';
+import { ArrowLeft, Percent, Settings2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { FieldLabel } from '@/components/ui/field';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/shared/utils';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { useDiskonPresets } from '@/hooks/dashboard/use-kasir';
 import type { DiskonPreset } from '@/types/kasir';
+
+const TANPA_DISKON = '__tanpa__';
 
 export function DiskonPicker({
   subtotal,
@@ -36,6 +46,15 @@ export function DiskonPicker({
 }) {
   const t = useTranslations('dashboard.kasir.diskon');
   const { data: presets, isLoading } = useDiskonPresets();
+
+  const pilih = (nilai: string) => {
+    if (nilai === TANPA_DISKON) {
+      onPilih(null);
+      return;
+    }
+    const preset = (presets ?? []).find((p) => p.id === nilai);
+    if (preset) onPilih(preset);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -59,69 +78,71 @@ export function DiskonPicker({
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
+        <RadioGroup
+          value={terpilihId ?? TANPA_DISKON}
+          onValueChange={pilih}
+          aria-label={t('groupLabel')}
+          className="gap-2"
+        >
           {/* Jalan keluar dari diskon apa pun — selalu di posisi pertama. */}
-          <button
-            type="button"
-            onClick={() => onPilih(null)}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
-              terpilihId === null
-                ? 'border-primary bg-primary/[0.06]'
-                : 'hover:bg-muted/50',
-            )}
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              <Percent className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="flex-1 font-medium">{t('none')}</span>
-            {terpilihId === null && (
-              <Check className="h-4 w-4 text-primary" aria-hidden />
-            )}
-          </button>
+          <FieldLabel htmlFor="diskon-tanpa">
+            <Card className="w-full flex-row items-center gap-3 py-3 transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
+              <CardContent className="flex flex-1 items-center gap-3 px-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <Percent className="h-4 w-4" aria-hidden />
+                </span>
+                <span className="flex-1 font-medium">{t('none')}</span>
+                <RadioGroupItem value={TANPA_DISKON} id="diskon-tanpa" />
+              </CardContent>
+            </Card>
+          </FieldLabel>
 
           {(presets ?? []).map((preset) => {
-            const aktif = preset.id === terpilihId;
             // Pratinjau dampak nominal sebelum dipilih — kasir bisa menyebut
             // angka hematnya ke pelanggan tanpa menghitung di kepala.
             const hemat = Math.round((subtotal * preset.persen) / 100);
 
             return (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => onPilih(preset)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
-                  aktif ? 'border-primary bg-primary/[0.06]' : 'hover:bg-muted/50',
-                )}
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
-                  {preset.persen}%
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{preset.nama}</span>
-                  <span className="block text-sm text-muted-foreground">
-                    {t('savePreview', { nominal: formatPriceIDR(hemat) })}
-                  </span>
-                </span>
-                {aktif && <Check className="h-4 w-4 text-primary" aria-hidden />}
-              </button>
+              <FieldLabel key={preset.id} htmlFor={`diskon-${preset.id}`}>
+                <Card className="w-full flex-row items-center gap-3 py-3 transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
+                  <CardContent className="flex flex-1 items-center gap-3 px-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold tabular-nums text-primary">
+                      {preset.persen}%
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">
+                        {preset.nama}
+                      </span>
+                      <span className="block text-sm font-normal text-muted-foreground">
+                        {t('savePreview', { nominal: formatPriceIDR(hemat) })}
+                      </span>
+                    </span>
+                    <RadioGroupItem
+                      value={preset.id}
+                      id={`diskon-${preset.id}`}
+                    />
+                  </CardContent>
+                </Card>
+              </FieldLabel>
             );
           })}
 
           {(presets ?? []).length === 0 && (
-            <div className="rounded-xl border border-dashed px-4 py-6 text-center">
-              <p className="text-sm text-muted-foreground">{t('emptyPresets')}</p>
-              <Button asChild variant="outline" size="sm" className="mt-3 gap-2">
-                <Link href="/dashboard/settings?section=diskon-preset">
-                  <Settings2 className="h-3.5 w-3.5" aria-hidden />
-                  {t('managePresets')}
-                </Link>
-              </Button>
-            </div>
+            <Card className="border-dashed py-6 shadow-none">
+              <CardContent className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  {t('emptyPresets')}
+                </p>
+                <Button asChild variant="outline" size="sm" className="mt-3 gap-2">
+                  <Link href="/dashboard/settings?section=diskon-preset">
+                    <Settings2 className="h-3.5 w-3.5" aria-hidden />
+                    {t('managePresets')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           )}
-        </div>
+        </RadioGroup>
       )}
     </div>
   );

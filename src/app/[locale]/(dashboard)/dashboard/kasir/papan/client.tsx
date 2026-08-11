@@ -10,21 +10,37 @@
 // harus melihat kartu Kanban yang tidak ia butuhkan detik itu.
 //
 // Bentuk layarnya berbeda per lebar, bukan satu tata letak yang dipaksakan:
-//   • Ponsel  → satu kolom pada satu waktu, dipilih lewat chip berhitung.
+//   • Ponsel  → satu kolom pada satu waktu, dipilih lewat tab berhitung.
 //     Empat kolom Kanban berdampingan di layar 5 inci menghasilkan kartu
 //     selebar 80px — terbaca sebagai kekacauan, bukan papan.
 //   • Desktop → empat kolom sungguhan berdampingan, karena di sinilah nilai
 //     Kanban muncul: melihat beban tiap tahap sekaligus.
+//
+// [UI/UX — Agu 2026] Lebar halaman ini sudah benar sejak awal dan jadi acuan
+// halaman kasir lainnya. Yang diperbaiki isinya: state loading/error/kosong
+// yang dulu digambar dengan div `border-dashed` buatan sendiri sekarang
+// memakai Skeleton / Alert / Empty seperti empat halaman lain, kolomnya jadi
+// Card dengan judul + penghitung, dan pemilih kolom di ponsel jadi Tabs.
+// Tinggi kolom sengaja TIDAK dikunci — lihat catatan di dekat daftar kartu.
 // ============================================================================
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, ClipboardList, Loader2, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/shared/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardAction, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getErrorMessage } from '@/lib/api/client';
-import { KasirPageHeader } from '@/components/dashboard/kasir/kasir-page-header';
+import { KasirPageShell } from '@/components/dashboard/kasir/kasir-page-shell';
+import {
+  KasirEmptySlot,
+  KasirEmptyState,
+  KasirErrorState,
+} from '@/components/dashboard/kasir/kasir-state';
+import { KasirBadge } from '@/components/dashboard/kasir/kasir-badges';
 import { PapanKartuItem } from '@/components/dashboard/kasir/papan-kartu';
 import { usePapanKerja, useUpdateStatusItem } from '@/hooks/dashboard/use-kasir';
 import { KOLOM_PAPAN } from '@/types/kasir';
@@ -47,44 +63,35 @@ export function PapanClient() {
     );
   };
 
-  const header = (
-    <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
-  );
-
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {header}
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+      <KasirPageShell title={t('title')} subtitle={t('subtitle')}>
+        {/* Empat kolom skeleton — bentuk yang sama dengan papan sungguhan,
+            jadi kolomnya tidak melompat saat data datang. */}
+        <div className="grid gap-3 lg:grid-cols-4">
+          {KOLOM_PAPAN.map((k) => (
+            <div key={k} className="space-y-2">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+            </div>
+          ))}
         </div>
-      </div>
+      </KasirPageShell>
     );
   }
 
   if (isError || !data) {
     return (
-      <div className="space-y-4">
-        {header}
-        <div className="rounded-xl border border-dashed py-12 text-center">
-          <p className="font-medium">{t('errorTitle')}</p>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            {t('errorDescription')}
-          </p>
-          <Button
-            variant="outline"
-            className="mt-4 gap-2"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw
-              className={cn('h-4 w-4', isFetching && 'animate-spin')}
-              aria-hidden
-            />
-            {t('retry')}
-          </Button>
-        </div>
-      </div>
+      <KasirPageShell title={t('title')} subtitle={t('subtitle')}>
+        <KasirErrorState
+          title={t('errorTitle')}
+          description={t('errorDescription')}
+          retryLabel={t('retry')}
+          onRetry={() => refetch()}
+          retrying={isFetching}
+        />
+      </KasirPageShell>
     );
   }
 
@@ -92,19 +99,13 @@ export function PapanClient() {
 
   if (ringkasan.total === 0) {
     return (
-      <div className="space-y-4">
-        {header}
-        <div className="rounded-xl border border-dashed py-16 text-center">
-          <ClipboardList
-            className="mx-auto h-8 w-8 text-muted-foreground/60"
-            aria-hidden
-          />
-          <p className="mt-3 font-medium">{t('emptyTitle')}</p>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            {t('emptyDescription')}
-          </p>
-        </div>
-      </div>
+      <KasirPageShell title={t('title')} subtitle={t('subtitle')}>
+        <KasirEmptyState
+          icon={<ClipboardList />}
+          title={t('emptyTitle')}
+          description={t('emptyDescription')}
+        />
+      </KasirPageShell>
     );
   }
 
@@ -112,9 +113,7 @@ export function PapanClient() {
 
   const daftarKartu = (kolomKey: KolomPapan) =>
     kolom[kolomKey].length === 0 ? (
-      <p className="rounded-lg border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
-        {t('kolomKosong')}
-      </p>
+      <KasirEmptySlot label={t('kolomKosong')} />
     ) : (
       kolom[kolomKey].map((kartu) => (
         <PapanKartuItem
@@ -129,82 +128,84 @@ export function PapanClient() {
     );
 
   return (
-    <div className="space-y-4">
-      {header}
-
-      {/* Ringkasan — dua angka yang butuh tindakan, bukan sekadar hitungan.
-          Ditampilkan hanya kalau nilainya bukan nol: baris "0 terlambat"
-          setiap hari melatih mata untuk mengabaikan baris itu. */}
-      {(ringkasan.terlambat > 0 || ringkasan.belumDibayar > 0) && (
-        <div className="flex flex-wrap gap-2">
-          {ringkasan.terlambat > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs font-medium text-destructive">
-              <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-              {t('ringkasanTerlambat', { jumlah: ringkasan.terlambat })}
-            </span>
-          )}
-          {ringkasan.belumDibayar > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
-              {t('ringkasanBelumDibayar', { jumlah: ringkasan.belumDibayar })}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* ── Ponsel: chip pemilih kolom + satu daftar ─────────────────────── */}
-      <div className="lg:hidden">
-        <div
-          className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1"
-          role="tablist"
-          aria-label={t('pilihKolom')}
-        >
-          {KOLOM_PAPAN.map((k) => {
-            const aktif = kolomAktif === k;
-            return (
-              <button
-                key={k}
-                type="button"
-                role="tab"
-                aria-selected={aktif}
-                onClick={() => setKolomAktif(k)}
-                className={cn(
-                  'flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  aktif
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )}
+    <KasirPageShell
+      title={t('title')}
+      subtitle={t('subtitle')}
+      toolbar={
+        // Ringkasan — dua angka yang butuh tindakan, bukan sekadar hitungan.
+        // Ditampilkan hanya kalau nilainya bukan nol: baris "0 terlambat"
+        // setiap hari melatih mata untuk mengabaikan baris itu.
+        ringkasan.terlambat > 0 || ringkasan.belumDibayar > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {ringkasan.terlambat > 0 && (
+              // Keterlambatan adalah peringatan, bukan label: ia dapat Alert,
+              // bukan badge yang mudah terlewat di antara badge lain.
+              <Alert variant="destructive" className="w-auto py-2">
+                <AlertTriangle className="h-4 w-4" aria-hidden />
+                <AlertDescription>
+                  {t('ringkasanTerlambat', { jumlah: ringkasan.terlambat })}
+                </AlertDescription>
+              </Alert>
+            )}
+            {ringkasan.belumDibayar > 0 && (
+              <KasirBadge tone="warning" className="px-2.5 py-1.5 text-xs">
+                {t('ringkasanBelumDibayar', { jumlah: ringkasan.belumDibayar })}
+              </KasirBadge>
+            )}
+          </div>
+        ) : undefined
+      }
+    >
+      {/* ── Ponsel: tab pemilih kolom + satu daftar ───────────────────────── */}
+      <Tabs
+        value={kolomAktif}
+        onValueChange={(v) => setKolomAktif(v as KolomPapan)}
+        className="lg:hidden"
+      >
+        <TabsList aria-label={t('pilihKolom')} className="h-9 w-full">
+          {KOLOM_PAPAN.map((k) => (
+            <TabsTrigger key={k} value={k} className="gap-1.5 text-xs">
+              {t(`status.${k}`)}
+              <Badge
+                variant="secondary"
+                className="px-1.5 py-0 text-[10px] tabular-nums"
               >
-                {t(`status.${k}`)}
-                <span
-                  className={cn(
-                    'rounded-full px-1.5 text-xs tabular-nums',
-                    aktif ? 'bg-primary/15' : 'bg-muted',
-                  )}
-                >
-                  {kolom[k].length}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                {kolom[k].length}
+              </Badge>
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-        <div className="mt-3 space-y-2">{daftarKartu(kolomAktif)}</div>
-      </div>
+        {KOLOM_PAPAN.map((k) => (
+          <TabsContent key={k} value={k} className="mt-3 space-y-2">
+            {daftarKartu(k)}
+          </TabsContent>
+        ))}
+      </Tabs>
 
-      {/* ── Desktop: empat kolom sungguhan ───────────────────────────────── */}
+      {/* ── Desktop: empat kolom sungguhan ────────────────────────────────── */}
       <div className="hidden gap-3 lg:grid lg:grid-cols-4">
         {KOLOM_PAPAN.map((k) => (
-          <section key={k} className="min-w-0">
-            <h2 className="mb-2 flex items-center justify-between gap-2 px-1 text-sm font-semibold">
-              {t(`status.${k}`)}
-              <span className="rounded-full bg-muted px-1.5 text-xs font-medium tabular-nums text-muted-foreground">
-                {kolom[k].length}
-              </span>
-            </h2>
-            <div className="space-y-2">{daftarKartu(k)}</div>
-          </section>
+          <Card key={k} className="min-w-0 gap-3 bg-muted/30 py-3">
+            <CardHeader className="px-3">
+              <CardTitle className="text-sm">{t(`status.${k}`)}</CardTitle>
+              <CardAction>
+                <Badge variant="secondary" className="tabular-nums">
+                  {kolom[k].length}
+                </Badge>
+              </CardAction>
+            </CardHeader>
+
+            {/* Tinggi mengikuti isi, TIDAK dikunci.
+                Sempat dicoba `h-[calc(100svh-22rem)]` supaya kolom padat tidak
+                menarik kolom sebelahnya memanjang. Dibatalkan: angka 22rem itu
+                tebakan atas tinggi header, dan pada papan yang hampir kosong
+                — keadaan paling umum — hasilnya empat kotak tinggi yang
+                isinya cuma satu kartu. Perilaku lama sudah benar. */}
+            <div className="space-y-2 px-3 pb-1">{daftarKartu(k)}</div>
+          </Card>
         ))}
       </div>
-    </div>
+    </KasirPageShell>
   );
 }

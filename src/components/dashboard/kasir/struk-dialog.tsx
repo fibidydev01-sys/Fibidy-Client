@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, Loader2, Share2 } from 'lucide-react';
+import { Check, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { bagikanStruk } from '@/lib/shared/struk-image';
 
 export function StrukDialog({
@@ -108,7 +109,7 @@ export function StrukDialog({
             className="w-full gap-2"
           >
             {sharing ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              <Spinner className="size-4" />
             ) : (
               <Share2 className="h-4 w-4" aria-hidden />
             )}

@@ -273,6 +273,30 @@
   padding-inline: 2rem;
 }
 
+/* ============================================================================
+   BOTTOM INSET — ruang yang harus disisakan bar melayang di bawah layar
+   [UI/UX — Agu 2026]
+
+   MobileNavbar `fixed bottom-0` setinggi h-16 (4rem) dan hanya ada di bawah
+   md. Sebelum token ini, tiga tempat menebak angkanya sendiri-sendiri:
+   cart bar `bottom-20 md:bottom-4`, footer keranjang `bottom-16 md:bottom-0`,
+   dan layout `pb-40 md:pb-0`. Ketiganya harus berubah bersamaan setiap kali
+   tinggi navbar disentuh — dan itu tidak pernah terjadi, jadi bar-bar itu
+   perlahan saling menimpa.
+
+   Sekarang satu variabel: bar melayang memakai
+   `bottom-[calc(var(--kasir-bottom-inset)+0.75rem)]`.
+   ========================================================================= */
+:root {
+  --kasir-bottom-inset: 0px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --kasir-bottom-inset: 4rem; /* MobileNavbar h-16 */
+  }
+}
+
 @layer components {
   button {
     cursor: pointer;
