@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 // ==========================================
 // PRODUCT GRID CARD — Dashboard product list
 // File: src/components/dashboard/product/product-grid-card.tsx
@@ -22,7 +24,7 @@
 
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Package, FileText } from 'lucide-react';
+import { Package, FileText, Wrench } from 'lucide-react';
 import { formatPrice } from '@/lib/shared/format';
 import type { Product } from '@/types/product';
 
@@ -32,9 +34,14 @@ interface ProductGridCardProps {
 }
 
 export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
+  const tKind = useTranslations('dashboard.products.kind');
   const imageUrl = product.images?.[0] ?? null;
   const isDigital = !!product.fileKey;
   const isCustomPrice = product.price === 0;
+  // [KASIR JASA] Barang dan layanan tampil di daftar yang sama, jadi
+  // pembedanya harus terbaca dari kartu — tanpa itu seller tidak bisa tahu
+  // kenapa satu entri punya stok dan yang lain tidak.
+  const isJasa = product.kind === 'JASA';
 
   // [IDR MIGRATION] Default to IDR uniformly. Was: hardcoded $X.XX.
   const currency = product.currency ?? 'IDR';
@@ -79,11 +86,19 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
 
       {/* Body */}
       <div className="px-3 py-2.5">
-        {product.category && (
-          <p className="text-xs text-muted-foreground truncate leading-none mb-1">
-            {product.category}
-          </p>
-        )}
+        <div className="mb-1 flex items-center gap-1.5">
+          {isJasa && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-blue-800 dark:bg-blue-950/50 dark:text-blue-300">
+              <Wrench className="h-2.5 w-2.5" aria-hidden />
+              {tKind('jasa')}
+            </span>
+          )}
+          {product.category && (
+            <p className="truncate text-xs leading-none text-muted-foreground">
+              {product.category}
+            </p>
+          )}
+        </div>
         <h3 className="font-medium text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
           {product.name}
         </h3>

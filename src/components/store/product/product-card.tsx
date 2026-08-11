@@ -19,11 +19,14 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import Link from 'next/link';
-import { Package, FileText } from 'lucide-react';
+import { Package, FileText, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/shared/format';
 import { productUrl } from '@/lib/public/store-url';
-import { getProductPricing } from '@/lib/shared/product-utils';
+import {
+  getProductPricing,
+  formatDurasiLayanan,
+} from '@/lib/shared/product-utils';
 import type { Product } from '@/types/product';
 
 interface ProductCardProps {
@@ -43,6 +46,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
   // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
   const currency = product.currency ?? 'IDR';
+  const durasi = formatDurasiLayanan(product.durasiJam);
 
   // Use the first thumbnail from the images array
   const imageUrl = product.images?.[0] ?? null;
@@ -101,6 +105,24 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
           <h3 className="font-medium text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
+
+          {/* [KASIR JASA] Satu baris estimasi, bukan badge di atas gambar.
+              Di grid etalase, yang dicari pembeli adalah harga dan "berapa
+              lama" — bukan label jenis. Barang tidak mendapat baris ini sama
+              sekali, jadi tinggi kartunya tidak berubah untuk toko produk. */}
+          {product.kind === 'JASA' && (durasi || product.durasiLabel) && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 shrink-0" aria-hidden />
+              <span className="truncate">
+                {durasi
+                  ? tInfo(
+                      durasi.satuan === 'hari' ? 'estimasiHari' : 'estimasiJam',
+                      { nilai: durasi.nilai },
+                    )
+                  : product.durasiLabel}
+              </span>
+            </p>
+          )}
 
           {!isCustomPrice && (
             <div className="mt-1.5 flex items-baseline gap-1.5">

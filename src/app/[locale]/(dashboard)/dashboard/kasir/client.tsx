@@ -29,7 +29,12 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { useDebounce } from '@/hooks/shared/use-debounce';
-import { useKasirProducts, usePromoRulesAktif } from '@/hooks/dashboard/use-kasir';
+import {
+  useKasirConfig,
+  useKasirLayanan,
+  useKasirProducts,
+  usePromoRulesAktif,
+} from '@/hooks/dashboard/use-kasir';
 import {
   hitungTotal,
   hitungTotalItem,
@@ -37,6 +42,11 @@ import {
 } from '@/stores/kasir-cart-store';
 import { CartBar } from '@/components/dashboard/kasir/cart-bar';
 import { CategoryChips } from '@/components/dashboard/kasir/category-chips';
+import {
+  KatalogToggle,
+  type KatalogMode,
+} from '@/components/dashboard/kasir/katalog-toggle';
+import { LayananRow } from '@/components/dashboard/kasir/layanan-row';
 import { KasirPageHeader } from '@/components/dashboard/kasir/kasir-page-header';
 import {
   ProductRow,
@@ -52,39 +62,69 @@ export function KasirClient() {
   const [kategori, setKategori] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
 
-  const {
-    data: produkResponse,
-    isLoading,
-    isError,
-    refetch,
-    isFetching,
-  } = useKasirProducts(
-    debouncedSearch ? { search: debouncedSearch } : undefined,
-  );
+  // Mode dagang menentukan katalog mana yang tampil. Diambil dari config
+  // tenant — BUKAN ditebak ulang dari kategori toko di sini, karena seller
+  // boleh menimpanya lewat pengaturan.
+  const { data: config } = useKasirConfig();
+  const dagangType = config?.dagangType ?? 'PRODUK';
+  const hybrid = dagangType === 'HYBRID';
+
+  // Toko jasa murni langsung membuka daftar layanan. Toko hybrid juga —
+  // di semua contoh nyata (bengkel, salon, print shop) jasa adalah alasan
+  // pelanggan datang, dan barang adalah tambahan.
+  const [mode, setMode] = useState<KatalogMode>('PRODUK');
+  const modeAktif: KatalogMode =
+    dagangType === 'JASA'
+      ? 'JASA'
+      : dagangType === 'PRODUK'
+        ? 'PRODUK'
+        : mode;
+  const lihatJasa = modeAktif === 'JASA';
+
+  const params = debouncedSearch ? { search: debouncedSearch } : undefined;
+  const produkQuery = useKasirProducts(params);
+  const layananQuery = useKasirLayanan(params);
+
+  // Hanya katalog yang sedang tampil yang menentukan loading/error halaman.
+  // Kalau keduanya digabung, kegagalan mengambil layanan akan menutup grid
+  // produk yang sebenarnya baik-baik saja.
+  const { isLoading, isError, refetch, isFetching } = lihatJasa
+    ? layananQuery
+    : produkQuery;
 
   const { data: promoAktif } = usePromoRulesAktif();
 
   const lines = useKasirCartStore((s) => s.lines);
   const diskon = useKasirCartStore((s) => s.diskon);
   const addProduct = useKasirCartStore((s) => s.addProduct);
+  const addLayanan = useKasirCartStore((s) => s.addLayanan);
   const increment = useKasirCartStore((s) => s.increment);
   const decrement = useKasirCartStore((s) => s.decrement);
 
-  const semuaProduk = useMemo(() => produkResponse?.data ?? [], [produkResponse]);
+  const semuaProduk = useMemo(
+    () => produkQuery.data?.data ?? [],
+    [produkQuery.data],
+  );
+  const semuaLayanan = useMemo(
+    () => layananQuery.data?.data ?? [],
+    [layananQuery.data],
+  );
 
   // Kategori diturunkan dari produk yang ada, bukan dari endpoint terpisah:
   // satu request lebih sedikit, dan chip tidak pernah menampilkan kategori
   // yang produknya sudah tidak dijual.
+  const sumberKatalog = lihatJasa ? semuaLayanan : semuaProduk;
+
   const categories = useMemo(
     () =>
       [
         ...new Set(
-          semuaProduk
+          sumberKatalog
             .map((p) => p.category)
             .filter((c): c is string => Boolean(c)),
         ),
       ].sort(),
-    [semuaProduk],
+    [sumberKatalog],
   );
 
   const produk = useMemo(
@@ -92,6 +132,16 @@ export function KasirClient() {
       kategori ? semuaProduk.filter((p) => p.category === kategori) : semuaProduk,
     [semuaProduk, kategori],
   );
+
+  const layanan = useMemo(
+    () =>
+      kategori
+        ? semuaLayanan.filter((p) => p.category === kategori)
+        : semuaLayanan,
+    [semuaLayanan, kategori],
+  );
+
+  const daftarTampil = lihatJasa ? layanan : produk;
 
   const promoPerProduk = useMemo(() => {
     const map = new Map<string, TipePromo>();
@@ -144,6 +194,20 @@ export function KasirClient() {
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
       <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
 
+      {/* Toggle katalog — hanya toko hybrid yang punya dua sisi untuk dipilih */}
+      {hybrid && (
+        <KatalogToggle
+          value={modeAktif}
+          onChange={(m) => {
+            setMode(m);
+            // Kategori barang dan kategori layanan adalah dua daftar berbeda;
+            // membawa filter lama ke katalog sebelah hampir selalu
+            // menghasilkan layar kosong yang membingungkan.
+            setKategori(null);
+          }}
+        />
+      )}
+
       {/* Pencarian + filter kategori */}
       <div className="space-y-3">
         <div className="relative">
@@ -154,9 +218,13 @@ export function KasirClient() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('searchPlaceholder')}
+            placeholder={
+              lihatJasa ? t('searchLayananPlaceholder') : t('searchPlaceholder')
+            }
             className="pl-9 pr-9"
-            aria-label={t('searchPlaceholder')}
+            aria-label={
+              lihatJasa ? t('searchLayananPlaceholder') : t('searchPlaceholder')
+            }
           />
           {search && (
             <button
@@ -184,7 +252,7 @@ export function KasirClient() {
             <ProductRowSkeleton key={i} />
           ))}
         </div>
-      ) : produk.length === 0 ? (
+      ) : daftarTampil.length === 0 ? (
         <div className="py-6">
           <Empty>
             <EmptyHeader>
@@ -194,12 +262,16 @@ export function KasirClient() {
               <EmptyTitle>
                 {debouncedSearch || kategori
                   ? tEmpty('noMatchTitle')
-                  : tEmpty('noProductTitle')}
+                  : lihatJasa
+                    ? tEmpty('noLayananTitle')
+                    : tEmpty('noProductTitle')}
               </EmptyTitle>
               <EmptyDescription>
                 {debouncedSearch || kategori
                   ? tEmpty('noMatchDescription')
-                  : tEmpty('noProductDescription')}
+                  : lihatJasa
+                    ? tEmpty('noLayananDescription')
+                    : tEmpty('noProductDescription')}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
@@ -219,7 +291,7 @@ export function KasirClient() {
                 <Button asChild className="gap-2">
                   <Link href="/dashboard/products/new">
                     <Plus className="h-4 w-4" aria-hidden />
-                    {tEmpty('addProduct')}
+                    {lihatJasa ? tEmpty('addLayanan') : tEmpty('addProduct')}
                   </Link>
                 </Button>
               )}
@@ -228,17 +300,29 @@ export function KasirClient() {
         </div>
       ) : (
         <div className="space-y-2 pb-2">
-          {produk.map((p) => (
-            <ProductRow
-              key={p.id}
-              product={p}
-              qtyDiKeranjang={qtyPerProduk.get(p.id) ?? 0}
-              promo={promoPerProduk.get(p.id)}
-              onAdd={() => addProduct(p)}
-              onIncrement={() => increment(p.id)}
-              onDecrement={() => decrement(p.id)}
-            />
-          ))}
+          {lihatJasa
+            ? layanan.map((l) => (
+                <LayananRow
+                  key={l.id}
+                  layanan={l}
+                  qtyDiKeranjang={qtyPerProduk.get(l.id) ?? 0}
+                  promo={promoPerProduk.get(l.id)}
+                  onAdd={() => addLayanan(l)}
+                  onIncrement={() => increment(l.id)}
+                  onDecrement={() => decrement(l.id)}
+                />
+              ))
+            : produk.map((p) => (
+                <ProductRow
+                  key={p.id}
+                  product={p}
+                  qtyDiKeranjang={qtyPerProduk.get(p.id) ?? 0}
+                  promo={promoPerProduk.get(p.id)}
+                  onAdd={() => addProduct(p)}
+                  onIncrement={() => increment(p.id)}
+                  onDecrement={() => decrement(p.id)}
+                />
+              ))}
         </div>
       )}
 

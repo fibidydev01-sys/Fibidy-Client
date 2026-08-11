@@ -62,6 +62,7 @@
       "settingsTitle": "Settings",
       "settingsDescription": "Manage your store settings",
       "kasirTitle": "Cashier",
+      "papanTitle": "Work Board",
       "kasirDescription": "Record walk-in sales, manage stock, and share digital receipts.",
       "keranjangTitle": "Cart",
       "riwayatTitle": "Transaction History",
@@ -185,7 +186,19 @@
           "stokLabel": "Stock",
           "stokHelper": "Optional. Initial stock is written to the stock log; products at 0 can still be sold.",
           "minStockLabel": "Minimum stock",
-          "minStockHelper": "Threshold for the \"low stock\" badge at the till. Defaults to 5."
+          "minStockHelper": "Threshold for the \"low stock\" badge at the till. Defaults to 5.",
+          "kindLabel": "Type",
+          "kindBarang": "Goods",
+          "kindBarangHint": "Has stock that drops when sold",
+          "kindJasa": "Service",
+          "kindJasaHint": "Work with a duration, no stock",
+          "kindLockedHint": "Type can't be changed after creation. If it's wrong, create a new entry and deactivate this one.",
+          "kindModeHint": "Follows your store's trading mode. Change it in Settings → Trading Mode & Receipt if you want to create the other kind.",
+          "durasiLabelLabel": "Duration label",
+          "durasiLabelPlaceholder": "e.g. Regular",
+          "durasiLabelHelper": "Optional. Shown at the till and on the receipt, e.g. \"Regular\" or \"Express\".",
+          "durasiJamLabel": "Estimate (hours)",
+          "durasiJamHelper": "Optional. Used to compute the estimated ready time. Leave empty if it finishes on the spot."
         },
         "validation": {
           "nameRequired": "Product name is required at least 2 characters.",
@@ -291,6 +304,10 @@
         "hint": "This is usually a temporary issue. Your products are safe.",
         "retry": "Try again",
         "retrying": "Retrying..."
+      },
+      "kind": {
+        "barang": "Goods",
+        "jasa": "Service"
       }
     },
     "library": {
@@ -821,6 +838,10 @@
         "description": "Log out from your account"
       },
       "kasir": {
+        "mode": {
+          "label": "Trading Mode & Receipt",
+          "description": "Choose whether the cashier sells goods, services, or both — plus receipt identity"
+        },
         "diskonPreset": {
           "label": "Discount Presets",
           "description": "Ready-made discounts the cashier picks during a sale"
@@ -924,6 +945,7 @@
       "title": "Cashier",
       "subtitle": "Pick products, then open the cart to complete the payment.",
       "searchPlaceholder": "Search products…",
+      "searchLayananPlaceholder": "Search services…",
       "clearSearch": "Clear search",
       "error": {
         "title": "Couldn't load products",
@@ -934,6 +956,7 @@
       "tabs": {
         "ariaLabel": "Cashier navigation",
         "jual": "Sell",
+        "papan": "Work Board",
         "riwayat": "History",
         "stok": "Stock",
         "laporan": "Reports"
@@ -945,6 +968,7 @@
       },
       "status": {
         "completed": "Completed",
+        "belum_bayar": "Unpaid",
         "void": "Void",
         "refund": "Refund"
       },
@@ -956,10 +980,53 @@
         "addToCart": "Add {nama} to cart",
         "inCart": "{qty} in cart"
       },
+      "katalog": {
+        "produk": "Goods",
+        "layanan": "Services",
+        "ariaLabel": "Pick a catalogue"
+      },
+      "layanan": {
+        "addToCart": "Add {nama} to cart",
+        "estimasiJam": "{nilai, plural, one {# hour} other {# hours}}",
+        "estimasiHari": "{nilai, plural, one {# day} other {# days}}"
+      },
+      "papan": {
+        "title": "Work Board",
+        "subtitle": "Work that hasn't been handed over yet. Move a card as soon as its stage changes.",
+        "errorTitle": "Couldn't load the board",
+        "errorDescription": "The work list couldn't be fetched. Check your connection and try again.",
+        "retry": "Try again",
+        "emptyTitle": "Nothing pending",
+        "emptyDescription": "Every service order has been handed over. New cards appear here as soon as a service order comes in.",
+        "kolomKosong": "Empty",
+        "pilihKolom": "Pick a stage",
+        "ringkasanTerlambat": "{jumlah} past estimate",
+        "ringkasanBelumDibayar": "{jumlah} unpaid",
+        "belumDibayar": "UNPAID",
+        "estimasiDalam": "Ready in {durasi}",
+        "terlambatSejak": "{durasi} overdue",
+        "serahkan": "Hand Over to Customer",
+        "perluDibayarDulu": "Take the payment in History first — this card leaves on its own once it is settled.",
+        "mundurKe": "Move back to {status}",
+        "status": {
+          "ANTRI": "Queued",
+          "PROSES": "In progress",
+          "SELESAI": "Done",
+          "SIAP_AMBIL": "Ready"
+        },
+        "aksi": {
+          "PROSES": "Start Work",
+          "SELESAI": "Mark Done",
+          "SIAP_AMBIL": "Ready for Pickup"
+        }
+      },
       "empty": {
         "noProductTitle": "No products yet",
         "noProductDescription": "Add a product on the Products page first — the cashier needs something to sell.",
         "addProduct": "Add product",
+        "noLayananTitle": "No services yet",
+        "noLayananDescription": "Add a service on the Products page first — the cashier needs something to book.",
+        "addLayanan": "Add service",
         "noMatchTitle": "Nothing matches",
         "noMatchDescription": "Try another keyword or switch back to All categories.",
         "resetFilter": "Reset filter"
@@ -973,6 +1040,7 @@
         "increase": "Increase quantity",
         "decrease": "Decrease quantity",
         "removeItem": "Remove item",
+        "layananLabel": "Service",
         "cashReceived": "Cash received",
         "exactAmount": "Exact",
         "shortBy": "Short by {nominal}",
@@ -984,6 +1052,10 @@
         "total": "Total",
         "pay": "Pay {nominal}",
         "paying": "Saving…",
+        "payLater": "Pay Later (Pick Up First)",
+        "picLabel": "Handled by",
+        "picPlaceholder": "Staff name",
+        "picHelper": "Optional. Makes it clear who is working on the order when the customer asks about it.",
         "emptyTitle": "Your cart is empty",
         "emptyDescription": "Pick some products on the Cashier page first.",
         "emptyCta": "Pick products",
@@ -999,6 +1071,15 @@
         "tunai": "Cash",
         "transfer": "Transfer",
         "debit": "Debit"
+      },
+      "bayar": {
+        "title": "Take payment",
+        "cashReceived": "Cash received",
+        "exactAmount": "Exact",
+        "shortBy": "Short by {nominal}",
+        "change": "Change {nominal}",
+        "saving": "Saving…",
+        "confirm": "Take {nominal}"
       },
       "diskon": {
         "title": "Choose a discount",
@@ -1034,14 +1115,19 @@
         "noMatchTitle": "Nothing matches",
         "noMatchDescription": "Try another order number or change the status filter.",
         "itemCount": "{jumlah} items",
+        "unpaidMethod": "Unpaid",
         "detailTitle": "Transaction detail",
         "subtotal": "Subtotal",
         "discount": "Discount {persen}%",
         "total": "Total",
+        "estimasi": "Ready by {waktu}",
         "method": "Method",
         "cash": "Cash received",
         "change": "Change",
         "viewStruk": "View receipt",
+        "viewTandaTerima": "View acknowledgement",
+        "terimaPembayaran": "Take Payment",
+        "batalPesanan": "Cancel order",
         "void": "Void",
         "refund": "Refund",
         "reasonLabel": "Reason",
@@ -1052,6 +1138,8 @@
         "voidConfirmDescription": "It drops out of the revenue summary. Stock is NOT restored, since the goods have likely already left. This can't be undone.",
         "refundConfirmTitle": "Refund this transaction?",
         "refundConfirmDescription": "It drops out of the revenue summary and the stock IS restored. This can't be undone.",
+        "batalConfirmTitle": "Cancel this order?",
+        "batalConfirmDescription": "The order is closed and can no longer be paid. Since it was never paid, no money is returned and revenue is unchanged. This can't be undone.",
         "cancel": "Cancel",
         "confirm": "Yes, continue",
         "processing": "Processing…"
@@ -1120,7 +1208,16 @@
         "diskonTitle": "Discounts this month",
         "diskonEmpty": "No discounted transactions this month yet.",
         "diskonTotal": "Total discount given",
-        "diskonUsed": "{jumlah}×"
+        "diskonUsed": "{jumlah}×",
+        "belumDibayarTitle": "Unpaid",
+        "belumDibayarCount": "{jumlah} orders",
+        "belumDibayarTerlama": "oldest {tanggal}",
+        "pekerjaanTitle": "Pending work",
+        "pekerjaanTerlambat": "{jumlah} past estimate",
+        "pekerjaanOnTrack": "Everything is still on estimate",
+        "basisKas": "Revenue is counted on the PAYMENT date, not the order date. An order taken on Monday and paid on Wednesday lands in Wednesday’s revenue.",
+        "topBarang": "Goods",
+        "topLayanan": "Services"
       },
       "planGate": {
         "title": "Cashier is a paid plan feature",
@@ -1139,7 +1236,8 @@
         "promoCreated": "Promo program created",
         "promoDeleted": "Promo program deactivated",
         "voidDone": "Transaction voided",
-        "refundDone": "Transaction refunded, stock restored"
+        "refundDone": "Transaction refunded, stock restored",
+        "bayarDone": "Payment received, order settled"
       },
       "settingsDiskon": {
         "title": "Discount presets",
@@ -1199,6 +1297,40 @@
         "deactivateDescription": "It stops running at the till. Past transactions that used it stay intact.",
         "deactivateCancel": "Cancel",
         "deactivateConfirm": "Yes, deactivate"
+      },
+      "settingsKasir": {
+        "modeTitle": "Trading mode",
+        "modeDescription": "Decides which catalogue and menus appear in the cashier. Your store category only guesses once at the start — this choice is what holds from then on.",
+        "modeProduk": "Sell goods",
+        "modeProdukDesc": "What you sell has stock that goes down when it sells.",
+        "modeJasa": "Sell services",
+        "modeJasaDesc": "What you sell is work that takes time, with no stock.",
+        "modeHybrid": "Sell both",
+        "modeHybridDesc": "Goods and services run side by side — a workshop or salon, say.",
+        "efekKatalogBarang": "The Sell tab lists goods",
+        "efekKatalogLayanan": "The Sell tab lists services",
+        "efekKatalogKeduanya": "The Sell tab gets a Goods / Services switch",
+        "efekAdaStok": "Stock tab available",
+        "efekTanpaStok": "Stock tab hidden",
+        "efekAdaPapan": "Work Board tab available",
+        "efekTanpaPapan": "Work Board tab hidden",
+        "modeBerubahHint": "The cashier menus change once you save. Nothing is deleted — every product and service you already created stays.",
+        "strukTitle": "Receipt identity",
+        "strukDescription": "Printed at the top and bottom of every receipt.",
+        "namaUsaha": "Business name",
+        "namaUsahaPlaceholder": "e.g. Bersih Jaya Laundry",
+        "alamat": "Address",
+        "alamatPlaceholder": "e.g. 10 Merdeka Street",
+        "noTelp": "Phone number",
+        "noTelpPlaceholder": "e.g. 0812-3456-7890",
+        "footerStruk": "Closing line",
+        "footerStrukPlaceholder": "Thank you for your visit",
+        "paperWidth": "Paper width",
+        "paperWidthValue": "{mm} mm",
+        "paperWidth58Hint": "Small thermal printer, the most common",
+        "paperWidth80Hint": "Wide thermal printer",
+        "save": "Save",
+        "saving": "Saving…"
       }
     }
   }

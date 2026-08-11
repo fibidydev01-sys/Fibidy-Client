@@ -34,8 +34,11 @@ import { StatusTransaksiBadge } from '@/components/dashboard/kasir/kasir-badges'
 import { TransaksiDetailSheet } from '@/components/dashboard/kasir/transaksi-detail-sheet';
 import type { KasirTransaksiStatus } from '@/types/kasir';
 
+// BELUM_BAYAR ditaruh tepat setelah "Semua": itu satu-satunya status yang
+// menuntut tindakan, jadi ia harus paling mudah dijangkau.
 const FILTER_STATUS: Array<KasirTransaksiStatus | null> = [
   null,
+  'BELUM_BAYAR',
   'COMPLETED',
   'VOID',
   'REFUND',
@@ -195,7 +198,9 @@ export function RiwayatClient() {
                     minute: '2-digit',
                   })}
                   {' · '}
-                  {trx.paymentMethod}
+                  {/* Pesanan yang belum dibayar belum punya metode — menulis
+                      "null" di situ lebih buruk daripada menyebut keadaannya. */}
+                  {trx.paymentMethod ?? t('unpaidMethod')}
                   {' · '}
                   {t('itemCount', { jumlah: trx._count?.items ?? 0 })}
                 </p>
@@ -204,10 +209,14 @@ export function RiwayatClient() {
               <span
                 className={cn(
                   'shrink-0 font-semibold tabular-nums',
-                  // Transaksi VOID/REFUND dicoret: angkanya masih ada di
-                  // riwayat, tapi tidak lagi dihitung sebagai omzet.
-                  trx.status !== 'COMPLETED' &&
+                  // VOID/REFUND dicoret: angkanya masih ada di riwayat, tapi
+                  // tidak lagi dihitung sebagai omzet.
+                  // BELUM_BAYAR TIDAK dicoret — uangnya belum masuk, tapi
+                  // tagihannya masih hidup dan justru harus terbaca jelas.
+                  (trx.status === 'VOID' || trx.status === 'REFUND') &&
                     'text-muted-foreground line-through',
+                  trx.status === 'BELUM_BAYAR' &&
+                    'text-amber-600 dark:text-amber-400',
                 )}
               >
                 {formatPriceIDR(trx.grandTotal)}

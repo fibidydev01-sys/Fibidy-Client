@@ -76,6 +76,7 @@ import {
   useKycStatus,
 } from '@/hooks/dashboard/use-products';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
+import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
 import { productSchema, type ProductFormData } from '@/lib/shared/validations';
 import { getMaxImages } from '@/lib/shared/product-utils';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
@@ -215,6 +216,15 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
 
   const currentStepKey = stepKeys[currentStep] ?? stepKeys[0];
 
+  // [KASIR JASA — G7] Toko jasa murni hanya punya satu jenis yang masuk akal
+  // dibuat, dan step-details menyembunyikan pemilihnya. Nilai awalnya harus
+  // ikut menyesuaikan di sini: kalau tidak, pemilihnya tersembunyi sementara
+  // form diam-diam mengirim kind PRODUK, dan layanan yang dibuat toko laundry
+  // masuk ke katalog barang.
+  const { data: kasirConfig } = useKasirConfig();
+  const kindDefault: 'PRODUK' | 'JASA' =
+    kasirConfig?.dagangType === 'JASA' ? 'JASA' : 'PRODUK';
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -229,6 +239,13 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
       // baru, dibiarkan kosong supaya seller sadar mengisinya (atau tidak).
       stok: product?.stok,
       minStock: product?.minStock,
+      // [KASIR JASA] Produk lama memakai jenisnya sendiri. Produk baru
+      // mengikuti mode dagang toko — yang untuk toko PRODUK dan HYBRID tetap
+      // berarti PRODUK, jadi seller yang tidak peduli jasa mendapat form yang
+      // sama persis seperti sebelum fitur ini ada.
+      kind: product?.kind ?? kindDefault,
+      durasiLabel: product?.durasiLabel ?? undefined,
+      durasiJam: product?.durasiJam ?? undefined,
     },
   });
 
@@ -304,6 +321,13 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
               // sebagai OPNAME — dikirim hanya kalau field-nya memang diisi.
               ...(data.stok !== undefined && { stok: data.stok }),
               ...(data.minStock !== undefined && { minStock: data.minStock }),
+              // [KASIR JASA] `kind` sengaja TIDAK dikirim saat update —
+              // server menolak perubahannya, dan mengirim nilai yang sama
+              // pun hanya menambah peluang salah kirim tanpa manfaat.
+              ...(data.durasiLabel !== undefined && {
+                durasiLabel: data.durasiLabel,
+              }),
+              ...(data.durasiJam !== undefined && { durasiJam: data.durasiJam }),
             },
           },
           { onSuccess: () => router.back() },
@@ -349,6 +373,13 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
               // [KASIR] Stok awal > 0 tercatat sebagai StockLog 'IN' di server.
               ...(data.stok !== undefined && { stok: data.stok }),
               ...(data.minStock !== undefined && { minStock: data.minStock }),
+              // [KASIR JASA] Jenis hanya dikirim saat MEMBUAT. Untuk layanan,
+              // server mengabaikan stok/minStock dan tidak menulis StockLog.
+              ...(data.kind !== undefined && { kind: data.kind }),
+              ...(data.durasiLabel !== undefined && {
+                durasiLabel: data.durasiLabel,
+              }),
+              ...(data.durasiJam !== undefined && { durasiJam: data.durasiJam }),
             },
             {
               onSuccess: () => { router.push('/dashboard/products'); resolve(); },
@@ -369,6 +400,7 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           <StepDetails
             form={form}
             categories={categories}
+            isEditing={isEditing}
             fieldErrors={fieldErrors}
             onClearFieldError={handleClearFieldError}
           />

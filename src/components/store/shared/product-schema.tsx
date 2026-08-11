@@ -19,6 +19,8 @@ interface ProductSchemaProps {
     sku?: string | null;
     stock?: number | null;
     trackStock?: boolean;
+    /** [KASIR JASA] Menentukan Product vs Service di JSON-LD. */
+    kind?: 'PRODUK' | 'JASA' | null;
   };
   tenant: {
     name: string;

@@ -77,7 +77,10 @@
       },
       "info": {
         "priceContactSeller": "Price: Contact seller",
-        "discountBadge": "-{percent}%"
+        "discountBadge": "-{percent}%",
+        "jasaBadge": "Service",
+        "estimasiJam": "Approx. {nilai, plural, one {# hour} other {# hours}}",
+        "estimasiHari": "Approx. {nilai, plural, one {# day} other {# days}}"
       },
       "notFound": {
         "title": "Product Not Found",

@@ -26,12 +26,15 @@ import {
   ArrowLeft,
   Banknote,
   ChevronRight,
+  Clock,
   CreditCard,
   Gift,
   Loader2,
   Landmark,
   ShoppingCart,
   Trash2,
+  UserRound,
+  Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,7 +72,10 @@ import {
 import { QtyStepper } from '@/components/dashboard/kasir/qty-stepper';
 import { DiskonPicker } from '@/components/dashboard/kasir/diskon-picker';
 import { StrukDialog } from '@/components/dashboard/kasir/struk-dialog';
-import { GratisBadge } from '@/components/dashboard/kasir/kasir-badges';
+import {
+  GratisBadge,
+  KasirBadge,
+} from '@/components/dashboard/kasir/kasir-badges';
 import type { KasirPaymentMethod } from '@/types/kasir';
 
 const NOMINAL_CEPAT = [5000, 10000, 20000, 50000, 100000];
@@ -93,6 +99,8 @@ export function KeranjangClient() {
   const diskon = useKasirCartStore((s) => s.diskon);
   const paymentMethod = useKasirCartStore((s) => s.paymentMethod);
   const uangDiterima = useKasirCartStore((s) => s.uangDiterima);
+  const picNama = useKasirCartStore((s) => s.picNama);
+  const setPicNama = useKasirCartStore((s) => s.setPicNama);
   const increment = useKasirCartStore((s) => s.increment);
   const decrement = useKasirCartStore((s) => s.decrement);
   const clear = useKasirCartStore((s) => s.clear);
@@ -102,6 +110,11 @@ export function KeranjangClient() {
 
   const { data: promoAktif } = usePromoRulesAktif();
   const { mutate: buatTransaksi, isPending } = useCreateTransaksi();
+
+  // [JASA] Pesanan yang mengandung layanan boleh dicatat dulu, dibayar saat
+  // pelanggan mengambil. Pesanan barang murni tidak — itu piutang, dan
+  // piutang bukan fitur yang dibangun di sini (server menolaknya juga).
+  const adaJasa = lines.some((l) => l.kind === 'JASA');
 
   const [mode, setMode] = useState<'cart' | 'diskon'>('cart');
   const [konfirmasiKosong, setKonfirmasiKosong] = useState(false);
@@ -129,10 +142,8 @@ export function KeranjangClient() {
     !isPending &&
     (paymentMethod !== 'TUNAI' || (uangDiterima !== '' && kurang <= 0));
 
-  // ── Bayar ─────────────────────────────────────────────────────────────
-  const handleBayar = () => {
-    if (!bisaBayar) return;
-
+  // ── Bayar / catat pesanan ─────────────────────────────────────────────
+  const kirimTransaksi = (bayarNanti: boolean) => {
     buatTransaksi(
       {
         items: lines.map((l) => ({
@@ -143,8 +154,13 @@ export function KeranjangClient() {
         })),
         diskonPresetId: diskon?.id,
         diskonPersen: diskon?.persen ?? 0,
-        paymentMethod,
-        ...(paymentMethod === 'TUNAI' ? { uangDiterima: uangAngka } : {}),
+        ...(adaJasa && picNama.trim() ? { picNama: picNama.trim() } : {}),
+        ...(bayarNanti
+          ? { bayarNanti: true }
+          : {
+              paymentMethod,
+              ...(paymentMethod === 'TUNAI' ? { uangDiterima: uangAngka } : {}),
+            }),
       },
       {
         onSuccess: (hasil) => {
@@ -156,6 +172,16 @@ export function KeranjangClient() {
         onError: (err) => setGagal(getErrorMessage(err)),
       },
     );
+  };
+
+  const handleBayar = () => {
+    if (!bisaBayar) return;
+    kirimTransaksi(false);
+  };
+
+  const handleBayarNanti = () => {
+    if (lines.length === 0 || isPending) return;
+    kirimTransaksi(true);
   };
 
   const handleSelesai = () => {
@@ -317,7 +343,15 @@ export function KeranjangClient() {
               <div key={line.productId} className="rounded-xl border">
                 <div className="flex items-center gap-3 px-3 py-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{line.namaProduk}</p>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="truncate font-medium">{line.namaProduk}</p>
+                      {line.kind === 'JASA' && (
+                        <KasirBadge tone="muted">
+                          <Wrench className="h-2.5 w-2.5" aria-hidden />
+                          {line.durasiLabel || t('layananLabel')}
+                        </KasirBadge>
+                      )}
+                    </div>
                     <p className="text-sm tabular-nums text-muted-foreground">
                       {formatPriceIDR(line.hargaSatuan)} × {line.qty} ={' '}
                       <span className="font-medium text-foreground">
@@ -350,6 +384,32 @@ export function KeranjangClient() {
             );
           })}
         </div>
+
+        {/* [JASA] Petugas pengerjaan — satu isian untuk seluruh pesanan.
+            Muncul hanya kalau ada layanan; untuk pesanan barang murni field
+            ini tidak punya arti. */}
+        {adaJasa && (
+          <div className="rounded-xl border px-3 py-3">
+            <label
+              htmlFor="pic-nama"
+              className="flex items-center gap-1.5 text-sm font-medium"
+            >
+              <UserRound className="h-3.5 w-3.5" aria-hidden />
+              {t('picLabel')}
+            </label>
+            <Input
+              id="pic-nama"
+              value={picNama}
+              maxLength={60}
+              onChange={(e) => setPicNama(e.target.value)}
+              placeholder={t('picPlaceholder')}
+              className="mt-1.5"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t('picHelper')}
+            </p>
+          </div>
+        )}
 
         {/* Diskon */}
         <button
@@ -436,6 +496,22 @@ export function KeranjangClient() {
             t('pay', { nominal: formatPriceIDR(grandTotal) })
           )}
         </Button>
+
+        {/* [JASA] Jalur kedua: catat sekarang, bayar saat diambil. Ditaruh
+            di bawah tombol utama dan dengan gaya sekunder — mayoritas
+            transaksi tetap dibayar saat itu juga, dan tombol yang sama
+            menonjolnya akan memperlambat kasus yang paling sering. */}
+        {adaJasa && (
+          <Button
+            onClick={handleBayarNanti}
+            disabled={lines.length === 0 || isPending}
+            variant="outline"
+            className="mt-2 h-11 w-full gap-2"
+          >
+            <Clock className="h-4 w-4" aria-hidden />
+            {t('payLater')}
+          </Button>
+        )}
       </div>
 
       {/* Konfirmasi kosongkan — aksi tidak bisa dibatalkan */}

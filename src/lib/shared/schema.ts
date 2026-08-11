@@ -169,6 +169,7 @@ export function generateProductSchema(
     images?: string[];
     category?: string | null;
     fileKey?: string | null;
+    kind?: 'PRODUK' | 'JASA' | null;
   },
   tenant: {
     name: string;
@@ -189,6 +190,37 @@ export function generateProductSchema(
     .toISOString()
     .split('T')[0];
 
+  const offer = {
+    '@type': 'Offer',
+    url: productUrl,
+    priceCurrency,
+    price: product.price,
+    priceValidUntil,
+    availability: 'https://schema.org/InStock',
+    seller: { '@type': 'Organization', name: tenant.name, url: tenantUrl },
+  };
+
+  // [KASIR JASA] Layanan dan barang butuh tipe schema.org yang berbeda.
+  //
+  // Menandai potong rambut sebagai Product dengan itemCondition
+  // "NewCondition" bukan sekadar janggal — itu markup yang keliru, dan
+  // Google memvalidasinya. Service memakai `provider`, bukan brand/
+  // manufacturer, dan tidak punya kondisi barang sama sekali.
+  if (product.kind === 'JASA') {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      '@id': `${productUrl}/#service`,
+      name: product.name,
+      description: product.description || `${product.name} from ${tenant.name}`,
+      url: productUrl,
+      image: product.images?.[0] || getFullUrl(seoConfig.defaultOgImage),
+      serviceType: product.category || undefined,
+      provider: { '@type': 'Organization', name: tenant.name, url: tenantUrl },
+      offers: offer,
+    };
+  }
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -200,16 +232,7 @@ export function generateProductSchema(
     category: product.category || undefined,
     brand: { '@type': 'Brand', name: tenant.name },
     manufacturer: { '@type': 'Organization', name: tenant.name },
-    offers: {
-      '@type': 'Offer',
-      url: productUrl,
-      priceCurrency,
-      price: product.price,
-      priceValidUntil,
-      availability: 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      seller: { '@type': 'Organization', name: tenant.name, url: tenantUrl },
-    },
+    offers: { ...offer, itemCondition: 'https://schema.org/NewCondition' },
   };
 }
 

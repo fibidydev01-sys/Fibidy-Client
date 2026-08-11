@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Ban, Loader2, RotateCcw } from 'lucide-react';
+import { Ban, Clock, Loader2, RotateCcw, Wallet } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -50,6 +50,7 @@ import {
 } from '@/hooks/dashboard/use-kasir';
 import { StatusTransaksiBadge } from './kasir-badges';
 import { StrukDialog } from './struk-dialog';
+import { TerimaPembayaranDialog } from './terima-pembayaran-dialog';
 
 export function TransaksiDetailSheet({
   transaksiId,
@@ -71,6 +72,10 @@ export function TransaksiDetailSheet({
   const [alasan, setAlasan] = useState('');
   const [alasanError, setAlasanError] = useState<string | null>(null);
   const [strukOpen, setStrukOpen] = useState(false);
+  const [bayarOpen, setBayarOpen] = useState(false);
+  // Struk hasil pelunasan datang dari respons server, bukan dari query struk
+  // yang mungkin masih memegang versi "TANDA TERIMA" yang lama.
+  const [strukLunas, setStrukLunas] = useState<string | null>(null);
 
   const tutupAksi = () => {
     setAksi(null);
@@ -103,6 +108,12 @@ export function TransaksiDetailSheet({
   };
 
   const pending = voidPending || refundPending;
+
+  // Void pada pesanan yang belum dibayar secara teknis endpoint yang sama,
+  // tapi konsekuensinya berbeda: tidak ada uang yang ditarik kembali dan omzet
+  // tidak bergerak sedikit pun. Memakai kalimat "dikeluarkan dari rekap omzet"
+  // di situ akan membuat kasir mengira ada angka yang hilang.
+  const membatalkanPesanan = aksi === 'void' && trx?.status === 'BELUM_BAYAR';
 
   return (
     <>
@@ -169,6 +180,22 @@ export function TransaksiDetailSheet({
                             item.itemType === 'PROMO_FREE' ? 0 : item.hargaSatuan,
                           )}
                         </span>
+                        {item.itemKind === 'JASA' && item.estimasiSelesai && (
+                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" aria-hidden />
+                            {t('estimasi', {
+                              waktu: new Date(
+                                item.estimasiSelesai,
+                              ).toLocaleString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }),
+                            })}
+                            {item.picNama ? ` · ${item.picNama}` : ''}
+                          </span>
+                        )}
                       </span>
                       <span className="shrink-0 tabular-nums">
                         {formatPriceIDR(item.subtotal)}
@@ -201,7 +228,7 @@ export function TransaksiDetailSheet({
                   </div>
                   <div className="flex justify-between pt-1">
                     <dt className="text-muted-foreground">{t('method')}</dt>
-                    <dd>{trx.paymentMethod}</dd>
+                    <dd>{trx.paymentMethod ?? t('unpaidMethod')}</dd>
                   </div>
                   {trx.uangDiterima != null && (
                     <>
@@ -223,18 +250,36 @@ export function TransaksiDetailSheet({
 
                 {/* Aksi */}
                 <div className="space-y-2 border-t pt-4">
+                  {/* [JASA] Aksi paling penting untuk pesanan yang belum
+                      dibayar, jadi ia berdiri sendiri di atas dan berwarna
+                      penuh — bukan berdesakan dengan Void/Refund. */}
+                  {trx.status === 'BELUM_BAYAR' && (
+                    <Button
+                      className="w-full gap-2"
+                      onClick={() => setBayarOpen(true)}
+                    >
+                      <Wallet className="h-4 w-4" aria-hidden />
+                      {t('terimaPembayaran')}
+                    </Button>
+                  )}
+
                   <Button
                     variant="outline"
                     className="w-full"
                     onClick={() => setStrukOpen(true)}
                     disabled={!struk}
                   >
-                    {t('viewStruk')}
+                    {trx.status === 'BELUM_BAYAR'
+                      ? t('viewTandaTerima')
+                      : t('viewStruk')}
                   </Button>
 
                   {/* Void/refund hanya masuk akal untuk transaksi yang masih
                       berlaku — status lain tidak menampilkan tombolnya sama
-                      sekali, bukan menampilkan tombol yang pasti ditolak. */}
+                      sekali, bukan menampilkan tombol yang pasti ditolak.
+                      Refund TIDAK ditawarkan untuk pesanan belum bayar: tidak
+                      ada uang yang pernah diterima untuk dikembalikan, dan
+                      yang dimaksud kasir hampir pasti "batal pesanan". */}
                   {trx.status === 'COMPLETED' && (
                     <div className="grid grid-cols-2 gap-2">
                       <Button
@@ -255,6 +300,17 @@ export function TransaksiDetailSheet({
                       </Button>
                     </div>
                   )}
+
+                  {trx.status === 'BELUM_BAYAR' && (
+                    <Button
+                      variant="outline"
+                      className="w-full gap-1.5"
+                      onClick={() => setAksi('void')}
+                    >
+                      <Ban className="h-3.5 w-3.5" aria-hidden />
+                      {t('batalPesanan')}
+                    </Button>
+                  )}
                 </div>
               </>
             )}
@@ -267,12 +323,18 @@ export function TransaksiDetailSheet({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {aksi === 'void' ? t('voidConfirmTitle') : t('refundConfirmTitle')}
+              {membatalkanPesanan
+                ? t('batalConfirmTitle')
+                : aksi === 'void'
+                  ? t('voidConfirmTitle')
+                  : t('refundConfirmTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {aksi === 'void'
-                ? t('voidConfirmDescription')
-                : t('refundConfirmDescription')}
+              {membatalkanPesanan
+                ? t('batalConfirmDescription')
+                : aksi === 'void'
+                  ? t('voidConfirmDescription')
+                  : t('refundConfirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -326,6 +388,32 @@ export function TransaksiDetailSheet({
           teks={struk.teks}
           nomorOrder={struk.nomorOrder}
           variant="lihat"
+        />
+      )}
+
+      {/* Struk lunas: dibuka otomatis setelah pembayaran diterima, memakai
+          teks dari respons pelunasan — bukan dari cache struk tanda terima. */}
+      {strukLunas && trx && (
+        <StrukDialog
+          open
+          onOpenChange={(o) => !o && setStrukLunas(null)}
+          teks={strukLunas}
+          nomorOrder={trx.nomorOrder}
+          onSelesai={() => {
+            setStrukLunas(null);
+            onClose();
+          }}
+        />
+      )}
+
+      {trx && trx.status === 'BELUM_BAYAR' && (
+        <TerimaPembayaranDialog
+          open={bayarOpen}
+          onOpenChange={setBayarOpen}
+          transaksiId={trx.id}
+          nomorOrder={trx.nomorOrder}
+          grandTotal={trx.grandTotal}
+          onLunas={(s) => setStrukLunas(s)}
         />
       )}
     </>

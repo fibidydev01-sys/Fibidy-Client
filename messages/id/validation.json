@@ -29,7 +29,10 @@
       "stokInteger": "Stok harus bilangan bulat",
       "stokNegative": "Stok tidak boleh negatif",
       "minStockInteger": "Stok minimum harus bilangan bulat",
-      "minStockNegative": "Stok minimum tidak boleh negatif"
+      "minStockNegative": "Stok minimum tidak boleh negatif",
+      "durasiLabelMaxLength": "Label durasi maksimal {max} karakter",
+      "durasiJamInteger": "Estimasi durasi harus bilangan bulat jam",
+      "durasiJamNegative": "Estimasi durasi tidak boleh negatif"
     },
     "store": {
       "slugTaken": "URL ini sudah dipakai",

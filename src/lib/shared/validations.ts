@@ -112,6 +112,21 @@ export const createProductSchema = (t: TranslateFn) =>
       .int(t('validation.product.minStockInteger'))
       .min(0, t('validation.product.minStockNegative'))
       .optional(),
+
+    // ── [KASIR JASA] ────────────────────────────────────────────────
+    // kind menentukan field mana yang berlaku: stok untuk barang, durasi
+    // untuk layanan. Form menyembunyikan yang tidak relevan, dan server
+    // mengabaikannya kalau tetap terkirim.
+    kind: z.enum(['PRODUK', 'JASA']).optional(),
+    durasiLabel: z
+      .string()
+      .max(50, t('validation.product.durasiLabelMaxLength', { max: 50 }))
+      .optional(),
+    durasiJam: z
+      .number()
+      .int(t('validation.product.durasiJamInteger'))
+      .min(0, t('validation.product.durasiJamNegative'))
+      .optional(),
   });
 
 export type ProductFormData = z.infer<ReturnType<typeof createProductSchema>>;
@@ -195,5 +210,14 @@ export const productSchema = z.object({
     .number()
     .int('Stok minimum harus bilangan bulat')
     .min(0, 'Stok minimum tidak boleh negatif')
+    .optional(),
+
+  // ── [KASIR JASA] ──────────────────────────────────────────────────
+  kind: z.enum(['PRODUK', 'JASA']).optional(),
+  durasiLabel: z.string().max(50, 'Label durasi maksimal 50 karakter').optional(),
+  durasiJam: z
+    .number()
+    .int('Durasi harus bilangan bulat jam')
+    .min(0, 'Durasi tidak boleh negatif')
     .optional(),
 });

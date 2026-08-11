@@ -40,6 +40,7 @@ import {
   ExternalLink,
   Percent,
   Gift,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -55,6 +56,7 @@ import { SubscriptionPageContent } from '@/components/dashboard/subscription/sub
 // sesekali oleh pemilik toko, bukan pekerjaan harian kasir.
 import { KasirDiskonPresetSection } from '@/components/dashboard/settings/kasir-diskon-preset';
 import { KasirPromoSection } from '@/components/dashboard/settings/kasir-promo';
+import { KasirModeDagangSection } from '@/components/dashboard/settings/kasir-mode-dagang';
 
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
@@ -77,6 +79,7 @@ type SettingId =
   | 'subscription'
   | 'password'
   | 'language'
+  | 'kasir-mode'
   | 'diskon-preset'
   | 'promo'
   | 'about-fibidy';
@@ -207,6 +210,15 @@ export function SettingsClient() {
       // [KASIR] Diskon & Promo. Kasir hanya MEMILIH preset saat transaksi;
       // pembuatan aturannya sesekali saja — itu persis definisi Pengaturan.
       kasir: [
+        // Paling atas karena ia yang menentukan bentuk seluruh modul kasir —
+        // katalog mana yang tampil, tab mana yang ada. Preset diskon dan promo
+        // adalah penyetelan di dalam bentuk itu.
+        {
+          id: 'kasir-mode',
+          icon: SlidersHorizontal,
+          labelKey: 'kasir.mode.label',
+          descriptionKey: 'kasir.mode.description',
+        },
         {
           id: 'diskon-preset',
           icon: Percent,
@@ -297,6 +309,7 @@ export function SettingsClient() {
       subscription: <SubscriptionPageContent onBack={handleBack} />,
       password: <PasswordSection onBack={handleBack} />,
       language: <LanguageSection onBack={handleBack} />,
+      'kasir-mode': <KasirModeDagangSection onBack={handleBack} />,
       'diskon-preset': <KasirDiskonPresetSection onBack={handleBack} />,
       promo: <KasirPromoSection onBack={handleBack} />,
       'about-fibidy': null,

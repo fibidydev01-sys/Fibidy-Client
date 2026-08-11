@@ -14,23 +14,65 @@
 // server/klien pada layar yang isinya cuma tujuh batang.
 // ============================================================================
 
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   AlertCircle,
   BarChart3,
+  ClipboardList,
   RefreshCw,
   TrendingUp,
+  Wallet,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/shared/utils';
-import { formatPriceIDR } from '@/lib/shared/format';
+import { formatDateShort, formatPriceIDR } from '@/lib/shared/format';
 import { useAnalisaDiskon, useKasirRingkasan } from '@/hooks/dashboard/use-kasir';
 import { KasirPageHeader } from '@/components/dashboard/kasir/kasir-page-header';
 import { StokBadge } from '@/components/dashboard/kasir/kasir-badges';
-import type { OmzetChartPoint } from '@/types/kasir';
+import type { OmzetChartPoint, TopProduk } from '@/types/kasir';
+
+/// Komponen level modul, bukan fungsi di dalam render: dua daftar terlaris
+/// memakai tata letak yang sama persis, dan mendefinisikannya di dalam
+/// komponen induk membuat React memasang ulang seluruh daftar tiap render.
+function TopList({
+  judul,
+  baris,
+  t,
+}: {
+  judul: string;
+  baris: TopProduk[];
+  t: (key: string, values?: Record<string, string | number>) => string;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {judul}
+      </p>
+      <ol className="space-y-2">
+        {baris.map((p, i) => (
+          <li key={p.namaProduk} className="flex items-center gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold">
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {p.namaProduk}
+            </span>
+            <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+              {t('qtySold', { qty: p.totalQty })}
+            </span>
+            <span className="shrink-0 text-sm font-medium tabular-nums">
+              {formatPriceIDR(p.totalOmzet)}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 // ── Grafik batang 7 hari ────────────────────────────────────────────────────
 
@@ -77,6 +119,7 @@ function ChartTujuhHari({ data }: { data: OmzetChartPoint[] }) {
 
 export function LaporanClient() {
   const t = useTranslations('dashboard.kasir.laporan');
+  const locale = useLocale();
 
   const { data, isLoading, isError, refetch, isFetching } = useKasirRingkasan();
   const { data: analisa } = useAnalisaDiskon();
@@ -122,12 +165,73 @@ export function LaporanClient() {
   }
 
   const omzet = data?.omzet;
-  const topProduk = data?.topProduk ?? [];
+  const topBarang = data?.topProduk?.barang ?? [];
+  const topLayanan = data?.topProduk?.layanan ?? [];
   const stok = data?.laporanStok;
+  const belumDibayar = data?.pesananBelumDibayar;
+  const pekerjaan = data?.pekerjaanTertunda;
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
       <KasirPageHeader title={t('title')} subtitle={t('subtitle')} />
+
+      {/* [J5] Dua hal yang butuh TINDAKAN, ditaruh di atas omzet.
+          Omzet adalah kabar; ini adalah pekerjaan. Keduanya hanya muncul
+          kalau angkanya bukan nol — kartu "0 pesanan belum dibayar" yang
+          selalu ada tiap hari melatih mata untuk melewatinya. */}
+      {(!!belumDibayar?.jumlah || !!pekerjaan?.total) && (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {!!belumDibayar?.jumlah && (
+            <Link
+              href="/dashboard/kasir/riwayat"
+              className="rounded-xl border border-amber-300 bg-amber-50 p-3 transition-colors hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:hover:bg-amber-950/60"
+            >
+              <p className="flex items-center gap-1.5 text-xs font-medium text-amber-900 dark:text-amber-200">
+                <Wallet className="h-3.5 w-3.5" aria-hidden />
+                {t('belumDibayarTitle')}
+              </p>
+              <p className="mt-1 text-lg font-bold tabular-nums text-amber-900 dark:text-amber-100">
+                {formatPriceIDR(belumDibayar.nilai)}
+              </p>
+              <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                {t('belumDibayarCount', { jumlah: belumDibayar.jumlah })}
+                {belumDibayar.terlamaAt && (
+                  <>
+                    {' · '}
+                    {t('belumDibayarTerlama', {
+                      tanggal: formatDateShort(belumDibayar.terlamaAt, locale),
+                    })}
+                  </>
+                )}
+              </p>
+            </Link>
+          )}
+
+          {!!pekerjaan?.total && (
+            <Link
+              href="/dashboard/kasir/papan"
+              className="rounded-xl border p-3 transition-colors hover:bg-muted/50"
+            >
+              <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <ClipboardList className="h-3.5 w-3.5" aria-hidden />
+                {t('pekerjaanTitle')}
+              </p>
+              <p className="mt-1 text-lg font-bold tabular-nums">
+                {pekerjaan.total}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {pekerjaan.terlambat > 0 ? (
+                  <span className="font-medium text-destructive">
+                    {t('pekerjaanTerlambat', { jumlah: pekerjaan.terlambat })}
+                  </span>
+                ) : (
+                  t('pekerjaanOnTrack')
+                )}
+              </p>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Omzet hari / minggu / bulan */}
       <Card>
@@ -147,6 +251,13 @@ export function LaporanClient() {
           ))}
         </CardContent>
       </Card>
+
+      {/* [J5] Kalimat ini penting untuk toko jasa: pesanan yang masuk Senin
+          dan dibayar Rabu masuk omzet RABU. Tanpa penjelasan ini, seller akan
+          mengira angka hari Senin-nya hilang. */}
+      <p className="-mt-2 px-1 text-[11px] leading-snug text-muted-foreground">
+        {t('basisKas')}
+      </p>
 
       {/* Tren 7 hari */}
       <Card>
@@ -172,41 +283,31 @@ export function LaporanClient() {
         </CardContent>
       </Card>
 
-      {/* Produk terlaris */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" aria-hidden />
-            {t('topProdukTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {topProduk.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              {t('topProdukEmpty')}
-            </p>
-          ) : (
-            <ol className="space-y-2">
-              {topProduk.map((p, i) => (
-                <li key={p.namaProduk} className="flex items-center gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-sm">
-                    {p.namaProduk}
-                  </span>
-                  <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                    {t('qtySold', { qty: p.totalQty })}
-                  </span>
-                  <span className="shrink-0 text-sm font-medium tabular-nums">
-                    {formatPriceIDR(p.totalOmzet)}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </CardContent>
-      </Card>
+      {/* Terlaris — barang dan layanan berdiri sendiri-sendiri. Daftar yang
+          seluruhnya kosong tidak digambar sama sekali; toko produk murni
+          tidak perlu melihat judul "Layanan terlaris" yang selamanya kosong
+          (G7 dalam bentuk lain). */}
+      {(topBarang.length > 0 || topLayanan.length > 0) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <BarChart3
+                className="h-4 w-4 text-muted-foreground"
+                aria-hidden
+              />
+              {t('topProdukTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {topBarang.length > 0 && (
+              <TopList judul={t('topBarang')} baris={topBarang} t={t} />
+            )}
+            {topLayanan.length > 0 && (
+              <TopList judul={t('topLayanan')} baris={topLayanan} t={t} />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Laporan stok ringkas */}
       <Card>

@@ -64,9 +64,15 @@ export interface Product {
   // ── [KASIR] Inventory ─────────────────────
   // Satu stok dipakai bersama storefront dan kasir — tidak ada angka kedua
   // yang perlu disinkronkan. Opsional karena endpoint publik lama tidak
-  // selalu menyertakannya.
+  // selalu menyertakannya. Untuk kind = JASA keduanya diabaikan.
   stok?: number;
   minStock?: number;
+
+  // ── [KASIR JASA] Barang atau layanan ──────
+  // Tidak bisa diubah setelah produk dibuat — server menolaknya.
+  kind?: 'PRODUK' | 'JASA';
+  durasiLabel?: string | null;
+  durasiJam?: number | null;
 
   // ── File fields (nullable) ────────────────
   currency?: string;
@@ -103,6 +109,12 @@ export interface CreateProductInput {
   // tetap bisa dibuat tanpa stok, dan minStock punya default di server.
   stok?: number;
   minStock?: number;
+
+  // [KASIR JASA] Jenis entri. Hanya dikirim saat MEMBUAT — mengirimnya di
+  // update dengan nilai berbeda akan ditolak server.
+  kind?: 'PRODUK' | 'JASA';
+  durasiLabel?: string;
+  durasiJam?: number;
 }
 
 export type UpdateProductInput = Partial<CreateProductInput>;

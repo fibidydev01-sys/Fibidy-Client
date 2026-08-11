@@ -25,11 +25,14 @@ import { useTranslations } from 'next-intl';
 import {
   BarChart3,
   Boxes,
+  ClipboardList,
   History,
   ShoppingCart,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
+import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
+import type { KasirDagangType } from '@/types/kasir';
 
 interface KasirTab {
   href: string;
@@ -37,12 +40,31 @@ interface KasirTab {
   icon: LucideIcon;
   /** true = hanya aktif pada path persis, bukan prefix. */
   exact?: boolean;
+  /**
+   * [G7] Mode dagang yang boleh melihat tab ini. Tidak diisi = selalu tampil.
+   *
+   * Menyembunyikan, bukan mengosongkan: tab Stok pada toko laundry akan
+   * selamanya kosong karena layanan tidak punya persediaan, dan menu yang
+   * selalu kosong membuat seller mengira datanya hilang.
+   */
+  untuk?: KasirDagangType[];
 }
 
 const TABS: KasirTab[] = [
   { href: '/dashboard/kasir', labelKey: 'jual', icon: ShoppingCart, exact: true },
+  {
+    href: '/dashboard/kasir/papan',
+    labelKey: 'papan',
+    icon: ClipboardList,
+    untuk: ['JASA', 'HYBRID'],
+  },
   { href: '/dashboard/kasir/riwayat', labelKey: 'riwayat', icon: History },
-  { href: '/dashboard/kasir/stok', labelKey: 'stok', icon: Boxes },
+  {
+    href: '/dashboard/kasir/stok',
+    labelKey: 'stok',
+    icon: Boxes,
+    untuk: ['PRODUK', 'HYBRID'],
+  },
   { href: '/dashboard/kasir/laporan', labelKey: 'laporan', icon: BarChart3 },
 ];
 
@@ -56,12 +78,22 @@ export function KasirTabs() {
   const t = useTranslations('dashboard.kasir.tabs');
   const pathname = stripLocalePrefix(usePathname());
 
+  // Sebelum config termuat, dagangType diasumsikan PRODUK — nilai default
+  // kolomnya di server, dan perilaku kasir sebelum fitur jasa ada. Efeknya
+  // tab bersyarat muncul sesaat setelah config datang, bukan berkedip hilang.
+  const { data: config } = useKasirConfig();
+  const dagangType = config?.dagangType ?? 'PRODUK';
+
+  const tabsTampil = TABS.filter(
+    (tab) => !tab.untuk || tab.untuk.includes(dagangType),
+  );
+
   return (
     <nav
       className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
       aria-label={t('ariaLabel')}
     >
-      {TABS.map((tab) => {
+      {tabsTampil.map((tab) => {
         // Tab "Jual" hanya aktif pada path persis — tanpa ini ia ikut menyala
         // di /riwayat, /stok, dan /laporan yang semuanya berawalan sama.
         const active = tab.exact

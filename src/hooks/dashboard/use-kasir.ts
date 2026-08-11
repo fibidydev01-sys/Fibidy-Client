@@ -26,11 +26,13 @@ import { kasirApi } from '@/lib/api/kasir';
 import { getErrorMessage } from '@/lib/api/client';
 import { queryKeys } from '@/lib/shared/query-keys';
 import type {
+  BayarTransaksiInput,
   CreateDiskonPresetInput,
   CreatePromoRuleInput,
   CreateTransaksiInput,
   QueryTransaksiParams,
   UpdateKasirConfigInput,
+  UpdateStatusItemInput,
 } from '@/types/kasir';
 
 // Data kasir berubah terus (stok, omzet), tapi tidak perlu se-fresh milidetik.
@@ -88,6 +90,29 @@ export function useKasirCategories() {
   return useQuery({
     queryKey: queryKeys.kasir.categories(),
     queryFn: () => kasirApi.getCategories(),
+    staleTime: STALE_SEDANG,
+    retry: retryKecualiKlien,
+  });
+}
+
+// ── Layanan ─────────────────────────────────────────────────────────────────
+
+export function useKasirLayanan(params?: {
+  search?: string;
+  category?: string;
+}) {
+  return useQuery({
+    queryKey: queryKeys.kasir.layanan(params as Record<string, unknown>),
+    queryFn: () => kasirApi.getLayanan(params),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+export function useKasirLayananCategories() {
+  return useQuery({
+    queryKey: queryKeys.kasir.layananCategories(),
+    queryFn: () => kasirApi.getLayananCategories(),
     staleTime: STALE_SEDANG,
     retry: retryKecualiKlien,
   });
@@ -309,6 +334,22 @@ export function useStruk(id: string | undefined) {
   });
 }
 
+/// [JASA] Pelunasan pesanan. Meng-invalidate seluruh cabang kasir karena
+/// pembayaran menggeser omzet, papan kerja, dan daftar riwayat sekaligus.
+export function useBayarTransaksi() {
+  const t = useTranslations('dashboard.kasir.toast');
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: BayarTransaksiInput }) =>
+      kasirApi.bayarTransaksi(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
+      toast.success(t('bayarDone'));
+    },
+  });
+}
+
 export function useVoidTransaksi() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
@@ -335,6 +376,41 @@ export function useRefundTransaksi() {
       queryClient.invalidateQueries({ queryKey: queryKeys.kasir.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
       toast.success(t('refundDone'));
+    },
+  });
+}
+
+// ── Papan Kerja ─────────────────────────────────────────────────────────────
+
+/// [JASA] Papan tidak di-cache di server (lihat KasirPapanService), jadi
+/// staleTime-nya pendek: papan yang menampilkan keadaan basi lebih berbahaya
+/// daripada satu permintaan tambahan.
+export function usePapanKerja(params?: {
+  status?: 'BELUM_BAYAR' | 'COMPLETED';
+}) {
+  return useQuery({
+    queryKey: queryKeys.kasir.papan(params),
+    queryFn: () => kasirApi.getPapan(params),
+    staleTime: STALE_PENDEK,
+    retry: retryKecualiKlien,
+  });
+}
+
+/// [JASA] Menggeser satu kartu. Yang di-invalidate cuma cabang papan dan
+/// detail transaksinya — status pengerjaan tidak menyentuh uang, jadi
+/// membatalkan cache omzet dan riwayat di sini hanya membuat layar lain
+/// berkedip tanpa alasan (G2: dua sumbu, tidak saling menyetir).
+export function useUpdateStatusItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateStatusItemInput) =>
+      kasirApi.updateStatusItem(input),
+    onSuccess: (_hasil, input) => {
+      queryClient.invalidateQueries({ queryKey: ['kasir', 'papan'] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.kasir.transaksi(input.transaksiId),
+      });
     },
   });
 }

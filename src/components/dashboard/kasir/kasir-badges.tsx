@@ -94,8 +94,16 @@ export function StatusTransaksiBadge({
 }) {
   const t = useTranslations('dashboard.kasir.status');
 
+  // BELUM_BAYAR = kuning: butuh perhatian tapi bukan masalah — ada uang yang
+  // masih harus ditagih. Beda dari VOID (merah, sesuatu dibatalkan).
   const tone: Tone =
-    status === 'VOID' ? 'danger' : status === 'REFUND' ? 'info' : 'success';
+    status === 'VOID'
+      ? 'danger'
+      : status === 'REFUND'
+        ? 'info'
+        : status === 'BELUM_BAYAR'
+          ? 'warning'
+          : 'success';
 
   return (
     <KasirBadge tone={tone} className={className}>

@@ -23,6 +23,9 @@ export const queryKeys = {
     products: (params?: Record<string, unknown>) =>
       ['kasir', 'products', params ?? {}] as const,
     categories: () => ['kasir', 'categories'] as const,
+    layanan: (params?: Record<string, unknown>) =>
+      ['kasir', 'layanan', params ?? {}] as const,
+    layananCategories: () => ['kasir', 'layanan', 'categories'] as const,
     /** Laporan stok — dipakai halaman Kelola Stok dan kartu dashboard. */
     stock: () => ['kasir', 'stock'] as const,
     stockLog: (productId: string, params?: Record<string, unknown>) =>
@@ -35,6 +38,10 @@ export const queryKeys = {
     transaksi: (id: string) => ['kasir', 'transaksi', 'detail', id] as const,
     struk: (id: string) => ['kasir', 'transaksi', 'struk', id] as const,
     dashboard: () => ['kasir', 'dashboard'] as const,
+    /** [JASA] Papan Kerja. Params ikut jadi bagian key supaya filter status
+     *  tidak saling menimpa cache-nya. */
+    papan: (params?: Record<string, unknown>) =>
+      ['kasir', 'papan', params ?? {}] as const,
     omzet: () => ['kasir', 'dashboard', 'omzet'] as const,
     topProduk: (limit?: number) =>
       ['kasir', 'dashboard', 'top-produk', limit ?? 5] as const,

@@ -41,6 +41,29 @@ export function getProductPricing(product: Pick<Product, 'price' | 'comparePrice
 }
 
 // ==========================================
+// [KASIR JASA] DURASI LAYANAN
+// ==========================================
+
+/**
+ * "48 jam" jadi "2 hari" — hanya kalau kelipatan hari penuh.
+ *
+ * "1 hari 6 jam" justru lebih sulit dibaca daripada "30 jam" saat kasir
+ * menyebutkannya ke pelanggan, jadi konversinya sengaja tidak dipaksakan.
+ *
+ * Tinggal di sini, bukan di komponen, karena dipakai tiga tempat: baris
+ * layanan di kasir, halaman produk di etalase, dan kartu produk di dashboard.
+ * Tiga salinan aturan pembulatan yang sama akan berbeda begitu salah satunya
+ * disentuh.
+ */
+export function formatDurasiLayanan(
+  jam: number | null | undefined,
+): { nilai: number; satuan: 'jam' | 'hari' } | null {
+  if (jam == null || jam <= 0) return null;
+  if (jam >= 24 && jam % 24 === 0) return { nilai: jam / 24, satuan: 'hari' };
+  return { nilai: jam, satuan: 'jam' };
+}
+
+// ==========================================
 // SHOW PRICE
 // ==========================================
 

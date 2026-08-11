@@ -100,6 +100,57 @@ export function formatDateShort(
   }).format(parsed);
 }
 
+/**
+ * Jarak waktu dalam kata: "3 jam", "2 hari".
+ *
+ * Menerima MENIT, bukan tanggal — fungsinya jadi murni, dan yang membaca jam
+ * adalah server. Itu disengaja: jam perangkat sering meleset, dan komponen
+ * yang memanggil Date.now() saat render menghasilkan tampilan yang berubah
+ * setiap kali React kebetulan me-render ulang.
+ *
+ * Mengembalikan BESARANNYA saja tanpa arah — pemanggil yang memutuskan
+ * membungkusnya jadi "selesai dalam 3 jam" atau "terlambat 3 jam", karena
+ * kalimat itu berbeda per konteks dan hanya i18n yang boleh menyusunnya.
+ *
+ * Memakai Intl.RelativeTimeFormat bawaan platform, bukan pustaka tanggal:
+ * satu-satunya kebutuhan di sini adalah dua kata, dan itu tidak sepadan
+ * dengan menambah dependensi beserta bundel locale-nya.
+ *
+ * @param menit  Selisih menit; tandanya diabaikan
+ * @param locale BCP 47 locale tag. Default 'en-US'.
+ */
+export function formatJarakWaktu(
+  menit: number | null | undefined,
+  locale: string = DEFAULT_LOCALE,
+): string {
+  if (menit == null || !Number.isFinite(menit)) return '-';
+
+  const detik = Math.abs(menit) * 60;
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'always' });
+
+  const satuan: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+    ['day', 86400],
+    ['hour', 3600],
+    ['minute', 60],
+    ['second', 1],
+  ];
+
+  const [unit, dalamDetik] =
+    satuan.find(([, batas]) => detik >= batas) ?? satuan[satuan.length - 1];
+  const nilai = Math.max(1, Math.round(detik / dalamDetik));
+
+  // formatToParts memecah "in 3 hours" jadi [literal "in ", integer "3",
+  // literal " hours"]. Membuang literal PEMBUKA menyisakan "3 hours" tanpa
+  // menebak-nebak kata depan tiap bahasa lewat regex.
+  const parts = rtf.formatToParts(nilai, unit);
+  const mulai = parts[0]?.type === 'literal' ? 1 : 0;
+  return parts
+    .slice(mulai)
+    .map((p) => p.value)
+    .join('')
+    .trim();
+}
+
 // ==========================================
 // WHATSAPP LINK
 // ==========================================

@@ -77,7 +77,10 @@
       },
       "info": {
         "priceContactSeller": "Harga: Hubungi penjual",
-        "discountBadge": "-{percent}%"
+        "discountBadge": "-{percent}%",
+        "jasaBadge": "Layanan",
+        "estimasiJam": "Estimasi {nilai} jam",
+        "estimasiHari": "Estimasi {nilai} hari"
       },
       "notFound": {
         "title": "Produk Tidak Ditemukan",

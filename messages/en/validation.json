@@ -29,7 +29,10 @@
       "stokInteger": "Stock must be a whole number",
       "stokNegative": "Stock cannot be negative",
       "minStockInteger": "Minimum stock must be a whole number",
-      "minStockNegative": "Minimum stock cannot be negative"
+      "minStockNegative": "Minimum stock cannot be negative",
+      "durasiLabelMaxLength": "Duration label must be at most {max} characters",
+      "durasiJamInteger": "Duration estimate must be a whole number of hours",
+      "durasiJamNegative": "Duration estimate cannot be negative"
     },
     "store": {
       "slugTaken": "This URL is already taken",

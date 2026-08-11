@@ -183,6 +183,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           comparePrice: product.comparePrice,
           images: product.images,
           category: product.category,
+          // [KASIR JASA] Menentukan JSON-LD memakai Service atau Product.
+          kind: product.kind,
         }}
         tenant={{
           name: tenant.name,

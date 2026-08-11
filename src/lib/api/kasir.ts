@@ -11,12 +11,15 @@ import { api, ApiRequestError } from './client';
 import type { PaginatedResponse } from '@/types/api';
 import type {
   AnalisaDiskon,
+  BayarTransaksiInput,
+  BayarTransaksiResult,
   CreateDiskonPresetInput,
   CreatePromoRuleInput,
   CreateTransaksiInput,
   CreateTransaksiResult,
   DiskonPreset,
   KasirConfig,
+  KasirLayananResponse,
   KasirProductsResponse,
   KasirRingkasan,
   KasirTransaksi,
@@ -24,6 +27,7 @@ import type {
   LaporanStok,
   OmzetSummary,
   OpnameResult,
+  PapanKerja,
   PromoRule,
   PromoRuleAktif,
   QueryTransaksiParams,
@@ -31,8 +35,10 @@ import type {
   StockLog,
   StockReport,
   StrukResponse,
-  TopProduk,
+  TopProdukTerpisah,
   UpdateKasirConfigInput,
+  UpdateStatusItemInput,
+  UpdateStatusItemResult,
 } from '@/types/kasir';
 
 /**
@@ -66,6 +72,23 @@ export const kasirApi = {
     );
     return res.categories ?? [];
   },
+
+  // ── Layanan (read-only; CRUD tetap lewat /products) ─────────────
+  getLayanan: (params?: {
+    search?: string;
+    category?: string;
+  }): Promise<KasirLayananResponse> => api.get('/kasir/layanan', { params }),
+
+  getLayananCategories: async (): Promise<string[]> => {
+    const res = await api.get<{ categories: string[] }>(
+      '/kasir/layanan/categories',
+    );
+    return res.categories ?? [];
+  },
+
+  // ── Papan Kerja ─────────────────────────────────────────────────
+  getPapan: (params?: { status?: 'BELUM_BAYAR' | 'COMPLETED' }) =>
+    api.get<PapanKerja>('/kasir/papan', { params }),
 
   // ── Stok ────────────────────────────────────────────────────────
   getStockReport: (): Promise<StockReport> => api.get('/kasir/stok'),
@@ -131,6 +154,29 @@ export const kasirApi = {
   getStruk: (id: string): Promise<StrukResponse> =>
     api.get(`/kasir/transaksi/${id}/struk`),
 
+  /** [JASA] Lunasi pesanan yang berstatus BELUM_BAYAR. */
+  bayarTransaksi: (
+    id: string,
+    data: BayarTransaksiInput,
+  ): Promise<BayarTransaksiResult> =>
+    api.patch(`/kasir/transaksi/${id}/bayar`, data),
+
+  /**
+   * [JASA] Menggeser satu kartu di Papan Kerja.
+   *
+   * Jalurnya lewat transaksi, bukan /kasir/papan, karena yang ditulis adalah
+   * baris item milik sebuah pesanan — dan servernya harus memeriksa status
+   * pembayaran pesanan itu sebelum mengizinkan DIAMBIL.
+   */
+  updateStatusItem: ({
+    transaksiId,
+    itemId,
+    status,
+  }: UpdateStatusItemInput): Promise<UpdateStatusItemResult> =>
+    api.patch(`/kasir/transaksi/${transaksiId}/item/${itemId}/status`, {
+      status,
+    }),
+
   voidTransaksi: (id: string, alasan?: string): Promise<KasirTransaksi> =>
     api.patch(`/kasir/transaksi/${id}/void`, { alasan }),
 
@@ -145,7 +191,7 @@ export const kasirApi = {
 
   getOmzet: (): Promise<OmzetSummary> => api.get('/kasir/dashboard/omzet'),
 
-  getTopProduk: (limit?: number): Promise<TopProduk[]> =>
+  getTopProduk: (limit?: number): Promise<TopProdukTerpisah> =>
     api.get('/kasir/dashboard/top-produk', { params: { limit } }),
 
   getAnalisaDiskon: (): Promise<AnalisaDiskon> =>

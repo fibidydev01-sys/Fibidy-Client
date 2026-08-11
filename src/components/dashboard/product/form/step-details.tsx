@@ -58,12 +58,20 @@ import {
 } from '@/components/ui/combobox';
 import { cn } from '@/lib/shared/utils';
 import { FEATURES } from '@/lib/config/features';
+import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
 import type { ProductFormData } from '@/lib/shared/validations';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface StepDetailsProps {
   form: UseFormReturn<ProductFormData>;
   categories?: string[];
+  /**
+   * [KASIR JASA] true saat mengedit produk yang sudah ada. Jenis
+   * (barang/layanan) dikunci di mode ini karena server menolak
+   * perubahannya — riwayat stok dan baris transaksi sudah terlanjur
+   * mengasumsikan salah satunya.
+   */
+  isEditing?: boolean;
   /** [v7] Field keys yang punya error — untuk highlight + data-field-error */
   fieldErrors?: Set<string>;
   /** [v7] Callback saat field error di-clear (user mulai ketik) */
@@ -107,6 +115,7 @@ function CharCounter({ current, max }: { current: number; max: number }) {
 export function StepDetails({
   form,
   categories = [],
+  isEditing = false,
   fieldErrors = new Set(),
   onClearFieldError,
 }: StepDetailsProps) {
@@ -122,6 +131,25 @@ export function StepDetails({
   const comparePrice = watch('comparePrice');
   const stok = watch('stok');
   const minStock = watch('minStock');
+  const kind = watch('kind') ?? 'PRODUK';
+  const isJasa = kind === 'JASA';
+
+  // [G7] Mode dagang menentukan jenis apa yang masuk akal dibuat. Toko produk
+  // murni yang membuat layanan akan menyimpannya dengan sukses lalu tidak
+  // pernah menemukannya di tab Jual — katalog layanan memang tidak ditampilkan
+  // untuk mode itu. Menawarkan pilihan yang berujung ke sana adalah jebakan,
+  // jadi pilihannya disembunyikan DAN jalan keluarnya ditunjukkan.
+  const { data: kasirConfig } = useKasirConfig();
+  const dagangType = kasirConfig?.dagangType ?? 'PRODUK';
+  const jenisTersedia =
+    dagangType === 'HYBRID'
+      ? (['PRODUK', 'JASA'] as const)
+      : dagangType === 'JASA'
+        ? (['JASA'] as const)
+        : (['PRODUK'] as const);
+  const jenisTerkunciModeDagang = jenisTersedia.length === 1;
+  const durasiLabel = watch('durasiLabel');
+  const durasiJam = watch('durasiJam');
   const selectedCategory = watch('category') ?? '';
   // [MAX-LENGTH GUARDRAIL] watch() drives the live counters below.
   const nameValue = watch('name') ?? '';
@@ -296,6 +324,61 @@ export function StepDetails({
         )}
       </div>
 
+      {/* ── [KASIR JASA] Jenis: barang atau layanan ────────────────────── */}
+      {/*
+        Ditaruh sebelum harga, bukan di bawah bersama stok, karena pilihan ini
+        MENGUBAH ARTI field-field di bawahnya: barang punya stok, layanan
+        punya durasi. Menaruhnya di bawah berarti seller mengisi dulu baru
+        tahu sebagian isiannya tidak berlaku.
+      */}
+      <div className="space-y-2">
+        <Label>{t('kindLabel')}</Label>
+
+        {isEditing || jenisTerkunciModeDagang ? (
+          // Dua sebab jenis tidak bisa dipilih, dengan keterangan berbeda:
+          //   • sedang mengedit → jenis memang terkunci selamanya
+          //   • mode dagang toko cuma mengizinkan satu jenis → bisa diubah,
+          //     dan kalimatnya menyebutkan di mana
+          <div className="rounded-lg border bg-muted/30 px-3 py-2.5">
+            <p className="text-sm font-medium">
+              {(isEditing ? isJasa : jenisTersedia[0] === 'JASA')
+                ? t('kindJasa')
+                : t('kindBarang')}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {isEditing ? t('kindLockedHint') : t('kindModeHint')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {jenisTersedia.map((opsi) => {
+              const aktif = kind === opsi;
+              return (
+                <button
+                  key={opsi}
+                  type="button"
+                  onClick={() => setValue('kind', opsi, { shouldValidate: true })}
+                  aria-pressed={aktif}
+                  className={cn(
+                    'rounded-xl border px-3 py-3 text-left transition-colors',
+                    aktif
+                      ? 'border-primary bg-primary/[0.06]'
+                      : 'hover:bg-muted/50',
+                  )}
+                >
+                  <span className="block text-sm font-medium">
+                    {opsi === 'JASA' ? t('kindJasa') : t('kindBarang')}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    {opsi === 'JASA' ? t('kindJasaHint') : t('kindBarangHint')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* ── Price ─────────────────────────────────────────────────────── */}
       {/*
         [SCROLL FIX] data-field-error di wrapper price.
@@ -387,6 +470,68 @@ export function StepDetails({
         Keduanya opsional — produk tetap bisa dibuat dengan stok 0, dan
         produk stok 0 tetap boleh dijual di kasir.
       */}
+      {isJasa ? (
+        // ── Durasi layanan ────────────────────────────────────────────
+        // Keduanya opsional: ada layanan yang selesai saat itu juga (potong
+        // rambut) dan tidak punya estimasi untuk disampaikan ke pelanggan.
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="durasiLabel">{t('durasiLabelLabel')}</Label>
+            <Input
+              id="durasiLabel"
+              maxLength={50}
+              placeholder={t('durasiLabelPlaceholder')}
+              value={durasiLabel ?? ''}
+              onChange={(e) =>
+                setValue('durasiLabel', e.target.value || undefined, {
+                  shouldValidate: true,
+                })
+              }
+              aria-invalid={!!errors.durasiLabel}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t('durasiLabelHelper')}
+            </p>
+            {errors.durasiLabel && (
+              <p className="text-sm text-destructive">
+                {errors.durasiLabel.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="durasiJam">{t('durasiJamLabel')}</Label>
+            <Input
+              id="durasiJam"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              step="1"
+              placeholder="0"
+              value={durasiJam === undefined || durasiJam === null ? '' : durasiJam}
+              onChange={(e) => {
+                const raw = e.target.value;
+                setValue(
+                  'durasiJam',
+                  raw === ''
+                    ? undefined
+                    : Math.max(0, Math.trunc(Number(raw) || 0)),
+                  { shouldValidate: true },
+                );
+              }}
+              aria-invalid={!!errors.durasiJam}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t('durasiJamHelper')}
+            </p>
+            {errors.durasiJam && (
+              <p className="text-sm text-destructive">
+                {errors.durasiJam.message}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="stok">{t('stokLabel')}</Label>
@@ -440,6 +585,7 @@ export function StepDetails({
           )}
         </div>
       </div>
+      )}
 
     </div>
   );

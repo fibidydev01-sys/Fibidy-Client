@@ -62,6 +62,7 @@
       "settingsTitle": "Pengaturan",
       "settingsDescription": "Kelola pengaturan toko kamu",
       "kasirTitle": "Kasir",
+      "papanTitle": "Papan Kerja",
       "kasirDescription": "Catat transaksi walk-in, kelola stok, dan cetak struk digital.",
       "keranjangTitle": "Keranjang",
       "riwayatTitle": "Riwayat Transaksi",
@@ -185,7 +186,19 @@
           "stokLabel": "Stok",
           "stokHelper": "Opsional. Stok awal tercatat di log stok; produk stok 0 tetap bisa dijual di kasir.",
           "minStockLabel": "Stok minimum",
-          "minStockHelper": "Batas bawah untuk badge \"stok menipis\" di kasir. Default 5."
+          "minStockHelper": "Batas bawah untuk badge \"stok menipis\" di kasir. Default 5.",
+          "kindLabel": "Jenis",
+          "kindBarang": "Barang",
+          "kindBarangHint": "Punya stok yang berkurang saat terjual",
+          "kindJasa": "Layanan",
+          "kindJasaHint": "Pengerjaan berdurasi, tidak punya stok",
+          "kindLockedHint": "Jenis tidak bisa diubah setelah dibuat. Kalau salah, buat entri baru lalu nonaktifkan yang ini.",
+          "kindModeHint": "Mengikuti mode dagang toko. Ubah di Pengaturan → Mode Dagang & Struk kalau ingin membuat jenis yang lain.",
+          "durasiLabelLabel": "Label durasi",
+          "durasiLabelPlaceholder": "Contoh: Reguler",
+          "durasiLabelHelper": "Opsional. Tampil di kasir dan struk, mis. \"Reguler\" atau \"Kilat\".",
+          "durasiJamLabel": "Estimasi (jam)",
+          "durasiJamHelper": "Opsional. Dipakai menghitung perkiraan selesai. Kosongkan kalau selesai saat itu juga."
         },
         "validation": {
           "nameRequired": "Nama produk wajib diisi minimal 2 karakter.",
@@ -291,6 +304,10 @@
         "hint": "Ini biasanya masalah sementara. Produk kamu aman.",
         "retry": "Coba lagi",
         "retrying": "Mencoba lagi..."
+      },
+      "kind": {
+        "barang": "Barang",
+        "jasa": "Layanan"
       }
     },
     "library": {
@@ -821,6 +838,10 @@
         "description": "Logout dari akun kamu"
       },
       "kasir": {
+        "mode": {
+          "label": "Mode Dagang & Struk",
+          "description": "Pilih kasir menjual barang, layanan, atau keduanya — plus identitas struk"
+        },
         "diskonPreset": {
           "label": "Preset Diskon",
           "description": "Diskon siap pakai yang dipilih kasir saat transaksi"
@@ -924,6 +945,7 @@
       "title": "Kasir",
       "subtitle": "Pilih produk, lalu buka keranjang untuk menyelesaikan pembayaran.",
       "searchPlaceholder": "Cari produk…",
+      "searchLayananPlaceholder": "Cari layanan…",
       "clearSearch": "Hapus pencarian",
       "error": {
         "title": "Gagal memuat produk",
@@ -934,6 +956,7 @@
       "tabs": {
         "ariaLabel": "Navigasi kasir",
         "jual": "Jual",
+        "papan": "Papan Kerja",
         "riwayat": "Riwayat",
         "stok": "Stok",
         "laporan": "Laporan"
@@ -945,6 +968,7 @@
       },
       "status": {
         "completed": "Selesai",
+        "belum_bayar": "Belum bayar",
         "void": "Void",
         "refund": "Refund"
       },
@@ -956,10 +980,53 @@
         "addToCart": "Tambah {nama} ke keranjang",
         "inCart": "{qty} di keranjang"
       },
+      "katalog": {
+        "produk": "Barang",
+        "layanan": "Layanan",
+        "ariaLabel": "Pilih katalog"
+      },
+      "layanan": {
+        "addToCart": "Tambah {nama} ke keranjang",
+        "estimasiJam": "{nilai} jam",
+        "estimasiHari": "{nilai} hari"
+      },
+      "papan": {
+        "title": "Papan Kerja",
+        "subtitle": "Pekerjaan yang belum diserahkan ke pelanggan. Geser kartunya begitu tahapannya berubah.",
+        "errorTitle": "Gagal memuat papan",
+        "errorDescription": "Daftar pekerjaan tidak bisa diambil. Periksa koneksi lalu coba lagi.",
+        "retry": "Coba lagi",
+        "emptyTitle": "Tidak ada pekerjaan tertunda",
+        "emptyDescription": "Semua pesanan layanan sudah diserahkan. Kartu baru muncul di sini begitu ada pesanan layanan masuk.",
+        "kolomKosong": "Kosong",
+        "pilihKolom": "Pilih tahapan",
+        "ringkasanTerlambat": "{jumlah} lewat estimasi",
+        "ringkasanBelumDibayar": "{jumlah} belum dibayar",
+        "belumDibayar": "BELUM BAYAR",
+        "estimasiDalam": "Selesai dalam {durasi}",
+        "terlambatSejak": "Lewat {durasi}",
+        "serahkan": "Serahkan ke Pelanggan",
+        "perluDibayarDulu": "Terima pembayarannya dulu di Riwayat — kartu ini keluar sendiri setelah lunas.",
+        "mundurKe": "Kembalikan ke {status}",
+        "status": {
+          "ANTRI": "Antri",
+          "PROSES": "Proses",
+          "SELESAI": "Selesai",
+          "SIAP_AMBIL": "Siap Ambil"
+        },
+        "aksi": {
+          "PROSES": "Mulai Kerjakan",
+          "SELESAI": "Tandai Selesai",
+          "SIAP_AMBIL": "Siap Diambil"
+        }
+      },
       "empty": {
         "noProductTitle": "Belum ada produk",
         "noProductDescription": "Tambah produk dulu di halaman Produk, baru kasir bisa dipakai berjualan.",
         "addProduct": "Tambah produk",
+        "noLayananTitle": "Belum ada layanan",
+        "noLayananDescription": "Tambah layanan dulu di halaman Produk, baru bisa dicatat di kasir.",
+        "addLayanan": "Tambah layanan",
         "noMatchTitle": "Tidak ada yang cocok",
         "noMatchDescription": "Coba kata kunci lain atau pilih kategori Semua.",
         "resetFilter": "Reset filter"
@@ -973,6 +1040,7 @@
         "increase": "Tambah jumlah",
         "decrease": "Kurangi jumlah",
         "removeItem": "Hapus item",
+        "layananLabel": "Layanan",
         "cashReceived": "Uang diterima",
         "exactAmount": "Uang pas",
         "shortBy": "Kurang {nominal}",
@@ -984,6 +1052,10 @@
         "total": "Total",
         "pay": "Bayar {nominal}",
         "paying": "Menyimpan…",
+        "payLater": "Bayar Nanti (Ambil Dulu)",
+        "picLabel": "Dikerjakan oleh",
+        "picPlaceholder": "Nama petugas",
+        "picHelper": "Opsional. Dipakai supaya jelas siapa yang mengerjakan saat pelanggan menanyakan pesanannya.",
         "emptyTitle": "Keranjang masih kosong",
         "emptyDescription": "Pilih produk dulu di halaman Kasir.",
         "emptyCta": "Pilih produk",
@@ -999,6 +1071,15 @@
         "tunai": "Tunai",
         "transfer": "Transfer",
         "debit": "Debit"
+      },
+      "bayar": {
+        "title": "Terima pembayaran",
+        "cashReceived": "Uang diterima",
+        "exactAmount": "Uang pas",
+        "shortBy": "Kurang {nominal}",
+        "change": "Kembalian {nominal}",
+        "saving": "Menyimpan…",
+        "confirm": "Terima {nominal}"
       },
       "diskon": {
         "title": "Pilih diskon",
@@ -1034,14 +1115,19 @@
         "noMatchTitle": "Tidak ada yang cocok",
         "noMatchDescription": "Coba nomor order lain atau ubah filter status.",
         "itemCount": "{jumlah} item",
+        "unpaidMethod": "Belum dibayar",
         "detailTitle": "Detail transaksi",
         "subtotal": "Subtotal",
         "discount": "Diskon {persen}%",
         "total": "Total",
+        "estimasi": "Estimasi selesai {waktu}",
         "method": "Metode",
         "cash": "Tunai diterima",
         "change": "Kembalian",
         "viewStruk": "Lihat struk",
+        "viewTandaTerima": "Lihat tanda terima",
+        "terimaPembayaran": "Terima Pembayaran",
+        "batalPesanan": "Batalkan pesanan",
         "void": "Void",
         "refund": "Refund",
         "reasonLabel": "Alasan",
@@ -1052,6 +1138,8 @@
         "voidConfirmDescription": "Transaksi dikeluarkan dari rekap omzet. Stok TIDAK dikembalikan karena barang kemungkinan sudah keluar. Tindakan ini tidak bisa dibatalkan.",
         "refundConfirmTitle": "Refund transaksi ini?",
         "refundConfirmDescription": "Transaksi dikeluarkan dari rekap omzet dan stok DIKEMBALIKAN ke sistem. Tindakan ini tidak bisa dibatalkan.",
+        "batalConfirmTitle": "Batalkan pesanan ini?",
+        "batalConfirmDescription": "Pesanan ditutup dan tidak bisa dibayar lagi. Karena belum pernah dibayar, tidak ada uang yang dikembalikan dan omzet tidak berubah. Tindakan ini tidak bisa dibatalkan.",
         "cancel": "Batal",
         "confirm": "Ya, lanjutkan",
         "processing": "Memproses…"
@@ -1120,7 +1208,16 @@
         "diskonTitle": "Diskon bulan ini",
         "diskonEmpty": "Belum ada transaksi berdiskon bulan ini.",
         "diskonTotal": "Total diskon diberikan",
-        "diskonUsed": "{jumlah}×"
+        "diskonUsed": "{jumlah}×",
+        "belumDibayarTitle": "Belum dibayar",
+        "belumDibayarCount": "{jumlah} pesanan",
+        "belumDibayarTerlama": "tertua {tanggal}",
+        "pekerjaanTitle": "Pekerjaan tertunda",
+        "pekerjaanTerlambat": "{jumlah} lewat estimasi",
+        "pekerjaanOnTrack": "Semua masih sesuai estimasi",
+        "basisKas": "Omzet dihitung dari tanggal PEMBAYARAN, bukan tanggal pesanan masuk. Pesanan yang diterima Senin lalu dibayar Rabu akan tercatat di omzet hari Rabu.",
+        "topBarang": "Barang",
+        "topLayanan": "Layanan"
       },
       "planGate": {
         "title": "Kasir tersedia di paket berbayar",
@@ -1139,7 +1236,8 @@
         "promoCreated": "Program promo dibuat",
         "promoDeleted": "Program promo dinonaktifkan",
         "voidDone": "Transaksi di-void",
-        "refundDone": "Transaksi di-refund, stok dikembalikan"
+        "refundDone": "Transaksi di-refund, stok dikembalikan",
+        "bayarDone": "Pembayaran diterima, pesanan lunas"
       },
       "settingsDiskon": {
         "title": "Preset diskon",
@@ -1199,6 +1297,40 @@
         "deactivateDescription": "Promo berhenti berjalan di kasir. Riwayat transaksi yang sudah memakainya tetap utuh.",
         "deactivateCancel": "Batal",
         "deactivateConfirm": "Ya, nonaktifkan"
+      },
+      "settingsKasir": {
+        "modeTitle": "Mode dagang",
+        "modeDescription": "Menentukan katalog dan menu apa yang tampil di kasir. Kategori toko cuma menebak sekali di awal — pilihan di sini yang berlaku seterusnya.",
+        "modeProduk": "Jual barang",
+        "modeProdukDesc": "Yang dijual punya persediaan yang berkurang saat terjual.",
+        "modeJasa": "Jual layanan",
+        "modeJasaDesc": "Yang dijual adalah pengerjaan berdurasi, tanpa persediaan.",
+        "modeHybrid": "Jual keduanya",
+        "modeHybridDesc": "Barang dan layanan berjalan berdampingan, mis. bengkel atau salon.",
+        "efekKatalogBarang": "Tab Jual menampilkan daftar barang",
+        "efekKatalogLayanan": "Tab Jual menampilkan daftar layanan",
+        "efekKatalogKeduanya": "Tab Jual punya pilihan Barang / Layanan",
+        "efekAdaStok": "Tab Stok tersedia",
+        "efekTanpaStok": "Tab Stok disembunyikan",
+        "efekAdaPapan": "Tab Papan Kerja tersedia",
+        "efekTanpaPapan": "Tab Papan Kerja disembunyikan",
+        "modeBerubahHint": "Menu kasir akan berubah setelah disimpan. Data yang sudah ada tidak dihapus — barang dan layanan yang pernah dibuat tetap tersimpan.",
+        "strukTitle": "Identitas struk",
+        "strukDescription": "Dicetak di bagian atas dan bawah setiap struk.",
+        "namaUsaha": "Nama usaha",
+        "namaUsahaPlaceholder": "Contoh: Laundry Bersih Jaya",
+        "alamat": "Alamat",
+        "alamatPlaceholder": "Contoh: Jl. Merdeka No. 10",
+        "noTelp": "Nomor telepon",
+        "noTelpPlaceholder": "Contoh: 0812-3456-7890",
+        "footerStruk": "Kalimat penutup",
+        "footerStrukPlaceholder": "Terima kasih atas kunjungan Anda",
+        "paperWidth": "Lebar kertas",
+        "paperWidthValue": "{mm} mm",
+        "paperWidth58Hint": "Printer thermal kecil, paling umum",
+        "paperWidth80Hint": "Printer thermal lebar",
+        "save": "Simpan",
+        "saving": "Menyimpan…"
       }
     }
   }
