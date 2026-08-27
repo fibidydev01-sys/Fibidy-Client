@@ -81,7 +81,11 @@
       "validation": {
         "titleRequired": "Highlight #{index}: Judul wajib diisi",
         "descriptionRequired": "Highlight #{index}: Deskripsi wajib diisi"
-      }
+      },
+      "panelTitle": "Highlight",
+      "reorderLabel": "Ubah urutan Highlight",
+      "removeLabel": "Hapus Highlight",
+      "reorderHint": "Seret ikon gagang untuk mengubah urutannya."
     },
     "contact": {
       "title": "Contact Section",

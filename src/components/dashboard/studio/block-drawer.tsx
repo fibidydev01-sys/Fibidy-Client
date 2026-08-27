@@ -36,6 +36,25 @@
 //     konten) — h-12, lebar mengikuti container (ada margin kiri-kanan
 //     agar terlihat floating, bukan full-bleed).
 // Isi kedua strip: 1 chevron di tengah (arah sesuai orientasi buka).
+//
+// [Z-INDEX FIX — Aug 2026]
+// SEBELUMNYA: SheetContent & collapsed-strip pakai z-40. StoreHeader
+// (src/components/layout/store/store-header.tsx) pakai `sticky top-0 z-50`.
+// Karena BlockDrawer dan LivePreview (yang me-render StoreHeader di
+// dalamnya) adalah SIBLING langsung di studio/page.tsx, keduanya berbagi
+// stacking context yang sama — dan z-50 header MENANG di atas z-40 drawer.
+// Akibatnya header selalu tampil di depan, menutupi baris teratas drawer
+// (termasuk Block 1) setiap kali drawer dibuka.
+//
+// SEKARANG: drawer & strip dinaikkan ke z-[51] — sengaja di atas header,
+// bukan sekadar menyamai. Selama drawer terbuka, drawer memang dimaksudkan
+// menutupi seluruh header (termasuk nav storefront), bukan berdampingan
+// dengannya. Ini pilihan sadar, bukan default: drawer tetap `top-0`
+// (bukan `top-16`), sehingga ia menang penuh dari atas, alih-alih hanya
+// duduk di bawah header. Begitu drawer ditutup (collapse ke strip), atau
+// strip itu sendiri di-hover/klik, tidak ada perubahan lain di header —
+// header kembali terlihat penuh normal karena drawer sudah tidak lagi
+// menempati ruang itu.
 // ============================================================================
 
 import { useState, useEffect, memo, useCallback, useRef } from 'react';
@@ -441,9 +460,15 @@ function DesktopSheet({
           menghadap konten/canvas saat Sheet dibuka ke kiri. Sisi kanan
           (nempel viewport edge) tetap siku karena tidak akan pernah
           terlihat rounded di situ. `right-0` tidak diubah — strip tetap
-          menempel viewport edge, hanya border-radius yang ditambah. */}
+          menempel viewport edge, hanya border-radius yang ditambah.
+
+          [Z-INDEX FIX — Aug 2026] z-40 → z-[51]. StoreHeader (di dalam
+          LivePreview, sibling komponen ini) pakai `sticky z-50`; strip
+          collapsed harus tetap menang di atasnya juga, konsisten dengan
+          SheetContent di bawah — kalau tidak, begitu drawer di-collapse,
+          strip trigger-nya sendiri yang jadi ketutup header. */}
       {!open && !isClosing && (
-        <div className="fixed right-0 top-0 bottom-0 w-12 bg-background border border-r-0 rounded-l-2xl shadow-lg z-40 flex items-center justify-center">
+        <div className="fixed right-0 top-0 bottom-0 w-12 bg-background border border-r-0 rounded-l-2xl shadow-lg z-[51] flex items-center justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -461,9 +486,14 @@ function DesktopSheet({
         onOpenChange={(v) => { if (!v) handleCollapse(); }}
         modal={false}
       >
+        {/* [Z-INDEX FIX — Aug 2026] z-40 → z-[51]. Lihat catatan besar di
+            atas file ini. `top-0` SENGAJA dipertahankan (bukan `top-16`):
+            drawer dimaksudkan menang PENUH dari atas, menutupi seluruh
+            StoreHeader (z-50) selama drawer terbuka — bukan cuma duduk
+            berdampingan di bawahnya. */}
         <SheetContent
           side="right"
-          className="top-0 z-40 w-[280px] p-0 flex flex-col"
+          className="top-0 z-[51] w-[280px] p-0 flex flex-col"
           onInteractOutside={() => handleCollapse()}
         >
           <div className="px-4 py-3 border-b shrink-0">
@@ -540,7 +570,7 @@ const BlockListItem = memo(function BlockListItem({
       className={cn(
         'w-full h-14 px-4 flex items-center justify-between border-b transition-all duration-200',
         isSelected
-          ? 'bg-primary/10 border-primary/20'
+          ? 'bg-surface-strong border-ink/20'
           : 'hover:bg-muted/50 border-border',
         isPulsing && 'animate-pulse bg-primary/5 ring-2 ring-primary/30 ring-inset',
       )}
@@ -564,7 +594,7 @@ const BlockListItem = memo(function BlockListItem({
             {t('proBadge')}
           </span>
         )}
-        {isSelected && <Check className="h-4 w-4 text-primary" />}
+        {isSelected && <Check className="h-4 w-4 text-ink" />}
       </div>
     </button>
   );

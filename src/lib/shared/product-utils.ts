@@ -8,14 +8,6 @@ import type { Product } from '@/types/product';
 import type { SubscriptionTier } from '@/lib/api/subscription';
 
 // ==========================================
-// DIGITAL CHECK
-// ==========================================
-
-export function isDigitalProduct(product: Pick<Product, 'fileKey'>): boolean {
-  return !!product.fileKey;
-}
-
-// ==========================================
 // PRICING
 // ==========================================
 

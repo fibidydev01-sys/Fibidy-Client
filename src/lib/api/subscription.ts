@@ -5,12 +5,10 @@ import { api } from './client';
 //
 // Backend tiers: FREE | STARTER | BUSINESS
 //
-// DUA PROVIDER, PERAN BERBEDA:
-//   LemonSqueezy → checkout hosted (redirect), auto-renew, cancel via API
-//   Tripay       → QRIS lokal, SEKALI BAYAR (tidak auto-renew), tanpa cancel
+// [PANGKAS PRODUK DIGITAL] Tinggal satu provider:
+//   Tripay → QRIS lokal, SEKALI BAYAR (tidak auto-renew), tanpa cancel
 //
-// Stripe Connect (marketplace digital product) adalah urusan terpisah —
-// lihat lib/api/checkout.ts. Tidak ada hubungannya dengan tier subscription.
+// Pembayaran kartu (LemonSqueezy) dan Stripe Connect sudah dicabut.
 //
 // [IDR MIGRATION — May 2026]
 // businessThreshold dikirim BE supaya FE tidak hardcode 3000000 / 20.
@@ -34,18 +32,11 @@ interface PlanLimits {
   maxProducts: number;
   componentBlockVariants: number;
   maxImagesPerProduct: number;
-  maxDigitalProducts: number;
-  maxStorageGb: number;
-  maxFileSizeMb: number;
-  allowedFileTypes: readonly string[];
 }
 
 interface SubscriptionRecord {
-  lsSubscriptionId: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
-  lsRenewsAt: string | null;
-  lsEndsAt: string | null;
 }
 
 /**
@@ -58,20 +49,34 @@ export interface BusinessThreshold {
   txCount: number;
 }
 
+/**
+ * Fase langganan menurut WAKTU, bukan menurut label status.
+ *
+ * Dihitung server di `langganan-aktif.ts` supaya klien tidak pernah
+ * menghitungnya sendiri — setiap tempat yang menghitungnya sendiri adalah
+ * tempat yang bisa berbeda pendapat tentang penjual yang sama.
+ */
+export type FaseLangganan = 'BELUM' | 'AKTIF' | 'TENGGANG' | 'HABIS';
+
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
   status: SubscriptionStatus | null;
   periodEnd: string | null;
   subscription: SubscriptionRecord | null;
+
+  /** Boleh memakai alat berbayar. AKTIF dan TENGGANG dua-duanya true. */
+  isActive: boolean;
+  fase: FaseLangganan;
+  /** Sisa hari sampai periodEnd. Negatif berarti sudah lewat. */
+  sisaHari: number | null;
+  masaTenggangHari: number;
+
   limits: PlanLimits;
   usage: {
     products: number;
-    digitalProducts: number;
-    storageMb: number;
   };
   isAtLimit: {
     products: boolean;
-    digitalProducts: boolean;
   };
   businessQualified: boolean;
   businessThreshold?: BusinessThreshold;
@@ -79,23 +84,6 @@ export interface SubscriptionInfo {
     totalAmount: number;
     totalCount: number;
   };
-}
-
-interface CheckoutResponse {
-  checkoutUrl: string;
-}
-
-interface CancelResponse {
-  message: string;
-  cancelAt?: string;
-}
-
-export interface VerifySubscriptionResponse {
-  status: 'pending' | 'completed';
-  tier?: SubscriptionTier;
-  subscriptionStatus?: SubscriptionStatus | null;
-  periodEnd?: string | null;
-  source?: string;
 }
 
 // ==========================================
@@ -147,12 +135,6 @@ export const subscriptionApi = {
   getMyPlan: (headers?: HeadersInit) =>
     api.get<SubscriptionInfo>('/subscription/me', { headers }),
 
-  /**
-   * POST /subscription/checkout?tier=STARTER|BUSINESS
-   * Mengembalikan URL checkout LemonSqueezy — FE cukup redirect.
-   */
-  createCheckout: (tier: 'STARTER' | 'BUSINESS') =>
-    api.post<CheckoutResponse>(`/subscription/checkout?tier=${tier}`),
 
   /**
    * POST /subscription/checkout/tripay?tier=STARTER|BUSINESS
@@ -190,22 +172,5 @@ export const subscriptionApi = {
   getTripayPayment: (paymentId: string) =>
     api.get<TripayPaymentDetail>(`/subscription/tripay/payments/${paymentId}`),
 
-  /**
-   * POST /subscription/cancel
-   *
-   * ⚠️ HANYA berlaku untuk langganan LemonSqueezy.
-   *
-   * Tenant yang aktivasinya lewat Tripay akan menerima 400 dengan code
-   * `TRIPAY_NO_AUTORENEW` — itu BUKAN error, itu jawaban: langganan QRIS
-   * memang tidak diperpanjang otomatis, jadi tidak ada yang perlu
-   * dibatalkan. UI wajib menampilkannya sebagai informasi, bukan kegagalan.
-   */
-  cancelSubscription: () => api.post<CancelResponse>('/subscription/cancel'),
 
-  /**
-   * GET /subscription/verify
-   * Poll sampai webhook (LS ATAU Tripay) memproses dan menaikkan tier.
-   * Tidak peduli provider mana yang mengaktifkan.
-   */
-  verify: () => api.get<VerifySubscriptionResponse>('/subscription/verify'),
 };

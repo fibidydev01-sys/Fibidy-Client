@@ -21,15 +21,21 @@
 
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Percent, Settings2 } from 'lucide-react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+} from '@/components/ui/empty';
 import { FieldLabel } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatPriceIDR } from '@/lib/shared/format';
 import { useDiskonPresets } from '@/hooks/dashboard/use-kasir';
 import type { DiskonPreset } from '@/types/kasir';
+import { Link } from '@/i18n/navigation';
 
 const TANPA_DISKON = '__tanpa__';
 
@@ -74,7 +80,7 @@ export function DiskonPicker({
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            <Skeleton key={i} className="h-16 w-full rounded-[var(--shape-panel)]" />
           ))}
         </div>
       ) : (
@@ -127,20 +133,23 @@ export function DiskonPicker({
             );
           })}
 
+          {/* Card border-dashed buatan sendiri diganti Empty. `min-h-0`
+              karena ini duduk di dalam sheet yang sempit — tinggi minimum
+              bawaan akan mendorong tombolnya keluar layar di ponsel. */}
           {(presets ?? []).length === 0 && (
-            <Card className="border-dashed py-6 shadow-none">
-              <CardContent className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t('emptyPresets')}
-                </p>
-                <Button asChild variant="outline" size="sm" className="mt-3 gap-2">
+            <Empty className="min-h-0 gap-4 py-6 sm:p-6 md:p-6">
+              <EmptyHeader>
+                <EmptyDescription>{t('emptyPresets')}</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button asChild variant="outline" size="sm" className="gap-2">
                   <Link href="/dashboard/settings?section=diskon-preset">
                     <Settings2 className="h-3.5 w-3.5" aria-hidden />
                     {t('managePresets')}
                   </Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </EmptyContent>
+            </Empty>
           )}
         </RadioGroup>
       )}

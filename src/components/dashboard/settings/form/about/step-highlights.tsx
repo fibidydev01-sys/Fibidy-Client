@@ -20,7 +20,7 @@
 // [RENAME — May 2026] item.icon → item.image
 // ============================================================================
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Crown, Lock, Trash2, Loader2, X } from 'lucide-react';
@@ -35,14 +35,30 @@ import { ImageCropModal, type AspectChoice } from '@/components/dashboard/shared
 import { EmptySlot } from '@/components/dashboard/shared/image-slot';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  CharCounter,
+  SKELETON_CONTROL,
+  SKELETON_FIELD,
+  SKELETON_TEXTAREA,
+} from '@/components/dashboard/shared/form-field';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import { cn } from '@/lib/shared/utils';
 import type { AboutFormData, FeatureItem } from '@/types/tenant';
+import { FormSection, FormPanel } from '@/components/dashboard/shared/form-panel';
+import {
+  SortableFormPanel,
+  SortablePanelList,
+} from '@/components/dashboard/shared/sortable-form-panel';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TOTAL_SLOTS = 7;
 const FREE_SLOTS  = 4;
-const MAX_TITLE   = 15;
-const MAX_DESC    = 100;
+
+// Batasnya tidak lagi ditulis di sini. Dua angka yang sama juga hidup di
+// wizard setup, dan begitu salah satunya diubah tanpa yang lain, penjual
+// melihat "15" di satu layar dan "100" di layar yang menulis medan yang sama.
+const MAX_TITLE = TENANT_LIMITS.aboutFeatureTitle.max;
+const MAX_DESC  = TENANT_LIMITS.aboutFeatureDescription.max;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface StepHighlightsProps {
@@ -57,17 +73,22 @@ interface StepHighlightsProps {
 // ─── LockedSlot ───────────────────────────────────────────────────────────────
 function LockedSlotInline({ onClick }: { onClick: () => void }) {
   return (
-    <div className="rounded-xl border-2 border-dashed border-amber-300/50 bg-amber-50/30 dark:bg-amber-950/10 p-4 space-y-3">
+    <div className="rounded-[var(--shape-panel)] border-2 border-dashed border-amber-300/50 bg-amber-50/30 dark:bg-amber-950/10 p-4 space-y-3">
       <button
         type="button"
         onClick={onClick}
-        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50 text-amber-600 dark:text-amber-400 text-xs font-medium hover:bg-amber-100/60 transition-colors"
+        className={cn(
+          'w-full flex items-center justify-center gap-2 py-2 bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50 text-amber-600 dark:text-amber-400 text-xs font-medium hover:bg-amber-100/60 transition-colors',
+          SKELETON_CONTROL,
+        )}
       >
         <Lock className="h-3.5 w-3.5" aria-hidden />
         <Crown className="h-3.5 w-3.5" aria-hidden />
       </button>
-      <div className="h-9 rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
-      <div className="h-[76px] rounded-md bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50" />
+      {/* Wakil Input + Textarea. Bentuknya diturunkan dari token yang sama
+          dengan isian aslinya — lihat SKELETON_* di shared/form-field.tsx. */}
+      <div className={cn(SKELETON_FIELD, 'bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50')} />
+      <div className={cn(SKELETON_TEXTAREA, 'bg-amber-50/60 dark:bg-amber-950/20 border border-dashed border-amber-300/50')} />
     </div>
   );
 }
@@ -91,7 +112,7 @@ function HighlightFilledImage({
   onLoadFail,
 }: HighlightFilledImageProps) {
   return (
-    <div className="relative aspect-square w-full rounded-xl overflow-hidden border bg-muted group">
+    <div className="relative aspect-square w-full rounded-[var(--shape-panel)] overflow-hidden border bg-muted group">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
@@ -251,10 +272,9 @@ function HighlightImageUpload({
 }
 
 // ─── HighlightCard (filled item — text fields) ────────────────────────────────
-interface HighlightCardProps {
+interface HighlightCardBodyProps {
   item: FeatureItem;
   index: number;
-  onRemove: () => void;
   onTitleChange: (val: string) => void;
   onDescriptionChange: (val: string) => void;
   onImageChange: (url: string) => void;
@@ -263,33 +283,18 @@ interface HighlightCardProps {
   t: ReturnType<typeof useTranslations<'settings.about'>>;
 }
 
-function HighlightCard({
+function HighlightCardBody({
   item,
   index,
-  onRemove,
   onTitleChange,
   onDescriptionChange,
   onImageChange,
   slotId,
   onUploadStateChange,
   t,
-}: HighlightCardProps) {
+}: HighlightCardBodyProps) {
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-3">
-      {/* Remove button header */}
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">
-          Highlight {index + 1}
-        </p>
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label="Remove highlight"
-          className="p-1.5 rounded-full bg-muted/60 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
+    <>
 
       {/* Image slot with full crop + drag drop */}
       <HighlightImageUpload
@@ -300,24 +305,21 @@ function HighlightCard({
         onUploadStateChange={onUploadStateChange}
       />
 
-      {/* Title */}
+      {/* Title — tanpa <label>: judul panel di atasnya sudah menamainya, dan
+          label kedua di dalam kartu cuma mengulang kata yang sama. */}
       <div className="relative">
         <Input
           placeholder={t('highlightTitlePlaceholder')}
           value={item.title || ''}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="h-9 text-sm font-semibold pr-10 placeholder:font-normal placeholder:text-muted-foreground/50"
+          maxLength={MAX_TITLE}
+          className="pr-14"
         />
-        <span
-          className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono tabular-nums pointer-events-none',
-            (item.title || '').length >= MAX_TITLE - 2
-              ? 'text-amber-500 font-semibold'
-              : 'text-muted-foreground/40',
-          )}
-        >
-          {t('counter', { current: (item.title || '').length, max: MAX_TITLE })}
-        </span>
+        <CharCounter
+          current={(item.title || '').length}
+          max={MAX_TITLE}
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        />
       </div>
 
       {/* Description */}
@@ -325,26 +327,18 @@ function HighlightCard({
         <Textarea
           placeholder={t('highlightDescriptionPlaceholder')}
           value={item.description || ''}
-          onChange={(e) => {
-            if (e.target.value.length <= MAX_DESC) {
-              onDescriptionChange(e.target.value);
-            }
-          }}
+          onChange={(e) => onDescriptionChange(e.target.value.slice(0, MAX_DESC))}
           rows={3}
-          className="resize-none text-sm pb-5 placeholder:font-normal placeholder:text-muted-foreground/50"
+          maxLength={MAX_DESC}
+          className="resize-none pb-6"
         />
-        <span
-          className={cn(
-            'absolute bottom-2 right-3 text-[10px] font-mono tabular-nums pointer-events-none',
-            (item.description || '').length >= MAX_DESC - 10
-              ? 'text-amber-500 font-semibold'
-              : 'text-muted-foreground/40',
-          )}
-        >
-          {t('counter', { current: (item.description || '').length, max: MAX_DESC })}
-        </span>
+        <CharCounter
+          current={(item.description || '').length}
+          max={MAX_DESC}
+          className="absolute bottom-2 right-3"
+        />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -403,66 +397,120 @@ export function StepHighlights({
     handleUpdate(index, 'title', val);
   };
 
+  // Id stabil untuk dnd-kit. Diturunkan dari URL gambar — preseden yang sama
+  // dengan product/form/step-media.tsx, dan alasannya sama: URL unik per
+  // unggahan dan tidak berubah selama kartunya hidup.
+  //
+  // Bedanya di sini: dua highlight BISA memakai foto yang sama (penjual
+  // mengunggah berkas yang sama dua kali). Duplikat diberi akhiran, jadi
+  // id-nya tetap unik tanpa perlu state maupun ref yang disentuh saat
+  // render — dua hal yang aturan react-hooks repo ini larang.
+  const ids = useMemo(() => {
+    const seen = new Map<string, number>();
+    return items.map((it, i) => {
+      const base = it.image || `slot-${i}`;
+      const n = seen.get(base) ?? 0;
+      seen.set(base, n + 1);
+      return n === 0 ? base : `${base}~${n}`;
+    });
+  }, [items]);
+
   return (
-    <div className="space-y-6 max-w-sm mx-auto">
-      {Array.from({ length: maxSlots }).map((_, i) => {
-        const item = items[i];
-
-        // Filled slot — HighlightCard dengan crop + drag drop
-        if (item) {
-          return (
-            <HighlightCard
-              key={i}
-              item={item}
-              index={i}
-              onRemove={() => handleRemove(i)}
-              onTitleChange={(val) => handleTitleChange(i, val)}
-              onDescriptionChange={(val) => handleUpdate(i, 'description', val)}
-              onImageChange={(url) => handleUpdate(i, 'image', url)}
-              slotId={`highlight-${i}`}
-              onUploadStateChange={onUploadStateChange}
-              t={t}
-            />
-          );
-        }
-
-        // Locked slot
-        if (!isBusiness && i >= FREE_SLOTS) {
-          return (
-            <LockedSlotInline key={`locked-${i}`} onClick={() => onUpgrade?.()} />
-          );
-        }
-
-        // Empty slot — untuk menambah item baru
-        return (
-          <div key={`empty-wrapper-${i}`} className="space-y-3">
-            <EmptySlot
-              index={i}
-              label={t('emptySlotLabel', { index: i + 1 })}
-              onClick={handleOpenNew}
-              isLoading={isUploadingNew && i === items.length}
-            />
-            <div className="h-9 rounded-md bg-muted/40 border border-dashed" />
-            <div className="h-[76px] rounded-md bg-muted/40 border border-dashed" />
-          </div>
-        );
-      })}
-
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="tabular-nums">
-          {t('slotCount', { current: items.length, max: maxSlots })}
+    // [PRESISI] Dulu satu grid PAGE_GRID_CARDS dengan baris hitungan slot
+    // ikut jadi ANAK GRID — ia menempati satu sel kartu, jadi kartu
+    // berikutnya melompat ke baris baru tanpa sebab yang terlihat.
+    // Sekarang hitungan slot naik ke kepala seksi, dan sel grid hanya berisi
+    // panel.
+    <FormSection
+      columns={3}
+      intro={items.length > 0 ? t('reorderHint') : undefined}
+      badge={
+        <span className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="tabular-nums">
+            {t('slotCount', { current: items.length, max: maxSlots })}
+          </span>
+          {!isBusiness && (
+            <button
+              type="button"
+              onClick={() => onUpgrade?.()}
+              className="flex items-center gap-1 text-amber-600 hover:underline dark:text-amber-400"
+            >
+              <Crown className="h-3 w-3" />
+              {t('upgradeCta')}
+            </button>
+          )}
         </span>
-        {!isBusiness && (
-          <button
-            type="button"
-            onClick={() => onUpgrade?.()}
-            className="flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline"
-          >
-            <Crown className="h-3 w-3" />
-            {t('upgradeCta')}
-          </button>
-        )}
-      </div>
-    </div>
+      }
+    >
+      <SortablePanelList
+        items={items}
+        getId={(_it, i) => ids[i]}
+        onReorder={(next) => updateFormData('aboutFeatures', next)}
+      >
+        {Array.from({ length: maxSlots }).map((_, i) => {
+          const item = items[i];
+
+          // Slot terisi — bisa diurut ulang.
+          if (item) {
+            return (
+              <SortableFormPanel
+                key={ids[i]}
+                id={ids[i]}
+                title={`${t('panelTitle')} ${i + 1}`}
+                handleLabel={`${t('reorderLabel')} ${i + 1}`}
+                extraAction={
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(i)}
+                    aria-label={`${t('removeLabel')} ${i + 1}`}
+                    className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                }
+              >
+                <HighlightCardBody
+                  item={item}
+                  index={i}
+                  onTitleChange={(val) => handleTitleChange(i, val)}
+                  onDescriptionChange={(val) => handleUpdate(i, 'description', val)}
+                  onImageChange={(url) => handleUpdate(i, 'image', url)}
+                  slotId={ids[i]}
+                  onUploadStateChange={onUploadStateChange}
+                  t={t}
+                />
+              </SortableFormPanel>
+            );
+          }
+
+          // Slot terkunci — bukan kartu yang bisa diurut, jadi panel biasa.
+          if (!isBusiness && i >= FREE_SLOTS) {
+            return (
+              <LockedSlotInline
+                key={`locked-${i}`}
+                onClick={() => onUpgrade?.()}
+              />
+            );
+          }
+
+          // Slot kosong — juga bukan kartu yang bisa diurut.
+          return (
+            <FormPanel
+              key={`empty-${i}`}
+              title={t('emptySlotLabel', { index: i + 1 })}
+            >
+              <EmptySlot
+                index={i}
+                label={t('emptySlotLabel', { index: i + 1 })}
+                onClick={handleOpenNew}
+                isLoading={isUploadingNew && i === items.length}
+              />
+              <div className={cn(SKELETON_FIELD, 'border border-dashed bg-muted/40')} />
+              <div className={cn(SKELETON_TEXTAREA, 'border border-dashed bg-muted/40')} />
+            </FormPanel>
+          );
+        })}
+      </SortablePanelList>
+    </FormSection>
   );
 }

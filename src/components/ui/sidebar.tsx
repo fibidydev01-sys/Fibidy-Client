@@ -22,8 +22,21 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "13rem"
-const SIDEBAR_WIDTH_MOBILE = "12rem"
+// ── LEBAR: angka referensi shadcn-admin, bukan tafsiran ──────────────────
+//
+// Sebelumnya 13rem / 12rem — dua angka yang tidak datang dari mana pun.
+// Akibatnya terukur: pada 16rem sebuah entri nav punya 208px untuk teks
+// setelah ikon 16px + gap 8px + padding 2×8px; pada 13rem ia cuma 160px,
+// dan "Langganan" pada tier PROFESSIONAL mulai ter-truncate padahal
+// ruangnya ada. Ikon, tinggi baris, dan padding memang sudah sama persis
+// dengan referensinya (size-4 pada ikon, h-8 pada baris, p-2) — yang
+// menyimpang cuma lebar panelnya.
+//
+// Mobile 18rem (bukan 12rem) dengan alasan yang berbeda: sheet mobile
+// tidak pernah menciut ke ikon, jadi lebarnya adalah SATU-SATUNYA ruang
+// yang dipunyai submenu Kasir yang menjorok (`mx-3.5 px-2.5`).
+const SIDEBAR_WIDTH = "16rem"
+const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
@@ -158,7 +171,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -196,28 +209,58 @@ function Sidebar({
     )
   }
 
-  // Hover-based overlay sidebar
+  // ── DIKEMBALIKAN KE PERILAKU RESMI shadcn ─────────────────────────────────
+  //
+  // Versi sebelumnya berupa overlay berbasis hover: `data-state="collapsed"`
+  // dan `data-collapsible="icon"` DIPATOK di markup, lebar celahnya selalu
+  // seukuran ikon, dan panelnya melebar lewat `group-hover/sidebar:`.
+  //
+  // Terlihat menarik, tapi ia memutus seluruh kontrak komponen ini:
+  //
+  //   • `SidebarTrigger` tidak mengerjakan apa pun — ia memanggil
+  //     `toggleSidebar()`, sementara markupnya tidak pernah membaca `state`.
+  //   • `useSidebar().state` selalu berbohong: ia bisa "expanded" sementara
+  //     yang tergambar tetap menciut.
+  //   • Setiap `group-data-[collapsible=icon]:*` di berkas ini — 6 tempat —
+  //     mencari leluhur ber-kelas `group` TANPA nama, sementara varian itu
+  //     memberi nama grupnya. Kelas-kelas itu mati diam-diam.
+  //   • Tidak ada cara membuka sidebar lewat papan ketik; pintasan Ctrl/Cmd+B
+  //     yang sudah terpasang di provider menjadi hiasan.
+  //
+  // Sidebar sekarang digerakkan STATE, seperti dokumentasinya: celah dan
+  // panel sama-sama membaca `state`, `SidebarTrigger` dan `SidebarRail`
+  // bekerja, dan pilihan penjual tersimpan di cookie `sidebar_state`.
   return (
     <div
-      className="group/sidebar peer text-sidebar-foreground hidden md:block"
-      data-state="collapsed"
-      data-collapsible="icon"
+      className="group peer text-sidebar-foreground hidden md:block"
+      data-state={state}
+      data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
     >
-      {/* Gap always stays at icon width */}
+      {/* Celah yang menahan tempat sidebar di alur dokumen. */}
       <div
         data-slot="sidebar-gap"
-        className="relative w-(--sidebar-width-icon) bg-transparent"
+        className={cn(
+          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          "group-data-[collapsible=offcanvas]:w-0",
+          "group-data-[side=right]:rotate-180",
+          variant === "floating" || variant === "inset"
+            ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
+        )}
       />
-      {/* Sidebar container - expands on hover as overlay */}
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-50 hidden h-svh transition-[width] duration-200 ease-linear md:flex",
-          "w-(--sidebar-width-icon) group-hover/sidebar:w-(--sidebar-width) group-hover/sidebar:shadow-xl",
-          side === "left" ? "left-0 border-r" : "right-0 border-l",
+          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          side === "left"
+            ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
+            : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+          variant === "floating" || variant === "inset"
+            ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
         {...props}
@@ -225,7 +268,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar flex h-full w-full flex-col overflow-hidden"
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -285,12 +328,19 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   )
 }
 
+// Panel isi yang MENGAMBANG di atas latar provider.
+//
+// `@container/content` bukan hiasan: ia yang membuat isi dasbor bisa
+// menanyakan lebar PANELNYA, bukan lebar viewport. Bedanya nyata — pada
+// 1280px dengan sidebar terbuka, panelnya cuma ~1000px, jadi `sm:`/`lg:`
+// yang membaca viewport menyalakan tata letak lebar di ruang yang tidak
+// ada. Bilah pagination bernomor adalah pemakai pertamanya.
 function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   return (
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
+        "@container/content bg-background relative flex w-full flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
@@ -386,7 +436,10 @@ function SidebarGroupLabel({
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
       className={cn(
-        "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-caption-uppercase caption-uppercase outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        // Label lenyap saat sidebar menciut ke ikon. Kelas ini sekarang
+        // BEKERJA lagi: `Sidebar` kembali memasang `data-collapsible` pada
+        // grup tanpa nama, seperti kontrak aslinya.
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -455,7 +508,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex items-center gap-2 overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width] duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground h-8 w-full p-2 [&>span:last-child]:truncate [&>span]:hidden [&>span]:group-hover/sidebar:inline [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex items-center gap-2 overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground h-8 w-full p-2 [&>span:last-child]:truncate group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -599,7 +652,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
       data-sidebar="menu-sub"
       className={cn(
         "border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-0.5",
-        "hidden group-hover/sidebar:flex",
+        "group-data-[collapsible=icon]:hidden",
         className
       )}
       {...props}

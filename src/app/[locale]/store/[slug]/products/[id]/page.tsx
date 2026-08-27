@@ -19,6 +19,7 @@ import { generateProductBreadcrumbs } from '@/lib/shared/seo';
 import { createProductMetadata } from '@/lib/shared/seo';
 import { productsUrlServer } from '@/lib/public/store-url.server';
 import { Separator } from '@/components/ui/separator';
+import { markdownToPlainText } from '@/lib/shared/markdown';
 
 // ==========================================
 // STORE PRODUCT DETAIL PAGE
@@ -166,8 +167,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // Fallback description for SocialShare — product-authored description
   // wins when present, i18n template kicks in otherwise.
+  // [MARKDOWN] Dilucuti — teks ini masuk ke caption bagikan (WhatsApp,
+  // Telegram, X), yang semuanya menampilkannya sebagai teks polos.
   const shareDescription =
-    product.description ||
+    markdownToPlainText(product.description) ||
     tDetail('buyFallbackDescription', { name: product.name, tenant: tenant.name });
 
   return (

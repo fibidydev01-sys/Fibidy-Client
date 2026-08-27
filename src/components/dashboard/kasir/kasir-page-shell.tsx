@@ -4,22 +4,16 @@
 // KASIR PAGE SHELL
 // File: src/components/dashboard/kasir/kasir-page-shell.tsx
 //
-// Satu-satunya tempat lebar halaman kasir ditentukan.
+// Satu-satunya tempat lebar halaman kasir ditentukan: SELALU lebar penuh,
+// sama persis dengan Papan & Products. Tidak ada pengecualian.
 //
-// Sebelum ini tiap halaman menulis wrapper-nya sendiri: Papan memakai lebar
-// penuh (sama seperti /dashboard/products), sementara Jual, Riwayat, Stok, dan
-// Laporan mengunci diri di `mx-auto max-w-2xl`. Akibatnya berpindah tab
-// menggeser judul dan strip tab secara horizontal — modul yang sama terasa
-// seperti dua aplikasi berbeda.
-//
-// Shell ini juga membungkus SEMUA cabang state (loading, error, kosong, isi).
+// Shell ini membungkus SEMUA cabang state (loading, error, kosong, isi).
 // Dulu tiap cabang punya wrapper sendiri (`space-y-6` untuk error, `gap-4`
 // untuk sukses), jadi jarak judul→tab→konten berubah begitu data datang.
 // Sekarang mustahil: cabangnya cuma mengganti `children`.
 //
-// Lebar tidak pernah ditulis ulang di halaman. Konten yang terlalu lebar untuk
-// dibaca TIDAK dipersempit dengan max-w, melainkan dipecah jadi grid oleh
-// halamannya masing-masing.
+// Konten yang terlalu lebar untuk dibaca TIDAK dipersempit dengan max-w,
+// melainkan dipecah jadi grid oleh halamannya masing-masing.
 // ============================================================================
 
 import { Separator } from '@/components/ui/separator';
@@ -40,13 +34,6 @@ export interface KasirPageShellProps {
    * satu-satunya jalan keluar dari Keranjang adalah selesai atau kembali.
    */
   showTabs?: boolean;
-  /**
-   * 'full'    → mengikuti lebar dashboard, sama persis dengan Papan & Products.
-   * 'focused' → checkout: dibatasi supaya angka dan tombol bayar tetap satu
-   *             blok pandangan. Ini SATU-SATUNYA pengecualian, dan ia tinggal
-   *             di sini, bukan sebagai `max-w-2xl` yang diketik ulang.
-   */
-  width?: 'full' | 'focused';
   className?: string;
   children: React.ReactNode;
 }
@@ -58,15 +45,26 @@ export function KasirPageShell({
   actions,
   toolbar,
   showTabs = true,
-  width = 'full',
   className,
   children,
 }: KasirPageShellProps) {
   return (
     <div
       className={cn(
-        'flex w-full flex-col gap-4',
-        width === 'focused' && 'mx-auto max-w-5xl',
+        // `h-full` bukan hiasan: ia yang membuat area isi di bawah bisa
+        // memakai `flex-1`, dan itu yang membuat CartBar mendarat di TEPI
+        // BAWAH panel meski katalognya cuma dua produk.
+        //
+        // Sebelumnya bilah itu `sticky bottom-…` tanpa apa pun yang
+        // mendorongnya turun, jadi pada halaman pendek ia menggantung tepat
+        // di bawah produk terakhir — di tengah layar, dengan ruang kosong
+        // sepanjang layar di bawahnya. `sticky` baru menempel kalau ada yang
+        // digulir; ia tidak pernah bisa menggantikan "dorong ke bawah".
+        //
+        // Pola yang sama sudah dipakai WizardNav sejak awal, dan itu memang
+        // acuan yang diminta: bilah aksi kasir dan bilah langkah wizard
+        // sekarang mendarat di garis yang sama.
+        'flex h-full w-full flex-col gap-4',
         className,
       )}
     >
@@ -75,7 +73,7 @@ export function KasirPageShell({
           <div className="flex min-w-0 items-start gap-2">
             {leading}
             <div className="min-w-0">
-              <h1 className="truncate text-2xl font-bold tracking-tight">
+              <h1 className="truncate text-display-sm text-ink">
                 {title}
               </h1>
               {subtitle && (
@@ -96,7 +94,9 @@ export function KasirPageShell({
 
       {toolbar}
 
-      {children}
+      {/* `min-h-0` wajib di anak flex yang boleh menyusut — tanpa itu ia
+          memakai `min-height: auto` dan menolak lebih pendek dari isinya. */}
+      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }

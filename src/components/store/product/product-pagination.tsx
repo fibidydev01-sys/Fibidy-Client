@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   Pagination,
@@ -12,6 +12,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { productsUrl } from '@/lib/public/store-url';
+import { useRouter } from '@/i18n/navigation';
 
 // ==========================================
 // PRODUCT PAGINATION COMPONENT

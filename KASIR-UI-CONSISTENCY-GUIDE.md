@@ -283,12 +283,70 @@ dan Stok mustahil berbeda.
 | Refetch (search, filter) | konten lama tetap tampil, `opacity-60 transition-opacity` saat `isFetching` — **bukan** skeleton |
 | Pending aksi (tombol) | `Spinner` di dalam `Button`, `disabled` |
 | Error | `Alert variant="destructive"` + `AlertTitle` + `AlertDescription` + tombol coba lagi |
-| Kosong (belum ada data) | `Empty` + `EmptyHeader` + `EmptyMedia variant="icon"` + `EmptyTitle` + `EmptyDescription` + `EmptyContent` |
-| Kosong (filter tidak cocok) | `Empty` dengan CTA "reset filter" |
+| Kosong (belum ada data) | `EmptyPanel` — lihat §3.4.1. **Bukan** `Empty` mentah |
+| Kosong (filter tidak cocok) | `KasirEmptyState` + tombol reset filter — sengaja beda, lihat §3.4.1 |
 | Kolom Kanban kosong | `Empty` ringkas (tanpa media) — menggantikan `<p className="border-dashed">` di `papan:115` |
 
 `Loader2` mentah dari lucide **diganti** `Spinner` (`ui/spinner.tsx`) di seluruh
 modul, supaya ukuran & animasi seragam.
+
+### 3.4.1 Satu pola untuk layar yang belum berisi
+
+`src/components/dashboard/shared/empty-panel.tsx` mengunci susunannya, dan
+susunan itu tidak bisa ditawar dari luar:
+
+```
+[ikon]
+Judul
+Penjelasan
+[ Tombol utama ]      ← opsional
+Pelajari cara …        ← tautan panduan (artikel luar), selalu ada
+Butuh bantuan …?       ← tautan bantuan, selalu ada
+```
+
+Yang boleh berbeda cuma teks dan tujuannya. Tautan panduan diambil dari
+`src/lib/constants/dashboard/guide-links.ts` — satu tempat, bukan URL
+bertaburan di tiap layar.
+
+| Layar | Tombol utama | Tujuannya |
+|---|---|---|
+| Jual | Tambah produk | `/dashboard/products/new` |
+| Riwayat | Mulai jualan | `/dashboard/kasir` |
+| Stok | Tambah produk | `/dashboard/products/new` |
+| **Laporan** | **tidak ada** | — |
+| Preset diskon | Tambah preset | buka form (lewat `jaga()`) |
+| Program promo | Tambah promo | buka form (lewat `jaga()`) |
+| Produk | Tambah | `/dashboard/products/new` |
+
+Laporan sengaja tanpa tombol: laporan bukan sesuatu yang **dibuat** penjual,
+ia muncul sebagai akibat dari berjualan. "Tambah laporan" akan berbohong soal
+cara kerjanya.
+
+**Kosong ≠ tersaring.** Yang filternya kesempitan cuma butuh satu tombol
+reset — bukan tautan panduan, karena tidak ada yang perlu dia pelajari. Dua
+keadaan ini memakai komponen yang berbeda, dan itu disengaja.
+
+**Kapan Laporan dianggap kosong.** Syaratnya ketat: begitu SATU bagian punya
+isi — pesanan belum dibayar, pekerjaan tertunda, transaksi di periode mana
+pun, produk terlaris, produk di stok, atau diskon terpakai — halaman penuh
+yang menang. Toko yang sudah punya produk tapi belum pernah jualan tetap
+melihat kartu stoknya. Laporan tidak boleh menyembunyikan angka yang sudah
+ada cuma karena bagian sebelahnya masih sepi.
+
+**Lantai tinggi.** `EmptyPanel` memasang `min-h-[336px] sm:min-h-[392px]`:
+tinggi ALAMI panel yang isinya paling penuh, diukur di layar. Lantai itu cuma
+mengangkat yang pendek, tidak pernah memampatkan yang panjang. Hasilnya tujuh
+layar mendarat di ukuran yang sama persis:
+
+| | Lebar × tinggi |
+|---|---|
+| Ponsel 390 | 358×336 |
+| Tablet 768 | 672×392 |
+| Desktop 1440 | 1216×392 |
+
+Lantai ini ada di `EmptyPanel`, **bukan** di `ui/empty.tsx` — primitifnya
+masih dipakai untuk keadaan kosong yang kecil (mis. daftar diskon di dalam
+popover), dan itu memang tidak boleh setinggi satu halaman.
 
 ### 3.5 Token bottom bar
 
@@ -456,7 +514,9 @@ Lebar sudah benar; yang diperbaiki **isinya**.
 | Bagian panjang di mobile | semua terbuka | `Accordion` / `Collapsible` per kartu |
 | Loading | 3 `Skeleton` blok (`:158-163`) | `Skeleton` di dalam `Card` yang sama persis dengan hasil akhir |
 | Error | `Alert` ✅ | tetap |
-| Grafik kosong | `<p>` (`:279-281`) | `Empty` |
+| Halaman kosong total | dinding angka nol | **`EmptyPanel` tanpa tombol** (§3.4.1) — muncul cuma kalau SEMUA bagian kosong |
+| Grafik kosong (halaman berisi) | `<p>` (`:279-281`) | tetap `<p>` — sengaja. Ini notis di DALAM kartu, bukan keadaan halaman; bingkai putus-putus di dalam kartu cuma jadi kebisingan |
+| Analisa diskon kosong (halaman berisi) | `<p>` | tetap `<p>`, alasan sama |
 | Ekspor | tidak ada | `Button` + `DropdownMenu` (CSV / salin) — opsional |
 
 Contoh wiring chart:

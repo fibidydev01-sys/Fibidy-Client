@@ -32,6 +32,7 @@ import {
   Eye,
   History,
   MoreHorizontal,
+  ShoppingCart,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DateRange } from 'react-day-picker';
@@ -73,11 +74,16 @@ import { useTransaksis } from '@/hooks/dashboard/use-kasir';
 import { KasirPageShell } from '@/components/dashboard/kasir/kasir-page-shell';
 import { KasirFilterGroup } from '@/components/dashboard/kasir/kasir-filter-group';
 import { KasirSearchField } from '@/components/dashboard/kasir/kasir-search-field';
+import { useCollectionView } from '@/components/dashboard/shared/collection-toolbar';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { LayoutGrid, List } from 'lucide-react';
 import {
   KasirEmptyState,
   KasirErrorState,
   KasirRowsSkeleton,
 } from '@/components/dashboard/kasir/kasir-state';
+import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
+import { GUIDE } from '@/lib/constants/dashboard/guide-links';
 import {
   KasirRowButton,
   KasirRowCard,
@@ -111,6 +117,7 @@ function tanggalISO(d: Date): string {
 
 export function RiwayatClient() {
   const t = useTranslations('dashboard.kasir.riwayat');
+  const tTaut = useTranslations('dashboard.kasir.emptyLinks');
   const tStatus = useTranslations('dashboard.kasir.status');
 
   const [search, setSearch] = useState('');
@@ -118,6 +125,14 @@ export function RiwayatClient() {
   const [rentang, setRentang] = useState<DateRange | undefined>();
   const [halaman, setHalaman] = useState(1);
   const [dipilih, setDipilih] = useState<string | null>(null);
+
+  // `fallback: 'list'` — di desktop riwayat memang lebih terbaca sebagai
+  // tabel, dan itu perilaku yang sudah ada sebelum toggle ini. Yang berubah
+  // cuma: sekarang bisa ditimpa.
+  const [tampilan, setTampilan] = useCollectionView(
+    'fibidy:view:kasir-riwayat',
+    'list',
+  );
   const debouncedSearch = useDebounce(search, 300);
 
   // Filter apa pun mengembalikan pembaca ke halaman 1. Tanpa ini, menyaring
@@ -221,6 +236,33 @@ export function RiwayatClient() {
           className="sm:max-w-md"
         />
 
+        {/* Toggle grid⇄daftar. Riwayat sudah menyimpan DUA tampilan lengkap
+            sejak awal — KasirRowCard dan <Table> — tapi memilihnya lewat
+            breakpoint. Sekarang breakpoint jadi NILAI BAKU, bukan aturan:
+            ponsel terbuka sebagai kartu, desktop sebagai tabel, dan penjual
+            boleh menimpanya. Pilihannya diingat, jadi kasir yang lebih suka
+            kartu di layar lebar tidak memilih ulang setiap pagi.
+
+            Bilah ini TIDAK memakai CollectionToolbar. Pencarian di sini
+            sudah debounce dan disaring di server bersama status dan rentang
+            tanggal; menggantinya dengan penyaring sisi-klien yang generik
+            akan menurunkan kualitasnya, bukan menyeragamkannya. Yang dipakai
+            ulang cuma `useCollectionView` — bagian yang memang sama. */}
+        <ToggleGroup
+          type="single"
+          value={tampilan}
+          onValueChange={(v) => v && setTampilan(v as 'grid' | 'list')}
+          variant="outline"
+          className="order-last shrink-0 sm:order-none sm:ml-auto"
+        >
+          <ToggleGroupItem value="grid" aria-label={t('viewGrid')}>
+            <LayoutGrid className="size-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label={t('viewList')}>
+            <List className="size-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="justify-start gap-2 sm:w-auto">
@@ -289,14 +331,13 @@ export function RiwayatClient() {
       {isLoading ? (
         <KasirRowsSkeleton rows={6} trailing="amount" />
       ) : transaksis.length === 0 ? (
-        <KasirEmptyState
-          icon={<History />}
-          title={adaFilter ? t('noMatchTitle') : t('emptyTitle')}
-          description={
-            adaFilter ? t('noMatchDescription') : t('emptyDescription')
-          }
-        >
-          {adaFilter && (
+        // Tersaring vs benar-benar kosong — dibedakan seperti di tab Jual.
+        adaFilter ? (
+          <KasirEmptyState
+            icon={<History />}
+            title={t('noMatchTitle')}
+            description={t('noMatchDescription')}
+          >
             <Button
               variant="outline"
               onClick={() => {
@@ -308,12 +349,28 @@ export function RiwayatClient() {
             >
               {t('dateReset')}
             </Button>
-          )}
-        </KasirEmptyState>
+          </KasirEmptyState>
+        ) : (
+          <EmptyPanel
+            icon={<History />}
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
+            // Riwayat tidak bisa diisi dari sini — transaksinya lahir di tab
+            // Jual. Jadi tombolnya mengantar ke sana, bukan ke form produk.
+            action={{
+              label: t('emptyAction'),
+              icon: <ShoppingCart className="h-4 w-4" aria-hidden />,
+              href: '/dashboard/kasir',
+            }}
+            learnLabel={tTaut('riwayat.learn')}
+            learnHref={GUIDE.kasir}
+            helpLabel={tTaut('riwayat.help')}
+          />
+        )
       ) : (
         <div className={cn('space-y-4 transition-opacity', isFetching && 'opacity-60')}>
           {/* ── Ponsel: kartu ─────────────────────────────────────────── */}
-          <div className="space-y-2 md:hidden">
+          <div className={cn('space-y-2', tampilan === 'list' ? 'hidden' : 'md:hidden')}>
             {transaksis.map((trx) => (
               <KasirRowCard key={trx.id}>
                 <KasirRowButton onClick={() => setDipilih(trx.id)}>
@@ -346,7 +403,7 @@ export function RiwayatClient() {
           </div>
 
           {/* ── Desktop: tabel ────────────────────────────────────────── */}
-          <Card className="hidden py-0 md:block">
+          <Card className={cn('py-0', tampilan === 'list' ? 'block' : 'hidden md:block')}>
             <Table>
               {/* <caption> wajib jadi anak pertama <table>; kelas
                   `caption-bottom` bawaan Table yang menaruhnya di bawah

@@ -139,8 +139,10 @@
           "number": "06",
           "title": "Plans and payments to Fibidy.",
           "content": [
-            "Fibidy offers a Free plan and a Starter plan. Feature details and pricing for each plan are listed on the Pricing page.",
-            "Payment for the Starter plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). If you stop paying for Starter, your account downgrades to the Free plan limits your data stays intact, but the additional product slots, photos, and layout options become unavailable until you resubscribe."
+            "Fibidy offers Free, Starter, and Business plans. Feature details and pricing for each plan are listed on the Pricing page.",
+            "Payment for a paid plan is your payment to Fibidy for using the service (not part of your sales transactions with customers). You pay once at the start of each period via QRIS. There is no automatic billing, we store no card, and nothing is taken from your account unless you pay it yourself. If you do not renew, your account downgrades to the Free plan limits — your data stays intact, but the additional product slots, photos, layout options, and the Cashier become unavailable until you subscribe again.",
+            "Payments for paid plans are non-refundable. Because a single payment immediately opens access for one full period and there is no recurring billing, there are no refunds — full, partial, or pro-rata — for a period already underway. You can stop at any time by not renewing, and your access stays live until the period you already paid for runs out.",
+            "This clause covers your payment to Fibidy. It does not govern money between you and your customers — complaints, returns, or cancelled orders in your store remain between you and your customer, per points 03 and 04 above."
           ]
         },
         {
@@ -301,7 +303,7 @@
           "items": [
             {
               "question": "Is it really free?",
-              "answer": "The Free plan lets you use the online store right away, no cost, but in a limited version. For full features more products, more photos, and more layout options the Starter plan is Rp 35,000/month, one payment and you're ready to go."
+              "answer": "The Free plan lets you use the online store right away, no cost, but in a limited version. For full features — more products, more photos, more layout options, plus the Cashier for recording sales — the Starter plan is Rp 35,000 per month. You pay once at the start of each period via QRIS, it activates immediately, and you renew it yourself if you want to continue."
             },
             {
               "question": "What's the difference between Free and Starter?",

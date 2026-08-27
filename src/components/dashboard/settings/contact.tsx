@@ -13,6 +13,8 @@ import type { ContactFormData } from '@/types/tenant';
 import { StepContactInfo } from './form/contact/step-contact-info';
 import { StepLocation } from './form/contact/step-location';
 import { StepSectionHeading } from './form/contact/step-section-heading';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ============================================================================
 // CONTACT SETTINGS SECTION
@@ -123,7 +125,7 @@ export function ContactSection({ onBack }: ContactSectionProps) {
   const stepProps = { formData: formData!, updateFormData };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       {/* DESKTOP — always ≥lg (1024px), always inside WizardNav's `sticky`
           range (md+): no fixed-position pill to reserve clearance for, so
           just a small breathing-room gap instead of the mobile block's

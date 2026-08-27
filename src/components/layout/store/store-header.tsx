@@ -33,9 +33,7 @@
 // ============================================================================
 
 import { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Menu, LayoutDashboard, Layout, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,6 +54,7 @@ import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import { SaveStatusPill } from '@/components/dashboard/studio/save-status-pill';
 import { cn } from '@/lib/shared/utils';
 import type { PublicTenant } from '@/types/tenant';
+import { Link, usePathname } from '@/i18n/navigation';
 
 interface StoreHeaderProps {
   tenant: PublicTenant;

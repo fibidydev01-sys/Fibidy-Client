@@ -53,7 +53,7 @@ export default async function TwitterImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          background: '#FF1F6D',
+          background: '#171717',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -90,7 +90,7 @@ export default async function TwitterImage() {
             left: '0',
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(135deg, #FF1F6D 0%, #e0185f 50%, #cc1257 100%)',
+            background: 'linear-gradient(135deg, #171717 0%, #1a1a1a 55%, #000000 100%)',
             display: 'flex',
           }}
         />

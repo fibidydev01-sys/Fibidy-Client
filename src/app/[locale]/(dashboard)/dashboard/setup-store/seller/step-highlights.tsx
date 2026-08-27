@@ -31,9 +31,16 @@ import { EmptySlot } from '@/components/dashboard/shared/image-slot';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { CharCounter } from '@/components/dashboard/shared/form-field';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import { AutofillBadge } from './autofill-badge';
 import { cn } from '@/lib/shared/utils';
 import type { FeatureItem } from '@/types/tenant';
+import { FormSection } from '@/components/dashboard/shared/form-panel';
+import {
+  SortableFormPanel,
+  SortablePanelList,
+} from '@/components/dashboard/shared/sortable-form-panel';
 
 interface StepHighlightsProps {
   items: FeatureItem[];
@@ -255,123 +262,185 @@ export function StepHighlights({
     items[2] ?? { ...EMPTY_FEATURE },
   ];
 
+  // ── Id stabil per kartu ───────────────────────────────────────────────
+  // dnd-kit butuh id yang TIDAK berubah selama kartunya hidup.
+  //
+  // Indeks tidak bisa dipakai: mengurut ulang justru mengubahnya, jadi
+  // dnd-kit kehilangan jejak elemen yang sedang diseret di tengah seretan.
+  // Isi kartu juga tidak bisa: penjual menyunting judul sambil kartunya
+  // terpasang, dan id yang ikut berubah membuat animasinya melompat.
+  //
+  // Jadi id disimpan terpisah dan digeser BERBARENGAN dengan datanya.
+  // Selama keduanya selalu bergerak bersama, tiap kartu memegang id yang
+  // sama seumur hidupnya.
+  const [ids, setIds] = useState(() => ['hl-a', 'hl-b', 'hl-c']);
+
   const updateFeature = (index: number, patch: Partial<FeatureItem>) => {
     const next = features.map((f, i) => (i === index ? { ...f, ...patch } : f));
     onChange(next);
   };
 
+  const handleReorder = (next: FeatureItem[]) => {
+    // Kunci error BERBASIS INDEKS (`highlight-0-title` dst), jadi setelah
+    // urutannya berubah kunci lama menunjuk kartu yang salah — pesan
+    // "judul wajib diisi" muncul di kartu yang judulnya sudah terisi.
+    //
+    // Dibersihkan seluruhnya. Validasi berjalan lagi saat Selanjutnya
+    // ditekan, jadi tidak ada yang hilang selain kesalahan pemetaan.
+    for (let i = 0; i < 3; i++) {
+      onClearFieldError?.(`highlight-${i}-image`);
+      onClearFieldError?.(`highlight-${i}-title`);
+      onClearFieldError?.(`highlight-${i}-desc`);
+    }
+    onChange(next);
+  };
+
   return (
-    <div className="space-y-8 max-w-lg mx-auto">
-      <p className="text-sm text-muted-foreground">{t('intro')}</p>
+    <FormSection
+      columns={3}
+      intro={`${t('intro')} ${t('reorderHint')}`}
+      badge={<AutofillBadge visible={isAutofilled('aboutFeatures')} />}
+    >
+      <SortablePanelList
+        items={features}
+        getId={(_f, i) => ids[i]}
+        onReorder={(nextFeatures) => {
+          // Datanya dan id-nya digeser dengan permutasi yang SAMA.
+          const perm = nextFeatures.map((f) => features.indexOf(f));
+          setIds((prev) => perm.map((from) => prev[from]));
+          handleReorder(nextFeatures);
+        }}
+      >
+        {features.map((feature, i) => {
+          const imageKey = `highlight-${i}-image`;
+          const titleKey = `highlight-${i}-title`;
+          const descKey = `highlight-${i}-desc`;
 
-      <AutofillBadge visible={isAutofilled('aboutFeatures')} />
+          const hasImageError = fieldErrors.has(imageKey);
+          const hasTitleError = fieldErrors.has(titleKey);
+          const hasDescError = fieldErrors.has(descKey);
 
-      {features.map((feature, i) => {
-        const imageKey = `highlight-${i}-image`;
-        const titleKey = `highlight-${i}-title`;
-        const descKey = `highlight-${i}-desc`;
-
-        const hasImageError = fieldErrors.has(imageKey);
-        const hasTitleError = fieldErrors.has(titleKey);
-        const hasDescError = fieldErrors.has(descKey);
-
-        return (
-          <div key={i} className="border rounded-xl p-4 space-y-4">
-            <p className="text-[11px] font-semibold tracking-widests uppercase text-muted-foreground">
-              Highlight {i + 1}
-            </p>
-
-            {/* Feature image */}
-            {/*
-              [SCROLL FIX] data-field-error di wrapper image section.
-            */}
-            <div
-              className="space-y-1.5"
-              data-field-error={hasImageError ? 'true' : undefined}
+          return (
+            <SortableFormPanel
+              key={ids[i]}
+              id={ids[i]}
+              title={`${t('panelTitle')} ${i + 1}`}
+              handleLabel={`${t('reorderLabel')} ${i + 1}`}
             >
-              <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-                {t('imageLabel')} <span className="text-destructive normal-case font-normal">*</span>
-              </Label>
-              <HighlightImageUpload
-                index={i}
-                imageUrl={feature.image ?? ''}
-                onImageChange={(url) => updateFeature(i, { image: url })}
-                slotId={`highlight-${i}`}
-                onUploadStateChange={onUploadStateChange}
-                hasImageError={hasImageError}
-                onClearImageError={() => onClearFieldError?.(imageKey)}
-              />
-              {hasImageError && (
-                <p className="text-xs text-destructive font-medium">
-                  {t('imageRequired')}
-                </p>
-              )}
-            </div>
-
-            {/* Title */}
-            <div
-              className="space-y-1.5"
-              data-field-error={hasTitleError ? 'true' : undefined}
-            >
-              <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-                {t('titleLabel')} <span className="text-destructive normal-case font-normal">*</span>
-              </Label>
-              <Input
-                placeholder={t('titlePlaceholder')}
-                value={feature.title}
-                onChange={(e) => {
-                  updateFeature(i, { title: e.target.value });
-                  if (hasTitleError) onClearFieldError?.(titleKey);
-                }}
-                maxLength={15}
-                className={cn(
-                  'h-10 text-sm font-semibold',
-                  hasTitleError && 'border-destructive focus-visible:ring-destructive',
+              {/* Gambar */}
+              <div
+                className="space-y-1.5"
+                data-field-error={hasImageError ? 'true' : undefined}
+              >
+                <Label>
+                  {t('imageLabel')}{' '}
+                  <span className="font-normal normal-case text-destructive">
+                    *
+                  </span>
+                </Label>
+                <HighlightImageUpload
+                  index={i}
+                  imageUrl={feature.image ?? ''}
+                  onImageChange={(url) => updateFeature(i, { image: url })}
+                  // slotId memakai id STABIL, bukan indeks: kalau memakai
+                  // indeks, mengurut ulang di tengah unggahan membuat
+                  // pelacak unggahan memegang kunci yang tidak pernah
+                  // ditutup, dan penjaga navigasi mengira ada unggahan
+                  // yang masih berjalan selamanya.
+                  slotId={ids[i]}
+                  onUploadStateChange={onUploadStateChange}
+                  hasImageError={hasImageError}
+                  onClearImageError={() => onClearFieldError?.(imageKey)}
+                />
+                {hasImageError && (
+                  <p className="text-xs font-medium text-destructive">
+                    {t('imageRequired')}
+                  </p>
                 )}
-              />
-              {hasTitleError && (
-                <p className="text-xs text-destructive font-medium">
-                  {t('titleRequired')}
-                </p>
-              )}
-            </div>
+              </div>
 
-            {/* Description */}
-            <div
-              className="space-y-1.5"
-              data-field-error={hasDescError ? 'true' : undefined}
-            >
-              <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-                {t('descriptionLabel')} <span className="text-destructive normal-case font-normal">*</span>
-              </Label>
-              <Textarea
-                placeholder={t('descriptionPlaceholder')}
-                value={feature.description ?? ''}
-                onChange={(e) => {
-                  updateFeature(i, { description: e.target.value });
-                  if (hasDescError) onClearFieldError?.(descKey);
-                }}
-                maxLength={100}
-                rows={2}
-                className={cn(
-                  'resize-none text-sm',
-                  hasDescError && 'border-destructive focus-visible:ring-destructive',
+              {/* Judul */}
+              <div
+                className="space-y-1.5"
+                data-field-error={hasTitleError ? 'true' : undefined}
+              >
+                <Label>
+                  {t('titleLabel')}{' '}
+                  <span className="font-normal normal-case text-destructive">
+                    *
+                  </span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    placeholder={t('titlePlaceholder')}
+                    value={feature.title}
+                    onChange={(e) => {
+                      updateFeature(i, { title: e.target.value });
+                      if (hasTitleError) onClearFieldError?.(titleKey);
+                    }}
+                    maxLength={TENANT_LIMITS.aboutFeatureTitle.max}
+                    className={cn(
+                      'pr-14',
+                      hasTitleError &&
+                        'border-destructive focus-visible:ring-destructive',
+                    )}
+                  />
+                  <CharCounter
+                    current={feature.title.length}
+                    max={TENANT_LIMITS.aboutFeatureTitle.max}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  />
+                </div>
+                {hasTitleError && (
+                  <p className="text-xs font-medium text-destructive">
+                    {t('titleRequired')}
+                  </p>
                 )}
-              />
-              <div className="flex justify-between items-center">
+              </div>
+
+              {/* Deskripsi */}
+              <div
+                className="space-y-1.5"
+                data-field-error={hasDescError ? 'true' : undefined}
+              >
+                <Label>
+                  {t('descriptionLabel')}{' '}
+                  <span className="font-normal normal-case text-destructive">
+                    *
+                  </span>
+                </Label>
+                <div className="relative">
+                  <Textarea
+                    placeholder={t('descriptionPlaceholder')}
+                    value={feature.description ?? ''}
+                    onChange={(e) => {
+                      updateFeature(i, { description: e.target.value });
+                      if (hasDescError) onClearFieldError?.(descKey);
+                    }}
+                    maxLength={TENANT_LIMITS.aboutFeatureDescription.max}
+                    rows={2}
+                    className={cn(
+                      'resize-none pb-6',
+                      hasDescError &&
+                        'border-destructive focus-visible:ring-destructive',
+                    )}
+                  />
+                  <CharCounter
+                    current={(feature.description ?? '').length}
+                    max={TENANT_LIMITS.aboutFeatureDescription.max}
+                    className="absolute bottom-2 right-3"
+                  />
+                </div>
                 {hasDescError && (
-                  <p className="text-xs text-destructive font-medium">
+                  <p className="text-xs font-medium text-destructive">
                     {t('descriptionRequired')}
                   </p>
                 )}
-                <p className="text-[11px] text-muted-foreground tabular-nums ml-auto">
-                  {(feature.description ?? '').length}/100
-                </p>
               </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+            </SortableFormPanel>
+          );
+        })}
+      </SortablePanelList>
+    </FormSection>
   );
 }

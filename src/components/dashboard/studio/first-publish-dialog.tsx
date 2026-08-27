@@ -17,7 +17,6 @@
 //   - CTA Secondary: "Lihat Toko Saya" → /store/{slug} (new tab)
 // ============================================================================
 
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { PartyPopper, ArrowRight } from 'lucide-react';
 import {
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { storeAbsoluteUrl } from '@/lib/public/store-url';
+import { useRouter } from '@/i18n/navigation';
 
 interface FirstPublishDialogProps {
   open: boolean;
@@ -67,7 +67,7 @@ export function FirstPublishDialog({
             </div>
           </div>
 
-          <DialogTitle className="text-center text-xl font-bold">
+          <DialogTitle className="text-center text-display-sm">
             {t('title')}
           </DialogTitle>
 

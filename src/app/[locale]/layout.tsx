@@ -4,7 +4,7 @@
 //
 // This file holds everything that USED to live in src/app/layout.tsx:
 //   - <html>, <head>, <body>
-//   - Font loading (Geist + Geist Mono — via official `geist` package, v15.3.3)
+//   - Font loading (Inter + JetBrains Mono — next/font/google)
 //   - Root metadata + viewport
 //   - Preconnect / DNS-prefetch
 //   - Apple / MS PWA meta tags
@@ -39,42 +39,18 @@
 //    theoretically rank for "fibidy" branded queries — duplicate
 //    content + brand dilution.
 //
-// [PHASE 5 polish v15.3.3 — May 2026]
-// Geist now loaded via the OFFICIAL `geist` npm package (the same
-// package Vercel themselves use on vercel.com), replacing the
-// previous `next/font/google` jalur from v15.3.0–v15.3.2.
-//
-// Why the swap:
-//   - `next/font/google` pulls a Google-redistributed copy of Geist.
-//     That copy is a subset — kerning pairs, font-feature-settings,
-//     and the full opsz axis can be trimmed depending on what Google
-//     hosts at any given moment.
-//   - The official `geist` package self-hosts the canonical .woff2
-//     files via `next/font/local` under the hood. Files are
-//     maintained by Vercel + Basement Studio (the original designers),
-//     updated in lockstep with the GitHub releases of vercel/geist-font,
-//     and ship with the full glyph set + feature settings intact.
-//   - Zero Google CDN dependency at runtime.
-//
-// What changed:
-//   - Imports: { Geist, Geist_Mono } from 'next/font/google'
-//             → { GeistSans } from 'geist/font/sans'
-//             + { GeistMono } from 'geist/font/mono'
-//   - No more Geist({ subsets, display, variable }) calls — the
-//     official package bakes those settings in (subset = 'latin',
-//     display = 'swap', variable = '--font-geist-sans' / '--font-geist-mono').
-//
-// What did NOT change:
-//   - CSS variable names: still --font-geist-sans / --font-geist-mono.
-//     globals.css and every consumer that references them keeps
-//     working without touching a single line of CSS.
-//   - The `.variable` className contract — applied to <body> below
-//     in the same place as before.
+// [FONT — Agu 2026]
+// Geist dicabut, diganti Inter + JetBrains Mono sesuai expo.design.md.
+// Blok panjang v15.3.3 yang dulu ada di sini menjelaskan kenapa Geist
+// dimuat lewat paket `geist` alih-alih next/font/google. Argumennya
+// benar dan tidak relevan lagi — alasannya ada di blok KONFIGURASI FONT
+// di bawah, termasuk temuan bahwa Geist tidak pernah benar-benar tampil.
+// Riwayat lengkapnya ada di git; menyimpannya di sini cuma membuat
+// berkas ini menjelaskan kode yang sudah tidak ada.
 // ==========================================
 
 import type { Metadata, Viewport } from 'next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
@@ -88,26 +64,59 @@ import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 // ==========================================
-// FONT CONFIGURATION — Geist + Geist Mono (v15.3.3)
+// KONFIGURASI FONT — Inter + JetBrains Mono
 // ==========================================
 //
-// `GeistSans` and `GeistMono` are pre-configured Font objects exported
-// by the `geist` npm package. They are NOT factory functions — they
-// already carry the CSS variable wiring (`--font-geist-sans` /
-// `--font-geist-mono`) baked in by Vercel.
+// Pasangan yang diminta expo.design.md, dituruti persis:
 //
-// Use them directly via `.variable` on a wrapping element. The
-// `.variable` value is a CSS class containing the `--font-*`
-// custom-property declaration; everything inside that element
-// inherits the variable through the cascade.
+//   sans : "'Inter', -apple-system, system-ui, sans-serif"
+//   mono : "'JetBrains Mono', 'Fira Code', monospace"
 //
-// No instantiation, no options object. The package itself is the
-// source of truth for subsetting, display strategy, weight axis
-// coverage, and font-feature-settings.
+// ── KENAPA GEIST DICABUT ───────────────────────────────────────────
+//
+// Bukan karena Geist jelek. Karena Geist TIDAK PERNAH TAMPIL.
+//
+// Sampai commit sebelumnya, `--font-geist-sans` dipasang oleh kelas
+// `.variable` di <body>, sementara `--font-sans` dideklarasikan di
+// `:root`. Properti kustom dihitung dari atas ke bawah, jadi :root
+// tidak bisa membaca variabel milik anaknya — `--font-sans` menghitung
+// jadi string kosong dan seluruh situs jatuh ke ui-sans-serif.
+//
+// Bug itu sudah diperbaiki (kelas variabel pindah ke <html>, dan
+// tetap di sana). Tapi begitu diperbaiki, pertanyaannya berubah: kalau
+// kita memang baru mau memilih font sekarang, kenapa bukan yang
+// diminta spec? Tidak ada jawaban yang bagus. Jadi Inter.
+//
+// ── CATATAN FAIL-LOUD, VERSI BARU ──────────────────────────────────
+//
+// Versi lama berbunyi: "Inter sengaja dicabut dari rantai fallback,
+// supaya kalau Geist mati halaman jatuh ke system sans-serif dan
+// regresinya kelihatan seketika."
+//
+// Alasan itu terdengar benar selama setahun dan tidak pernah
+// menyelamatkan apa pun — situsnya memang sudah jatuh ke fallback,
+// dan tidak ada yang menyadarinya. Fail-loud yang tidak ada yang
+// dengar bukan fail-loud; itu cuma fail.
+//
+// Penggantinya bukan komentar, melainkan pengukuran: verifikasi
+// membaca getComputedStyle(body).fontFamily di build produksi dan
+// menolak hasil yang tidak memuat "Inter". Lihat ROADMAP_EAS_DASHBOARD.md §5.
+//
+// Rantai fallback sekarang ditulis apa adanya sesuai spec — tidak ada
+// lagi yang sengaja dilubangi.
 // ==========================================
 
-// (Intentionally no `Geist()` / `Geist_Mono()` calls here — the
-// official package exports the configured Font objects directly.)
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono',
+});
 
 // ==========================================
 // VIEWPORT CONFIGURATION
@@ -121,7 +130,7 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: seoConfig.themeColor },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: dark)', color: '#171717' },
   ],
 };
 
@@ -263,7 +272,27 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    // [Agu 2026] Kelas variabel Geist DIPINDAH dari <body> ke <html>.
+    //
+    // Selama ini `.variable` menempel di <body>, jadi `--font-geist-sans`
+    // hanya ada MULAI DARI body ke bawah. Tapi `--font-sans` dideklarasikan
+    // di `:root` (globals.css), dan properti kustom dihitung dari atas ke
+    // bawah — :root tidak bisa membaca variabel yang baru lahir di anaknya.
+    // Akibatnya `--font-sans: var(--font-geist-sans), sans-serif` menjadi
+    // invalid-at-computed-value-time, menghitung jadi string KOSONG, dan
+    // `font-family: var(--font-sans)` jatuh ke tumpukan preflight Tailwind.
+    //
+    // Jadi Geist tidak pernah benar-benar tampil — seluruh situs berjalan
+    // dengan ui-sans-serif. Fallback fail-loud di globals.css bekerja persis
+    // seperti yang dirancang; yang tidak terjadi adalah ada yang menyadarinya.
+    // Diverifikasi di build produksi: getComputedStyle(body).fontFamily
+    // mengembalikan "ui-sans-serif, system-ui, …" sebelum baris ini diubah,
+    // dan memuat "Inter" sesudahnya.
+    <html
+      lang={locale}
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -283,7 +312,7 @@ export default async function LocaleLayout({
         )}
 
         {/* PWA Theme Color (fallback) */}
-        <meta name="theme-color" content="#ec4899" />
+        <meta name="theme-color" content="#ffffff" />
 
         {/* Apple PWA Meta Tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -291,15 +320,13 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-title" content="Fibidy" />
 
         {/* MS Tile */}
-        <meta name="msapplication-TileColor" content="#ec4899" />
+        <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
 
         {/* Organization + WebSite Schema (JSON-LD) */}
         <OrganizationSchema />
       </head>
-      <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
-      >
+      <body className="font-sans antialiased">
         <NextIntlClientProvider>
           <Providers>
             {children}

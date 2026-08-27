@@ -28,6 +28,8 @@ import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { toast } from 'sonner';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ==========================================
 // VALIDATION — uses validation.password.* keys
@@ -112,7 +114,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
           takes over from md up where WizardNav is `sticky`/in-flow and
           doesn't need an artificial reserve — see wizard-nav.tsx's v6
@@ -122,7 +124,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-bold">{t('title')}</h2>
+            <h2 className="text-title-md">{t('title')}</h2>
           </div>
           <p className="text-sm text-muted-foreground">
             {t('subtitle')}
@@ -159,7 +161,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             name="currentPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+                <FormLabel>
                   {t('currentLabel')}
                 </FormLabel>
                 <FormControl>
@@ -169,7 +171,6 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
                       placeholder={t('currentPlaceholder')}
                       autoComplete="current-password"
                       disabled={isLoading}
-                      className="h-11 text-sm"
                       {...field}
                     />
                     <Button
@@ -198,7 +199,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             name="newPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+                <FormLabel>
                   {t('newLabel')}
                 </FormLabel>
                 <FormControl>
@@ -208,7 +209,6 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
                       placeholder={t('newPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
-                      className="h-11 text-sm"
                       {...field}
                     />
                     <Button
@@ -240,7 +240,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+                <FormLabel>
                   {t('confirmLabel')}
                 </FormLabel>
                 <FormControl>
@@ -250,7 +250,6 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
                       placeholder={t('confirmPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
-                      className="h-11 text-sm"
                       {...field}
                     />
                     <Button

@@ -6,7 +6,6 @@
       "loginFailed": "Gagal masuk",
       "registerSuccess": "Pendaftaran berhasil!",
       "registerSuccessDetail": "Toko kamu siap digunakan",
-      "registerBuyerSuccessDetail": "Kamu sekarang bisa membeli produk.",
       "registerFailed": "Pendaftaran gagal",
       "logoutSuccess": "Berhasil keluar",
       "passwordChangedSuccess": "Kata sandi berhasil diubah",
@@ -19,40 +18,10 @@
       "updated": "Produk diperbarui",
       "deleted": "Produk dihapus"
     },
-    "upgrade": {
-      "success": "Selamat!",
-      "successDetail": "Toko kamu sudah aktif. Mulai jual produk sekarang!",
-      "failed": "Upgrade gagal",
-      "categoryRequired": "Silakan pilih jenis usaha",
-      "nameRequired": "Nama toko wajib diisi",
-      "slugRequired": "URL toko wajib diisi",
-      "whatsappRequired": "Nomor WhatsApp wajib diisi",
-      "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
-    },
     "setup": {
       "success": "Setup toko selesai!",
       "successDetail": "Toko kamu sudah live. Mulai tambah produk sekarang!",
       "failed": "Setup gagal"
-    },
-    "refund": {
-      "approved": "Refund disetujui! Dana akan kembali ke rekening kamu dalam 5-10 hari kerja.",
-      "rejectedFileValid": "File bisa diakses dan valid. Refund tidak bisa diproses.",
-      "rejectedOutOfWindow": "Masa refund (7 hari) sudah lewat.",
-      "rejectedAlreadyRefunded": "Pembelian ini sudah di-refund sebelumnya.",
-      "rejectedGeneric": "Permintaan refund ditolak."
-    },
-    "subscription": {
-      "paymentSuccess": "Pembayaran berhasil!",
-      "paymentSuccessDetail": "Paket kamu sekarang {tier}.",
-      "paymentSuccessGeneric": "Langganan kamu aktif.",
-      "paymentCanceled": "Pembayaran dibatalkan.",
-      "verificationFailed": "Verifikasi gagal",
-      "verificationFailedDetail": "Silakan coba lagi atau hubungi support jika kartu sudah ditagih."
-    },
-    "checkout": {
-      "cancelFailed": "Checkout dibatalkan.",
-      "duplicateLockTitle": "Masih memproses checkout sebelumnya",
-      "duplicateLockBody": "Tunggu beberapa detik lalu coba lagi. Jika kamu sudah diarahkan ke Stripe, selesaikan pembayaran di tab tersebut."
     },
     "settings": {
       "heroSaved": "Hero section berhasil disimpan",
@@ -67,19 +36,6 @@
       "logoRemoveFailed": "Gagal menghapus logo",
       "heroBgRemoved": "Gambar latar berhasil dihapus",
       "heroBgRemoveFailed": "Gagal menghapus gambar latar"
-    },
-    "admin": {
-      "loginSuccess": "Login berhasil",
-      "loginSuccessDetail": "Selamat datang, {name}",
-      "loginFailed": "Login gagal",
-      "logoutSuccess": "Berhasil keluar",
-      "tenantSuspended": "Tenant di-suspend",
-      "tenantReactivated": "Tenant diaktifkan kembali",
-      "suspendFailed": "Gagal suspend tenant",
-      "unsuspendFailed": "Gagal mengaktifkan tenant",
-      "cleanupSuccess": "Cleanup berhasil",
-      "cleanupDetail": "{downloadLogs} log download + {webhookEvents} webhook event dihapus.",
-      "cleanupFailed": "Cleanup gagal"
     },
     "landing": {
       "published": "Landing page dipublikasikan!",

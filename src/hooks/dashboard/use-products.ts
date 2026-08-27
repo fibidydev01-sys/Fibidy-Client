@@ -7,10 +7,6 @@
 // All product hooks here:
 //   - CRUD: useProducts, useProduct, useCreateProduct, useUpdateProduct, useDeleteProduct
 //   - Categories: useProductCategories (with optional `includeCategory` inject)
-//   - KYC: useKycStatus, useInitiateKyc, useKycReturnHandler
-//   - Storage: useStorageUsage
-//   - Upload: useUploadProduct
-//   - Download: useDownloadHistory
 //
 // ==========================================
 // [REALTIME REFRESH FIX — May 2026]
@@ -47,38 +43,26 @@
 //      `queryKeys.products.categories()`:
 //        - useCreateProduct
 //        - useUpdateProduct
-//        - useUpdateProductFile
 //        - useDeleteProduct       (last product of a category gone)
-//        - useUploadProduct       (file-upload create path)
 //
 //   4. Mutations also invalidate `queryKeys.products.detail(id)`
 //      where applicable, so edit page reflects fresh server state
 //      after save.
 //
-// [PHASE 3 — DIGITAL PRODUCTS FLAG]
-// All digital-only hooks remain gated via React Query's `enabled`:
-//   - useKycStatus, useStorageUsage, useDownloadHistory
-//   - useKycReturnHandler (early-return on flag off)
+// [PANGKAS PRODUK DIGITAL] Hook KYC, storage, upload, dan riwayat unduhan
+// sudah dicabut seluruhnya bersama fiturnya.
 // ==========================================
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  useIsFetching,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { productsApi } from '@/lib/api/products';
 import { getErrorMessage } from '@/lib/api/client';
 import { queryKeys } from '@/lib/shared/query-keys';
-import { FEATURES } from '@/lib/config/features';
 import type {
   ProductQueryParams,
   CreateProductInput,
   UpdateProductInput,
-  UpdateProductFileInput,
 } from '@/types/product';
 
 // ==========================================
@@ -249,42 +233,6 @@ export function useUpdateProduct() {
 }
 
 // ==========================================
-// USE UPDATE PRODUCT FILE — update file-product metadata
-//
-// [REALTIME FIX] Same invalidation set as useUpdateProduct.
-// ==========================================
-
-export function useUpdateProductFile() {
-  const tToast = useTranslations('toast.products');
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateProductFileInput;
-    }) => productsApi.updateFile(id, data),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.products.categories(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.products.detail(variables.id),
-      });
-      toast.success(tToast('updated'));
-    },
-    onError: (err) => {
-      toast.error(getErrorMessage(err));
-    },
-  });
-
-  return { updateProduct: mutate, isLoading: isPending };
-}
-
-// ==========================================
 // USE DELETE PRODUCT
 //
 // [REALTIME FIX] Also invalidates categories — if this was the last
@@ -302,9 +250,6 @@ export function useDeleteProduct() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.products.categories(),
       });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.products.storage(),
-      });
       toast.success(tToast('deleted'));
     },
     onError: (err) => {
@@ -313,202 +258,4 @@ export function useDeleteProduct() {
   });
 
   return { deleteProduct: mutate, isLoading: isPending };
-}
-
-// ==========================================
-// KYC
-//
-// [PHASE 3] Skip fetch when digital-products feature flag off.
-// Without this, the query fires → backend returns 503 → console noise.
-// ==========================================
-
-export function useKycStatus() {
-  return useQuery({
-    queryKey: queryKeys.products.kyc(),
-    queryFn: () => productsApi.getKycStatus(),
-    enabled: FEATURES.digitalProducts,
-    staleTime: 1000 * 60 * 2,
-    gcTime: 1000 * 60 * 10,
-  });
-}
-
-export function useInitiateKyc() {
-  const queryClient = useQueryClient();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: () => productsApi.initiateKyc(),
-    onSuccess: (data) => {
-      window.location.href = data.onboardingUrl;
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.products.kyc(),
-      });
-    },
-    onError: (err) => {
-      toast.error(getErrorMessage(err));
-    },
-  });
-
-  return { initiateKyc: mutate, isLoading: isPending };
-}
-
-// ==========================================
-// KYC RETURN HANDLER
-//
-// [v3.1 FIX] Completely removed local setState from effect.
-//
-// Previous approach (v3): `setIsPolling((prev) => (prev ? prev : true))` —
-// ESLint rule `react-hooks/set-state-in-effect` is stricter than expected
-// and flags ANY setState call inside effect body, regardless of whether
-// the functional updater is a no-op.
-//
-// New approach (v3.1): Derive `isPolling` from React Query's `useIsFetching`
-// which tracks in-flight queries globally. When the effect triggers
-// `invalidateQueries`, the KYC query starts refetching → `useIsFetching`
-// returns > 0 → `isPolling` is true. Zero local state, zero setState,
-// same external API.
-//
-// [PHASE 3] When flag is off, the effect early-returns and `isPolling`
-// is permanently false. KYC query is gated by useKycStatus's `enabled`,
-// so invalidation here is also a no-op.
-// ==========================================
-
-export function useKycReturnHandler() {
-  const queryClient = useQueryClient();
-  const hasHandledRef = useRef(false);
-
-  // Track whether the KYC query is currently refetching.
-  // `useIsFetching` returns count of in-flight matching queries (0 = idle).
-  const fetchingCount = useIsFetching({ queryKey: queryKeys.products.kyc() });
-  const isPolling = fetchingCount > 0;
-
-  useEffect(() => {
-    // [PHASE 3] Skip entirely when feature is off
-    if (!FEATURES.digitalProducts) return;
-
-    if (typeof window === 'undefined') return;
-    if (hasHandledRef.current) return;
-
-    const url = new URL(window.location.href);
-    if (url.searchParams.get('kyc') !== 'return') return;
-
-    hasHandledRef.current = true;
-    url.searchParams.delete('kyc');
-    window.history.replaceState({}, '', url.toString());
-
-    // Trigger refetch — isPolling becomes true via useIsFetching
-    // No setState called from inside this effect body.
-    queryClient.invalidateQueries({ queryKey: queryKeys.products.kyc() });
-  }, [queryClient]);
-
-  return { isPolling };
-}
-
-// ==========================================
-// STORAGE
-//
-// [PHASE 3] Skip fetch when digital-products feature flag off.
-// ==========================================
-
-export function useStorageUsage() {
-  return useQuery({
-    queryKey: queryKeys.products.storage(),
-    queryFn: () => productsApi.getStorageUsage(),
-    enabled: FEATURES.digitalProducts,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 10,
-  });
-}
-
-// ==========================================
-// UPLOAD PRODUCT (with file)
-//
-// [REALTIME FIX] Also invalidates categories — a new file-product
-// may carry a category (set via the subsequent .update() call from
-// product-form.tsx).
-// ==========================================
-
-export function useUploadProduct() {
-  const tToast = useTranslations('toast.products');
-  const queryClient = useQueryClient();
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const upload = useCallback(
-    async (
-      file: File,
-      productData: { name: string; description?: string; price: number },
-    ) => {
-      setIsUploading(true);
-      setUploadProgress(0);
-
-      try {
-        const fileSizeMb = file.size / (1024 * 1024);
-        const fileType = file.name.split('.').pop()?.toLowerCase() ?? '';
-
-        const { uploadUrl, fileKey } = await productsApi.initiateUpload({
-          fileName: file.name,
-          fileType,
-          fileSizeMb,
-        });
-
-        await productsApi.uploadToR2(
-          uploadUrl,
-          file,
-          file.type || 'application/octet-stream',
-          (percent) => setUploadProgress(percent),
-        );
-
-        setUploadProgress(100);
-
-        const result = await productsApi.confirmUpload({
-          fileKey,
-          fileName: file.name,
-          fileType,
-          fileSizeMb,
-          name: productData.name,
-          description: productData.description,
-          price: productData.price,
-        });
-
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.products.categories(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.products.storage(),
-        });
-
-        toast.success(tToast('added'));
-        return result.product;
-      } catch (err) {
-        toast.error(getErrorMessage(err));
-        throw err;
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    [queryClient, tToast],
-  );
-
-  return { upload, isUploading, uploadProgress };
-}
-
-// ==========================================
-// DOWNLOAD HISTORY
-//
-// [PHASE 3] Skip fetch when digital-products feature flag off.
-// ==========================================
-
-export function useDownloadHistory(params?: {
-  productId?: string;
-  page?: number;
-  limit?: number;
-}) {
-  return useQuery({
-    queryKey: queryKeys.products.downloads(params),
-    queryFn: () => productsApi.getDownloadHistory(params),
-    enabled: FEATURES.digitalProducts,
-    staleTime: 1000 * 60 * 2,
-    gcTime: 1000 * 60 * 10,
-  });
 }

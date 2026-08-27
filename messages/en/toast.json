@@ -6,7 +6,6 @@
       "loginFailed": "Login failed",
       "registerSuccess": "Registration successful!",
       "registerSuccessDetail": "Your store is ready to use",
-      "registerBuyerSuccessDetail": "You can now purchase products.",
       "registerFailed": "Registration failed",
       "logoutSuccess": "Logged out",
       "passwordChangedSuccess": "Password changed successfully",
@@ -19,40 +18,10 @@
       "updated": "Product updated",
       "deleted": "Product deleted"
     },
-    "upgrade": {
-      "success": "Congratulations!",
-      "successDetail": "Your store is live. Start selling products now!",
-      "failed": "Upgrade failed",
-      "categoryRequired": "Please select a business type",
-      "nameRequired": "Store name is required",
-      "slugRequired": "Store URL is required",
-      "whatsappRequired": "WhatsApp number is required",
-      "agreementRequired": "Please agree to the Terms of Service to continue"
-    },
     "setup": {
       "success": "Store setup complete!",
       "successDetail": "Your store is now live. Start adding products!",
       "failed": "Setup failed"
-    },
-    "refund": {
-      "approved": "Refund approved! Funds will return to your account in 5-10 business days.",
-      "rejectedFileValid": "File is accessible and valid. Refund cannot be processed.",
-      "rejectedOutOfWindow": "Refund window (7 days) has expired.",
-      "rejectedAlreadyRefunded": "This purchase has already been refunded.",
-      "rejectedGeneric": "Refund request was rejected."
-    },
-    "subscription": {
-      "paymentSuccess": "Payment successful!",
-      "paymentSuccessDetail": "Your plan is now {tier}.",
-      "paymentSuccessGeneric": "Your subscription is active.",
-      "paymentCanceled": "Payment canceled.",
-      "verificationFailed": "Verification failed",
-      "verificationFailedDetail": "Please try again or contact support if you have already been charged."
-    },
-    "checkout": {
-      "cancelFailed": "Checkout was canceled.",
-      "duplicateLockTitle": "Still processing your previous checkout",
-      "duplicateLockBody": "Wait a few seconds and try again. If you were already redirected to Stripe, complete the payment in that tab."
     },
     "settings": {
       "heroSaved": "Hero section saved successfully",
@@ -67,19 +36,6 @@
       "logoRemoveFailed": "Failed to remove logo",
       "heroBgRemoved": "Background image removed successfully",
       "heroBgRemoveFailed": "Failed to remove background image"
-    },
-    "admin": {
-      "loginSuccess": "Login successful",
-      "loginSuccessDetail": "Welcome, {name}",
-      "loginFailed": "Login failed",
-      "logoutSuccess": "Logged out",
-      "tenantSuspended": "Tenant suspended",
-      "tenantReactivated": "Tenant reactivated",
-      "suspendFailed": "Failed to suspend tenant",
-      "unsuspendFailed": "Failed to reactivate tenant",
-      "cleanupSuccess": "Cleanup successful",
-      "cleanupDetail": "{downloadLogs} download logs + {webhookEvents} webhook events deleted.",
-      "cleanupFailed": "Cleanup failed"
     },
     "landing": {
       "published": "Landing page published!",

@@ -1,124 +1,161 @@
 'use client';
 
 // ============================================================================
-// DASHBOARD SIDEBAR (desktop)
+// DASHBOARD SIDEBAR — komposisi
 // File: src/components/layout/dashboard/dashboard-sidebar.tsx
 //
-// [SETUP HIGHLIGHT — May 2026]
-// Saat user klik nav item yang locked (requiresSetup + !isSetupComplete):
-//   1. MandatoryDialog muncul
-//   2. User klik "Continue Setup"
-//   3. Jika user SUDAH di /dashboard/setup-store:
-//      → dispatch CustomEvent 'setup:highlight'
-//      → wizard mendengar event → highlight + scroll field kosong step saat ini
-//   4. Jika user BELUM di /dashboard/setup-store:
-//      → router.push ke setup-store
-//      → wizard mount fresh (state awal step 1)
+// Mengikuti komposisi resmi shadcn (contoh `app-sidebar.tsx`):
 //
-// Dengan begini: user yang sudah di step 2 dan coba navigate tetap di step 2,
-// field kosong di-highlight, tidak reset ke step 1.
+//   Sidebar variant="inset"
+//   ├── SidebarHeader   → identitas toko
+//   ├── SidebarContent  → NavMain × 2 grup
+//   ├── SidebarFooter   → NavUser
+//   └── SidebarRail     → gagang untuk membuka/menutup
+//
+// Berkas ini sekarang MURNI komposisi. Data nav, gerbang setup, dan dialognya
+// tetap di sini karena ketiganya milik sidebar; markup menu dan menu pengguna
+// pindah ke nav-main.tsx dan nav-user.tsx, sama seperti contohnya.
+//
+// [SETUP HIGHLIGHT — Mei 2026] Saat entri terkunci ditekan (requiresSetup +
+// !isSetupComplete): MandatoryDialog muncul; "Lanjutkan Setup" akan
+// mengirim CustomEvent 'setup:highlight' kalau penjual sudah berada di
+// /dashboard/setup-store (supaya langkah yang sedang dibuka tidak reset ke
+// langkah 1), atau menavigasi ke sana kalau belum.
 // ============================================================================
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import {
+  CreditCard,
   LayoutDashboard,
   Layout,
   Settings,
-  BookOpen,
-  Store,
-  History,
-  CreditCard,
-  ShieldCheck,
   ShoppingCart,
-  LogOut,
   type LucideIcon,
 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from '@/components/ui/sidebar';
+import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/hooks/auth/use-auth';
-import { FEATURES } from '@/lib/config/features';
-import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
+import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import {
+  bacaCacheDagangType,
+  layarKasirUntuk,
+} from '@/lib/constants/dashboard/kasir-screens';
+import { NavMain, type NavMainItem } from './nav-main';
+import { NavUser } from './nav-user';
 
-interface NavItem {
+// ─── Data nav ───────────────────────────────────────────────────────────────
+
+interface NavEntry {
   titleKey: string;
   href: string;
   icon: LucideIcon;
-  hideForEdu?: boolean;
+  group: 'store' | 'account';
   requiresSetup?: boolean;
+  hideForEdu?: boolean;
+  /**
+   * Layar anak diturunkan dari KASIR_SCREENS, disaring mode dagang toko.
+   * Hanya Kasir yang punya layar anak, jadi ini bendera, bukan daftar.
+   */
+  subKeysDinamis?: boolean;
 }
 
-const sellerNavItems: NavItem[] = [
-  { titleKey: 'products', href: '/dashboard/products', icon: LayoutDashboard, requiresSetup: true },
-  // [KASIR] Satu entri untuk seluruh modul kasir; Jual/Riwayat/Stok/Laporan
-  // dipisah lewat sub-nav di dalamnya (KasirTabs). Ditaruh tepat setelah
-  // Produk karena keduanya dipakai berdampingan setiap hari.
-  // Tenant FREE tetap melihat entri ini — KasirPlanGate yang menjelaskan
-  // kenapa belum bisa dipakai. Menyembunyikannya total membuat fitur
-  // berbayar tidak pernah ditemukan orang yang mungkin mau membelinya.
-  { titleKey: 'kasir', href: '/dashboard/kasir', icon: ShoppingCart, requiresSetup: true },
-  { titleKey: 'studio', href: '/dashboard/studio', icon: Layout, requiresSetup: true },
-  ...(FEATURES.digitalProducts
-    ? [
-      { titleKey: 'downloads', href: '/dashboard/products/downloads', icon: History, requiresSetup: true },
-      { titleKey: 'library', href: '/dashboard/library', icon: BookOpen, requiresSetup: true },
-    ]
-    : []),
-  { titleKey: 'subscription', href: '/dashboard/subscription', icon: CreditCard, hideForEdu: true, requiresSetup: true },
-  ...(FEATURES.digitalProducts
-    ? [{ titleKey: 'onboard', href: '/dashboard/onboard', icon: ShieldCheck, hideForEdu: true, requiresSetup: true }]
-    : []),
+const NAV_ENTRIES: NavEntry[] = [
+  {
+    titleKey: 'products',
+    href: '/dashboard/products',
+    icon: LayoutDashboard,
+    group: 'store',
+    requiresSetup: true,
+  },
+  {
+    titleKey: 'kasir',
+    href: '/dashboard/kasir',
+    icon: ShoppingCart,
+    group: 'store',
+    requiresSetup: true,
+    // Layar kasir. Strip tab di dalam halaman tetap ada — itu untuk berpindah
+    // SAAT sudah di kasir; submenu ini untuk masuk langsung dari halaman lain
+    // tanpa mampir ke Jual dulu.
+    //
+    // Daftarnya TIDAK ditulis di sini lagi. Dulu kelimanya dipatok apa adanya
+    // sementara strip tab menyaringnya per mode dagang, dan hasilnya terlihat
+    // di layar: toko PRODUK punya "Papan Kerja" di sidebar tapi tidak di tab —
+    // padahal servernya menyaring papan ke `itemKind: 'JASA'`, jadi tautan itu
+    // mengantar ke layar yang mustahil terisi. Sekarang keduanya membaca
+    // fungsi saringan yang sama; lihat lib/constants/dashboard/kasir-screens.
+    subKeysDinamis: true,
+  },
+  {
+    titleKey: 'studio',
+    href: '/dashboard/studio',
+    icon: Layout,
+    group: 'store',
+    requiresSetup: true,
+  },
+  {
+    titleKey: 'subscription',
+    href: '/dashboard/subscription',
+    icon: CreditCard,
+    group: 'account',
+    requiresSetup: true,
+    hideForEdu: true,
+  },
+  { titleKey: 'settings', href: '/dashboard/settings', icon: Settings, group: 'account' },
 ];
 
-const buyerNavItems: NavItem[] = FEATURES.digitalProducts
-  ? [
-    { titleKey: 'library', href: '/dashboard/library', icon: BookOpen },
-    { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
-  ]
-  : [
-    { titleKey: 'startSelling', href: '/dashboard/setup-store', icon: Store },
-  ];
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function stripLocalePrefix(pathname: string): string {
-  const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
-  if (!match) return pathname;
-  return match[2] || '/';
-}
+const NAV_GROUPS = [
+  { key: 'store' as const, labelKey: 'groupStore' },
+  { key: 'account' as const, labelKey: 'groupAccount' },
+];
 
 function isSetupStorePath(pathname: string): boolean {
-  return stripLocalePrefix(pathname).startsWith('/dashboard/setup-store');
+  return pathname.startsWith('/dashboard/setup-store');
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Komponen ───────────────────────────────────────────────────────────────
 
 export function DashboardSidebar() {
   const t = useTranslations('dashboard.nav');
+  const tKasir = useTranslations('dashboard.kasir.tabs');
   const tGate = useTranslations('dashboard.setupStore.setupGateDialog');
   const pathname = usePathname();
   const router = useRouter();
   const tenant = useAuthStore((s) => s.tenant);
   const { logout } = useLogout();
+  const { tier } = useSubscriptionPlan();
 
   const [gateOpen, setGateOpen] = useState(false);
 
-  const isSeller = tenant?.role === 'SELLER';
-  const isEdu = isSeller && tenant?.isEduMode === true;
-  const isSetupDone = tenant?.isSetupComplete ?? true;
+  // Mode dagang dibaca dari cache yang DITULIS strip tab kasir — sidebar
+  // sengaja tidak memanggil `useKasirConfig()` sendiri: ia dirender di setiap
+  // halaman dasbor, termasuk milik penjual yang tidak pernah membuka Kasir.
+  // Sebelum Kasir pernah dibuka sekali, nilainya null dan submenu menampilkan
+  // daftar PRODUK — tebakan yang sama dengan strip tab.
+  //
+  // `useSyncExternalStore` dengan snapshot server `null`: localStorage tidak
+  // ada di server, dan membacanya saat render akan membuat markup server
+  // berbeda dari render hidrasi.
+  const dagangType = useSyncExternalStore(
+    () => () => undefined,
+    bacaCacheDagangType,
+    () => null,
+  );
 
-  const rawNavItems = isSeller ? sellerNavItems : buyerNavItems;
-  const navItems = rawNavItems.filter((item) => !(isEdu && item.hideForEdu));
+  const isEdu = tenant?.isEduMode === true;
+  const isSetupDone = tenant?.isSetupComplete ?? true;
+  const namaToko = tenant?.name ?? 'Fibidy';
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -132,91 +169,94 @@ export function DashboardSidebar() {
     return pathname.startsWith(href);
   };
 
-  const isLocked = (item: NavItem) => isSeller && !isSetupDone && !!item.requiresSetup;
+  // Layar anak dicocokkan PERSIS, bukan lewat `startsWith`. "/dashboard/kasir"
+  // adalah awalan dari keempat saudaranya, jadi `startsWith` akan menyalakan
+  // "Jual" di setiap layar kasir sekaligus.
+  const isSubActive = (href: string) => pathname === href;
 
-  // [SETUP HIGHLIGHT] Handler saat user klik "Continue Setup" di dialog
+  const buildItems = (group: 'store' | 'account'): NavMainItem[] =>
+    NAV_ENTRIES.filter((e) => e.group === group)
+      .filter((e) => !(isEdu && e.hideForEdu))
+      .map((e) => ({
+        title: t(e.titleKey),
+        href: e.href,
+        icon: e.icon,
+        isActive: isActive(e.href),
+        locked: !isSetupDone && !!e.requiresSetup,
+        items: e.subKeysDinamis
+          ? layarKasirUntuk(dagangType).map((layar) => ({
+              title: tKasir(layar.key),
+              href: layar.href,
+            }))
+          : undefined,
+      }));
+
   const handleContinueSetup = () => {
     setGateOpen(false);
-
     if (isSetupStorePath(pathname)) {
-      // User sudah di setup-store — jangan navigate, cukup highlight field kosong
-      // Dispatch event → seller-setup-wizard.tsx mendengar dan trigger highlight
       window.dispatchEvent(new CustomEvent('setup:highlight'));
     } else {
-      // User belum di setup-store — navigate ke sana
       router.push('/dashboard/setup-store');
     }
   };
 
   return (
     <>
-      <Sidebar collapsible="icon">
-        <SidebarContent className="flex flex-col justify-center">
-          <SidebarGroup>
-            <SidebarMenu>
-              {navItems.map((item) => {
-                const locked = isLocked(item);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    {locked ? (
-                      <SidebarMenuButton
-                        onClick={() => setGateOpen(true)}
-                        className="opacity-50 cursor-pointer"
-                        isActive={false}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{t(item.titleKey)}</span>
-                      </SidebarMenuButton>
-                    ) : (
-                      <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                        <Link href={item.href}>
-                          <item.icon className="h-5 w-5" />
-                          <span>{t(item.titleKey)}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    )}
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
+      <Sidebar variant="inset" collapsible="icon">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild tooltip={namaToko}>
+                <Link href="/dashboard/products">
+                  <div
+                    aria-hidden
+                    className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-[13px] font-semibold text-sidebar-primary-foreground"
+                  >
+                    {namaToko.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="grid flex-1 text-left leading-tight">
+                    <span className="truncate text-title-sm">{namaToko}</span>
+                    <span className="truncate text-caption text-muted-foreground">
+                      {t(`plan.${tier.toLowerCase()}`)}
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+
+        <SidebarContent>
+          {NAV_GROUPS.map(({ key, labelKey }) => (
+            <NavMain
+              key={key}
+              label={t(labelKey)}
+              items={buildItems(key)}
+              onLockedClick={() => setGateOpen(true)}
+              isSubActive={isSubActive}
+            />
+          ))}
         </SidebarContent>
 
         <SidebarFooter>
-          <SidebarMenu>
-            {isSeller ? (
-              <SidebarMenuItem>
-                {!isSetupDone ? (
-                  <SidebarMenuButton
-                    onClick={() => setGateOpen(true)}
-                    className="opacity-50 cursor-pointer"
-                    isActive={false}
-                  >
-                    <Settings className="h-5 w-5" />
-                    <span>{t('settings')}</span>
-                  </SidebarMenuButton>
-                ) : (
-                  <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
-                    <Link href="/dashboard/settings">
-                      <Settings className="h-5 w-5" />
-                      <span>{t('settings')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                )}
-              </SidebarMenuItem>
-            ) : (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => logout()}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>{t('signOut')}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
-          </SidebarMenu>
+          <NavUser
+            name={namaToko}
+            email={tenant?.email ?? ''}
+            logo={tenant?.logo}
+            planLabel={t(`plan.${tier.toLowerCase()}`)}
+            showSubscription={!isEdu}
+            labels={{
+              subscription: t('subscription'),
+              settings: t('settings'),
+              signOut: t('signOut'),
+            }}
+            onSignOut={() => void logout()}
+          />
         </SidebarFooter>
+
+        {/* Gagang tipis di tepi panel — cara kedua membuka/menutup sidebar,
+            di samping SidebarTrigger di kepala halaman dan Ctrl/Cmd+B. */}
+        <SidebarRail />
       </Sidebar>
 
       <MandatoryDialog

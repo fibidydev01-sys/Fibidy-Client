@@ -14,18 +14,18 @@ import { useTranslations } from 'next-intl';
 // which opens on card click. Keep this component dumb-presentational.
 //
 // [IDR MIGRATION — May 2026]
-// Replaced hardcoded `${(product.price ?? 0).toFixed(2)}` with
-// `formatPrice(product.price ?? 0, product.currency ?? 'IDR')`.
-// Pre-migration this rendered "$50000.00" — wrong for IDR products.
+// Harga dirender lewat formatPriceIDR(), bukan `.toFixed(2)`.
+// Sebelum migrasi ini merender "$50000.00" — salah untuk produk IDR.
 //
 // Also exports ProductGridCardSkeleton for loading states. Imported by
 // ./product-grid.tsx as part of <ProductsGridSkeleton />.
 // ==========================================
 
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { cn } from '@/lib/shared/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Package, FileText, Wrench } from 'lucide-react';
-import { formatPrice } from '@/lib/shared/format';
+import { Package, Wrench } from 'lucide-react';
+import { formatPriceIDR } from '@/lib/shared/format';
 import type { Product } from '@/types/product';
 
 interface ProductGridCardProps {
@@ -35,8 +35,8 @@ interface ProductGridCardProps {
 
 export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
   const tKind = useTranslations('dashboard.products.kind');
+  const tCol = useTranslations('dashboard.products.collection');
   const imageUrl = product.images?.[0] ?? null;
-  const isDigital = !!product.fileKey;
   const isCustomPrice = product.price === 0;
   // [KASIR JASA] Barang dan layanan tampil di daftar yang sama, jadi
   // pembedanya harus terbaca dari kartu — tanpa itu seller tidak bisa tahu
@@ -44,7 +44,6 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
   const isJasa = product.kind === 'JASA';
 
   // [IDR MIGRATION] Default to IDR uniformly. Was: hardcoded $X.XX.
-  const currency = product.currency ?? 'IDR';
 
   return (
     <button
@@ -65,21 +64,13 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
             className="object-cover transition-transform group-hover:scale-105"
             fallback={
               <div className="flex h-full items-center justify-center">
-                {isDigital ? (
-                  <FileText className="h-10 w-10 text-muted-foreground/30" />
-                ) : (
-                  <Package className="h-10 w-10 text-muted-foreground/30" />
-                )}
+                <Package className="h-10 w-10 text-muted-foreground/30" />
               </div>
             }
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            {isDigital ? (
-              <FileText className="h-10 w-10 text-muted-foreground/30" />
-            ) : (
-              <Package className="h-10 w-10 text-muted-foreground/30" />
-            )}
+            <Package className="h-10 w-10 text-muted-foreground/30" />
           </div>
         )}
       </div>
@@ -105,14 +96,31 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
 
         <div className="mt-2">
           {!isCustomPrice ? (
-            <span className="font-semibold text-sm text-primary">
-              {/* [IDR MIGRATION] formatPrice respects currency, defaults IDR. */}
-              {formatPrice(product.price ?? 0, currency)}
+            <span className="font-semibold text-sm text-ink">
+              {formatPriceIDR(product.price ?? 0)}
             </span>
           ) : (
             <span className="text-xs text-muted-foreground italic">—</span>
           )}
         </div>
+      </div>
+
+      {/* Strip meta di kaki kartu — pola yang sama dengan kartu proyek EAS,
+          yang menaruh status build di bilah terpisah di bawah namanya.
+          Statusnya tidak bisa ikut ke badan kartu: badan sudah memuat
+          kategori, nama dua baris, dan harga, dan menambah baris keempat di
+          sana membuat tinggi kartu bergantung pada panjang nama produk. */}
+      <div className="flex items-center gap-1.5 border-t bg-surface-sunken px-3 py-2">
+        <span
+          aria-hidden
+          className={cn(
+            'size-1.5 shrink-0 rounded-full',
+            product.isActive ? 'bg-semantic-success' : 'bg-muted-strong',
+          )}
+        />
+        <span className="truncate text-caption text-muted-foreground">
+          {tCol(product.isActive ? 'statusActive' : 'statusInactive')}
+        </span>
       </div>
     </button>
   );

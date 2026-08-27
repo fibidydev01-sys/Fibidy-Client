@@ -14,7 +14,7 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
 import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
@@ -22,25 +22,20 @@ import { authApi } from '@/lib/api/auth';
 import { tenantsApi } from '@/lib/api/tenants';
 import { clearCsrfToken } from '@/lib/api/csrf';
 import { toast } from '@/lib/providers/root-provider';
-import { FEATURES } from '@/lib/config/features';
 import { clearBuilderBridge } from '@/hooks/auth/use-register-wizard';
-import type { LoginInput, RegisterInput, RegisterBuyerInput } from '@/types/auth';
+import type { LoginInput, RegisterInput } from '@/types/auth';
 import type { Tenant } from '@/types/tenant';
+import { useRouter } from '@/i18n/navigation';
 
 // ============================================================
 // POST-LOGIN REDIRECT HELPER
 // ============================================================
 
 export function getPostLoginRedirect(
-  tenant: Pick<Tenant, 'role' | 'isSetupComplete'>,
+  tenant: Pick<Tenant, 'isSetupComplete'>,
 ): string {
-  if (tenant.role === 'SELLER') {
-    return tenant.isSetupComplete
-      ? '/dashboard/products'
-      : '/dashboard/setup-store';
-  }
-  return FEATURES.digitalProducts
-    ? '/dashboard/library'
+  return tenant.isSetupComplete
+    ? '/dashboard/products'
     : '/dashboard/setup-store';
 }
 
@@ -161,52 +156,12 @@ export function useRegister() {
     [setTenant, setChecked, router, tToast, t],
   );
 
-  const registerBuyer = useCallback(
-    async (data: RegisterBuyerInput) => {
-      setIsLoading(true);
-      setError(null);
-      setErrorCode(null);
-
-      try {
-        const response = await authApi.registerBuyer(data);
-        setTenant(response.tenant);
-        setChecked(true);
-
-        toast.success(
-          tToast('registerSuccess'),
-          tToast('registerBuyerSuccessDetail'),
-        );
-
-        const redirect = FEATURES.digitalProducts
-          ? '/dashboard/library'
-          : '/dashboard/setup-store';
-
-        router.push(redirect);
-
-        return response;
-      } catch (err) {
-        const message = getErrorMessage(err, t);
-        setError(message);
-
-        if (err instanceof ApiRequestError && err.code) {
-          setErrorCode(err.code);
-        }
-
-        toast.error(tToast('registerFailed'), message);
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [setTenant, setChecked, router, tToast, t],
-  );
-
   const reset = useCallback(() => {
     setError(null);
     setErrorCode(null);
   }, []);
 
-  return { register, registerBuyer, isLoading, error, errorCode, reset };
+  return { register, isLoading, error, errorCode, reset };
 }
 
 // ============================================================

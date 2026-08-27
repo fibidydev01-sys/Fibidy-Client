@@ -9,11 +9,11 @@
 // setelah Lottie update (icon digantikan animasi Lottie).
 // ============================================================================
 
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
 import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
 import { storeAbsoluteUrl } from '@/lib/public/store-url';
+import { useRouter } from '@/i18n/navigation';
 
 export function SellerSetupDone() {
   const t = useTranslations('dashboard.setupStore.seller.done.goToStudioDialog');

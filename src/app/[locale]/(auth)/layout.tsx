@@ -50,7 +50,25 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     // the register wizard's sticky footer off the bottom of the screen.
     // {children}'s own grid must be `flex-1` (not `min-h-svh`) for this
     // to actually fix it — see register/page.tsx and auth-layout.tsx.
-    <div className="flex min-h-svh flex-col">
+    //
+    // [UI/UX — Aug 2026 v2] `min-h-svh` → `h-svh`. min-height adalah
+    // LANTAI, bukan PLAFON. Konsolidasi di atas menghapus klaim ganda,
+    // tapi kotaknya tetap bebas tumbuh: di step "Jenis Usaha" register
+    // (daftar kategori ~3900px) kotak ini terukur setinggi 4173px, dan
+    // seluruh `h-full` / `overflow-hidden` / `flex-1 overflow-y-auto` di
+    // bawahnya ikut mengembang mengikutinya. Akibatnya zona scroll
+    // register TIDAK PERNAH overflow — jadi tidak pernah scroll — dan
+    // nav Lanjut/Sebelumnya mendarat di y=4095, 3257px di bawah layar.
+    // Itulah "tombolnya tenggelam".
+    //
+    // Tiga zona (sticky header / body scroll / footer) hanya bisa bekerja
+    // kalau kotak terluarnya DIBATASI setinggi viewport. `h-svh` memberi
+    // batas itu. Halaman auth lain aman: login & forgot-password tidak
+    // punya `overflow-hidden`, jadi konten yang lebih tinggi tetap meluber
+    // dan dokumen tetap bisa di-scroll persis seperti sebelumnya (diukur
+    // di 1440x500: docScrollable 21px, tidak ada yang terpotong).
+    // Plafonnya hanya menggigit di tempat yang kodenya memang meminta.
+    <div className="flex h-svh flex-col">
       {/* [SPRINT 3] Offline banner — user perlu tahu offline sebelum submit form */}
       <OfflineBanner />
       {children}

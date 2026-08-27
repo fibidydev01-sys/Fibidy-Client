@@ -20,7 +20,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CalendarDays, Gift, Loader2, Plus, Power, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -41,8 +40,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { MahkotaKecil } from '@/components/dashboard/shared/notice-mahkota';
+import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
+import { GUIDE } from '@/lib/constants/dashboard/guide-links';
+import { useKasirLock } from '@/hooks/dashboard/use-kasir-lock';
 import { toast } from 'sonner';
 import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 import { getErrorMessage } from '@/lib/api/client';
 import { labelPromo } from '@/lib/shared/kasir-promo';
 import {
@@ -65,6 +69,11 @@ function formatTanggal(iso: string | null): string | null {
 
 export function KasirPromoSection({ onBack }: { onBack: () => void }) {
   const t = useTranslations('dashboard.kasir.settingsPromo');
+  const tTaut = useTranslations('dashboard.kasir.emptyLinks');
+
+  // Mahkota di tombol, bukan di halaman. Daftar promonya tetap tampil utuh
+  // untuk tenant FREE — yang dimahkotai cuma aksi yang menulis.
+  const { terkunci, jaga } = useKasirLock();
 
   const { data: rules, isLoading } = usePromoRules();
   const { data: produkResponse } = useKasirProducts();
@@ -125,7 +134,7 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
   // ── Form tambah ───────────────────────────────────────────────────────
   if (mode === 'form') {
     return (
-      <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+      <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
         <div className="flex-1 space-y-6 pb-20 md:pb-6">
           <div>
             <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -190,7 +199,7 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
                       onClick={() => setTipePromo(tipe)}
                       aria-pressed={aktif}
                       className={cn(
-                        'rounded-xl border px-3 py-3 text-left transition-colors',
+                        'rounded-[var(--shape-panel)] border px-3 py-3 text-left transition-colors',
                         aktif
                           ? 'border-primary bg-primary/[0.06]'
                           : 'hover:bg-muted/50',
@@ -260,7 +269,8 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
 
         <WizardNav
           onBack={() => setMode('list')}
-          onSave={simpan}
+          onSave={jaga(simpan)}
+          saveTerkunci={terkunci}
           isSaving={creating}
           saveLabel={t('save')}
           savingLabel={t('saving')}
@@ -271,7 +281,7 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
 
   // ── Daftar ────────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+    <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
       <div className="flex-1 space-y-6 pb-20 md:pb-6">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -284,27 +294,26 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 2 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-xl" />
+              <Skeleton key={i} className="h-20 w-full rounded-[var(--shape-panel)]" />
             ))}
           </div>
         ) : (rules ?? []).length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <Tag className="h-5 w-5 text-muted-foreground" aria-hidden />
-              </div>
-              <div>
-                <p className="font-medium">{t('emptyTitle')}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {t('emptyDescription')}
-                </p>
-              </div>
-              <Button onClick={bukaForm} className="gap-2">
-                <Plus className="h-4 w-4" aria-hidden />
-                {t('addButton')}
-              </Button>
-            </CardContent>
-          </Card>
+          // Sama dengan Preset diskon: Card + markup buatan sendiri diganti
+          // Empty, supaya semua blok kosong satu bentuk.
+          <EmptyPanel
+            icon={<Tag aria-hidden />}
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
+            action={{
+              label: t('addButton'),
+              icon: <Plus className="h-4 w-4" aria-hidden />,
+              onClick: jaga(bukaForm),
+              terkunci,
+            }}
+            learnLabel={tTaut('promo.learn')}
+            learnHref={GUIDE.promo}
+            helpLabel={tTaut('promo.help')}
+          />
         ) : (
           <div className="space-y-2">
             {(rules ?? []).map((rule) => {
@@ -315,7 +324,7 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
                 <div
                   key={rule.id}
                   className={cn(
-                    'rounded-xl border px-3 py-3',
+                    'rounded-[var(--shape-panel)] border px-3 py-3',
                     !rule.isActive && 'opacity-60',
                   )}
                 >
@@ -347,11 +356,15 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setKonfirmasiHapus(rule)}
+                        onClick={jaga(() => setKonfirmasiHapus(rule))}
                         aria-label={t('deactivateAria')}
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
-                        <Power className="h-4 w-4" aria-hidden />
+                        {terkunci ? (
+                          <MahkotaKecil />
+                        ) : (
+                          <Power className="h-4 w-4" aria-hidden />
+                        )}
                       </Button>
                     )}
                   </div>
@@ -359,8 +372,12 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
               );
             })}
 
-            <Button onClick={bukaForm} className="w-full gap-2">
-              <Plus className="h-4 w-4" aria-hidden />
+            <Button onClick={jaga(bukaForm)} className="w-full gap-2">
+              {terkunci ? (
+                <MahkotaKecil />
+              ) : (
+                <Plus className="h-4 w-4" aria-hidden />
+              )}
               {t('addButton')}
             </Button>
           </div>

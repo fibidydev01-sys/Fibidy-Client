@@ -47,7 +47,7 @@ function ReviewCard({
     <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 space-y-2 min-w-0">
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widests">
+          <p className="text-caption-uppercase caption-uppercase text-muted-foreground">
             {label}
           </p>
           {children}
@@ -89,7 +89,10 @@ export function StepReview({
   );
 
   return (
-    <div className="space-y-3 max-w-md mx-auto">
+    // Ringkasan tetap SATU kolom: urutannya mencerminkan urutan langkah, dan
+    // memecahnya jadi dua membuat pembacaannya melompat. Yang dilepas cuma
+    // batas 448px-nya supaya sejajar dengan nav di bawahnya.
+    <div className="space-y-3">
 
       {/* Step 1: Visual */}
       <ReviewCard label={t('visual')} step={1} onEdit={onEditStep}>

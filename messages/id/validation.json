@@ -48,10 +48,6 @@
       "nameRequired": "Nama wajib diisi",
       "messageRequired": "Pesan wajib diisi"
     },
-    "admin": {
-      "emailInvalid": "Format email tidak valid",
-      "passwordMinLength": "Kata sandi minimal 8 karakter"
-    },
     "forgotPassword": {
       "emailInvalid": "Masukkan alamat email yang valid"
     }

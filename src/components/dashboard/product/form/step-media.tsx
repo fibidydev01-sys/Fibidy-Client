@@ -116,7 +116,7 @@ function LockedSlotInline({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="relative aspect-square w-full rounded-xl border-2 border-dashed border-amber-300/50 bg-amber-50/30 dark:bg-amber-950/10 flex flex-col items-center justify-center gap-2 p-4 transition-colors hover:bg-amber-50/60 dark:hover:bg-amber-950/20"
+      className="relative aspect-square w-full rounded-[var(--shape-panel)] border-2 border-dashed border-amber-300/50 bg-amber-50/30 dark:bg-amber-950/10 flex flex-col items-center justify-center gap-2 p-4 transition-colors hover:bg-amber-50/60 dark:hover:bg-amber-950/20"
     >
       <Lock className="h-5 w-5 text-amber-500/70" aria-hidden />
       <Crown className="h-3.5 w-3.5 text-amber-500" aria-hidden />

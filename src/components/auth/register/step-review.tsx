@@ -31,7 +31,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
-import type { RegisterIntent } from '@/types/auth';
 
 // ============================================================================
 // TYPES
@@ -47,7 +46,6 @@ interface StepReviewProps {
     password?: string;
     whatsapp?: string;
   };
-  intent: RegisterIntent | null;
   onEdit: (step: number) => void;
   isAgreed: boolean;
   onAgreementChange: (agreed: boolean) => void;
@@ -63,7 +61,6 @@ interface StepReviewProps {
 
 export function StepReview({
   data,
-  intent,
   onEdit,
   isAgreed,
   onAgreementChange,
@@ -74,7 +71,6 @@ export function StepReview({
   const t = useTranslations('auth.register.review');
   const tRoot = useTranslations();
 
-  const isBuyer = intent === 'BUYER';
   const hasAgreementError = fieldErrors.has('agreement');
 
   const categoryConfig = data.category
@@ -91,50 +87,45 @@ export function StepReview({
 
   const categoryStep = 2;
   const storeInfoStep = 3;
-  const accountStep = isBuyer ? 2 : 4;
+  const accountStep = 4;
 
   return (
     <div className="space-y-3 max-w-md">
 
-      {/* Business Type — hanya untuk SELLER + EDU */}
-      {!isBuyer && (
-        <ReviewCard label={t('businessType')} onEdit={() => onEdit(categoryStep)}>
-          <p className="text-sm font-medium">{categoryLabel}</p>
-          {categoryDescription && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {categoryDescription}
-            </p>
-          )}
-        </ReviewCard>
-      )}
+      <ReviewCard label={t('businessType')} onEdit={() => onEdit(categoryStep)}>
+        <p className="text-sm font-medium">{categoryLabel}</p>
+        {categoryDescription && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {categoryDescription}
+          </p>
+        )}
+      </ReviewCard>
 
-      {/* Store Info — hanya untuk SELLER + EDU */}
-      {!isBuyer && (
-        <ReviewCard
-          label={t('storeInfo')}
-          icon={<Store className="h-3.5 w-3.5 text-muted-foreground" />}
-          onEdit={() => onEdit(storeInfoStep)}
-        >
-          <div className="space-y-1.5">
-            <div>
-              <p className="text-xs text-muted-foreground">{t('storeName')}</p>
-              <p className="text-sm font-medium">{data.name || t('dash')}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">{t('storeUrl')}</p>
-              <p className="text-sm font-medium text-primary">
-                {t('storeUrlSuffix', { slug: data.slug || t('dash') })}
-              </p>
-            </div>
-            {data.description && (
-              <div>
-                <p className="text-xs text-muted-foreground">{t('description')}</p>
-                <p className="text-sm">{data.description}</p>
-              </div>
-            )}
+      {/* Store Info */}
+      <ReviewCard
+        label={t('storeInfo')}
+        icon={<Store className="h-3.5 w-3.5 text-muted-foreground" />}
+        onEdit={() => onEdit(storeInfoStep)}
+      >
+        <div className="space-y-1.5">
+          <div>
+            <p className="text-xs text-muted-foreground">{t('storeName')}</p>
+            <p className="text-sm font-medium">{data.name || t('dash')}</p>
           </div>
-        </ReviewCard>
-      )}
+          <div>
+            <p className="text-xs text-muted-foreground">{t('storeUrl')}</p>
+            <p className="text-sm font-medium text-primary">
+              {t('storeUrlSuffix', { slug: data.slug || t('dash') })}
+            </p>
+          </div>
+          {data.description && (
+            <div>
+              <p className="text-xs text-muted-foreground">{t('description')}</p>
+              <p className="text-sm">{data.description}</p>
+            </div>
+          )}
+        </div>
+      </ReviewCard>
 
       {/* Account */}
       <ReviewCard onEdit={() => onEdit(accountStep)}>
@@ -147,7 +138,7 @@ export function StepReview({
             <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <p className="text-sm">••••••••</p>
           </div>
-          {!isBuyer && data.whatsapp && (
+          {data.whatsapp && (
             <div className="flex items-center gap-2">
               <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
               <p className="text-sm">+{data.whatsapp}</p>
@@ -196,7 +187,7 @@ export function StepReview({
               href="/legal/terms"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-link hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {t('termsLink')}
@@ -206,7 +197,7 @@ export function StepReview({
               href="/legal/privacy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-link hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {t('privacyLink')}
@@ -246,7 +237,7 @@ function ReviewCard({
           <div className="flex items-center gap-1.5">
             {icon}
             {label && (
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widests">
+              <p className="text-caption-uppercase caption-uppercase text-muted-foreground">
                 {label}
               </p>
             )}

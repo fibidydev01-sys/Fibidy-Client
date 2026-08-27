@@ -68,7 +68,19 @@ export default function RegisterPage() {
     // whatever's left within it. See (auth)/layout.tsx for the full
     // reasoning — this was clipping the register wizard's sticky footer
     // off the bottom of the screen whenever the banner showed.
-    <div className="grid flex-1 lg:grid-cols-2">
+    //
+    // [UI/UX — Aug 2026 v2] Tambah `min-h-0`. Ini PASANGAN WAJIB dari
+    // `h-svh` di (auth)/layout.tsx — tanpanya perbaikan itu no-op.
+    // Sebagai flex item, div ini punya `min-height: auto`, yang untuk
+    // kotak ber-`overflow: visible` berarti "sebesar min-content". Daftar
+    // kategori setinggi ~3900px membuat min-content-nya ~4114px, dan
+    // minimum otomatis itu MENANG melawan plafon induknya — kotaknya
+    // tetap tumbuh melewati viewport meski induknya sudah dibatasi.
+    // `min-h-0` mematikan minimum otomatis tersebut sehingga plafon dari
+    // atas benar-benar sampai ke bawah. Saudara-saudaranya di rantai ini
+    // sudah aman sendiri karena ber-`overflow-hidden` (overflow selain
+    // visible membuat minimum otomatis jadi 0).
+    <div className="grid flex-1 min-h-0 lg:grid-cols-2">
 
       {/*
        * ── KOLOM KIRI ──

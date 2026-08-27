@@ -89,7 +89,7 @@ export function BuilderLoadingSteps({ loadingStates, onComplete, className }: Bu
     <div className={cn('h-screen flex flex-col items-center justify-center bg-background', className)}>
       <div className="w-full max-w-md px-6 space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-display-sm text-ink">{t('title')}</h1>
           <p className="text-muted-foreground text-sm">{t('subtitle')}</p>
         </div>
 

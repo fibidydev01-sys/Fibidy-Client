@@ -86,7 +86,7 @@ export default async function StoreLayout({
     <>
       <style dangerouslySetInnerHTML={{ __html: generateThemeCSS(primaryHex) }} />
 
-      <div className="tenant-theme flex min-h-screen flex-col">
+      <div data-shape="site" className="tenant-theme flex min-h-screen flex-col">
         <LocalBusinessSchema
           tenant={{
             name: tenant.name,

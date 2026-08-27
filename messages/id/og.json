@@ -2,17 +2,17 @@
   "og": {
     "platform": {
       "brand": "Fibidy",
-      "altText": "Fibidy - Platform Toko Online untuk Kreator Digital",
-      "headlineLine1": "Jual Produk",
-      "headlineLine2": "Digital",
-      "subtitle": "Buat toko, upload file kamu, terima pembayaran via Stripe. Gratis selamanya.",
+      "altText": "Fibidy Buka toko. Jualan hari ini.",
+      "headlineLine1": "Buka Toko.",
+      "headlineLine2": "Jualan Hari Ini.",
+      "subtitle": "Susun katalog, bagikan tautannya, terima pesanan lewat WhatsApp.",
       "stats": {
         "free": "Gratis",
         "freeSub": "Selamanya",
         "setup": "5 Menit",
         "setupSub": "Setup",
-        "payments": "Stripe",
-        "paymentsSub": "Pembayaran"
+        "payments": "WhatsApp",
+        "paymentsSub": "Pesanan"
       },
       "url": "fibidy.com"
     },

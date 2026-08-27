@@ -31,16 +31,20 @@ import { ImageCropModal, type AspectChoice } from '@/components/dashboard/shared
 import { EmptySlot, FilledImageSlot } from '@/components/dashboard/shared/image-slot';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import { AutofillBadge } from './autofill-badge';
-import { LogoGenerator } from './logo-generator';
 import type { Area } from 'react-easy-crop';
+import { FormSection, FormPanel } from '@/components/dashboard/shared/form-panel';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface StepVisualProps {
   logo: string;
+  /**
+   * Logo sedang dibuat autofill. Slotnya menampilkan pemuat, BUKAN ajakan
+   * unggah — lihat catatan di `isLoading` bawah.
+   */
+  isGeneratingLogo?: boolean;
   primaryColor: string;
   heroBackgroundImage: string;
-  storeName: string;
   onLogoChange: (url: string) => void;
   onColorChange: (hex: string) => void;
   onHeroBgChange: (url: string) => void;
@@ -77,9 +81,24 @@ function ColorPicker({
   hasError?: boolean;
 }) {
   return (
+    // [BOCOR KE BAWAH] Dulu `flex flex-wrap justify-center`. Terukur: tiap
+    // bulatan 44px (w-9 + p-1) dan jaraknya 8px, jadi enam butuh 304px —
+    // sementara panel di layar 350px cuma menyisakan ~278px. Lima muat,
+    // yang keenam jatuh SENDIRIAN ke baris kedua dan terbaca seperti ada
+    // yang lepas, bukan seperti baris yang penuh.
+    //
+    // Grid menghapus kemungkinan itu: 3 kolom di bawah `sm` berarti dua
+    // baris yang sama-sama penuh, 6 kolom di atasnya berarti satu baris.
+    // Tidak ada lebar layar yang menghasilkan sisa satu.
+    //
+    // `w-fit mx-auto` menyertainya: tanpa itu grid meregang selebar panel
+    // (1216px di desktop) dan keenam bulatan terpencar sejauh 200px satu
+    // sama lain — terbaca sebagai enam benda terpisah, bukan sebagai satu
+    // deret pilihan. Kolom yang seukuran isinya menjaga kelompoknya rapat,
+    // dan `mx-auto` menaruhnya di tengah seperti sebelumnya.
     <div
       className={cn(
-        'flex items-center justify-center flex-wrap gap-2 rounded-lg p-2 transition-colors',
+        'mx-auto grid w-fit grid-cols-3 gap-2 rounded-lg p-2 transition-colors sm:grid-cols-6',
         hasError && 'ring-2 ring-destructive ring-offset-2',
       )}
     >
@@ -119,9 +138,9 @@ function ColorPicker({
 
 export function StepVisual({
   logo,
+  isGeneratingLogo = false,
   primaryColor,
   heroBackgroundImage,
-  storeName,
   onLogoChange,
   onColorChange,
   onHeroBgChange,
@@ -249,159 +268,183 @@ export function StepVisual({
     setActiveCropSlot(null);
   }, [closeCrop]);
 
-  const handleGenerateStateChange = useCallback(
-    (active: boolean) => {
-      onUploadStateChange?.('logo-generator', active);
-    },
-    [onUploadStateChange],
-  );
-
   return (
-    <div className="space-y-10 max-w-sm mx-auto text-center">
-
-      {/* ── Logo ─────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-            {t('logoLabel')} <span className="text-destructive normal-case font-normal">*</span>
-          </p>
-          <p className="text-xs text-muted-foreground">{t('logoHelper')}</p>
-        </div>
-
-        {logo ? (
+    // [PRESISI] Dulu satu grid 3-kolom ber-`text-center` dengan tiga anak yang
+    // tingginya jauh berbeda — kotak unggah logo ~470px bersebelahan dengan
+    // enam bulatan warna ~150px — plus ImageCropModal yang ikut jadi ANAK GRID
+    // dan diam-diam memakan sel keempat.
+    //
+    // Sekarang: dua panel gambar bersebelahan (tingginya memang sepadan, jadi
+    // barisnya rata), lalu panel warna selebar halaman — bentuk yang memang
+    // diminta sederet bulatan. Modal dipindah keluar dari grid.
+    <>
+      <FormSection>
+        {/* ── Logo ─────────────────────────────────────────────────────── */}
+        <FormPanel
+          title={t('logoLabel')}
+          required
+          description={t('logoHelper')}
+          badge={<AutofillBadge visible={isAutofilled('logo')} />}
+        >
           <div className="space-y-1.5">
-            <FilledImageSlot
-              url={logo}
-              alt="Store logo"
-              onRemove={() => { onLogoChange(''); setLogoAspect(null); }}
-            />
-            <div className="flex justify-center">
-              <AspectBadge aspect={logoAspect ?? (logo ? 'square' : null)} />
-            </div>
-          </div>
-        ) : (
-          <>
-            {/*
-              [SCROLL FIX] data-field-error="true" saat logo error.
-              scrollToFirstFieldError() akan menemukan div ini dan scroll ke sini.
-            */}
-            <div
-              data-field-error={hasLogoError ? 'true' : undefined}
-              className={cn(
-                'rounded-xl transition-all',
-                hasLogoError && 'ring-2 ring-destructive ring-offset-2',
-              )}
-            >
-              <EmptySlot
-                index={0}
-                label={t('uploadLogo')}
-                onClick={() => openLogoFilePicker(1)}
-                onFileDrop={handleLogoDrop}
-                isLoading={isUploadingLogo}
-                progress={logoProgress}
-              />
-            </div>
-            {hasLogoError && (
-              <p className="text-xs text-destructive font-medium">
-                {t('logoRequired')}
-              </p>
-            )}
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <span className="text-[11px] text-muted-foreground/50">{t('logoGenerateOr')}</span>
-              <LogoGenerator
-                storeName={storeName}
-                primaryColor={primaryColor}
-                onGenerated={(url) => {
-                  onLogoChange(url);
-                  onClearFieldError?.('logo');
+            {logo ? (
+              <FilledImageSlot
+                url={logo}
+                alt="Store logo"
+                onRemove={() => {
+                  onLogoChange('');
+                  setLogoAspect(null);
                 }}
-                disabled={isUploadingLogo}
-                onGenerateStateChange={handleGenerateStateChange}
+                // [PRESISI] Lebar logo = 56,25% panel, dan angka itu bukan
+                // selera: hero di sebelahnya `aspect-video`, jadi TINGGI-nya
+                // = lebar × 9/16 = 56,25%. Logo 1:1 selebar itu punya tinggi
+                // yang sama persis, sehingga dua panel gambar ini rata satu
+                // baris di lebar berapa pun — tidak perlu angka piksel yang
+                // harus dijaga manual tiap kali kolomnya berubah.
+                //
+                // Yang RUSAK sebelum ini: logo dipatok 240px sementara hero
+                // dibiarkan 1:1. Logonya mengecil, hero-nya tetap setinggi
+                // lebar panel, dan barisnya jadi timpang jauh.
+                className="mx-auto w-[56.25%]"
               />
-            </div>
-          </>
-        )}
-      </div>
+            ) : (
+              <>
+                {/* [SCROLL FIX] data-field-error saat logo error. */}
+                <div
+                  data-field-error={hasLogoError ? 'true' : undefined}
+                  className={cn(
+                    'rounded-xl transition-all',
+                    hasLogoError && 'ring-2 ring-destructive ring-offset-2',
+                  )}
+                >
+                  <EmptySlot
+                    index={0}
+                    label={t('uploadLogo')}
+                    onClick={() => openLogoFilePicker(1)}
+                    onFileDrop={handleLogoDrop}
+                    className="mx-auto w-[56.25%]"
+                    // Dua sebab, satu tampilan. Autofill logo asinkron (SVG
+                    // dibuat lalu diunggah), dan tanpa baris ini slotnya
+                    // menampilkan ajakan "Upload Logo" lebih dulu sebelum
+                    // ditimpa logonya — sementara panel Hero di sebelahnya
+                    // tidak pernah begitu, karena autofill-nya cuma menyalin
+                    // URL. Dua panel bersebelahan, dua perilaku berbeda saat
+                    // halaman dimuat ulang.
+                    isLoading={isUploadingLogo || isGeneratingLogo}
+                    progress={logoProgress}
+                  />
+                </div>
+                {hasLogoError && (
+                  <p className="text-xs font-medium text-destructive">
+                    {t('logoRequired')}
+                  </p>
+                )}
+              </>
+            )}
 
-      {/* ── Brand Color ──────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-            {t('colorLabel')} <span className="text-destructive normal-case font-normal">*</span>
-          </p>
-          <AutofillBadge visible={isAutofilled('primaryColor')} />
-          <p className="text-xs text-muted-foreground">{t('colorHelper')}</p>
-        </div>
-        {/*
-          [SCROLL FIX] data-field-error="true" saat color error.
-        */}
-        <div data-field-error={hasColorError ? 'true' : undefined}>
-          <ColorPicker
-            value={primaryColor}
-            onChange={onColorChange}
-            hasError={hasColorError}
-          />
-        </div>
-        {hasColorError && (
-          <p className="text-xs text-destructive font-medium">
-            {t('colorRequired')}
-          </p>
-        )}
-        {primaryColor && <p className="text-xs font-mono text-muted-foreground">{primaryColor}</p>}
-      </div>
-
-      {/* ── Hero Background ───────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
-            {t('heroBgLabel')} <span className="text-destructive normal-case font-normal">*</span>
-          </p>
-          <AutofillBadge visible={isAutofilled('heroBackgroundImage')} />
-          <p className="text-xs text-muted-foreground">{t('heroBgHelper')}</p>
-        </div>
-
-        {heroBackgroundImage ? (
-          <div className="space-y-1.5">
-            <FilledImageSlot
-              url={heroBackgroundImage}
-              alt="Hero background"
-              onRemove={() => { onHeroBgChange(''); setHeroBgAspect(null); }}
-            />
+            {/*
+              Lencana rasio DI LUAR percabangan terisi/kosong, di kedua panel.
+              Dulu ia cuma muncul setelah gambarnya ada — jadi saat kosong,
+              satu-satunya keterangan bentuk yang dibutuhkan penjual justru
+              tidak ada. Sekarang ia memberi tahu ukuran yang diminta SEBELUM
+              orang menyiapkan berkasnya, lalu menegaskan yang terpasang
+              sesudahnya.
+            */}
             <div className="flex justify-center">
-              <AspectBadge aspect={heroBgAspect ?? (heroBackgroundImage ? 'landscape' : null)} />
+              <AspectBadge aspect={logoAspect ?? 'square'} />
             </div>
           </div>
-        ) : (
-          <>
-            {/*
-              [SCROLL FIX] data-field-error="true" saat heroBg error.
-            */}
-            <div
-              data-field-error={hasHeroBgError ? 'true' : undefined}
-              className={cn(
-                'rounded-xl transition-all',
-                hasHeroBgError && 'ring-2 ring-destructive ring-offset-2',
-              )}
-            >
-              <EmptySlot
-                index={0}
-                label={t('uploadHeroBg')}
-                onClick={() => openHeroBgFilePicker(1)}
-                onFileDrop={handleHeroBgDrop}
-                isLoading={isUploadingHeroBg}
-                progress={heroBgProgress}
-              />
-            </div>
-            {hasHeroBgError && (
-              <p className="text-xs text-destructive font-medium">
-                {t('heroBgRequired')}
-              </p>
-            )}
-          </>
-        )}
-      </div>
+        </FormPanel>
 
-      {/* ── Crop Modal ────────────────────────────────────────────────────── */}
+        {/* ── Latar hero ───────────────────────────────────────────────── */}
+        <FormPanel
+          title={t('heroBgLabel')}
+          required
+          description={t('heroBgHelper')}
+          badge={<AutofillBadge visible={isAutofilled('heroBackgroundImage')} />}
+        >
+          <div className="space-y-1.5">
+            {heroBackgroundImage ? (
+              <FilledImageSlot
+                url={heroBackgroundImage}
+                alt="Hero background"
+                onRemove={() => {
+                  onHeroBgChange('');
+                  setHeroBgAspect(null);
+                }}
+                // Etalase merender latar hero 16:9, lencana di bawah panel
+                // ini sendiri berbunyi "landscape", dan Pengaturan → Bio
+                // sudah memakai aspect-video. Slot ini satu-satunya yang
+                // masih persegi — jadi yang dilihat penjual di sini bukan
+                // yang akan tampil di tokonya. tailwind-merge menyelesaikan
+                // aspect-square bawaan slot melawan yang ini.
+                className="aspect-video"
+              />
+            ) : (
+              <>
+                <div
+                  data-field-error={hasHeroBgError ? 'true' : undefined}
+                  className={cn(
+                    'rounded-xl transition-all',
+                    hasHeroBgError && 'ring-2 ring-destructive ring-offset-2',
+                  )}
+                >
+                  <EmptySlot
+                    index={0}
+                    label={t('uploadHeroBg')}
+                    onClick={() => openHeroBgFilePicker(1)}
+                    onFileDrop={handleHeroBgDrop}
+                    isLoading={isUploadingHeroBg}
+                    progress={heroBgProgress}
+                    className="aspect-video"
+                  />
+                </div>
+                {hasHeroBgError && (
+                  <p className="text-xs font-medium text-destructive">
+                    {t('heroBgRequired')}
+                  </p>
+                )}
+              </>
+            )}
+
+            <div className="flex justify-center">
+              <AspectBadge aspect={heroBgAspect ?? 'landscape'} />
+            </div>
+          </div>
+        </FormPanel>
+
+        {/* ── Warna merek ──────────────────────────────────────────────── */}
+        <FormPanel
+          title={t('colorLabel')}
+          required
+          wide
+          description={t('colorHelper')}
+          badge={<AutofillBadge visible={isAutofilled('primaryColor')} />}
+        >
+          <div data-field-error={hasColorError ? 'true' : undefined}>
+            <ColorPicker
+              value={primaryColor}
+              onChange={onColorChange}
+              hasError={hasColorError}
+            />
+          </div>
+          {hasColorError && (
+            <p className="text-xs font-medium text-destructive">
+              {t('colorRequired')}
+            </p>
+          )}
+          {primaryColor && (
+            <p className="text-center font-mono text-xs text-muted-foreground">
+              {primaryColor}
+            </p>
+          )}
+        </FormPanel>
+      </FormSection>
+
+      {/*
+        Modal DI LUAR grid. Sebagai anak langsung grid ia menempati satu sel —
+        kosong saat tertutup, tapi tetap menggeser panel setelahnya.
+      */}
       <ImageCropModal
         open={cropOpen}
         imageSrc={imageSrc}
@@ -410,7 +453,6 @@ export function StepVisual({
         onCancel={handleCropCancel}
         isProcessing={isCropProcessing}
       />
-
-    </div>
+    </>
   );
 }

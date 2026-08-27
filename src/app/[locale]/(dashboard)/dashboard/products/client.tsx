@@ -24,21 +24,27 @@
 // productsLoading saja sudah cukup sebagai gate.
 // ============================================================================
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Plus,
-  ArrowUpRight,
   Package,
-  HelpCircle,
   AlertCircle,
   RefreshCw,
   ShoppingBag,
   Sparkles,
+  SearchX,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
+import { GUIDE } from '@/lib/constants/dashboard/guide-links';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Dialog,
@@ -48,19 +54,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
 import { useProductsFlat } from '@/hooks/dashboard/use-products';
+import {
+  CollectionToolbar,
+  useCollectionView,
+} from '@/components/dashboard/shared/collection-toolbar';
+import { CollectionPager } from '@/components/dashboard/shared/collection-pager';
 import {
   ProductsGrid,
   ProductsGridSkeleton,
 } from '@/components/dashboard/product/product-grid';
+import { Link, useRouter } from '@/i18n/navigation';
 
 // ── WelcomeProductDialog ──────────────────────────────────────────────────────
 
@@ -157,9 +161,113 @@ export function DashboardClient() {
     isFetching: isRefetching,
   } = useProductsFlat();
 
-  const products = productsData ?? [];
+  // `productsData ?? []` menghasilkan array BARU tiap render selama datanya
+  // belum datang, dan tiga useMemo di bawah membacanya sebagai dependensi —
+  // jadi ketiganya menghitung ulang tiap render tanpa ada yang berubah.
+  // Sudah begitu sejak dulu; baru terlihat saat saringan kategori menambah
+  // pemakai ketiga. Satu useMemo di sini memperbaiki ketiganya.
+  const products = useMemo(() => productsData ?? [], [productsData]);
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+
+  // ── Pencarian, pengurutan, tampilan ──────────────────────────────────────
+  //
+  // Penyaringan dikerjakan DI SINI, bukan di CollectionToolbar. Bilah itu
+  // melapor apa yang dipilih; halaman yang tahu arti "harga terendah" untuk
+  // koleksinya sendiri. Begitu bilahnya ikut menyaring, ia berhenti bisa
+  // dipakai daftar kasir yang bentuk datanya berbeda.
+  const tc = useTranslations('dashboard.products.collection');
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('newest');
+  const [kategori, setKategori] = useState<string | null>(null);
+  const [view, setView] = useCollectionView('fibidy:view:products');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+
+  // Ruang untuk bilah aksi massal yang mengambang. Lihat catatan pada
+  // `onSelectionCountChange` di product-grid.tsx: bilahnya `fixed`, jadi ia
+  // tidak memakan ruang sendiri, dan tanpa ini ia menutupi pager begitu
+  // halaman digulir habis.
+  const [jumlahTerpilih, setJumlahTerpilih] = useState(0);
+
+  const sortOptions = useMemo(
+    () => [
+      { value: 'newest', label: tc('sortNewest') },
+      { value: 'oldest', label: tc('sortOldest') },
+      { value: 'name-asc', label: tc('sortNameAsc') },
+      { value: 'name-desc', label: tc('sortNameDesc') },
+      { value: 'price-asc', label: tc('sortPriceAsc') },
+      { value: 'price-desc', label: tc('sortPriceDesc') },
+    ],
+    [tc],
+  );
+
+  // Kategori diturunkan dari produk yang ada, bukan dari endpoint terpisah:
+  // satu request lebih sedikit, dan saringan tidak pernah menawarkan kategori
+  // yang produknya sudah tidak dijual. Aturan yang sama dipakai kasir.
+  const categories = useMemo(
+    () =>
+      [
+        ...new Set(
+          products.map((p) => p.category).filter((c): c is string => Boolean(c)),
+        ),
+      ].sort((a, b) => a.localeCompare(b, 'id')),
+    [products],
+  );
+
+  const visibleProducts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const cocokKategori = (p: (typeof products)[number]) =>
+      !kategori || p.category === kategori;
+
+    const hasil = q
+      ? products.filter(
+          (p) =>
+            cocokKategori(p) &&
+            (p.name.toLowerCase().includes(q) ||
+              (p.category ?? '').toLowerCase().includes(q)),
+        )
+      : products.filter(cocokKategori);
+
+    // `localeCompare` dengan 'id' supaya urutan nama menghormati abjad
+    // Indonesia, bukan urutan byte.
+    switch (sort) {
+      case 'oldest':
+        return hasil.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      case 'name-asc':
+        return hasil.sort((a, b) => a.name.localeCompare(b.name, 'id'));
+      case 'name-desc':
+        return hasil.sort((a, b) => b.name.localeCompare(a.name, 'id'));
+      case 'price-asc':
+        return hasil.sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return hasil.sort((a, b) => b.price - a.price);
+      default:
+        return hasil.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    }
+  }, [products, query, sort, kategori]);
+
+  // ── Halaman ──────────────────────────────────────────────────────────────
+  //
+  // Dipotong SETELAH disaring dan diurutkan, bukan sebelumnya — kalau tidak,
+  // pencarian cuma akan menelusuri 20 produk yang kebetulan ada di halaman
+  // yang sedang dibuka.
+  const totalPages = Math.max(1, Math.ceil(visibleProducts.length / perPage));
+  const halamanAman = Math.min(page, totalPages);
+  const pagedProducts = visibleProducts.slice(
+    (halamanAman - 1) * perPage,
+    halamanAman * perPage,
+  );
+
+  // Mengubah kata kunci, urutan, atau jumlah baris membuat halaman ke-7 tidak
+  // lagi berarti apa-apa. Direset lewat KEY, bukan efek: `useEffect` di sini
+  // berarti satu render menampilkan halaman kosong sebelum resetnya masuk.
+  const resetKey = `${query}|${sort}|${kategori ?? ''}|${perPage}`;
+  const [lastResetKey, setLastResetKey] = useState(resetKey);
+  if (resetKey !== lastResetKey) {
+    setLastResetKey(resetKey);
+    setPage(1);
+  }
 
   // ── Dialog trigger ────────────────────────────────────────────────────────
   //
@@ -207,7 +315,7 @@ export function DashboardClient() {
 
   const PageHeader = () => (
     <div className="flex items-center justify-between">
-      <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+      <h1 className="text-display-sm text-ink">{t('title')}</h1>
       <Button asChild>
         <Link href="/dashboard/products/new" className="gap-2">
           <Plus className="h-4 w-4" />
@@ -281,44 +389,101 @@ export function DashboardClient() {
 
           {products.length === 0 ? (
             <div className="py-8">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Package />
-                  </EmptyMedia>
-                  <EmptyTitle>{t('empty')}</EmptyTitle>
-                  <EmptyDescription>{t('emptyHint')}</EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent className="flex-col items-center gap-3">
-                  <Button asChild>
-                    <Link href="/dashboard/products/new" className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      {t('addButton')}
-                    </Link>
-                  </Button>
-                  <a
-                    href="https://guide.fibidy.com/products"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {t('emptyGuideLink')}
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
-                  {/* Selalu tampil selama products kosong — tidak perlu dismissed gate */}
-                  <button
-                    type="button"
-                    onClick={() => setWelcomeOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <HelpCircle className="h-3 w-3" />
-                    {t('emptyReopenDialog')}
-                  </button>
-                </EmptyContent>
-              </Empty>
+              {/* Acuan polanya sekarang ikut komponen yang sama dengan layar
+                  lain. Dulu halaman ini yang jadi contoh tapi ditulis manual,
+                  jadi begitu layar lain menirunya, tiruannya yang menyimpang. */}
+              <EmptyPanel
+                icon={<Package />}
+                title={t('empty')}
+                description={t('emptyHint')}
+                action={{
+                  label: t('addButton'),
+                  icon: <Plus className="h-4 w-4" />,
+                  href: '/dashboard/products/new',
+                }}
+                learnLabel={t('emptyGuideLink')}
+                learnHref={GUIDE.produk}
+                helpLabel={t('emptyReopenDialog')}
+                // Satu-satunya layar yang punya dialog terpandu sungguhan.
+                // Yang lain mengarah ke pusat bantuan lewat bawaan EmptyPanel.
+                onHelp={() => setWelcomeOpen(true)}
+              />
             </div>
           ) : (
-            <ProductsGrid products={products} />
+            <>
+              <CollectionToolbar
+                searchLabel={tc('searchLabel')}
+                searchPlaceholder={tc('searchPlaceholder')}
+                clearSearchLabel={tc('clearSearch')}
+                query={query}
+                onQueryChange={setQuery}
+                sortLabel={tc('sortLabel')}
+                sortOptions={sortOptions}
+                sort={sort}
+                onSortChange={setSort}
+                categoryLabel={tc('categoryLabel')}
+                categoryAllLabel={tc('categoryAll')}
+                categories={categories}
+                category={kategori}
+                onCategoryChange={setKategori}
+                view={view}
+                onViewChange={setView}
+                gridLabel={tc('viewGrid')}
+                listLabel={tc('viewList')}
+              />
+
+              {visibleProducts.length === 0 ? (
+                /* Kosong karena PENCARIAN, bukan karena belum punya produk.
+                   Dua keadaan yang berbeda, jadi dua bentuk yang berbeda:
+
+                   EmptyPanel adalah pola "layar kosong" milik repo ini, dan
+                   kontraknya mewajibkan tautan panduan + tautan bantuan. Itu
+                   benar untuk penjual yang belum punya produk sama sekali,
+                   dan salah untuk penjual yang produknya ada tapi kata
+                   kuncinya tidak cocok — ia tidak butuh artikel "cara
+                   menambah produk", ia butuh mengosongkan kotak pencarian.
+
+                   Jadi keadaan ini memakai primitif Empty yang lebih ringan,
+                   dengan satu aksi yang benar-benar menyelesaikannya. */
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <SearchX />
+                    </EmptyMedia>
+                    <EmptyTitle>{tc('noMatch')}</EmptyTitle>
+                    <EmptyDescription>{tc('noMatchHint')}</EmptyDescription>
+                  </EmptyHeader>
+                  {/* Mengosongkan KEDUANYA. Tombol yang cuma menghapus kata
+                      kunci sementara saringan kategori masih menyala akan
+                      meninggalkan penjual di layar kosong yang sama. */}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setQuery('');
+                      setKategori(null);
+                    }}
+                  >
+                    {tc('clearSearch')}
+                  </Button>
+                </Empty>
+              ) : (
+                <>
+                  <ProductsGrid
+                    products={pagedProducts}
+                    view={view}
+                    onSelectionCountChange={setJumlahTerpilih}
+                  />
+                  <CollectionPager
+                    page={halamanAman}
+                    totalPages={totalPages}
+                    perPage={perPage}
+                    onPageChange={setPage}
+                    onPerPageChange={setPerPage}
+                    className={jumlahTerpilih > 0 ? 'md:mb-20' : undefined}
+                  />
+                </>
+              )}
+            </>
           )}
         </div>
       )}

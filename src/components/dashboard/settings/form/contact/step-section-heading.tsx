@@ -1,92 +1,70 @@
 'use client';
 
+// ============================================================================
+// STEP SECTION HEADING — Pengaturan → Kontak, judul seksi
+// File: src/components/dashboard/settings/form/contact/step-section-heading.tsx
+//
+// Dua isian ini juga tak berbatas sebelumnya, padahal servernya membatasi
+// keduanya (contactTitle 200, contactSubtitle 300).
+//
+// Cabang desktop/mobile DIHAPUS. Keduanya merender dua isian yang sama
+// persis; satu-satunya beda adalah pembungkusnya — `PAGE_GRID_2_FORM`
+// (yang di bawah `lg` sudah satu kolom) versus `space-y-5`. Jadi cabangnya
+// tidak pernah menghasilkan tampilan berbeda di lebar mana pun, tapi ia
+// menggandakan setiap isian: dua id, dua pemanggil `updateFormData`, dan
+// setiap perbaikan harus ditulis dua kali — yang kedua pasti terlewat.
+// Prop `isDesktop` dipertahankan di tanda tangannya supaya pemanggil tidak
+// perlu ikut berubah.
+// ============================================================================
+
 import { useTranslations } from 'next-intl';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FormField } from '@/components/dashboard/shared/form-field';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import type { ContactFormData } from '@/types/tenant';
+import { PAGE_GRID_2_FORM } from '@/components/dashboard/shared/page-column';
 
 interface StepSectionHeadingProps {
   formData: ContactFormData;
   updateFormData: <K extends keyof ContactFormData>(key: K, value: ContactFormData[K]) => void;
+  /**
+   * TIDAK lagi memilih tata letak — cuma AKHIRAN `id`. Lihat catatan
+   * "dua cabang, satu markup" di step-contact-info.tsx: `contact.tsx`
+   * merender langkah ini dua kali sekaligus, jadi id-nya tetap harus unik.
+   */
   isDesktop?: boolean;
 }
 
-export function StepSectionHeading({ formData, updateFormData, isDesktop = false }: StepSectionHeadingProps) {
+export function StepSectionHeading({
+  formData,
+  updateFormData,
+  isDesktop = false,
+}: StepSectionHeadingProps) {
   const t = useTranslations('settings.contact.heading');
 
-  // ── DESKTOP ───────────────────────────────────────────────────────────────
-  if (isDesktop) {
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
+  const sfx = isDesktop ? '-d' : '-m';
 
-        {/* Section Title */}
-        <div id="tour-contact-title" className="space-y-1.5">
-          <Label htmlFor="contactTitle-d" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('titleLabel')}
-          </Label>
-          <Input
-            id="contactTitle-d"
-            placeholder={t('titlePlaceholder')}
-            value={formData.contactTitle}
-            onChange={(e) => updateFormData('contactTitle', e.target.value)}
-            className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
-          />
-          <p className="text-xs text-muted-foreground">{t('titleHelper')}</p>
-        </div>
-
-        {/* Section Subheading */}
-        <div className="space-y-1.5">
-          <Label htmlFor="contactSubtitle-d" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('subheadingLabel')}
-          </Label>
-          <Input
-            id="contactSubtitle-d"
-            placeholder={t('subheadingPlaceholder')}
-            value={formData.contactSubtitle}
-            onChange={(e) => updateFormData('contactSubtitle', e.target.value)}
-            className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
-          />
-          <p className="text-xs text-muted-foreground">{t('subheadingHelper')}</p>
-        </div>
-
-      </div>
-    );
-  }
-
-  // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-2xl mx-auto">
+    <div className={PAGE_GRID_2_FORM}>
+      <FormField
+        id={`contactTitle${sfx}`}
+        anchorId={`tour-contact-title${sfx}`}
+        label={t('titleLabel')}
+        placeholder={t('titlePlaceholder')}
+        description={t('titleHelper')}
+        value={formData.contactTitle}
+        onChange={(v) => updateFormData('contactTitle', v)}
+        limit={TENANT_LIMITS.contactTitle}
+      />
 
-      {/* Section Title */}
-      <div id="tour-contact-title" className="space-y-1.5">
-        <Label htmlFor="contactTitle-m" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          {t('titleLabel')}
-        </Label>
-        <Input
-          id="contactTitle-m"
-          placeholder={t('titlePlaceholder')}
-          value={formData.contactTitle}
-          onChange={(e) => updateFormData('contactTitle', e.target.value)}
-          className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
-        />
-        <p className="text-xs text-muted-foreground">{t('titleHelper')}</p>
-      </div>
-
-      {/* Section Subheading */}
-      <div className="space-y-1.5">
-        <Label htmlFor="contactSubtitle-m" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          {t('subheadingLabel')}
-        </Label>
-        <Input
-          id="contactSubtitle-m"
-          placeholder={t('subheadingPlaceholder')}
-          value={formData.contactSubtitle}
-          onChange={(e) => updateFormData('contactSubtitle', e.target.value)}
-          className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
-        />
-        <p className="text-xs text-muted-foreground">{t('subheadingHelper')}</p>
-      </div>
-
+      <FormField
+        id={`contactSubtitle${sfx}`}
+        label={t('subheadingLabel')}
+        placeholder={t('subheadingPlaceholder')}
+        description={t('subheadingHelper')}
+        value={formData.contactSubtitle}
+        onChange={(v) => updateFormData('contactSubtitle', v)}
+        limit={TENANT_LIMITS.contactSubtitle}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 // ==========================================
-// USE SUBSCRIPTION PLAN HOOK — Stripe Billing
+// USE SUBSCRIPTION PLAN HOOK — langganan QRIS (Tripay)
 //
 // Tiers: FREE | STARTER | BUSINESS
 //
@@ -10,7 +10,11 @@
 // ==========================================
 
 import { useQuery } from '@tanstack/react-query';
-import { subscriptionApi, type SubscriptionTier } from '@/lib/api/subscription';
+import {
+  subscriptionApi,
+  type SubscriptionTier,
+  type FaseLangganan,
+} from '@/lib/api/subscription';
 import { queryKeys } from '@/lib/shared/query-keys';
 
 interface SubscriptionPlanInfo {
@@ -29,6 +33,19 @@ interface SubscriptionPlanInfo {
   businessQualified: boolean;
   /** Sales tracking for Business qualification progress */
   salesTrack: { totalAmount: number; totalCount: number };
+
+  // ── Masa aktif ────────────────────────────────────────────────────────
+  // Dihitung SERVER di langganan-aktif.ts, tidak pernah dihitung ulang di
+  // sini. Setiap tempat yang menghitungnya sendiri adalah tempat yang bisa
+  // berbeda pendapat tentang penjual yang sama.
+  /** Boleh memakai alat berbayar. AKTIF dan TENGGANG dua-duanya true. */
+  isActive: boolean;
+  fase: FaseLangganan;
+  /** Sisa hari sampai periodEnd. Negatif berarti sudah lewat. */
+  sisaHari: number | null;
+  masaTenggangHari: number;
+  /** ISO string, apa adanya dari server. */
+  periodEnd: string | null;
 }
 
 /**
@@ -49,22 +66,30 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     retry: false,
+    // Placeholder ini muncul sekejap sebelum jawaban server sampai — dan
+    // sekejap itu cukup untuk menampilkan angka yang salah. Nilainya wajib
+    // sama persis dengan PLAN_LIMITS.FREE di server (20 / 3 / 2); dulu di
+    // sini tertulis 5 / 1 / 2, entah sisa dari mana.
+    //
+    // `tier: 'FREE'` adalah jebakan yang sudah beberapa kali menggigit:
+    // selama isLoading, SETIAP tenant terlihat FREE. Apa pun yang mengunci
+    // sesuatu berdasarkan tier WAJIB menunggu isLoading selesai dulu.
     placeholderData: {
       tier: 'FREE' as const,
       status: null,
       periodEnd: null,
       subscription: null,
+      isActive: false,
+      fase: 'BELUM' as const,
+      sisaHari: null,
+      masaTenggangHari: 3,
       limits: {
-        maxProducts: 5,
-        componentBlockVariants: 1,
+        maxProducts: 20,
+        componentBlockVariants: 3,
         maxImagesPerProduct: 2,
-        maxDigitalProducts: 3,
-        maxStorageGb: 0.5,
-        maxFileSizeMb: 20,
-        allowedFileTypes: ['pdf'],
       },
-      usage: { products: 0, digitalProducts: 0, storageMb: 0 },
-      isAtLimit: { products: false, digitalProducts: false },
+      usage: { products: 0 },
+      isAtLimit: { products: false },
       businessQualified: false,
       salesTrack: { totalAmount: 0, totalCount: 0 },
     },
@@ -85,5 +110,10 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
     blockVariantLimit,
     businessQualified: data?.businessQualified ?? false,
     salesTrack: data?.salesTrack ?? { totalAmount: 0, totalCount: 0 },
+    isActive: data?.isActive ?? false,
+    fase: data?.fase ?? 'BELUM',
+    sisaHari: data?.sisaHari ?? null,
+    masaTenggangHari: data?.masaTenggangHari ?? 3,
+    periodEnd: data?.periodEnd ?? null,
   };
 }

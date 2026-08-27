@@ -1,6 +1,6 @@
 import { api } from './client';
 import type { Tenant } from '@/types/tenant';
-import type { LoginInput, RegisterInput, RegisterBuyerInput } from '@/types/auth';
+import type { LoginInput, RegisterInput } from '@/types/auth';
 
 // ==========================================
 // AUTH API SERVICE
@@ -33,9 +33,6 @@ export const authApi = {
     return api.post<AuthResponse>('/auth/register', data);
   },
 
-  registerBuyer: (data: RegisterBuyerInput): Promise<AuthResponse> => {
-    return api.post<AuthResponse>('/auth/register-buyer', data);
-  },
 
   logout: (): Promise<{ message: string }> => {
     return api.post<{ message: string }>('/auth/logout');

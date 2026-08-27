@@ -21,8 +21,6 @@
 //   }
 // ============================================================================
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   GraduationCap,
@@ -32,6 +30,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link, useRouter } from '@/i18n/navigation';
 
 export type EduRestrictionType =
   | 'subscription'

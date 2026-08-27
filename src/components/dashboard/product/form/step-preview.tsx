@@ -11,11 +11,6 @@
 //      ProductForm only creates/edits IDR products via the upload pipeline,
 //      so the preview can format prices unconditionally as Rupiah.
 //
-//   2. Hardcoded `value="USD"` for the rowCurrency row → "IDR".
-//      Matches the rest of the IDR migration. If/when the platform ever
-//      supports multi-currency product creation, swap this for a dynamic
-//      value sourced from `formData` or a tenant-level currency field.
-//
 // No behavioral changes elsewhere.
 //
 // [PREVIEW IMAGE + STATUS + COVER GRID FIX — Aug 2026]
@@ -74,11 +69,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/shared/utils';
-import {
-  formatFileSizeFromBytes,
-  formatPriceIDR,
-} from '@/lib/shared/format';
+import { formatPriceIDR } from '@/lib/shared/format';
 import type { ProductFormData } from '@/lib/shared/validations';
+import { ringkasanDeskripsi } from '@/lib/shared/markdown';
 
 interface PreviewProductProps {
   open: boolean;
@@ -87,9 +80,7 @@ interface PreviewProductProps {
   isSaving: boolean;
   formData: ProductFormData;
   isEditing: boolean;
-  selectedFile?: File | null;
   /** Mirrors product.tsx's showFileStep — hides the File section instead of showing "No file yet". */
-  showFileSection: boolean;
 }
 
 function PreviewSection({
@@ -139,8 +130,6 @@ export function PreviewProduct({
   isSaving,
   formData,
   isEditing,
-  selectedFile,
-  showFileSection,
 }: PreviewProductProps) {
   const t = useTranslations('dashboard.products.form.preview');
   const images = formData.images || [];
@@ -223,31 +212,14 @@ export function PreviewProduct({
               <PreviewRow label={t('rowCategory')} value={formData.category} missing={t('noCategory')} />
               <PreviewRow
                 label={t('rowDescription')}
-                value={formData.description ? `${formData.description.slice(0, 60)}${formData.description.length > 60 ? '…' : ''}` : null}
+                // [MARKDOWN] Dilucuti DULU baru dipotong. Memotong markdown
+                // mentah di karakter ke-60 bisa jatuh di tengah sintaks dan
+                // menyisakan `**Ko…` di ringkasan.
+                value={ringkasanDeskripsi(formData.description)}
                 missing={t('noDescription')}
               />
             </div>
           </PreviewSection>
-
-          {/* File */}
-          {showFileSection && (
-            <PreviewSection label={t('sectionDigitalFile')}>
-              <div className="rounded-xl border bg-card px-3 py-1">
-                <PreviewRow
-                  label={t('rowFile')}
-                  value={
-                    selectedFile
-                      ? t('fileWithSize', { name: selectedFile.name, size: formatFileSizeFromBytes(selectedFile.size) })
-                      : isEditing
-                        ? t('fileUploadedPrefix')
-                        : null
-                  }
-                  missing={t('noFile')}
-                  valueClass={selectedFile || isEditing ? 'text-emerald-600' : undefined}
-                />
-              </div>
-            </PreviewSection>
-          )}
 
           {/*
             [FIX 3 — COVER IMAGES GRID]
@@ -303,14 +275,6 @@ export function PreviewProduct({
                 label={t('rowComparePrice')}
                 value={formatPrice(formData.comparePrice)}
                 missing={t('dash')}
-              />
-              <PreviewRow
-                label={t('rowCurrency')}
-                /* [IDR MIGRATION] Was hardcoded "USD". Product creation pipeline
-                   stores currency: 'IDR' on BE (products-upload.service.ts), so
-                   the preview should reflect that uniformly. */
-                value="IDR"
-                valueClass="text-muted-foreground"
               />
             </div>
           </PreviewSection>

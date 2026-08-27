@@ -20,13 +20,9 @@
 // later). Two changes:
 //
 //   1. "Maybe later" removed as a button — its job (dismiss without
-//      committing to anything) is now a corner X next to DialogTitle,
-//      matching the standard close-affordance every other Dialog in this
-//      app already exposes by default (Radix's own DialogContent close
-//      button — this one had it hidden via [&>button:last-child]:hidden
-//      on the header markup previously; that hide was for the OLD "Maybe
-//      later" text button which no longer exists, so it's removed here
-//      too). "Maybe later" as a full labeled row implied it was a
+//      committing to anything) is now the corner X, matching the
+//      standard close-affordance every other Dialog in this app already
+//      exposes. "Maybe later" as a full labeled row implied it was a
 //      meaningfully different choice from closing the dialog outright —
 //      it wasn't; onOpenChange(false) is what both did.
 //
@@ -38,11 +34,27 @@
 //      leave half the row visibly empty, so that case stays a single
 //      full-width button instead. grid-cols-2 only applies when both
 //      buttons exist.
+//
+// [DOUBLE-X FIX — Aug 2026]
+// This component used to render its own corner-X `<button>` on top of
+// DialogContent, defensively, "in case the base component doesn't
+// already supply one" (see prior comment, now removed). It does supply
+// one: `components/ui/dialog.tsx`'s `DialogContent` has had
+// `showCloseButton = true` by default all along, rendering its own
+// `DialogPrimitive.Close` at the exact same `absolute top-4 right-4`
+// coordinates. The two X's were stacking, pixel-for-pixel.
+//
+// Every other Dialog in this app (StudioOnboardingDialog,
+// FirstPublishDialog, etc.) either relies on that default silently, or
+// explicitly hides it via `[&>button:last-child]:hidden` when the dialog
+// is meant to be non-dismissible. This one did neither — it left the
+// default on AND added a second X on top of it. Fix: rely on the
+// default like every sibling Dialog does. No custom button, no
+// className override needed.
 // ==========================================
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Crown, AlertTriangle, X, Zap } from 'lucide-react';
+import { Crown, AlertTriangle, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
   Dialog,
@@ -55,6 +67,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { PaymentMethodDialog } from '@/components/dashboard/subscription/payment-method-dialog';
 import type { SubscriptionTier } from '@/lib/api/subscription';
+import { useRouter } from '@/i18n/navigation';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -73,7 +86,6 @@ export function UpgradeModal({
   currentTier = 'FREE',
 }: UpgradeModalProps) {
   const t = useTranslations('dashboard.upgradeModal');
-  const tCommon = useTranslations('common.actions');
   const router = useRouter();
   const [payDialogOpen, setPayDialogOpen] = useState(false);
 
@@ -109,26 +121,13 @@ export function UpgradeModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
+        {/*
+          [DOUBLE-X FIX] No custom close button here anymore, and no
+          className override to suppress the default. DialogContent's
+          own `showCloseButton` (default true) renders the single X in
+          the corner, same as every other dismissible Dialog in the app.
+        */}
         <DialogContent className="sm:max-w-md">
-          {/*
-            [FOOTER LAYOUT FIX] Corner close button replaces the old
-            "Maybe later" row. Radix's DialogContent normally ships its
-            own default close X — this app's own DialogContent variant
-            renders one already via its base primitive, so an explicit
-            second X is only added here if the base component doesn't
-            already supply one. Kept explicit + positioned so it reads
-            unambiguously as "dismiss" next to the title, independent of
-            whatever the base Dialog component's default happens to be.
-          */}
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            aria-label={tCommon('close')}
-            className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <X className="h-4 w-4" />
-          </button>
-
           <DialogHeader className="text-center sm:text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
               <AlertTriangle className="h-6 w-6 text-primary" />

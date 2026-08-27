@@ -12,6 +12,8 @@ import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { SocialFormData, SocialLinks } from '@/types/tenant';
 import { StepSocialLinks } from './form/social/step-social-links';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ============================================================================
 // SOCIAL SETTINGS SECTION
@@ -105,7 +107,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
 
   if (tenant === null) {
     return (
-      <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+      <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
         <div className="hidden lg:flex lg:flex-col lg:h-full">
           <div className="flex-1 pb-4 min-h-[280px]">
             <div className="space-y-7">
@@ -120,7 +122,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
                     {Array.from({ length: count }).map((_, i) => (
                       <div key={i} className="space-y-1.5">
                         <Skeleton className="h-[11px] w-20 rounded-full" />
-                        <Skeleton className="h-9 w-full rounded-md" />
+                        <Skeleton className="h-[var(--field-height)] w-full rounded-[var(--shape-field)]" />
                       </div>
                     ))}
                   </div>
@@ -130,11 +132,16 @@ export function SocialSection({ onBack }: SocialSectionProps) {
           </div>
         </div>
         <div className="lg:hidden flex flex-col pb-24 md:pb-6">
-          <div className="space-y-3 max-w-sm mx-auto w-full">
+          {/* [LEBAR KONSISTEN] `max-w-sm mx-auto` dilepas: di tablet skeleton
+              ini 384px sementara isi aslinya 672px, jadi kerangkanya
+              melompat begitu data datang. Cabang loading dan cabang isi
+              harus punya kotak yang sama — alasan yang sama dipakai
+              KasirPageShell saat menyatukan wrapper tiap cabangnya. */}
+          <div className="space-y-3 w-full">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-1.5">
                 <Skeleton className="h-[11px] w-20 rounded-full" />
-                <Skeleton className="h-9 w-full rounded-md" />
+                <Skeleton className="h-[var(--field-height)] w-full rounded-[var(--shape-field)]" />
               </div>
             ))}
           </div>
@@ -145,7 +152,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
   }
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       {/* DESKTOP — always ≥lg, always within WizardNav's `sticky` range:
           small breathing-room gap, no fixed-pill clearance needed. */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">

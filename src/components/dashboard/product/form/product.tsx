@@ -18,7 +18,6 @@
 //
 // Field error keys per step:
 //   'details': 'name', 'price'
-//   'file':    (bukan required — skip validation)
 //   'cover':   tidak ada required field
 //
 // Validasi utama ada di Zod schema (productSchema) — ValidationDialog
@@ -28,13 +27,10 @@
 // [v6 REALTIME FIX carry-forward]
 // [v6 DUPLICATE-RENDER FIX carry-forward]
 //
-// [DIGITAL PRODUCT FLAG — Aug 2026]
-// Step list sekarang dinamis (StepKey[]), bukan array 3-elemen tetap.
-// 'file' step di-drop total dari wizard (bukan cuma disembunyikan) untuk
-// produk BARU saat FEATURES.digitalProducts === false — step dots, index
-// step, dan validasi semua ngikut daftar yang sudah difilter. Produk LAMA
-// yang sudah punya file (dibuat sebelum flag dimatikan) tetap bisa lihat
-// & edit step itu, supaya data lama nggak jadi nggak bisa diakses.
+// [PANGKAS PRODUK DIGITAL]
+// Wizard tinggal dua step: 'details' dan 'cover'. Step 'file' beserta
+// seluruh jalur unggah R2, KYC, dan kuota storage sudah dicabut — produk
+// di platform ini hanya barang fisik dan jasa.
 //
 // [EDIT-SAVE FIX — Aug 2026]
 // handleSave's isEditing branch was calling useUpdateProductFile(), whose
@@ -52,16 +48,11 @@
 //
 // useUpdateProduct() (mutation over UpdateProductInput = Partial
 // <CreateProductInput>, which DOES include images/category/comparePrice)
-// was already being used elsewhere in this component for the "new digital
-// product, attach extra fields after upload" path (see updateExtras below)
-// — it just wasn't the one wired into the plain-edit branch. Editing now
-// goes through the same updateProduct() mutation, sending the full field
-// set the form actually collected. useUpdateProductFile() import removed
-// since this was its only call site in this file.
+// is what the edit branch uses now, sending the full field set the form
+// actually collected.
 // ============================================================================
 
 import { useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye } from 'lucide-react';
@@ -69,11 +60,8 @@ import { useTranslations } from 'next-intl';
 import { Form } from '@/components/ui/form';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import {
-  useUploadProduct,
   useCreateProduct,
   useUpdateProduct,
-  useStorageUsage,
-  useKycStatus,
 } from '@/hooks/dashboard/use-products';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
@@ -81,14 +69,16 @@ import { productSchema, type ProductFormData } from '@/lib/shared/validations';
 import { getMaxImages } from '@/lib/shared/product-utils';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
-import { FEATURES } from '@/lib/config/features';
 import { StepDetails } from './step-details';
-import { StepUpload } from './step-upload';
+import { StepDescription } from './step-description';
 import { StepMedia } from './step-media';
 import { PreviewProduct } from './step-preview';
-import { isDigitalProduct, type Product } from '@/types/product';
+import { type Product } from '@/types/product';
+import { useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
-type StepKey = 'details' | 'file' | 'cover';
+type StepKey = 'details' | 'deskripsi' | 'cover';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -133,7 +123,8 @@ function computeStepErrors(
       errors.push(t('validation.priceRequired'));
     }
   }
-  // 'file' — bukan wajib, skip ke next. 'cover' — gambar tidak wajib.
+  // 'deskripsi' — deskripsi opsional, tidak ada yang wajib diisi.
+  // 'cover'     — gambar tidak wajib.
 
   return errors;
 }
@@ -170,13 +161,12 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
   const router = useRouter();
   const isEditing = !!product;
 
-  // 'file' step exists only when digital products is on, or when editing a
-  // product that already has one (data from before the flag was flipped off).
-  const showFileStep = FEATURES.digitalProducts || (product != null && isDigitalProduct(product));
-
+  // [MARKDOWN] Deskripsi punya langkahnya sendiri di tengah. Selain
+  // melegakan Step 1, langkah terpisah adalah batas code-split yang alami:
+  // editor rich text 141 KB gzip baru diunduh saat penjual sampai di sini.
   const stepKeys = useMemo<StepKey[]>(
-    () => (showFileStep ? ['details', 'file', 'cover'] : ['details', 'cover']),
-    [showFileStep],
+    () => ['details', 'deskripsi', 'cover'],
+    [],
   );
 
   const steps = useMemo(
@@ -189,20 +179,16 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
   );
 
   // ── Mutation hooks ────────────────────────────────────────────────────────
-  const { upload, isUploading, uploadProgress } = useUploadProduct();
   const { createProduct, isLoading: isCreating } = useCreateProduct();
   const { updateProduct, isLoading: isUpdating } = useUpdateProduct();
 
-  const { data: storage } = useStorageUsage();
-  const { data: kyc } = useKycStatus();
   const { tier } = useSubscriptionPlan();
 
-  const isSaving = isUploading || isCreating || isUpdating;
+  const isSaving = isCreating || isUpdating;
 
   // ── Local state ───────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   // [v7] Validation dialog state
@@ -282,30 +268,16 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
   }, [currentStepKey, form, tValidation]);
 
   // ── Save ──────────────────────────────────────────────────────────────────
-  const updateExtras = (
-    id: string,
-    data: Parameters<typeof updateProduct>[0]['data'],
-  ): Promise<void> =>
-    new Promise((resolve, reject) => {
-      updateProduct(
-        { id, data },
-        { onSuccess: () => resolve(), onError: (err) => reject(err) },
-      );
-    });
-
   const handleSave = async () => {
     const data = form.getValues();
 
     try {
       if (isEditing) {
-        // [EDIT-SAVE FIX] Was useUpdateProductFile() with a hardcoded
-        // 4-field payload (name/description/price/isActive) — category,
-        // comparePrice, and images were never sent, so cover photos added
-        // while editing an existing product never persisted. Now routes
-        // through updateProduct() (UpdateProductInput = Partial
-        // <CreateProductInput>), sending everything the form collected,
-        // the same way the "new digital product" path already does via
-        // updateExtras() below.
+        // [EDIT-SAVE FIX] Payload edit dulu cuma 4 field
+        // (name/description/price/isActive) — category, comparePrice, dan
+        // images tidak pernah dikirim, jadi foto sampul yang ditambahkan
+        // saat mengedit tidak pernah tersimpan. Sekarang lewat
+        // updateProduct(), mengirim seluruh field yang dikumpulkan form.
         updateProduct(
           {
             id: product.id,
@@ -332,33 +304,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           },
           { onSuccess: () => router.back() },
         );
-      } else if (selectedFile) {
-        const newProduct = await upload(selectedFile, {
-          name: data.name,
-          description: data.description,
-          price: data.price,
-        });
-
-        if (newProduct?.id) {
-          const extraFields: Record<string, unknown> = {};
-          if (data.category) extraFields.category = data.category;
-          if (data.comparePrice != null && data.comparePrice > 0) {
-            extraFields.comparePrice = data.comparePrice;
-          }
-          if (data.images && data.images.length > 0) {
-            extraFields.images = data.images;
-          }
-          if (data.isActive !== undefined) {
-            extraFields.isActive = data.isActive;
-          }
-          if (data.stok !== undefined) extraFields.stok = data.stok;
-          if (data.minStock !== undefined) extraFields.minStock = data.minStock;
-          if (Object.keys(extraFields).length > 0) {
-            await updateExtras(newProduct.id, extraFields);
-          }
-        }
-
-        router.push('/dashboard/products');
       } else {
         await new Promise<void>((resolve, reject) => {
           createProduct(
@@ -405,28 +350,9 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
             onClearFieldError={handleClearFieldError}
           />
         );
-      case 'file':
+      case 'deskripsi':
         return (
-          <StepUpload
-            form={form}
-            storage={storage}
-            selectedFile={selectedFile}
-            onFileSelect={setSelectedFile}
-            onFileClear={() => setSelectedFile(null)}
-            uploadProgress={uploadProgress}
-            isUploading={isUploading}
-            isEditing={isEditing}
-            editFileInfo={
-              isEditing
-                ? {
-                  fileType: product.fileType,
-                  fileName: product.fileName,
-                  fileSizeMb: product.fileSizeMb,
-                }
-                : undefined
-            }
-            kycStatus={kyc?.kycStatus}
-          />
+          <StepDescription form={form} onUpgrade={() => setUpgradeOpen(true)} />
         );
       case 'cover':
         return (
@@ -451,8 +377,6 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
         isSaving={isSaving}
         formData={form.getValues()}
         isEditing={isEditing}
-        selectedFile={selectedFile}
-        showFileSection={showFileStep}
       />
 
       <UpgradeModal
@@ -470,7 +394,10 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
       />
 
       <Form {...form}>
-        <form onSubmit={(e) => e.preventDefault()} className="h-full flex flex-col">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className={cn('h-full flex flex-col', PAGE_COLUMN)}
+        >
           {/* pb-24 (fixed-pill clearance) only matters below md; md:pb-6
               takes over from md up where WizardNav is `sticky`/in-flow
               and doesn't need an artificial reserve — see

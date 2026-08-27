@@ -6,8 +6,6 @@
 // ============================================================================
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
@@ -23,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTripayPayment } from '@/hooks/dashboard/use-tripay-payment';
 import { formatIdr } from '@/lib/constants/dashboard/pricing';
+import { Link, useRouter } from '@/i18n/navigation';
 
 interface Props {
   paymentId: string;
@@ -188,7 +187,7 @@ export function TripayPaymentWaiting({ paymentId }: Props) {
             // timeout. Backend membiarkan barisnya PENDING dan rekonsiliasi
             // yang akan menentukan nasibnya, jadi seller diberi tahu apa
             // adanya, bukan layar kosong.
-            <div className="rounded-lg border border-dashed p-6 text-center">
+            <div className="rounded-[var(--shape-panel)] border border-dashed p-6 text-center">
               <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 {t('qrPending')}
@@ -197,7 +196,7 @@ export function TripayPaymentWaiting({ paymentId }: Props) {
           )}
 
           {/* Nominal */}
-          <div className="rounded-lg bg-muted/50 p-4 text-center">
+          <div className="rounded-[var(--shape-panel)] bg-muted/50 p-4 text-center">
             <p className="text-xs text-muted-foreground">{t('amountLabel')}</p>
             <p className="text-2xl font-semibold">{formatIdr(payment.amount)}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">

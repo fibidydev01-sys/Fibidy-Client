@@ -96,8 +96,11 @@ export const seoConfig = {
   // ==========================================
   defaultTitle: 'Fibidy — Open your store. Sell today.',
   titleTemplate: '%s | Fibidy',
+  // "Free during beta" dicabut: itu janji harga yang bertabrakan dengan
+  // paket berbayar yang sudah tayang. Paket Free memang gratis selamanya —
+  // itu yang benar dan itu yang ditulis.
   defaultDescription:
-    'Launch your storefront in minutes. Build your catalog, share your link, and let customers order via WhatsApp. Free during beta — for Indonesian creators and small businesses.',
+    'Launch your storefront in minutes. Build your catalog, share your link, and let customers order via WhatsApp. Free plan forever — for Indonesian small businesses.',
 
   // ==========================================
   // KEYWORDS — ENGLISH
@@ -134,7 +137,7 @@ export const seoConfig = {
   // ==========================================
   // THEME
   // ==========================================
-  themeColor: '#ec4899',
+  themeColor: '#ffffff',
   backgroundColor: '#ffffff',
 
   // ==========================================

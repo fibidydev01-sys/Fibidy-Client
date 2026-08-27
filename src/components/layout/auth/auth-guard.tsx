@@ -20,10 +20,10 @@
 // ============================================================================
 
 import { useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthHydrated, useIsAuthenticated, useAuthChecked, useAuthStore } from '@/stores/auth-store';
 import { authApi } from '@/lib/api/auth';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 // ==========================================
 // useAuthCheck — shared internal hook

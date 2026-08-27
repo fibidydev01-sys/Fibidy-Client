@@ -28,6 +28,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Square, RectangleHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/shared/utils';
 import {
   useCloudinaryUpload,
@@ -39,6 +40,7 @@ import { EmptySlot, FilledImageSlot } from '@/components/dashboard/shared/image-
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
 import type { HeroFormData } from '@/types/tenant';
 import type { Area } from 'react-easy-crop';
+import { FormSection, FormPanel } from '@/components/dashboard/shared/form-panel';
 
 // ─── LogoGenerator (inline — identik dengan Setup) ───────────────────────────
 
@@ -128,11 +130,19 @@ function LogoGenerator({
   if (!storeName.trim()) return null;
 
   return (
-    <button
+    /* [KONSISTEN] Dulu <button> yang menyalin gaya `variant="outline"`
+       dengan tangan — border, hover, keadaan disabled, semuanya diketik
+       ulang. Salinan seperti itu tidak ikut berubah saat tokennya berubah:
+       ia satu-satunya tombol di Pengaturan yang masih 36px dan
+       `border-input` setelah tombol lain pindah ke 40px dan
+       `border-hairline-strong`. */
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
       onClick={handleGenerate}
       disabled={disabled || isGenerating}
-      className="inline-flex items-center gap-1.5 text-xs h-8 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+      className="gap-1.5 text-muted-foreground hover:text-foreground"
     >
       {isGenerating ? (
         <div className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -142,7 +152,7 @@ function LogoGenerator({
         </svg>
       )}
       {isGenerating ? 'Membuat...' : 'Generate dari nama'}
-    </button>
+    </Button>
   );
 }
 
@@ -171,7 +181,10 @@ function ColorPicker({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-center flex-wrap gap-2">
+    // [BOCOR KE BAWAH] Sama dengan ColorPicker di wizard: `flex-wrap`
+    // membuat bulatan keenam jatuh sendirian di layar sempit. Grid 3/6
+    // kolom membuat setiap baris selalu penuh.
+    <div className="mx-auto grid w-fit grid-cols-3 items-center gap-2 sm:grid-cols-6">
       {THEME_COLORS.map((color) => {
         const active = value === color.value;
         return (
@@ -367,24 +380,36 @@ export function StepAppearance({
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-8 max-w-sm mx-auto text-center">
-
-      {/* ── Logo ──────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('logoHeading')}
-          </p>
-          <p className="text-xs text-muted-foreground">{t('logoDescription')}</p>
-        </div>
+    // [LEBAR KONSISTEN] Dulu `space-y-8 max-w-sm mx-auto` — 384px di tengah
+    // halaman 1024px, Logo/Latar/Warna diantre ke bawah. Sekarang menumpuk
+    // di mobile dan berjajar di desktop, mengisi lebar halamannya.
+    // [PRESISI] Kembaran Step 1 wizard, dan cacatnya sama persis:
+    // grid 3-kolom ber-`text-center` dengan tinggi anak yang timpang,
+    // plus ImageCropModal yang ikut jadi anak grid.
+    <>
+      <FormSection>
+        {/* ── Logo ──────────────────────────────────────────────────────────── */}
+      <FormPanel title={t('logoHeading')} description={t('logoDescription')}>
 
         {formData.logo ? (
           <div className="space-y-1.5">
+            {/* [PRESISI] Lebar logo = 56,25% panel, dan angka itu bukan
+              selera: panel latar di sebelahnya `aspect-video`, jadi TINGGI-nya
+              = lebar × 9/16 = 56,25%. Logo 1:1 selebar itu punya tinggi yang
+              sama persis, sehingga dua panel gambar ini rata satu baris di
+              lebar berapa pun — tidak perlu angka piksel yang harus dijaga
+              manual tiap kali kolomnya berubah.
+
+              Yang salah sebelumnya: logo mengikuti lebar panel penuh (terukur
+              530×530) sementara latar cuma 298 tinggi. Barisnya timpang, dan
+              logonya 2,6× lebih besar daripada berkas 200×200px yang diminta
+              helper di bawahnya sendiri — jadi selalu tampil buram. */}
             <FilledImageSlot
               url={formData.logo}
               alt="Store logo"
               onRemove={onRemoveLogo}
               isRemoving={isRemovingLogo}
+              className="mx-auto w-[56.25%]"
             />
             <div className="flex justify-center">
               <AspectBadge aspect={logoAspect ?? (formData.logo ? 'square' : null)} />
@@ -399,6 +424,7 @@ export function StepAppearance({
               onFileDrop={handleLogoDrop}
               isLoading={isUploadingLogo}
               progress={logoProgress}
+              className="mx-auto w-[56.25%]"
             />
             <div className="flex items-center justify-center gap-2 pt-1">
               <span className="text-[11px] text-muted-foreground/50">atau</span>
@@ -414,24 +440,25 @@ export function StepAppearance({
         )}
 
         <p className="text-[11px] text-muted-foreground">{t('logoHelper')}</p>
-      </div>
+      </FormPanel>
 
       {/* ── Background Image ──────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('bgHeading')}
-          </p>
-          <p className="text-xs text-muted-foreground">{t('bgDescription')}</p>
-        </div>
+      <FormPanel title={t('bgHeading')} description={t('bgDescription')}>
 
         {formData.heroBackgroundImage ? (
           <div className="space-y-1.5">
+            {/* aspect-video: latar hero di-crop 16:9 dan etalase merendernya
+                16:9. Kotak pratinjau persegi memangkasnya LAGI lewat
+                object-cover, jadi yang terlihat di sini bukan yang akan
+                tampil di toko. tailwind-merge menyelesaikan aspect-square
+                bawaan slot melawan yang ini — tanpa prop baru.
+                Rasio CROP-nya tidak disentuh; ini murni kotak pratinjau. */}
             <FilledImageSlot
               url={formData.heroBackgroundImage}
               alt="Hero background"
               onRemove={onRemoveHeroBg}
               isRemoving={isRemovingHeroBg}
+              className="aspect-video"
             />
             <div className="flex justify-center">
               <AspectBadge aspect={heroBgAspect ?? (formData.heroBackgroundImage ? 'landscape' : null)} />
@@ -445,30 +472,36 @@ export function StepAppearance({
             onFileDrop={handleHeroBgDrop}
             isLoading={isUploadingHeroBg}
             progress={heroBgProgress}
+            className="aspect-video"
           />
         )}
 
         <p className="text-[11px] text-muted-foreground">{t('bgHelper')}</p>
-      </div>
+      </FormPanel>
 
       {/* ── Brand Color ───────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('colorHeading')}
-          </p>
-          <p className="text-xs text-muted-foreground">{t('colorDescription')}</p>
-        </div>
+      <FormPanel wide title={t('colorHeading')} description={t('colorDescription')}>
         <ColorPicker
           value={formData.primaryColor}
           onChange={(v) => updateFormData('primaryColor', v)}
         />
+        {/* Kode hex sejajar dengan deretan swatch-nya, bukan menempel ke kiri
+            panel. Ia MEMBACA warna yang sedang terpilih di atasnya — label
+            yang letaknya berjauhan dari benda yang dijelaskannya membuat
+            penjual harus menghubungkan keduanya sendiri. */}
         {formData.primaryColor && (
-          <p className="text-xs font-mono text-muted-foreground">{formData.primaryColor}</p>
+          <p className="text-center font-mono text-xs text-muted-foreground">
+            {formData.primaryColor}
+          </p>
         )}
-      </div>
+      </FormPanel>
 
-      {/* ── Crop Modal ────────────────────────────────────────────────────── */}
+      </FormSection>
+
+      {/*
+        Modal DI LUAR grid — sebagai anak langsung ia menempati satu sel dan
+        menggeser panel setelahnya walau tidak menampilkan apa pun.
+      */}
       <ImageCropModal
         open={cropOpen}
         imageSrc={imageSrc}
@@ -477,7 +510,6 @@ export function StepAppearance({
         onCancel={handleCropCancel}
         isProcessing={isCropProcessing}
       />
-
-    </div>
+    </>
   );
 }

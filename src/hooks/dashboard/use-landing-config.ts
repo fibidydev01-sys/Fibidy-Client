@@ -63,6 +63,13 @@ interface UseLandingConfigOptions {
   initialConfig?: TenantLandingConfig | null;
   onSaveSuccess?: (info: { wasFirstPublish: boolean }) => void | Promise<void>;
   onValidationError?: (errors: string[]) => void;
+  /**
+   * Dipanggil kalau server menolak dengan 403 — blok yang dipilih di luar
+   * jatah paket. Server yang memutuskan, bukan klien: penjual yang paketnya
+   * turun tetap boleh menyimpan blok lamanya (grandfathering di
+   * tenants.service.ts), jadi klien tidak boleh menebak-nebak lebih dulu.
+   */
+  onPlanRejected?: (message: string) => void;
 }
 
 export interface PublishResult {
@@ -135,6 +142,7 @@ async function doPublish({
   wasFirstPublish,
   onSaveSuccess,
   onValidationError,
+  onPlanRejected,
   setSavedConfig,
   setValidationErrors,
   tToast,
@@ -145,6 +153,7 @@ async function doPublish({
   wasFirstPublish: boolean;
   onSaveSuccess?: (info: { wasFirstPublish: boolean }) => void | Promise<void>;
   onValidationError?: (errors: string[]) => void;
+  onPlanRejected?: (message: string) => void;
   setSavedConfig: (c: TenantLandingConfig) => void;
   setValidationErrors: (e: string[]) => void;
   tToast: (key: string, values?: Record<string, string | number>) => string;
@@ -164,6 +173,14 @@ async function doPublish({
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('[useLandingConfig] Publish error:', error);
+    }
+
+    // Blok di luar jatah paket. Jangan tawarkan "coba lagi" — percobaan
+    // kedua pasti ditolak juga. Serahkan ke pemanggil (studio membuka modal
+    // upgrade), dan tampilkan alasan asli dari server.
+    if (error instanceof ApiRequestError && error.isForbidden()) {
+      onPlanRejected?.(error.message);
+      return { ok: false, wasFirstPublish };
     }
 
     if (error instanceof ApiRequestError && error.isValidationError()) {
@@ -199,6 +216,7 @@ export function useLandingConfig({
   initialConfig,
   onSaveSuccess,
   onValidationError,
+  onPlanRejected,
 }: UseLandingConfigOptions): UseLandingConfigReturn {
   const tToast = useTranslations('toast.landing');
   const tError = useTranslations('error.generic');
@@ -248,6 +266,7 @@ export function useLandingConfig({
       wasFirstPublish,
       onSaveSuccess,
       onValidationError,
+      onPlanRejected,
       setSavedConfig: (c) => setSavedConfig(c),
       setValidationErrors,
       tToast,
@@ -257,7 +276,7 @@ export function useLandingConfig({
 
     setIsSaving(false);
     return result;
-  }, [config, onSaveSuccess, onValidationError, tToast, tError]);
+  }, [config, onSaveSuccess, onValidationError, onPlanRejected, tToast, tError]);
 
   publishChangesRef.current = publishChanges;
 
@@ -278,6 +297,7 @@ export function useLandingConfig({
         wasFirstPublish,
         onSaveSuccess,
         onValidationError,
+        onPlanRejected,
         setSavedConfig: (c) => setSavedConfig(c),
         setValidationErrors,
         tToast,
@@ -288,7 +308,7 @@ export function useLandingConfig({
       setIsSaving(false);
       return result;
     },
-    [onSaveSuccess, onValidationError, tToast, tError],
+    [onSaveSuccess, onValidationError, onPlanRejected, tToast, tError],
   );
 
   // ── discardChanges ────────────────────────────────────────────────────────

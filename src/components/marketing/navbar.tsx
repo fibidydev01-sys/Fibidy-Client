@@ -76,8 +76,8 @@ function ListItem({
           className="flex select-none gap-3 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
         >
           {Icon && (
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Icon className="w-4 h-4 text-primary" />
+            <div className="w-8 h-8 rounded-md bg-surface-strong flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Icon className="w-4 h-4 text-ink" />
             </div>
           )}
           <div className="flex flex-col gap-1">
@@ -155,7 +155,7 @@ export function Navbar() {
                 >
                   <a
                     href="#hero"
-                    className="text-sm font-semibold text-foreground"
+                    className="text-nav-link font-semibold text-ink"
                   >
                     Beranda
                   </a>
@@ -164,7 +164,7 @@ export function Navbar() {
 
               {/* Kenapa Fibidy — dropdown */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground">
+                <NavigationMenuTrigger className="bg-transparent text-nav-link text-muted-foreground hover:text-ink data-[state=open]:text-ink">
                   Kenapa Fibidy
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -192,7 +192,7 @@ export function Navbar() {
                 >
                   <a
                     href="#pricing"
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="text-nav-link text-muted-foreground hover:text-ink"
                   >
                     Harga
                   </a>
@@ -245,7 +245,7 @@ export function Navbar() {
                         href={item.href}
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80 transition-colors cursor-pointer"
                       >
-                        <Icon className="w-4 h-4 text-primary flex-shrink-0" />
+                        <Icon className="w-4 h-4 text-ink flex-shrink-0" />
                         {item.title}
                       </a>
                     </SheetClose>

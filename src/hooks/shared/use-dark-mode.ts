@@ -6,8 +6,7 @@
 // Toggle dark/light + persist ke localStorage
 //
 // Nama: useDarkMode (bukan useTheme — hindari konflik next-themes)
-// Dipakai di: dashboard-sidebar, mobile-navbar,
-//             admin-sidebar, admin-mobile-navbar
+// Dipakai di: dashboard-sidebar, mobile-navbar
 // ==========================================
 
 import { useEffect, useState } from 'react';

@@ -61,18 +61,6 @@ export function formatPrice(
 }
 
 /**
- * Format a USD amount. Convenience wrapper.
- * Used by: LemonSqueezy subscription display (if migrated to dynamic).
- * NOT used by Stripe Connect path — that's IDR.
- */
-export function formatPriceUSD(
-  price: number,
-  locale: string = DEFAULT_LOCALE,
-): string {
-  return formatPrice(price, 'USD', locale);
-}
-
-/**
  * Format an IDR amount. Convenience wrapper for explicit IDR formatting.
  * Equivalent to formatPrice(price, 'IDR') but more readable in code.
  */

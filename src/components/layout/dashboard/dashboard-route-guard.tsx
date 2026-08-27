@@ -16,59 +16,54 @@
 //   → page renders EduRestrictedPage inline with full context
 //
 // WHAT THIS GUARD STILL DOES:
-//   Case D — SELLER + !isSetupComplete → setup-store
-//   Case F — SELLER + setupComplete + !hasPublishedOnce → studio
-//   Case A — BUYER + !FEATURES.digitalProducts → setup-store
-//   Case B — BUYER on seller-only route → library
+//   Case D — !isSetupComplete → setup-store
+//   Case F — setupComplete + !hasPublishedOnce → studio
 //   Case E — DEFENSIVE FALLBACK only for routes not yet wired with inline page
 // ============================================================================
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { isBuyerRestrictedRoute } from '@/lib/constants/shared/route-guard';
-import { FEATURES } from '@/lib/config/features';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 interface DashboardRouteGuardProps {
   children: React.ReactNode;
 }
 
-function stripLocalePrefix(pathname: string): string {
-  const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
-  if (!match) return pathname;
-  return match[2] || '/';
-}
+// [FIX — locale hilang] `stripLocalePrefix` DIHAPUS dari file ini.
+//
+// Helper itu dulu perlu karena `usePathname` diambil dari 'next/navigation',
+// yang mengembalikan path apa adanya termasuk prefix: '/id/dashboard/studio'.
+// Sekarang `usePathname` datang dari '@/i18n/navigation' (next-intl), dan itu
+// SUDAH mengembalikan path tanpa locale — '/dashboard/studio' baik di /en
+// maupun /id. Helper-nya jadi tidak pernah mengubah apa pun.
+//
+// Dibuang, bukan dibiarkan: fungsi bernama stripLocalePrefix yang tidak
+// benar-benar menangani locale adalah tempat pertama orang akan mencari
+// ketika ada bug path berikutnya — dan mereka akan mencari di tempat yang salah.
 
 function isSetupStorePath(pathname: string): boolean {
-  return stripLocalePrefix(pathname) === '/dashboard/setup-store';
+  return pathname === '/dashboard/setup-store';
 }
 
 function isStudioPath(pathname: string): boolean {
-  return stripLocalePrefix(pathname).startsWith('/dashboard/studio');
+  return pathname.startsWith('/dashboard/studio');
 }
 
 // Routes with INLINE EduRestrictedPage handling — guard does NOT redirect these
-const EDU_INLINE_HANDLED_PATHS = [
-  '/dashboard/subscription',
-  '/dashboard/onboard',
-] as const;
+const EDU_INLINE_HANDLED_PATHS = ['/dashboard/subscription'] as const;
 
 function isEduInlineHandled(pathname: string): boolean {
-  const clean = stripLocalePrefix(pathname);
+  const clean = pathname;
   return EDU_INLINE_HANDLED_PATHS.some((p) => clean.startsWith(p));
 }
 
 function isEduRestrictedPath(pathname: string): boolean {
-  const clean = stripLocalePrefix(pathname);
-  return (
-    clean.startsWith('/dashboard/subscription') ||
-    clean.startsWith('/dashboard/onboard')
-  );
+  const clean = pathname;
+  return clean.startsWith('/dashboard/subscription');
 }
 
 function shouldHide(
   tenant: {
-    role: string;
     isSetupComplete?: boolean;
     isEduMode?: boolean;
     hasPublishedOnce?: boolean;
@@ -79,7 +74,6 @@ function shouldHide(
 
   // Case E — only hide if route NOT yet wired with inline handler
   if (
-    tenant.role === 'SELLER' &&
     tenant.isEduMode === true &&
     isEduRestrictedPath(pathname) &&
     !isEduInlineHandled(pathname)
@@ -87,9 +81,8 @@ function shouldHide(
     return true;
   }
 
-  // Case F — SELLER + setupComplete + !hasPublishedOnce → must publish first
+  // Case F — setupComplete + !hasPublishedOnce → must publish first
   if (
-    tenant.role === 'SELLER' &&
     tenant.isSetupComplete === true &&
     tenant.hasPublishedOnce === false &&
     !isStudioPath(pathname)
@@ -97,23 +90,12 @@ function shouldHide(
     return true;
   }
 
-  // Case D — SELLER setup not complete
+  // Case D — setup not complete
   if (
-    tenant.role === 'SELLER' &&
     !tenant.isSetupComplete &&
     !isSetupStorePath(pathname) &&
     !isStudioPath(pathname)
   ) {
-    return true;
-  }
-
-  // Case A — Digital OFF + BUYER
-  if (!FEATURES.digitalProducts && tenant.role === 'BUYER') {
-    return !isSetupStorePath(pathname);
-  }
-
-  // Case B — Digital ON + BUYER on seller-only route
-  if (tenant.role === 'BUYER' && isBuyerRestrictedRoute(pathname)) {
     return true;
   }
 
@@ -131,7 +113,6 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
     // [SPRINT 3] Case E — DEFENSIVE FALLBACK
     // Only redirect paths NOT yet wired with inline EduRestrictedPage
     if (
-      tenant.role === 'SELLER' &&
       tenant.isEduMode === true &&
       isEduRestrictedPath(pathname) &&
       !isEduInlineHandled(pathname)
@@ -140,9 +121,8 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
       return;
     }
 
-    // Case F — SELLER + setupComplete + !hasPublishedOnce → back to /studio
+    // Case F — setupComplete + !hasPublishedOnce → back to /studio
     if (
-      tenant.role === 'SELLER' &&
       tenant.isSetupComplete === true &&
       tenant.hasPublishedOnce === false &&
       !isStudioPath(pathname)
@@ -151,28 +131,13 @@ export function DashboardRouteGuard({ children }: DashboardRouteGuardProps) {
       return;
     }
 
-    // Case D — SELLER + isSetupComplete=false
+    // Case D — isSetupComplete=false
     if (
-      tenant.role === 'SELLER' &&
       !tenant.isSetupComplete &&
       !isSetupStorePath(pathname) &&
       !isStudioPath(pathname)
     ) {
       router.replace('/dashboard/setup-store');
-      return;
-    }
-
-    // Case A
-    if (!FEATURES.digitalProducts && tenant.role === 'BUYER') {
-      if (!isSetupStorePath(pathname)) {
-        router.replace('/dashboard/setup-store');
-      }
-      return;
-    }
-
-    // Case B
-    if (tenant.role === 'BUYER' && isBuyerRestrictedRoute(pathname)) {
-      router.replace('/dashboard/library');
       return;
     }
   }, [tenant, pathname, router]);

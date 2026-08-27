@@ -11,7 +11,7 @@
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
-import { ShoppingBag, Store, GraduationCap, Check } from 'lucide-react';
+import { Store, GraduationCap, Check } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
 import type { RegisterIntent } from '@/types/auth';
 
@@ -26,19 +26,12 @@ interface StepIntentProps {
 interface IntentOption {
   intent: RegisterIntent;
   icon: React.ElementType;
-  labelKey: 'buyer' | 'seller' | 'edu';
+  labelKey: 'seller' | 'edu';
   iconColor: string;
   iconBg: string;
 }
 
 const INTENT_OPTIONS: IntentOption[] = [
-  {
-    intent: 'BUYER',
-    icon: ShoppingBag,
-    labelKey: 'buyer',
-    iconColor: 'text-violet-600 dark:text-violet-400',
-    iconBg: 'bg-violet-100 dark:bg-violet-950/40',
-  },
   {
     intent: 'SELLER',
     icon: Store,

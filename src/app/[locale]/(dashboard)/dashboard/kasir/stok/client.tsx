@@ -20,6 +20,14 @@
 //     terbaca sebelum angkanya dibaca.
 //   • Semua penyaringan dan pengurutan di sisi klien — laporan stok satu tenant
 //     memang datang sekali ambil dan ukurannya wajar.
+//   • Ringkasan dan daftar produk dibungkus SATU `div flex flex-col gap-4`.
+//     Sebelumnya keduanya dirender sebagai sibling langsung dari
+//     KasirPageShell — shell memang memberi `gap-4` di level ATASNYA (antara
+//     header/toolbar/children), tapi TIDAK meneruskannya ke dalam children
+//     itu sendiri. Akibatnya kartu ringkasan dan tabel/list produk menempel
+//     tanpa jarak sama sekali, persis di titik yang paling sering dilihat
+//     kasir tiap membuka tab ini. `gap-4` dipilih supaya sama dengan jarak
+//     antar-blok yang sudah dipakai shell, bukan angka baru.
 // ============================================================================
 
 import { useMemo, useState } from 'react';
@@ -31,6 +39,7 @@ import {
   MoreHorizontal,
   PackagePlus,
   Wallet,
+  Plus,
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -72,6 +81,8 @@ import {
   KasirErrorState,
   KasirRowsSkeleton,
 } from '@/components/dashboard/kasir/kasir-state';
+import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
+import { GUIDE } from '@/lib/constants/dashboard/guide-links';
 import {
   KasirRowButton,
   KasirRowCard,
@@ -97,6 +108,7 @@ function persenStok(stok: number, minStock: number): number {
 
 export function StokClient() {
   const t = useTranslations('dashboard.kasir.stok');
+  const tTaut = useTranslations('dashboard.kasir.emptyLinks');
 
   const [search, setSearch] = useState('');
   const [kondisi, setKondisi] = useState<Kondisi>('SEMUA');
@@ -189,6 +201,8 @@ export function StokClient() {
             { value: 'MENIPIS', label: t('filterLow') },
             { value: 'HABIS', label: t('filterOut') },
           ]}
+          // Berbagi baris `justify-between` dengan Switch di sebelahnya —
+          // w-full akan mendorong Switch turun ke baris berikutnya.
           className="w-auto"
         />
 
@@ -230,180 +244,195 @@ export function StokClient() {
       subtitle={t('subtitle')}
       toolbar={toolbar}
     >
-      {/* Ringkasan */}
-      {isLoading ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-[104px] w-full rounded-xl" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <KasirStatCard
-            label={t('totalValue')}
-            value={formatPriceIDR(data?.totalNilai ?? 0)}
-            icon={<Wallet className="size-3.5" aria-hidden />}
-          />
-          <KasirStatCard
-            label={t('lowCount')}
-            value={data?.jumlahMenipis ?? 0}
-            tone="warning"
-            icon={<AlertTriangle className="size-3.5" aria-hidden />}
-          />
-          <KasirStatCard
-            label={t('outCount')}
-            value={data?.jumlahHabis ?? 0}
-            tone="danger"
-            icon={<XCircle className="size-3.5" aria-hidden />}
-          />
-        </div>
-      )}
-
-      {/* Daftar produk */}
-      {isLoading ? (
-        <KasirRowsSkeleton rows={6} trailing="amount" />
-      ) : produk.length === 0 ? (
-        <KasirEmptyState
-          icon={<Boxes />}
-          title={
-            adaFilter
-              ? search.trim()
-                ? t('noMatchTitle')
-                : t('noFilterMatchTitle')
-              : t('emptyTitle')
-          }
-          description={
-            adaFilter
-              ? search.trim()
-                ? t('noMatchDescription')
-                : t('noFilterMatchDescription')
-              : t('emptyDescription')
-          }
-        >
-          {adaFilter && (
-            <Button variant="outline" onClick={resetFilter}>
-              {t('resetFilter')}
-            </Button>
-          )}
-        </KasirEmptyState>
-      ) : (
-        <>
-          {/* ── Ponsel: kartu ─────────────────────────────────────────── */}
-          <div className="space-y-2 md:hidden">
-            {produk.map((p) => (
-              <KasirRowCard key={p.id}>
-                <KasirRowButton onClick={() => setDipilih(p)}>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-medium">{p.name}</span>
-                      <StokBadge stok={p.stok} minStock={p.minStock} />
-                    </div>
-                    <p className="mt-0.5 text-sm tabular-nums text-muted-foreground">
-                      {t('rowValue', {
-                        nilai: formatPriceIDR(p.price * p.stok),
-                        min: p.minStock,
-                      })}
-                    </p>
-                    <Progress
-                      value={persenStok(p.stok, p.minStock)}
-                      aria-label={t('stockLevel')}
-                      className="mt-2 h-1.5"
-                    />
-                  </div>
-
-                  <span className="shrink-0 text-right">
-                    <span className="block text-lg font-bold tabular-nums">
-                      {p.stok}
-                    </span>
-                    <span className="block text-[11px] text-muted-foreground">
-                      {t('unit')}
-                    </span>
-                  </span>
-                </KasirRowButton>
-              </KasirRowCard>
+      {/* Ringkasan + daftar dibungkus satu wrapper supaya gap-4 berlaku DI
+          ANTARA keduanya. Shell hanya memberi gap ke level di atasnya
+          (header/toolbar/children) — tanpa wrapper ini kedua blok di bawah
+          menempel tanpa jarak, walau tampilannya masing-masing sudah benar. */}
+      <div className="flex flex-col gap-4">
+        {/* Ringkasan */}
+        {isLoading ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-[104px] w-full rounded-[var(--shape-panel)]" />
             ))}
           </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <KasirStatCard
+              label={t('totalValue')}
+              value={formatPriceIDR(data?.totalNilai ?? 0)}
+              icon={<Wallet className="size-3.5" aria-hidden />}
+            />
+            <KasirStatCard
+              label={t('lowCount')}
+              value={data?.jumlahMenipis ?? 0}
+              tone="warning"
+              icon={<AlertTriangle className="size-3.5" aria-hidden />}
+            />
+            <KasirStatCard
+              label={t('outCount')}
+              value={data?.jumlahHabis ?? 0}
+              tone="danger"
+              icon={<XCircle className="size-3.5" aria-hidden />}
+            />
+          </div>
+        )}
 
-          {/* ── Desktop: tabel ────────────────────────────────────────── */}
-          <Card className="hidden py-0 md:block">
-            <Table>
-              {/* <caption> wajib jadi anak pertama <table>. */}
-              <TableCaption className="mb-4">
-                {t('tableCaption', {
-                  tampil: produk.length,
-                  total: semua.length,
-                })}
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-4">{t('colName')}</TableHead>
-                  <TableHead>{t('colCategory')}</TableHead>
-                  <TableHead className="w-40">{t('colStock')}</TableHead>
-                  <TableHead className="text-right">{t('colMin')}</TableHead>
-                  <TableHead className="text-right">{t('colValue')}</TableHead>
-                  <TableHead className="w-10 pr-4">
-                    <span className="sr-only">{t('actionsColumn')}</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {produk.map((p) => (
-                  <TableRow
-                    key={p.id}
-                    onClick={() => setDipilih(p)}
-                    className="cursor-pointer"
-                  >
-                    <TableCell className="pl-4">
+        {/* Daftar produk */}
+        {isLoading ? (
+          <KasirRowsSkeleton rows={6} trailing="amount" />
+        ) : produk.length === 0 ? (
+          // Tersaring vs benar-benar kosong — dibedakan seperti di tab Jual.
+          adaFilter ? (
+            <KasirEmptyState
+              icon={<Boxes />}
+              title={search.trim() ? t('noMatchTitle') : t('noFilterMatchTitle')}
+              description={
+                search.trim()
+                  ? t('noMatchDescription')
+                  : t('noFilterMatchDescription')
+              }
+            >
+              <Button variant="outline" onClick={resetFilter}>
+                {t('resetFilter')}
+              </Button>
+            </KasirEmptyState>
+          ) : (
+            <EmptyPanel
+              icon={<Boxes />}
+              title={t('emptyTitle')}
+              description={t('emptyDescription')}
+              // Stok mengikuti produk: tanpa produk tidak ada yang bisa
+              // dilacak, jadi tombolnya mengantar ke form produk.
+              action={{
+                label: t('emptyAction'),
+                icon: <Plus className="h-4 w-4" aria-hidden />,
+                href: '/dashboard/products/new',
+              }}
+              learnLabel={tTaut('stok.learn')}
+              learnHref={GUIDE.stok}
+              helpLabel={tTaut('stok.help')}
+            />
+          )
+        ) : (
+          <>
+            {/* ── Ponsel: kartu ─────────────────────────────────────────── */}
+            <div className="space-y-2 md:hidden">
+              {produk.map((p) => (
+                <KasirRowCard key={p.id}>
+                  <KasirRowButton onClick={() => setDipilih(p)}>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{p.name}</span>
+                        <span className="truncate font-medium">{p.name}</span>
                         <StokBadge stok={p.stok} minStock={p.minStock} />
                       </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {p.category ?? '—'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="w-10 shrink-0 font-semibold tabular-nums">
-                          {p.stok}
-                        </span>
-                        <Progress
-                          value={persenStok(p.stok, p.minStock)}
-                          aria-label={t('stockLevel')}
-                          className="h-1.5"
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">
-                      {p.minStock}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {formatPriceIDR(p.price * p.stok)}
-                    </TableCell>
-                    <TableCell className="pr-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={t('rowActions')}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="size-4" aria-hidden />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        {aksiBaris(p)}
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+                      <p className="mt-0.5 text-sm tabular-nums text-muted-foreground">
+                        {t('rowValue', {
+                          nilai: formatPriceIDR(p.price * p.stok),
+                          min: p.minStock,
+                        })}
+                      </p>
+                      <Progress
+                        value={persenStok(p.stok, p.minStock)}
+                        aria-label={t('stockLevel')}
+                        className="mt-2 h-1.5"
+                      />
+                    </div>
 
-            </Table>
-          </Card>
-        </>
-      )}
+                    <span className="shrink-0 text-right">
+                      <span className="block text-lg font-bold tabular-nums">
+                        {p.stok}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        {t('unit')}
+                      </span>
+                    </span>
+                  </KasirRowButton>
+                </KasirRowCard>
+              ))}
+            </div>
+
+            {/* ── Desktop: tabel ────────────────────────────────────────── */}
+            <Card className="hidden py-0 md:block">
+              <Table>
+                {/* <caption> wajib jadi anak pertama <table>. */}
+                <TableCaption className="mb-4">
+                  {t('tableCaption', {
+                    tampil: produk.length,
+                    total: semua.length,
+                  })}
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-4">{t('colName')}</TableHead>
+                    <TableHead>{t('colCategory')}</TableHead>
+                    <TableHead className="w-40">{t('colStock')}</TableHead>
+                    <TableHead className="text-right">{t('colMin')}</TableHead>
+                    <TableHead className="text-right">{t('colValue')}</TableHead>
+                    <TableHead className="w-10 pr-4">
+                      <span className="sr-only">{t('actionsColumn')}</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {produk.map((p) => (
+                    <TableRow
+                      key={p.id}
+                      onClick={() => setDipilih(p)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell className="pl-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{p.name}</span>
+                          <StokBadge stok={p.stok} minStock={p.minStock} />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {p.category ?? '—'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="w-10 shrink-0 font-semibold tabular-nums">
+                            {p.stok}
+                          </span>
+                          <Progress
+                            value={persenStok(p.stok, p.minStock)}
+                            aria-label={t('stockLevel')}
+                            className="h-1.5"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {p.minStock}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatPriceIDR(p.price * p.stok)}
+                      </TableCell>
+                      <TableCell className="pr-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={t('rowActions')}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="size-4" aria-hidden />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          {aksiBaris(p)}
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+
+              </Table>
+            </Card>
+          </>
+        )}
+      </div>
 
       <StokKelolaSheet produk={dipilih} onClose={() => setDipilih(null)} />
     </KasirPageShell>

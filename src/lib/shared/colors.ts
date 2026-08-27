@@ -16,9 +16,17 @@ const THEME_OKLCH_MAP: Record<string, ThemeColor> = {
   '#f97316': { light: 'oklch(0.705 0.213 47.604)', dark: 'oklch(0.762 0.182 50.939)' },
 };
 
+// Enam warna pilihan seller di THEME_COLORS adalah DATA SELLER, bukan warna
+// merek — mereka tidak ikut berubah saat sistem desain platform berganti, dan
+// memang tidak boleh: toko yang sudah memilih Emerald tetap Emerald.
+//
+// Yang berubah cuma jatuh-baliknya. Sebelum ini toko tanpa pilihan warna
+// mewarisi merah muda platform; sekarang ia mewarisi voltase merek yang baru
+// — hitam murni di terang, membalik jadi putih di gelap dengan aturan inversi
+// yang sama seperti :root.
 const DEFAULT_THEME: ThemeColor = {
-  light: 'oklch(0.656 0.241 354.308)',
-  dark: 'oklch(0.718 0.202 349.761)',
+  light: '#000000',
+  dark: '#ffffff',
 };
 
 function getThemeColors(hexColor?: string): ThemeColor {

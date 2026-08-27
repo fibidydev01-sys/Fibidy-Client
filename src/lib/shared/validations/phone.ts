@@ -193,7 +193,7 @@ export function validateLocalPhone(local: string, country: CountryCode): PhoneVa
 
 /**
  * Validasi format WhatsApp ID Indonesia (format: 62xxxxxxxxx).
- * Dipakai di BuyerUpgradeWizard yang Indonesia-only.
+ * Dipakai di wizard setup toko yang Indonesia-only.
  *
  * Lebih strict dari regex sebelumnya (^62[0-9]{9,13}$).
  * Pakai rule Indonesia dari COUNTRY_CODES untuk konsistensi.

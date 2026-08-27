@@ -4,18 +4,18 @@
 // SETTINGS PAGE CLIENT
 // File: src/app/[locale]/(dashboard)/dashboard/settings/client.tsx
 //
-// [EDU + KYC BADGE — May 2026]
+// [EDU BADGE — May 2026]
 // Badge section ditambah di atas settings list:
 //   - EDU mode (isEduMode = true):
 //       Badge biru "Student Mode" — learning simulation, fitur payment disabled
-//   - Seller biasa (FEATURES.digitalProducts = true):
-//       KycBanner — Stripe Connect verification status
+//
+// [PANGKAS PRODUK DIGITAL] KycBanner (Stripe Connect) dicabut — tidak ada
+// lagi verifikasi identitas karena platform tidak menyalurkan dana penjualan.
 //
 // EduDashboardBanner dihapus dari layout global — badge ini penggantinya
 // yang lebih kontekstual (hanya muncul di Settings, bukan semua halaman).
 //
 // [LAYER 8 — 2026-04-19] Preferences group: Language + Dark Mode
-// [KYC MERGE — 2026-04-19] KycBanner di atas list view
 // ============================================================================
 
 import { useState, useEffect, useMemo } from 'react';
@@ -60,12 +60,12 @@ import { KasirModeDagangSection } from '@/components/dashboard/settings/kasir-mo
 
 // Hooks
 import { useLogout } from '@/hooks/auth/use-auth';
-import { useKycStatus, useKycReturnHandler } from '@/hooks/dashboard/use-products';
 import { useAuthStore } from '@/stores/auth-store';
-import { FEATURES } from '@/lib/config/features';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
+import { Skeleton } from '@/components/ui/skeleton';
+import { KasirPlanGate } from '@/components/dashboard/kasir/kasir-plan-gate';
 
-// KYC Banner
-import { KycBanner } from '@/components/dashboard/product/kyc-banner';
 
 // ==========================================
 // Types
@@ -142,6 +142,25 @@ function EduModeBadge() {
 // Main component
 // ==========================================
 
+/**
+ * Skeleton selama gerbang paket kasir memeriksa hak akses.
+ *
+ * Bentuknya mengikuti SEKSI Pengaturan — judul lalu beberapa kartu — bukan
+ * halaman kasir penuh seperti default KasirPlanGate. Tanpa ini, membuka
+ * "Mode Dagang & Struk" memperlihatkan kerangka halaman kasir sesaat lalu
+ * melompat ke bentuk seksi.
+ */
+function SeksiKasirSkeleton() {
+  return (
+    <div className={cn(PAGE_COLUMN, 'space-y-4 pb-20 md:pb-6')}>
+      <Skeleton className="h-8 w-52" />
+      <Skeleton className="h-28 w-full" />
+      <Skeleton className="h-28 w-full" />
+      <Skeleton className="h-28 w-full" />
+    </div>
+  );
+}
+
 export function SettingsClient() {
   const t = useTranslations('dashboard.settings');
   const router = useRouter();
@@ -153,9 +172,6 @@ export function SettingsClient() {
   const tenant = useAuthStore((s) => s.tenant);
   const isEdu = tenant?.isEduMode === true;
 
-  // KYC — hanya fetch jika digital products enabled dan bukan EDU
-  const { data: kyc } = useKycStatus();
-  const { isPolling } = useKycReturnHandler();
 
   const sectionParam = searchParams.get('section') as SettingId | null;
   const [activeSection, setActiveSection] = useState<SettingId | null>(sectionParam);
@@ -309,9 +325,32 @@ export function SettingsClient() {
       subscription: <SubscriptionPageContent onBack={handleBack} />,
       password: <PasswordSection onBack={handleBack} />,
       language: <LanguageSection onBack={handleBack} />,
-      'kasir-mode': <KasirModeDagangSection onBack={handleBack} />,
-      'diskon-preset': <KasirDiskonPresetSection onBack={handleBack} />,
-      promo: <KasirPromoSection onBack={handleBack} />,
+      // [FINALISASI] Ketiga seksi kasir dibungkus KasirPlanGate. Semua
+      // endpoint kasir menolak tenant FREE dengan 403, dan tanpa gerbang
+      // penolakan itu muncul sebagai layar rusak, bukan penjelasan:
+      // Mode Dagang macet di skeleton selamanya (`isLoading || !config` —
+      // isLoading selesai, config tetap undefined), sementara Preset Diskon
+      // dan Promo menampilkan "belum ada data" seolah seller-nya yang belum
+      // membuat apa-apa.
+      //
+      // Gerbangnya memakai query yang SAMA (useKasirConfig), jadi tidak ada
+      // permintaan tambahan — cache TanStack Query membaginya dengan seksi
+      // di dalamnya.
+      'kasir-mode': (
+        <KasirPlanGate fallback={<SeksiKasirSkeleton />}>
+          <KasirModeDagangSection onBack={handleBack} />
+        </KasirPlanGate>
+      ),
+      'diskon-preset': (
+        <KasirPlanGate fallback={<SeksiKasirSkeleton />}>
+          <KasirDiskonPresetSection onBack={handleBack} />
+        </KasirPlanGate>
+      ),
+      promo: (
+        <KasirPlanGate fallback={<SeksiKasirSkeleton />}>
+          <KasirPromoSection onBack={handleBack} />
+        </KasirPlanGate>
+      ),
       'about-fibidy': null,
     };
 
@@ -321,36 +360,49 @@ export function SettingsClient() {
     // which left the section's sticky WizardNav floating right after
     // the content on short pages (Language, Password) instead of
     // bottoming out at the real viewport edge. See dashboard-shell.tsx.
-    if (node) return <div className="h-full max-w-2xl mx-auto">{node}</div>;
+    //
+    // [FIX — lebar halaman] `max-w-2xl mx-auto` dilepas dari SINI: setiap
+    // seksi sudah membungkus isinya sendiri di kolom itu (about.tsx,
+    // contact.tsx, social.tsx, password.tsx, language.tsx, …). Cap ganda
+    // tidak mengubah apa pun secara visual, tapi membuat lebar seksi
+    // seolah diatur dua tempat — dan yang di sini bukan pemiliknya.
+    if (node) return <div className="h-full">{node}</div>;
   }
 
   // ==========================================
   // List view
   // ==========================================
 
+  // [FIX — lebar halaman] Daftar ini dulu `max-w-2xl mx-auto`: 672px,
+  // dipusatkan. Produk dan Kasir memakai lebar penuh dan rata kiri, jadi
+  // berpindah ke Pengaturan menggeser judul ke tengah layar — modul yang
+  // sama terasa seperti dua aplikasi berbeda. Persis keluhan yang sudah
+  // ditulis KasirPageShell di header-nya.
+  //
+  // Mengikuti aturan yang sama pula: konten yang terlalu lebar untuk dibaca
+  // TIDAK dipersempit dengan max-w, melainkan dipecah jadi grid. Baris
+  // pengaturan itu pendek, jadi di layar lebar dua kolom mengisi ruang tanpa
+  // membuat satu baris pun jadi terlalu panjang untuk dipindai.
+  //
+  // `items-start` wajib: tanpa itu kartu di satu kolom meregang mengikuti
+  // tinggi kolom sebelahnya yang isinya lebih banyak.
+  // [LEBAR KONSISTEN] Daftar ini ikut PAGE_COLUMN, sama dengan seksi-seksinya.
+  // Sebelumnya daftar memakai lebar dashboard penuh (terukur 1216px di 1440)
+  // sementara tiap seksi terkunci 672px — membuka satu seksi menyusutkan
+  // halaman 544px. Kerangkanya harus diam saat isinya berganti.
   return (
-    <div className="max-w-2xl mx-auto pb-10">
+    <div className={cn(PAGE_COLUMN, 'pb-10')}>
       <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
 
-      {/*
-        Badge section — mutual exclusive:
-          EDU mode  → Student Mode badge (biru, info tentang learning simulation)
-          Seller biasa + digital products → KYC Stripe Connect banner
-          Seller biasa tanpa digital products → tidak ada badge
-      */}
-      {isEdu ? (
-        <EduModeBadge />
-      ) : FEATURES.digitalProducts ? (
-        <KycBanner
-          kycStatus={kyc?.kycStatus}
-          hasStripeAccount={kyc?.hasStripeAccount}
-          errors={kyc?.errors}
-          hasFutureRequirements={kyc?.hasFutureRequirements}
-          futureRequirementsDeadline={kyc?.futureRequirementsDeadline}
-          isPolling={isPolling}
-        />
-      ) : null}
+      {/* EDU mode → Student Mode badge. Seller biasa → tidak ada badge. */}
+      {isEdu ? <EduModeBadge /> : null}
 
+      {/* [FINAL] Daftar seksi tetap SATU KOLOM memanjang — keputusan pemilik
+          produk, bukan kelalaian. Sempat dipecah dua kolom saat kerangkanya
+          masih dibatasi 1024px; begitu halaman mengikuti lebar dashboard
+          penuh, dua kolom membuat mata melompat bolak-balik untuk memindai
+          daftar yang urutannya justru bermakna. Baris dengan ikon, judul,
+          dan chevron terbaca baik di lebar berapa pun. */}
       <div className="space-y-6">
         {groupOrder.map((groupKey) => {
           const rows = groups[groupKey];

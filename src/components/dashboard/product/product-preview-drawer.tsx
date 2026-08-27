@@ -1,30 +1,14 @@
 'use client';
 
-// [TIDUR-NYENYAK FIX #9] Q3=A treatment:
-// When product has purchases (salesCount > 0):
-//   - HIDE "Delete product" button entirely
-//   - Replace with info hint
-//   - "Deactivate" button still works as normal (top action row)
-//
-// [i18n FIX — 2026-04-19]
-// Replaced hardcoded fallback string 'FILE' in the digital-product
-// icon fallback block with a proper i18n key from common.productType.
-// Previously: product.fileType?.toUpperCase() ?? 'FILE' would always
-// render the English word "FILE" regardless of locale. Now uses
-// tProductType('fileFallback') so it stays consistent with the rest
-// of the product-type labels ("Digital", "Custom", etc.) and gets
-// translated once new locales are added in Phase 2.
+// [PANGKAS PRODUK DIGITAL]
+// Blok info file, hitungan penjualan, dan penguncian tombol Hapus semuanya
+// bertumpu pada Purchase — yang sudah tidak ada. Produk kini selalu boleh
+// dihapus dari sini.
 //
 // [IDR MIGRATION FOLLOW-UP — May 2026] — Bug #22 fix
-// Replaced hardcoded ${(product.price ?? 0).toFixed(2)} and
-// ${product.comparePrice.toFixed(2)} with formatPrice() from
-// @/lib/shared/format, defaulting currency to 'IDR' to match the
-// rest of the IDR migration. Was rendering "$50000.00" for IDR products
-// — wrong on every dimension (symbol, separator, decimal rule).
-// Now renders "Rp 50.000".
-//
-// product.currency carries the actual currency from BE; we fall back
-// to 'IDR' for legacy/null values consistent with format.ts default.
+// Harga dirender lewat formatPriceIDR() dari @/lib/shared/format, bukan
+// .toFixed(2). Dulu "$50000.00" untuk produk IDR — salah di semua sisi:
+// simbol, pemisah, dan aturan desimal. Sekarang "Rp 50.000".
 //
 // [UI/UX CONSISTENCY AUDIT]
 // Rebuilt on top of the shared shadcn Drawer primitives (DrawerHeader /
@@ -129,9 +113,6 @@ import {
   Eye,
   EyeOff,
   ImageIcon,
-  FileText,
-  Download,
-  Info,
 } from 'lucide-react';
 import {
   Drawer,
@@ -142,17 +123,14 @@ import {
   DrawerDescription,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/shared/utils';
-import {
-  formatDateShort,
-  formatFileSizeFromMb,
-  formatPrice,
-} from '@/lib/shared/format';
+import { formatDateShort, formatPriceIDR } from '@/lib/shared/format';
 import { useIsMobile } from '@/hooks/shared/use-media-query';
 import type { Product } from '@/types/product';
+import { MarkdownText } from '@/components/store/shared/markdown-text';
+import { markdownToPlainText } from '@/lib/shared/markdown';
 
 interface ProductPreviewDrawerProps {
   product: Product | null;
@@ -180,7 +158,6 @@ function DrawerInner({
 }: DrawerInnerProps) {
   const t = useTranslations('dashboard.products.previewDrawer');
   // [i18n FIX] For the "FILE" fallback label when fileType is null.
-  const tProductType = useTranslations('common.productType');
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -235,15 +212,7 @@ function DrawerInner({
 
   const hasImages = product.images && product.images.length > 0;
   const currentImage = hasImages ? product.images[selectedImageIndex] : null;
-  const isDigital = !!product.fileKey;
-  const salesCount = product._count?.purchases ?? 0;
-
-  // [FIX #9] Delete is blocked if product has purchases.
-  const canDelete = salesCount === 0;
-
   // [IDR MIGRATION] Default to IDR uniformly. Was: hardcoded $X.XX.
-  // formatPrice respects locale + symbol + decimal rules per currency.
-  const currency = product.currency ?? 'IDR';
 
   return (
     <>
@@ -255,8 +224,13 @@ function DrawerInner({
           </VisuallyHidden.Root>
         </DrawerTitle>
         <DrawerDescription asChild>
+          {/* [MARKDOWN] Dilucuti, bukan dirender. Ini teks yang DIBACAKAN
+              pembaca layar — menaruh markup di sini membuat pengguna mendengar
+              "bintang bintang Kopi bintang bintang". Jalur teks-polos, sama
+              seperti meta description dan JSON-LD. */}
           <VisuallyHidden.Root id="drawer-description">
-            {product.description || t('descriptionFallback', { name: product.name || '' })}
+            {markdownToPlainText(product.description) ||
+              t('descriptionFallback', { name: product.name || '' })}
           </VisuallyHidden.Root>
         </DrawerDescription>
 
@@ -275,16 +249,22 @@ function DrawerInner({
         */}
         <div className="relative flex items-center justify-center min-h-8">
           {onToggleActive && (
-            <button
+            /* [KONSISTEN] Dulu <button> bergaya sendiri: `rounded-full`,
+               `h-8`, cincin fokus tulis tangan. Tiga hal yang sudah punya
+               jawaban di <Button>, dan pil-nya melanggar aturan bentuk EAS
+               (pil hanya untuk badge). Sekarang Button variant ghost — radius,
+               tinggi, hover, dan fokusnya ikut token seperti tombol lain. */
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={handleToggleActive}
               aria-label={optimisticIsActive ? t('deactivate') : t('activate')}
               className={cn(
-                'absolute left-0 inline-flex items-center justify-center gap-1.5 min-w-[92px] h-8 px-2.5 rounded-full text-xs font-medium transition-colors',
-                'hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'absolute left-0 min-w-[92px] gap-1.5',
                 optimisticIsActive
                   ? 'text-muted-foreground'
-                  : 'text-amber-600 dark:text-amber-400',
+                  : 'text-amber-600 hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-400',
               )}
             >
               {optimisticIsActive ? (
@@ -298,7 +278,7 @@ function DrawerInner({
                   {t('activate')}
                 </>
               )}
-            </button>
+            </Button>
           )}
           <h2 className="font-semibold text-base text-center truncate pl-[128px] pr-[56px]">
             {product.name}
@@ -325,19 +305,8 @@ function DrawerInner({
                 />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  {isDigital ? (
-                    <>
-                      <FileText className="h-16 w-16 text-muted-foreground/30" />
-                      <Badge variant="outline" className="text-xs">
-                        {product.fileType?.toUpperCase() ?? tProductType('fileFallback')}
-                      </Badge>
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground">{t('noImage')}</p>
-                    </>
-                  )}
+                  <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground">{t('noImage')}</p>
                 </div>
               )}
             </div>
@@ -378,11 +347,11 @@ function DrawerInner({
             <div className="flex items-baseline gap-3">
               {/* [IDR MIGRATION] formatPrice — was: ${(price).toFixed(2)} */}
               <span className="text-2xl font-bold">
-                {formatPrice(product.price ?? 0, currency)}
+                {formatPriceIDR(product.price ?? 0)}
               </span>
               {product.comparePrice && product.comparePrice > product.price && (
                 <span className="text-sm text-muted-foreground line-through">
-                  {formatPrice(product.comparePrice, currency)}
+                  {formatPriceIDR(product.comparePrice)}
                 </span>
               )}
             </div>
@@ -396,7 +365,9 @@ function DrawerInner({
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
                 {t('description')}
               </h3>
-              <p className="text-sm leading-relaxed break-words">{product.description}</p>
+              <MarkdownText className="text-sm break-words">
+                {product.description}
+              </MarkdownText>
             </div>
           )}
 
@@ -422,30 +393,6 @@ function DrawerInner({
               </div>
             </div>
 
-            {isDigital && product.fileType && (
-              <div className="flex items-start gap-3">
-                <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('file')}</p>
-                  <p className="text-sm font-medium">
-                    {product.fileType.toUpperCase()}
-                    {product.fileSizeMb
-                      ? ` · ${formatFileSizeFromMb(product.fileSizeMb)}`
-                      : ''}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {salesCount > 0 && (
-              <div className="flex items-start gap-3">
-                <Download className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('sales')}</p>
-                  <p className="text-sm font-medium">{t('salesCount', { count: salesCount })}</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -455,10 +402,7 @@ function DrawerInner({
         [ACTIVATE TOGGLE RELOCATION] Activate/Deactivate moved to the
         header (top-left) — footer now holds Edit + Delete side by side
         in the same 2-column grid the footer originally used for
-        Toggle+Edit. When Delete is hidden (product has purchases, see
-        FIX #9 below), Edit still renders alone inside the grid rather
-        than stretching to fill both columns, matching how this grid
-        already behaved for the Toggle+Edit pairing before this change.
+        Toggle+Edit.
       */}
       <DrawerFooter className="border-t">
         <div className="grid grid-cols-2 gap-3">
@@ -468,40 +412,22 @@ function DrawerInner({
               className="w-full"
               onClick={handleEdit}
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4" />
               {t('edit')}
             </Button>
           )}
 
-          {/* [FIX #9] Delete button — only shown if product has NO purchases */}
-          {onDelete && canDelete && (
+          {onDelete && (
             <Button
               variant="outline"
               className="w-full text-destructive hover:text-destructive"
               onClick={handleDelete}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4" />
               {t('deleteProduct')}
             </Button>
           )}
         </div>
-
-        {/* [FIX #9] Info hint when product has purchases (delete blocked) */}
-        {onDelete && !canDelete && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-3 py-2.5">
-            <div className="flex gap-2">
-              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                <p className="font-medium mb-0.5">
-                  {t('cannotDeleteTitle')}
-                </p>
-                <p className="text-amber-700 dark:text-amber-400">
-                  {t('cannotDeleteBody')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </DrawerFooter>
     </>
   );

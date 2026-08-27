@@ -162,7 +162,7 @@ export function TerimaPembayaranDialog({
                 <FieldLabel htmlFor="bayar-uang">
                   {t('cashReceived')}
                 </FieldLabel>
-                <InputGroup className="h-11">
+                <InputGroup>
                   <InputGroupAddon>Rp</InputGroupAddon>
                   <InputGroupInput
                     id="bayar-uang"

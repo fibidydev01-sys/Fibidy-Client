@@ -15,10 +15,10 @@
 // [UI/UX — Aug 2026] Self-contained pill styling — sticky, rounded-full,
 // shadow, backdrop-blur, hidden sm:inline responsive labels — matching
 // dashboard/shared/wizard-nav.tsx's pattern instead of leaving shape/
-// position up to each caller (previously: register.tsx wrapped this in
-// its own sticky+border+no-rounding footer, while setup-store's
-// BuyerUpgradeWizard didn't wrap it in anything at all — two different
-// looks for the same component). Width is max-w-lg, not the dashboard's
+// position up to each caller (dulu register.tsx membungkusnya dengan
+// footer sticky+border sendiri, sementara wizard upgrade di setup-store
+// tidak membungkusnya sama sekali — dua tampilan berbeda untuk komponen
+// yang sama). Width is max-w-lg, not the dashboard's
 // max-w-2xl: register.tsx's own step content (StepStoreInfo) already
 // caps out at max-w-md, and the register PAGE itself is one half of a
 // lg:grid-cols-2 split-screen layout — max-w-2xl risks overflowing that
@@ -38,24 +38,20 @@
 // the same viewport sweep.
 //
 // [UI/UX — Aug 2026 v4] Re-added as `md:w-full` — see wizard-nav.tsx's
-// v6 note for the full writeup. register.tsx's own footer wrapper
-// (`pt-4 pb-4 shrink-0`, not itself flex) shields THAT caller from the
-// bug, but setup-store/client.tsx's BuyerUpgradeWizard renders this nav
-// as a DIRECT child of its own `flex h-full max-w-lg flex-col` column —
-// exactly the shrink-to-fit-via-auto-margin trap v6 documents: without
-// an explicit width, a cross-axis flex item with `mx-auto` shrinks to
-// its own content instead of stretching to fill/cap at max-w-lg, even
-// though the column's `align-items` defaults to stretch. `md:w-full` is
-// a no-op for register.tsx's already-safe wrapper and the actual fix
-// for BuyerUpgradeWizard's — same className either way, no caller-
-// specific branching.
+// v6 note for the full writeup. Dulu ini memperbaiki pemanggil kedua
+// (wizard upgrade di setup-store) yang merender nav sebagai anak
+// LANGSUNG kolom flex-nya sendiri — jebakan shrink-to-fit lewat
+// auto-margin yang didokumentasikan v6. Pemanggil itu sudah dicabut
+// bersama produk digital; `md:w-full` dipertahankan karena memang no-op
+// untuk register.tsx (footer-nya sendiri sudah aman) dan menjaga
+// komponen ini tetap benar kalau dipakai ulang di kolom flex lain.
 // ============================================================================
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { RegisterStepDots } from './register-step-indicator';
+import { useRouter } from '@/i18n/navigation';
 
 interface Step {
   title: string;

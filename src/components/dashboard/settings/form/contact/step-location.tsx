@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { MapPin } from 'lucide-react';
 import type { ContactFormData } from '@/types/tenant';
+import { PAGE_GRID_2_FORM } from '@/components/dashboard/shared/page-column';
 
 // ============================================================================
 // STEP LOCATION — Settings Contact Form
@@ -61,54 +62,64 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
   // ── DESKTOP ───────────────────────────────────────────────────────────────
   if (isDesktop) {
     return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div id="tour-maps-url" className="space-y-1.5">
-          <Label htmlFor="mapUrl-d" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-            {t('urlLabel')}
-          </Label>
-          <Input
-            id="mapUrl-d"
-            placeholder={t('urlPlaceholder')}
-            value={formData.contactMapUrl}
-            onChange={(e) => handleMapUrlChange(e.target.value)}
-            className={`h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${
-              mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
-            }`}
-          />
-          {mapUrlError ? (
-            <p className="text-xs text-destructive font-medium">{mapUrlError}</p>
-          ) : (
-            <div className="border-l-2 border-muted-foreground/20 pl-3 py-0.5">
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {t('instructionsDesktop')}{' '}
-                <span className="font-medium text-foreground">{t('instructionsShareBold')}</span>{' '}
-                {t('instructionsThen')}{' '}
-                <span className="font-medium text-foreground">{t('instructionsEmbedBold')}</span>{' '}
-                {t('instructionsCopy')}{' '}
-                <code className="font-mono text-primary text-[11px]">src=&#34;...&#34;</code>
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between border rounded-lg px-4 py-3">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">{t('showMapLabel')}</p>
-            <p className="text-xs text-muted-foreground">{t('showMapDescDesktop')}</p>
+      // [LEBAR KONSISTEN] Dulu satu kolom 672px: isian URL, sakelar, lalu
+      // pratinjau peta 220px diantre ke bawah. Di desktop pratinjau pindah
+      // ke kolom kanan — kamu bisa menempel URL sambil melihat hasilnya,
+      // tanpa menggulir bolak-balik. Di bawah lg keduanya menumpuk seperti
+      // sebelumnya, dengan pratinjau tetap DI BAWAH isian: itu hasil dari
+      // apa yang baru diketik, bukan hiasan yang pantas mendahuluinya.
+      <div className={PAGE_GRID_2_FORM}>
+        {/* Kiri: isian */}
+        <div className="space-y-8">
+          <div id="tour-maps-url" className="space-y-1.5">
+            <Label htmlFor="mapUrl-d">
+              {t('urlLabel')}
+            </Label>
+            <Input
+              id="mapUrl-d"
+              placeholder={t('urlPlaceholder')}
+              value={formData.contactMapUrl}
+              onChange={(e) => handleMapUrlChange(e.target.value)}
+              className={`h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${
+                mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
+              }`}
+            />
+            {mapUrlError ? (
+              <p className="text-xs text-destructive font-medium">{mapUrlError}</p>
+            ) : (
+              <div className="border-l-2 border-muted-foreground/20 pl-3 py-0.5">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('instructionsDesktop')}{' '}
+                  <span className="font-medium text-foreground">{t('instructionsShareBold')}</span>{' '}
+                  {t('instructionsThen')}{' '}
+                  <span className="font-medium text-foreground">{t('instructionsEmbedBold')}</span>{' '}
+                  {t('instructionsCopy')}{' '}
+                  <code className="font-mono text-primary text-[11px]">src=&#34;...&#34;</code>
+                </p>
+              </div>
+            )}
           </div>
-          <Switch
-            id="contactShowMap-d"
-            checked={formData.contactShowMap}
-            onCheckedChange={(checked) => updateFormData('contactShowMap', checked)}
-          />
+
+          <div className="flex items-center justify-between border rounded-[var(--shape-panel)] px-4 py-3">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t('showMapLabel')}</p>
+              <p className="text-xs text-muted-foreground">{t('showMapDescDesktop')}</p>
+            </div>
+            <Switch
+              id="contactShowMap-d"
+              checked={formData.contactShowMap}
+              onCheckedChange={(checked) => updateFormData('contactShowMap', checked)}
+            />
+          </div>
         </div>
 
+        {/* Kanan (lg+): pratinjau peta */}
         <div className="space-y-2">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+          <p>
             {t('previewHeading')}
           </p>
           {hasValidUrl && formData.contactShowMap ? (
-            <div className="border rounded-lg overflow-hidden shadow-sm">
+            <div className="border rounded-[var(--shape-panel)] overflow-hidden shadow-sm">
               <iframe
                 src={formData.contactMapUrl}
                 width="100%"
@@ -120,7 +131,7 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
               />
             </div>
           ) : (
-            <div className="h-[220px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground">
+            <div className="h-[220px] border-2 border-dashed rounded-[var(--shape-panel)] flex flex-col items-center justify-center gap-2 text-muted-foreground">
               <MapPin className="h-8 w-8 opacity-30" />
               <p className="text-xs text-center px-4">
                 {!hasValidUrl ? t('previewEmptyUrl') : t('previewEmptyToggle')}
@@ -134,9 +145,9 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
 
   // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-2xl mx-auto">
+    <div className="space-y-5">
       <div id="tour-maps-url" className="space-y-1.5">
-        <Label htmlFor="mapUrl-m" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+        <Label htmlFor="mapUrl-m">
           {t('urlLabel')}
         </Label>
         <Input
@@ -157,7 +168,7 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
         )}
       </div>
 
-      <div className="flex items-center justify-between border rounded-lg px-4 py-3">
+      <div className="flex items-center justify-between border rounded-[var(--shape-panel)] px-4 py-3">
         <div className="space-y-0.5">
           <p className="text-sm font-medium">{t('showMapLabel')}</p>
           <p className="text-xs text-muted-foreground">{t('showMapDescMobile')}</p>
@@ -171,10 +182,10 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
 
       {hasValidUrl && formData.contactShowMap && (
         <div className="space-y-1.5">
-          <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+          <p>
             {t('previewHeading')}
           </p>
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-[var(--shape-panel)] overflow-hidden">
             <iframe
               src={formData.contactMapUrl}
               width="100%"

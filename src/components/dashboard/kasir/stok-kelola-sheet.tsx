@@ -190,7 +190,7 @@ export function StokKelolaSheet({
                   <FieldLabel htmlFor="jumlah-restock">
                     {t('restockLabel')}
                   </FieldLabel>
-                  <InputGroup className="h-11">
+                  <InputGroup>
                     <InputGroupInput
                       id="jumlah-restock"
                       inputMode="numeric"
@@ -225,7 +225,7 @@ export function StokKelolaSheet({
                   <FieldLabel htmlFor="stok-fisik">
                     {t('opnameLabel')}
                   </FieldLabel>
-                  <InputGroup className="h-11">
+                  <InputGroup>
                     <InputGroupInput
                       id="stok-fisik"
                       inputMode="numeric"

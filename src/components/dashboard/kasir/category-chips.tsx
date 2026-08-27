@@ -20,6 +20,19 @@
 // 2. Di atas 12 kategori, chip berubah jadi Combobox. Alasannya bukan estetika:
 //    dua puluh chip berarti scroll horizontal berkali-kali untuk menemukan satu
 //    kategori, dan itu lebih lambat daripada mengetik tiga huruf.
+//
+// [FIX — chip kepotong] Lebar TIDAK lagi diterima dari pemanggil.
+//
+// Dulu halaman Jual mengirim `sm:max-w-md`, disalin dari KasirSearchField tepat
+// di atasnya. Untuk kolom pencarian batas 448px memang benar — input selebar
+// layar konyol. Untuk barisan chip, batas yang sama menyembunyikan pilihan:
+// empat chip pertama menghabiskan jatah, sisanya masuk area scroll yang tidak
+// kelihatan ada, dan seribu piksel di sebelahnya menganggur.
+//
+// Dua varian di bawah punya kebutuhan lebar yang BERBEDA, jadi masing-masing
+// menentukan sendiri — bukan menerima satu nilai yang cocok untuk salah satu:
+//   · chip     → selebar induk; barisan filter memang harus memakai ruang ada
+//   · combobox → dibatasi, karena yang itu memang sebuah input
 // ============================================================================
 
 import { useMemo, useState } from 'react';
@@ -41,13 +54,11 @@ export function CategoryChips({
   categories,
   value,
   onChange,
-  className,
 }: {
   categories: string[];
   /** null = semua kategori */
   value: string | null;
   onChange: (kategori: string | null) => void;
-  className?: string;
 }) {
   const t = useTranslations('dashboard.kasir.filter');
 
@@ -91,7 +102,7 @@ export function CategoryChips({
           aria-label={t('categoryLabel')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className={className}
+          className="sm:max-w-md"
         />
         <ComboboxContent>
           <ComboboxList>
@@ -117,7 +128,6 @@ export function CategoryChips({
         { value: SEMUA, label: t('all') },
         ...categories.map((kategori) => ({ value: kategori, label: kategori })),
       ]}
-      className={className}
     />
   );
 }

@@ -139,8 +139,10 @@
           "number": "06",
           "title": "Plan dan pembayaran ke Fibidy.",
           "content": [
-            "Fibidy punya plan Free dan Starter. Rincian fitur dan harga masing-masing plan tercantum di halaman Harga.",
-            "Pembayaran plan Starter adalah pembayaran kamu ke Fibidy untuk memakai layanan (bukan bagian dari transaksi jual-belimu dengan pelanggan). Kalau kamu berhenti membayar Starter, akunmu turun ke limit Free datamu tetap ada, cuma slot produk, foto, dan pilihan tampilan tambahan jadi tidak tersedia sampai kamu berlangganan lagi."
+            "Fibidy punya plan Free, Starter, dan Business. Rincian fitur dan harga masing-masing plan tercantum di halaman Harga.",
+            "Pembayaran plan berbayar adalah pembayaran kamu ke Fibidy untuk memakai layanan (bukan bagian dari transaksi jual-belimu dengan pelanggan). Pembayarannya sekali di awal tiap periode lewat QRIS. Tidak ada tagihan otomatis, tidak ada kartu yang kami simpan, dan tidak ada yang ditarik dari rekeningmu tanpa kamu bayar sendiri. Kalau kamu tidak memperpanjang, akunmu turun ke limit Free — datamu tetap ada, cuma slot produk, foto, pilihan tampilan tambahan, dan Kasir jadi tidak tersedia sampai kamu berlangganan lagi.",
+            "Pembayaran plan berbayar tidak bisa dikembalikan. Karena satu pembayaran langsung membuka akses untuk satu periode penuh dan tidak ada tagihan berulang, tidak ada pengembalian dana — baik penuh, sebagian, maupun pro-rata — untuk periode yang sudah berjalan. Kamu bisa berhenti kapan saja dengan tidak memperpanjang, dan akses tetap hidup sampai periode yang sudah kamu bayar itu habis.",
+            "Ketentuan ini soal pembayaran kamu ke Fibidy. Ia tidak mengatur uang antara kamu dan pelangganmu — komplain, pengembalian, atau pembatalan pesanan di tokomu tetap urusan kamu dan pelangganmu, sesuai poin 03 dan 04 di atas."
           ]
         },
         {
@@ -301,7 +303,7 @@
           "items": [
             {
               "question": "Beneran gratis?",
-              "answer": "Plan Free bisa langsung dipakai tanpa biaya, tapi versinya terbatas. Kalau mau fitur lengkap — lebih banyak produk, foto, dan pilihan tampilan — plan Starter cuma Rp 35.000/bulan, sekali bayar langsung aktif."
+              "answer": "Plan Free bisa langsung dipakai tanpa biaya, tapi versinya terbatas. Kalau mau fitur lengkap — lebih banyak produk, foto, pilihan tampilan, plus Kasir buat catat penjualan — plan Starter Rp 35.000 per bulan. Bayarnya sekali di awal periode lewat QRIS, langsung aktif, dan diperpanjang sendiri kalau kamu mau lanjut."
             },
             {
               "question": "Beda Free sama Starter apa aja?",

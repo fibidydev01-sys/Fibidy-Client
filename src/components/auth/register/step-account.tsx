@@ -194,7 +194,6 @@ export function StepAccount({
       <div className="space-y-1.5">
         <Label
           htmlFor="acc-email"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('emailLabel')}
         </Label>
@@ -209,7 +208,6 @@ export function StepAccount({
             onUpdate({ email: e.target.value });
           }}
           className={cn(
-            'h-11 text-sm placeholder:text-muted-foreground/50',
             hasEmailError && 'border-destructive focus-visible:ring-destructive',
           )}
         />
@@ -227,7 +225,6 @@ export function StepAccount({
       <div className="space-y-1.5">
         <Label
           htmlFor="acc-password"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('passwordLabel')}
         </Label>
@@ -243,8 +240,7 @@ export function StepAccount({
               onUpdate({ password: e.target.value });
             }}
             className={cn(
-              'h-11 text-sm placeholder:text-muted-foreground/50',
-              hasPasswordError && 'border-destructive focus-visible:ring-destructive',
+            hasPasswordError && 'border-destructive focus-visible:ring-destructive',
             )}
           />
           <Button
@@ -277,7 +273,6 @@ export function StepAccount({
           <div className="space-y-1.5">
             <Label
               htmlFor="acc-whatsapp"
-              className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
             >
               {t('whatsappLabel')}
             </Label>
@@ -300,7 +295,7 @@ export function StepAccount({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 max-h-72 overflow-y-auto" align="start">
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widests text-muted-foreground font-medium">
+                  <DropdownMenuLabel className="text-caption-uppercase caption-uppercase text-muted-foreground">
                     Asia Tenggara
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
@@ -320,7 +315,7 @@ export function StepAccount({
                     ))}
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-widests text-muted-foreground font-medium">
+                  <DropdownMenuLabel className="text-caption-uppercase caption-uppercase text-muted-foreground">
                     Asia & Lainnya
                   </DropdownMenuLabel>
                   <DropdownMenuGroup>
@@ -349,7 +344,7 @@ export function StepAccount({
                 inputMode="numeric"
                 placeholder={t('whatsappPlaceholder', { hint: selectedCountry.rule.prefixHint })}
                 className={cn(
-                  'h-11 flex-1 min-w-0 text-sm placeholder:text-muted-foreground/50',
+                  'flex-1 min-w-0',
                   phoneTouched && localPhone && !phoneValidation.valid && 'border-destructive focus-visible:ring-destructive',
                   hasWhatsappError && 'border-destructive focus-visible:ring-destructive',
                 )}

@@ -81,7 +81,11 @@
       "validation": {
         "titleRequired": "Highlight #{index}: Title is required",
         "descriptionRequired": "Highlight #{index}: Description is required"
-      }
+      },
+      "panelTitle": "Highlight",
+      "reorderLabel": "Reorder Highlight",
+      "removeLabel": "Remove Highlight",
+      "reorderHint": "Drag the grip icon to change the order."
     },
     "contact": {
       "title": "Contact Section",

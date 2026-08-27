@@ -18,6 +18,8 @@ import { useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { CharCounter } from '@/components/dashboard/shared/form-field';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { MapPin, Navigation, Loader2, X, AlertCircle } from 'lucide-react';
@@ -25,6 +27,11 @@ import { AutofillBadge } from './autofill-badge';
 import { useLocationPicker } from './use-location-picker';
 import { cn } from '@/lib/shared/utils';
 import type { LocationType } from '@/lib/constants/shared/categories';
+import {
+  FormSection,
+  FormPanel,
+  PANEL_WIDE,
+} from '@/components/dashboard/shared/form-panel';
 
 interface StepContactLocationProps {
   contactTitle: string;
@@ -176,7 +183,7 @@ function LocationPickerSection({
 
       {previewUrl ? (
         <div className="space-y-1.5">
-          <p className="text-[10px] font-medium tracking-widests uppercase text-muted-foreground">
+          <p className="text-caption-uppercase caption-uppercase text-muted-foreground">
             {t('mapPreviewLabel')}
           </p>
           <MapPreview url={previewUrl} />
@@ -209,7 +216,6 @@ function LocationPickerSection({
             onContactMapUrlChange(parsed);
             onClearMapError?.();
           }}
-          className="h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50"
         />
         <div className="border-l-2 border-muted-foreground/20 pl-3 py-0.5">
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -263,13 +269,27 @@ export function StepContactLocation({
   const hasMapError = fieldErrors.has('map');
 
   return (
-    <div className="space-y-8 max-w-lg mx-auto">
+    <FormSection>
 
       {/* ── SECTION COPY ─────────────────────────────────────────────────── */}
-      <div className="space-y-5">
-        <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
-          {t('sectionCopyHeading')}
-        </p>
+      {/*
+        [BERSIH] Dua isian di panel ini sama-sama bisa terisi otomatis.
+        Dulu masing-masing memasang lencananya sendiri, di tengah tumpukan
+        judul→isian. Sekarang SATU ikon di pojok kanan atas panel, menyala
+        kalau salah satu dari keduanya terisi otomatis — pertanyaan yang
+        dijawab lencana ini memang setingkat panel: "ada yang kami isikan
+        di sini, silakan sunting".
+      */}
+      <FormPanel
+        title={t('sectionCopyHeading')}
+        badge={
+          <AutofillBadge
+            visible={
+              isAutofilled('contactTitle') || isAutofilled('contactSubtitle')
+            }
+          />
+        }
+      >
 
         {/*
           [SCROLL FIX] data-field-error di wrapper contactTitle
@@ -280,22 +300,27 @@ export function StepContactLocation({
         >
           <Label
             htmlFor="wizard-contactTitle"
-            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
           >
             {t('contactTitleLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
-          <AutofillBadge visible={isAutofilled('contactTitle')} />
-          <Input
-            id="wizard-contactTitle"
-            placeholder={t('contactTitlePlaceholder')}
-            value={contactTitle}
-            onChange={(e) => onContactTitleChange(e.target.value)}
-            className={cn(
-              'h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
-              hasContactTitleError && 'border-destructive focus-visible:ring-destructive',
-            )}
-            maxLength={200}
-          />
+          <div className="relative">
+            <Input
+              id="wizard-contactTitle"
+              placeholder={t('contactTitlePlaceholder')}
+              value={contactTitle}
+              onChange={(e) => onContactTitleChange(e.target.value)}
+              className={cn(
+                'pr-16',
+                hasContactTitleError && 'border-destructive focus-visible:ring-destructive',
+              )}
+              maxLength={TENANT_LIMITS.contactTitle.max}
+            />
+            <CharCounter
+              current={contactTitle.length}
+              max={TENANT_LIMITS.contactTitle.max}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </div>
           {hasContactTitleError && (
             <p className="text-xs text-destructive font-medium">{t('contactTitleRequired')}</p>
           )}
@@ -310,33 +335,35 @@ export function StepContactLocation({
         >
           <Label
             htmlFor="wizard-contactSubtitle"
-            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
           >
             {t('contactSubtitleLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
-          <AutofillBadge visible={isAutofilled('contactSubtitle')} />
-          <Input
-            id="wizard-contactSubtitle"
-            placeholder={t('contactSubtitlePlaceholder')}
-            value={contactSubtitle}
-            onChange={(e) => onContactSubtitleChange(e.target.value)}
-            className={cn(
-              'h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
-              hasContactSubtitleError && 'border-destructive focus-visible:ring-destructive',
-            )}
-            maxLength={300}
-          />
+          <div className="relative">
+            <Input
+              id="wizard-contactSubtitle"
+              placeholder={t('contactSubtitlePlaceholder')}
+              value={contactSubtitle}
+              onChange={(e) => onContactSubtitleChange(e.target.value)}
+              className={cn(
+                'pr-16',
+                hasContactSubtitleError && 'border-destructive focus-visible:ring-destructive',
+              )}
+              maxLength={TENANT_LIMITS.contactSubtitle.max}
+            />
+            <CharCounter
+              current={contactSubtitle.length}
+              max={TENANT_LIMITS.contactSubtitle.max}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </div>
           {hasContactSubtitleError && (
             <p className="text-xs text-destructive font-medium">{t('contactSubtitleRequired')}</p>
           )}
         </div>
-      </div>
+      </FormPanel>
 
       {/* ── REACH OUT ──────────────────────────────────────────────────────── */}
-      <div className="space-y-5">
-        <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
-          {t('reachOutHeading')}
-        </p>
+      <FormPanel title={t('reachOutHeading')}>
 
         {/*
           [SCROLL FIX] data-field-error di wrapper phone
@@ -347,7 +374,6 @@ export function StepContactLocation({
         >
           <Label
             htmlFor="wizard-phone"
-            className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
           >
             {t('phoneLabel')} <span className="text-destructive normal-case font-normal">*</span>
           </Label>
@@ -358,8 +384,7 @@ export function StepContactLocation({
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
             className={cn(
-              'h-11 text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/50',
-              hasPhoneError && 'border-destructive focus-visible:ring-destructive',
+            hasPhoneError && 'border-destructive focus-visible:ring-destructive',
             )}
           />
           {hasPhoneError && (
@@ -372,25 +397,21 @@ export function StepContactLocation({
 
         {whatsappReadonly && (
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
+            <Label>
               {t('whatsappReadonly')}
             </Label>
             <Input
               value={`+${whatsappReadonly}`}
               disabled
-              className="h-11 text-sm bg-muted/30 text-muted-foreground cursor-not-allowed"
             />
             <p className="text-xs text-muted-foreground">{t('whatsappReadonlyHelper')}</p>
           </div>
         )}
-      </div>
+      </FormPanel>
 
       {/* ── LOCATION ───────────────────────────────────────────────────────── */}
       {!isOnline && (
-        <div className="space-y-5">
-          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground border-b pb-2">
-            {t('whereWeAreHeading')}
-          </p>
+        <FormPanel wide title={t('whereWeAreHeading')}>
 
           {showPhysicalToggle && (
             <div className="flex items-center justify-between border rounded-lg px-4 py-3">
@@ -415,7 +436,6 @@ export function StepContactLocation({
             >
               <Label
                 htmlFor="wizard-address"
-                className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
               >
                 {t('addressLabel')}{' '}
                 {isAddressMandatory ? (
@@ -426,22 +446,31 @@ export function StepContactLocation({
                   </span>
                 )}
               </Label>
-              <Textarea
-                id="wizard-address"
-                placeholder={t('addressPlaceholder')}
-                value={address}
-                onChange={(e) => onAddressChange(e.target.value)}
-                rows={3}
-                maxLength={300}
-                className={cn(
-                  'resize-none text-sm placeholder:font-normal placeholder:text-muted-foreground/50',
-                  hasAddressError && 'border-destructive focus-visible:ring-destructive',
-                )}
-              />
-              {hasAddressError ? (
+              {/* Penghitungnya pindah KE DALAM isian. Sebelumnya ia baris
+                  teks tersendiri di bawah textarea — dan karena baris itu
+                  BERGANTIAN dengan pesan galat, isian ini berubah tinggi
+                  saat error muncul, mendorong seluruh panel di bawahnya. */}
+              <div className="relative">
+                <Textarea
+                  id="wizard-address"
+                  placeholder={t('addressPlaceholder')}
+                  value={address}
+                  onChange={(e) => onAddressChange(e.target.value)}
+                  rows={3}
+                  maxLength={TENANT_LIMITS.address.max}
+                  className={cn(
+                    'resize-none pb-6',
+                    hasAddressError && 'border-destructive focus-visible:ring-destructive',
+                  )}
+                />
+                <CharCounter
+                  current={address.length}
+                  max={TENANT_LIMITS.address.max}
+                  className="absolute bottom-2 right-3"
+                />
+              </div>
+              {hasAddressError && (
                 <p className="text-xs text-destructive font-medium">{t('addressRequired')}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground tabular-nums">{address.length}/300</p>
               )}
             </div>
           )}
@@ -454,7 +483,7 @@ export function StepContactLocation({
               className="space-y-1.5"
               data-field-error={hasMapError ? 'true' : undefined}
             >
-              <Label className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground">
+              <Label>
                 {t('mapLabel')}{' '}
                 {isAddressMandatory && (
                   <span className="text-destructive normal-case font-normal">*</span>
@@ -477,15 +506,15 @@ export function StepContactLocation({
               )}
             </div>
           )}
-        </div>
+        </FormPanel>
       )}
 
       {isOnline && (
-        <div className="rounded-lg bg-muted/40 px-4 py-3 border">
+        <div className={cn(PANEL_WIDE, "rounded-lg border bg-muted/40 px-4 py-3")}>
           <p className="text-xs text-muted-foreground">{t('onlineNote')}</p>
         </div>
       )}
 
-    </div>
+    </FormSection>
   );
 }

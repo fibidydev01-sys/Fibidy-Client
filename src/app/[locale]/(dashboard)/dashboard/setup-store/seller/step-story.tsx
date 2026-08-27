@@ -2,23 +2,46 @@
 
 // ============================================================================
 // STEP STORY — Setup Wizard Step 2
-// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/step-story.tsx
+// File: .../setup-store/seller/step-story.tsx
 //
-// [SPRINT 5 — SCROLL FIX]
-// Tambah data-field-error="true" ke wrapper setiap field yang error.
-// Field keys: heroTitle, heroSubtitle, heroCtaText
-// Placement: div wrapper langsung di atas Label + Input/Textarea.
+// [SPRINT 5 — SCROLL FIX] data-field-error="true" di pembungkus tiap isian
+// yang error. Kunci: heroTitle, heroSubtitle, heroCtaText.
+// [Phase B] isAutofilled → AutofillBadge.
 //
-// [SPRINT 5 — FIELD HIGHLIGHT]
-// [Phase B] isAutofilled prop — AutofillBadge
+// ── [PRESISI] APA YANG BERUBAH DAN KENAPA ──────────────────────────────────
+//
+// Versi sebelumnya memakai PAGE_GRID_2_FORM dengan PAGE_SPAN_2 pada Tagline
+// saja. Terukur di 1440px: Headline 720px, Tagline 1470px, Button Text
+// 720px. Tiga isian sejenis, bertumpuk, tiga lebar berbeda — dan karena
+// urutannya sempit-lebar-sempit, ketidaksamaannya justru paling menonjol.
+//
+// Sekarang tiap isian jadi PANEL, dan panel yang sebaris selalu sama lebar.
+//
+// Efek samping yang bagus: LABEL GANDA HILANG. Dulu tiap isian menumpuk
+// Label + AutofillBadge + helper sendiri di dalam sel grid; sekarang
+// kepala panel yang memegang ketiganya. Satu lapisan markup lebih sedikit,
+// dan judulnya mustahil melenceng dari isinya.
+//
+// ── Penempatan: [Judul][Tombol] sebaris, [Tagline] selebar ────────────────
+// Judul dan teks tombol sama-sama satu baris — tingginya sama, jadi
+// barisnya rata. Tagline sebuah textarea; lebar penuh memang bentuk
+// alaminya.
+//
+// Konsekuensi yang disadari: urutan Tab jadi Judul → Tombol → Tagline,
+// bukan urutan baca hero. Diterima karena formulirnya cuma tiga isian dan
+// tiap panel berjudul jelas — sementara alternatifnya (tiga panel selebar
+// halaman, bertumpuk) menghasilkan tiga isian selebar 1856px, yang justru
+// masalah yang dokumen page-column.tsx minta dipecah jadi kolom.
 // ============================================================================
 
 import { useTranslations } from 'next-intl';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { CharCounter } from '@/components/dashboard/shared/form-field';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import { cn } from '@/lib/shared/utils';
 import { AutofillBadge } from './autofill-badge';
+import { FormSection, FormPanel } from '@/components/dashboard/shared/form-panel';
 
 interface StepStoryProps {
   heroTitle: string;
@@ -41,13 +64,16 @@ export function StepStory({
   onHeroCtaTextChange,
   isAutofilled,
   fieldErrors = new Set(),
-  onClearFieldError,
 }: StepStoryProps) {
   const t = useTranslations('dashboard.setupStore.seller.story');
 
-  const MAX_TITLE = 200;
-  const MAX_SUBTITLE = 300;
-  const MAX_CTA = 15;
+  // Angkanya datang dari FIELD_LIMITS — cermin DTO umkm-server. Sebelumnya
+  // ditulis di sini, dan salinan kedua yang menulis medan yang SAMA hidup di
+  // settings/form/hero/. Dua salinan yang harus disamakan dengan tangan
+  // setiap kali servernya berubah.
+  const MAX_TITLE = TENANT_LIMITS.heroTitle.max;
+  const MAX_SUBTITLE = TENANT_LIMITS.heroSubtitle.max;
+  const MAX_CTA = TENANT_LIMITS.heroCtaText.max;
 
   const hasHeroTitleError = fieldErrors.has('heroTitle');
   const hasHeroSubtitleError = fieldErrors.has('heroSubtitle');
@@ -60,27 +86,32 @@ export function StepStory({
     onHeroCtaTextChange(value);
   };
 
-  return (
-    <div className="space-y-8 max-w-lg mx-auto">
+  // Helper ATAU pesan error — bukan keduanya. Ditulis sekali di sini supaya
+  // ketiga panel memperlakukannya sama persis.
+  const jelaskan = (error: boolean, errorKey: string, helperKey: string) =>
+    error ? (
+      <span className="font-medium text-destructive">{t(errorKey)}</span>
+    ) : (
+      t(helperKey)
+    );
 
-      {/* Hero Title */}
-      {/*
-        [SCROLL FIX] data-field-error="true" di wrapper level space-y-1.5
-        agar scroll mendarat di atas label, bukan di tengah field.
-      */}
-      <div
-        className="space-y-1.5"
-        data-field-error={hasHeroTitleError ? 'true' : undefined}
+  return (
+    <FormSection>
+      {/* ── Judul hero ───────────────────────────────────────────────────── */}
+      <FormPanel
+        title={t('heroTitleLabel')}
+        required
+        badge={<AutofillBadge visible={isAutofilled('heroTitle')} />}
+        description={jelaskan(
+          hasHeroTitleError,
+          'heroTitleRequired',
+          'heroTitleHelper',
+        )}
       >
-        <Label
-          htmlFor="wizard-heroTitle"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+        <div
+          className="relative"
+          data-field-error={hasHeroTitleError ? 'true' : undefined}
         >
-          {t('heroTitleLabel')}{' '}
-          <span className="text-destructive normal-case font-normal">*</span>
-        </Label>
-        <AutofillBadge visible={isAutofilled('heroTitle')} />
-        <div className="relative">
           <Input
             id="wizard-heroTitle"
             placeholder={t('heroTitlePlaceholder')}
@@ -91,42 +122,69 @@ export function StepStory({
               }
             }}
             className={cn(
-              'h-11 text-sm pr-14 placeholder:text-muted-foreground/50',
-              hasHeroTitleError && 'border-destructive focus-visible:ring-destructive',
+              'pr-16',
+              hasHeroTitleError &&
+                'border-destructive focus-visible:ring-destructive',
             )}
           />
-          <span
-            className={cn(
-              'absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-mono tabular-nums pointer-events-none',
-              heroTitle.length >= MAX_TITLE - 10
-                ? 'text-amber-500 font-semibold'
-                : 'text-muted-foreground/40',
-            )}
-          >
-            {heroTitle.length}/{MAX_TITLE}
-          </span>
+          <CharCounter
+            current={heroTitle.length}
+            max={MAX_TITLE}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+          />
         </div>
-        {hasHeroTitleError ? (
-          <p className="text-xs text-destructive font-medium">{t('heroTitleRequired')}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t('heroTitleHelper')}</p>
-        )}
-      </div>
+      </FormPanel>
 
-      {/* Hero Subtitle */}
-      <div
-        className="space-y-1.5"
-        data-field-error={hasHeroSubtitleError ? 'true' : undefined}
+      {/* ── Teks tombol ──────────────────────────────────────────────────── */}
+      <FormPanel
+        title={t('heroCtaLabel')}
+        required
+        badge={<AutofillBadge visible={isAutofilled('heroCtaText')} />}
+        description={jelaskan(
+          hasHeroCtaError,
+          'heroCtaRequired',
+          'heroCtaHelper',
+        )}
       >
-        <Label
-          htmlFor="wizard-heroSubtitle"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
+        <div
+          className="relative"
+          data-field-error={hasHeroCtaError ? 'true' : undefined}
         >
-          {t('heroSubtitleLabel')}{' '}
-          <span className="text-destructive normal-case font-normal">*</span>
-        </Label>
-        <AutofillBadge visible={isAutofilled('heroSubtitle')} />
-        <div className="relative">
+          <Input
+            id="wizard-heroCtaText"
+            placeholder={t('heroCtaPlaceholder')}
+            value={heroCtaText}
+            onChange={(e) => handleCtaChange(e.target.value)}
+            className={cn(
+              'pr-16',
+              hasHeroCtaError &&
+                'border-destructive focus-visible:ring-destructive',
+            )}
+          />
+          <CharCounter
+            current={heroCtaText.length}
+            max={MAX_CTA}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+          />
+        </div>
+      </FormPanel>
+
+      {/* ── Tagline ──────────────────────────────────────────────────────── */}
+      <FormPanel
+        title={t('heroSubtitleLabel')}
+        required
+        wide
+        badge={<AutofillBadge visible={isAutofilled('heroSubtitle')} />}
+        description={jelaskan(
+          hasHeroSubtitleError,
+          'heroSubtitleRequired',
+          'heroSubtitleHelper',
+        )}
+      >
+        <div
+          className="relative"
+          data-field-error={hasHeroSubtitleError ? 'true' : undefined}
+        >
           <Textarea
             id="wizard-heroSubtitle"
             placeholder={t('heroSubtitlePlaceholder')}
@@ -138,70 +196,18 @@ export function StepStory({
             }}
             rows={3}
             className={cn(
-              'resize-none text-sm pb-5 placeholder:text-muted-foreground/50',
-              hasHeroSubtitleError && 'border-destructive focus-visible:ring-destructive',
+              'resize-none pb-6',
+              hasHeroSubtitleError &&
+                'border-destructive focus-visible:ring-destructive',
             )}
           />
-          <span
-            className={cn(
-              'absolute bottom-2 right-3 text-[11px] font-mono tabular-nums pointer-events-none',
-              heroSubtitle.length >= MAX_SUBTITLE - 20
-                ? 'text-amber-500 font-semibold'
-                : 'text-muted-foreground/40',
-            )}
-          >
-            {heroSubtitle.length}/{MAX_SUBTITLE}
-          </span>
-        </div>
-        {hasHeroSubtitleError ? (
-          <p className="text-xs text-destructive font-medium">{t('heroSubtitleRequired')}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t('heroSubtitleHelper')}</p>
-        )}
-      </div>
-
-      {/* Hero CTA Text */}
-      <div
-        className="space-y-1.5"
-        data-field-error={hasHeroCtaError ? 'true' : undefined}
-      >
-        <Label
-          htmlFor="wizard-heroCtaText"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
-        >
-          {t('heroCtaLabel')}{' '}
-          <span className="text-destructive normal-case font-normal">*</span>
-        </Label>
-        <AutofillBadge visible={isAutofilled('heroCtaText')} />
-        <div className="relative">
-          <Input
-            id="wizard-heroCtaText"
-            placeholder={t('heroCtaPlaceholder')}
-            value={heroCtaText}
-            onChange={(e) => handleCtaChange(e.target.value)}
-            className={cn(
-              'h-11 text-sm pr-14 font-semibold placeholder:font-normal placeholder:text-muted-foreground/50',
-              hasHeroCtaError && 'border-destructive focus-visible:ring-destructive',
-            )}
+          <CharCounter
+            current={heroSubtitle.length}
+            max={MAX_SUBTITLE}
+            className="absolute bottom-2 right-3"
           />
-          <span
-            className={cn(
-              'absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-mono tabular-nums pointer-events-none',
-              heroCtaText.length >= MAX_CTA - 2
-                ? 'text-amber-500 font-semibold'
-                : 'text-muted-foreground/40',
-            )}
-          >
-            {heroCtaText.length}/{MAX_CTA}
-          </span>
         </div>
-        {hasHeroCtaError ? (
-          <p className="text-xs text-destructive font-medium">{t('heroCtaRequired')}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t('heroCtaHelper')}</p>
-        )}
-      </div>
-
-    </div>
+      </FormPanel>
+    </FormSection>
   );
 }

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/shared/use-debounce';
 import { cn } from '@/lib/shared/utils';
 import { productsUrl } from '@/lib/public/store-url';
+import { useRouter } from '@/i18n/navigation';
 
 // ==========================================
 // PRODUCT FILTERS COMPONENT

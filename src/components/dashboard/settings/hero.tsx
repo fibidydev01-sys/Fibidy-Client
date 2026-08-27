@@ -14,6 +14,8 @@ import type { HeroFormData } from '@/types/tenant';
 import { StepIdentity } from './form/hero/step-identity';
 import { StepStory } from './form/hero/step-story';
 import { StepAppearance } from './form/hero/step-appearance';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ============================================================================
 // HERO SETTINGS SECTION
@@ -214,7 +216,7 @@ export function HeroSection({ onBack }: HeroSectionProps) {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
           takes over from md up where WizardNav is `sticky`/in-flow and
           doesn't need an artificial reserve — see wizard-nav.tsx's v6

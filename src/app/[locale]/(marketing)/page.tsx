@@ -36,7 +36,15 @@ function HeroSection() {
       id="hero"
       className="relative w-full bg-background flex flex-col items-center overflow-hidden pt-8 md:pt-16"
     >
-      <div className="flex flex-col items-center text-center pb-12 px-6 max-w-4xl mx-auto">
+      {/* Cuci langit — satu-satunya dekorasi atmosferik di seluruh halaman.
+          Ia berhenti di sini: seksi lain berdiri di kanvas putih polos, dan
+          itu yang membuat kedalaman di hero berarti sesuatu. */}
+      <div
+        aria-hidden
+        className="hero-sky-wash pointer-events-none absolute inset-x-0 top-0 h-[560px] md:h-[720px]"
+      />
+
+      <div className="relative flex flex-col items-center text-center pb-12 px-6 max-w-4xl mx-auto">
         {/* Eyebrow */}
         <Badge
           variant="outline"
@@ -45,9 +53,8 @@ function HeroSection() {
           🚀 Toko Online untuk UMKM
         </Badge>
 
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-          Solusi <span className="text-primary">Manajemen Toko Online</span>{" "}
-          Terpadu untuk UMKM Indonesia
+        <h1 className="text-display-lg sm:text-display-xl md:text-display-mega text-ink mb-6">
+          Solusi Manajemen Toko Online Terpadu untuk UMKM Indonesia
         </h1>
 
         <p className="text-sm md:text-base text-muted-foreground max-w-xl leading-relaxed mb-10">
@@ -112,7 +119,7 @@ const whyFibidy = [
 
 function WhySection() {
   return (
-    <section id="about" className="w-full bg-background py-16 md:py-20 px-6">
+    <section id="about" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <Badge
@@ -121,7 +128,7 @@ function WhySection() {
           >
             Kenapa Harus Fibidy?
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
+          <h2 className="text-display-md md:text-display-lg text-ink mb-3">
             Toko online yang belum kamu punya, kini beres dalam satu platform
           </h2>
           <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
@@ -165,8 +172,8 @@ function WhySection() {
             return (
               <Card key={item.title} className="border border-border">
                 <CardContent className="flex flex-col gap-4 p-6">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-lg bg-surface-strong flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-ink" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-foreground mb-2">
@@ -225,7 +232,7 @@ function StepDeviceMock({ image }: { image: string }) {
 function GroupLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-2 justify-center">
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+      <span className="text-caption-uppercase caption-uppercase text-muted-foreground">
         {children}
       </span>
     </div>
@@ -234,7 +241,7 @@ function GroupLabel({ children }: { children: React.ReactNode }) {
 
 function HowItWorksSection() {
   return (
-    <section id="timeline" className="w-full bg-background py-16 md:py-20 px-6">
+    <section id="timeline" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-5xl mx-auto">
         {/* Header center-aligned on both mobile and desktop */}
         <div className="mb-12 md:mb-16 text-center">
@@ -244,10 +251,10 @@ function HowItWorksSection() {
           >
             # Cara Kerjanya
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
+          <h2 className="text-display-md md:text-display-lg text-ink mb-3">
             Bikin toko online, dalam waktu 5 menit.
           </h2>
-          <p className="text-sm text-primary max-w-md leading-relaxed mx-auto">
+          <p className="text-sm text-ink max-w-md leading-relaxed mx-auto">
             Dua langkah setup toko online. Isi sekali, langsung jadi.
           </p>
         </div>
@@ -271,7 +278,7 @@ function HowItWorksSection() {
                   <>
                     <div className="w-full md:w-1/2 flex justify-center md:justify-end pr-0 md:pr-16 py-6 md:py-8 order-1">
                       <div className="max-w-[260px] text-center md:text-right">
-                        <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
+                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">
                           {step.eyebrow}
                         </p>
                         <h3 className="text-base font-semibold text-foreground mb-2">
@@ -293,7 +300,7 @@ function HowItWorksSection() {
                     </div>
                     <div className="w-full md:w-1/2 flex justify-center md:justify-start pl-0 md:pl-16 py-6 md:py-8 order-1 md:order-2">
                       <div className="max-w-[260px] text-center md:text-left">
-                        <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
+                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">
                           {step.eyebrow}
                         </p>
                         <h3 className="text-base font-semibold text-foreground mb-2">
@@ -353,6 +360,11 @@ const pricingFeatures: {
       starter: { type: "text", value: "12 pilihan", highlight: true },
     },
     {
+      label: "Kasir untuk catat penjualan",
+      free: { type: "dash" },
+      starter: { type: "check" },
+    },
+    {
       label: "Data otomatis terisi",
       free: { type: "check" },
       starter: { type: "check" },
@@ -381,7 +393,7 @@ function Cell({ cell }: { cell: CellType }) {
 
 function PricingSection() {
   return (
-    <section id="pricing" className="w-full bg-background py-16 md:py-20 px-6">
+    <section id="pricing" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10 md:mb-12">
           <Badge
@@ -390,14 +402,15 @@ function PricingSection() {
           >
             # Harga
           </Badge>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-display-md sm:text-display-lg md:text-display-xl text-ink mb-4">
             Harga Terjangkau
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Toko online bisa langsung dipakai gratis.
           </p>
-          <p className="text-sm text-primary mt-1">
-            Toko online lengkap mulai Rp 35.000 bayar sekali, langsung aktif.
+          <p className="text-sm text-ink mt-1">
+            Toko online lengkap mulai Rp 35.000 per bulan bayar sekali per
+            periode lewat QRIS, langsung aktif.
           </p>
         </div>
 
@@ -433,12 +446,12 @@ function PricingSection() {
                   Starter
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Toko online lengkap dengan semua fitur aktif.
+                  Toko online lengkap plus Kasir buat catat penjualan.
                 </p>
               </div>
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">35rb</p>
-                <p className="text-xs text-primary mt-1">per bulan</p>
+                <p className="text-xs text-ink mt-1">per bulan</p>
               </div>
               <Button className="w-full" asChild>
                 <Link href="/register">Mulai Starter</Link>
@@ -474,6 +487,16 @@ function PricingSection() {
             ))}
           </div>
         </ScrollArea>
+
+        {/* Business tidak punya kartunya sendiri di sini, tapi ia ADA — dan
+            tabel dua kolom di atas membuat Starter terbaca seperti puncak
+            tangga. Satu baris ini yang membuatnya jujur. */}
+        <p className="text-xs text-muted-foreground text-center mt-6">
+          Butuh lebih dari itu? Paket{" "}
+          <span className="text-foreground font-medium">Business</span> Rp
+          149.000 per bulan: produk tanpa batas, 5 foto per produk, dan semua
+          pilihan tampilan.
+        </p>
       </div>
     </section>
   );
@@ -485,7 +508,7 @@ function PricingSection() {
 const faqs = [
   {
     q: "Beneran gratis?",
-    a: "Plan Free bisa langsung dipakai tanpa biaya, tapi versinya terbatas. Kalau mau fitur lengkap lebih banyak produk, foto, dan pilihan tampilan plan Starter cuma Rp 35.000/bulan, sekali bayar langsung aktif.",
+    a: "Plan Free bisa langsung dipakai tanpa biaya, tapi versinya terbatas. Kalau mau fitur lengkap lebih banyak produk, foto, pilihan tampilan, plus Kasir buat catat penjualan plan Starter Rp 35.000 per bulan. Bayarnya sekali di awal periode lewat QRIS, langsung aktif, dan diperpanjang sendiri kalau kamu mau lanjut.",
   },
   {
     q: "Pelanggan bayar gimana di toko onlineku?",
@@ -493,7 +516,7 @@ const faqs = [
   },
   {
     q: "Beda Free sama Starter apa aja?",
-    a: "Starter ngasih kamu jauh lebih banyak ruang buat berkembang dari 20 jadi 50 produk, 2 jadi 3 foto per produk, dan 3 jadi 12 pilihan tampilan halaman. Cocok kalau tokomu udah mulai rame dan butuh tampil lebih maksimal.",
+    a: "Starter ngasih kamu jauh lebih banyak ruang buat berkembang dari 20 jadi 50 produk, 2 jadi 3 foto per produk, dan 3 jadi 12 pilihan tampilan halaman. Yang paling kerasa: Kasir kebuka di Starter, jadi tiap penjualan kecatat rapi buat pembukuan. Cocok kalau tokomu udah mulai rame dan butuh tampil lebih maksimal.",
   },
   {
     q: "Cocok untuk bisnis apa aja?",
@@ -503,7 +526,7 @@ const faqs = [
 
 function FAQSection() {
   return (
-    <section id="faq" className="w-full bg-background py-16 md:py-20 px-6">
+    <section id="faq" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-2xl mx-auto">
         <Badge
           variant="outline"
@@ -511,7 +534,7 @@ function FAQSection() {
         >
           # Tanya Jawab
         </Badge>
-        <h2 className="text-4xl md:text-5xl font-bold text-foreground text-center mb-10">
+        <h2 className="text-display-lg md:text-display-xl text-ink text-center mb-10">
           Yang sering ditanyain.
         </h2>
         <div className="bg-muted rounded-2xl p-4">
@@ -563,7 +586,7 @@ const contactInfo = [
 
 function ContactSection() {
   return (
-    <section id="contact" className="w-full bg-background py-16 md:py-20 px-6">
+    <section id="contact" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
           <Badge
@@ -572,7 +595,7 @@ function ContactSection() {
           >
             # Hubungi Kami
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+          <h2 className="text-display-md md:text-display-lg text-ink mb-3">
             Ada pertanyaan? Kami siap bantu.
           </h2>
           <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -586,11 +609,11 @@ function ContactSection() {
             return (
               <Card key={item.label} className="border border-border">
                 <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-lg bg-surface-strong flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-ink" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    <p className="text-caption-uppercase caption-uppercase text-muted-foreground mb-1">
                       {item.label}
                     </p>
                     <p className="text-sm font-semibold text-foreground">

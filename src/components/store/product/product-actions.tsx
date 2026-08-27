@@ -6,16 +6,13 @@
 //
 // [EDU MODE — May 2026]
 // Saat tenant.isEduMode === true:
-//   - Tombol beli (WA / Stripe) TIDAK ditampilkan
+//   - Tombol pesan TIDAK ditampilkan
 //   - Diganti EduOrderDialog — info bahwa ini simulation store
 //   - Tombol tetap ada (tidak dihilangkan) agar UX tidak broken
 //
-// fileKey != null → Digital:
-//   - "Ask Seller" (WA) — pre-sales questions
-//   - "Buy Now" (Stripe) — primary action
-//
-// fileKey == null → Custom/Service:
-//   - "Order via WhatsApp" only
+// [PANGKAS PRODUK DIGITAL]
+// Tinggal satu jalur: pesan lewat WhatsApp. Percabangan digital/fisik dan
+// tombol checkout Stripe sudah dicabut.
 //
 // [IDR MIGRATION — May 2026]
 // Default to IDR uniformly.
@@ -36,9 +33,9 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import { WhatsAppOrderButton } from '../checkout/whatsapp-order-button';
-import { StripeCheckoutButton } from '../checkout/stripe-checkout-button';
 import type { Product } from '@/types/product';
 import type { PublicTenant } from '@/types/tenant';
+import { MarkdownText } from '@/components/store/shared/markdown-text';
 
 // ── EduOrderDialog ────────────────────────────────────────────────────────────
 
@@ -99,12 +96,9 @@ interface ProductActionsProps {
 export function ProductActions({ product, tenant }: ProductActionsProps) {
   const t = useTranslations('store.product.detail');
   const tCheckout = useTranslations('store.checkout');
-  const isDigital = !!product.fileKey;
   const isEdu = tenant.isEduMode === true;
 
   const [eduDialogOpen, setEduDialogOpen] = useState(false);
-
-  const currency = product.currency ?? 'IDR';
 
   // ── EDU mode — semua tombol beli diganti satu tombol → dialog ─────────────
 
@@ -129,9 +123,9 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
         {product.description && (
           <div className="space-y-1">
             <p className="text-sm font-semibold">{t('descriptionHeading')}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <MarkdownText className="text-sm text-muted-foreground">
               {product.description}
-            </p>
+            </MarkdownText>
           </div>
         )}
       </div>
@@ -142,46 +136,18 @@ export function ProductActions({ product, tenant }: ProductActionsProps) {
 
   return (
     <div className="space-y-4">
-      {isDigital ? (
-        <div className="space-y-3">
-          {/* Primary: Stripe checkout */}
-          <StripeCheckoutButton
-            productId={product.id}
-            price={product.price}
-            currency={currency}
-            className="w-full"
-          />
-
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">{t('actionsDivider')}</span>
-            <div className="flex-1 border-t border-border" />
-          </div>
-
-          {/* Secondary: WA pre-sales */}
-          <WhatsAppOrderButton
-            product={product}
-            tenant={tenant}
-            className="w-full"
-            variant="outline"
-            customLabel={tCheckout('askSellerWhatsapp')}
-          />
-        </div>
-      ) : (
-        <WhatsAppOrderButton
-          product={product}
-          tenant={tenant}
-          className="w-full"
-        />
-      )}
+      <WhatsAppOrderButton
+        product={product}
+        tenant={tenant}
+        className="w-full"
+      />
 
       {product.description && (
         <div className="space-y-1">
           <p className="text-sm font-semibold">{t('descriptionHeading')}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <MarkdownText className="text-sm text-muted-foreground">
             {product.description}
-          </p>
+          </MarkdownText>
         </div>
       )}
     </div>

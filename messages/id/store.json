@@ -135,7 +135,6 @@
         "name": "Nama",
         "question": "Pertanyaan"
       },
-      "askSellerWhatsapp": "Tanya Penjual via WhatsApp",
       "orderWhatsapp": "Pesan via WhatsApp",
       "simulateOrder": "Simulasi Pesanan",
       "orderDialog": {
@@ -156,14 +155,6 @@
       "orderWhatsappLabels": {
         "name": "Nama",
         "notes": "Catatan"
-      },
-      "stripe": {
-        "signInToBuy": "Masuk untuk Membeli",
-        "buyNow": "Beli Sekarang {price}",
-        "loading": "Memuat...",
-        "redirecting": "Mengalihkan ke Stripe...",
-        "stillProcessingTitle": "Masih memproses checkout sebelumnya",
-        "stillProcessingBody": "Tunggu beberapa detik lalu coba lagi. Jika kamu sudah diarahkan ke Stripe, selesaikan pembayaran di tab tersebut."
       }
     },
     "productList": {

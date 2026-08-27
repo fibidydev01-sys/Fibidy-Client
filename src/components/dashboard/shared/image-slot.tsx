@@ -149,7 +149,7 @@ export function EmptySlot({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        'relative aspect-square w-full rounded-xl border-2 border-dashed bg-muted/30 transition-all duration-150',
+        'relative aspect-square w-full rounded-[var(--shape-panel)] border-2 border-dashed bg-muted/30 transition-all duration-150',
         'flex flex-col items-center justify-center gap-2 p-4',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         'disabled:cursor-not-allowed disabled:opacity-90',
@@ -223,7 +223,7 @@ export function FilledImageSlot({
     <>
       <div
         className={cn(
-          'relative aspect-square w-full rounded-xl overflow-hidden border bg-muted group',
+          'relative aspect-square w-full rounded-[var(--shape-panel)] overflow-hidden border bg-muted group',
           className,
         )}
       >

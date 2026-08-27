@@ -24,12 +24,12 @@
 //    yang ditebak dari tinggi MobileNavbar.
 // ============================================================================
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatPriceIDR } from '@/lib/shared/format';
+import { Link } from '@/i18n/navigation';
 
 export function CartBar({
   totalItem,
@@ -43,10 +43,19 @@ export function CartBar({
   if (totalItem <= 0) return null;
 
   return (
-    <div className="pointer-events-none sticky bottom-[calc(var(--kasir-bottom-inset)+0.75rem)] z-30">
+    // `mt-auto` MENDORONG bilah ke tepi bawah panel; `sticky` MENAHANNYA di
+    // sana saat katalognya panjang. Dua mekanisme berbeda untuk dua keadaan
+    // berbeda, dan sebelumnya cuma yang kedua yang ada — jadi pada katalog
+    // pendek bilahnya menggantung di tengah layar. Lihat catatan di
+    // kasir-page-shell.tsx untuk `h-full` yang membuat `mt-auto` punya arti.
+    <div className="pointer-events-none sticky bottom-[calc(var(--kasir-bottom-inset)+0.75rem)] z-30 mt-auto pt-3">
       <Button
         asChild
-        size="lg"
+        // h-14 (56px) dipertahankan: ini SATU-SATUNYA pintu ke checkout dan
+        // ditekan sambil berdiri, sering dengan satu tangan. {button-primary}
+        // 40px benar untuk tombol di dalam formulir, bukan untuk target tap
+        // selebar layar yang menutup transaksi. Radiusnya tetap ikut spec —
+        // 8px lewat --shape-control, bukan pil.
         className="pointer-events-auto h-14 w-full justify-between gap-3 px-4 shadow-lg"
       >
         <Link href="/dashboard/kasir/keranjang">

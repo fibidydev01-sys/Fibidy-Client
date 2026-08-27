@@ -18,10 +18,10 @@
 // `not-found.tsx` files.
 // ==========================================
 
-import Link from 'next/link';
 import { Package, ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { Link } from '@/i18n/navigation';
 
 export default function ProductNotFound() {
   const t = useTranslations('store.product.notFound');

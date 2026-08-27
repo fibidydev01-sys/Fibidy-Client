@@ -67,11 +67,24 @@
 // trigger the bug. One shared shape, verified safe either way.
 // ============================================================================
 
+// ── BENTUK: PIL, MENGIKUTI DIALEK DASBOR ──────────────────────────────────
+//
+// Bilah ini dan kedua tombolnya `rounded-full`. Sempat dilepas ke 12px/8px
+// atas dasar expo.design.md ("pill geometry is reserved for badges only"),
+// lalu DIKEMBALIKAN: pemilik produk menolak bentuk kotak itu setelah
+// melihatnya di layar. Lihat catatan panjangnya di globals.css, blok
+// [data-surface="app"] — dialek dasbor memang pil, dan itu pilihan, bukan
+// kelalaian.
+//
+// Tinggi tombolnya TIDAK dikembalikan ke h-9: 40px adalah ukuran baku
+// Button sekarang, dan tidak ada yang mempermasalahkannya.
+
 import { ChevronLeft, ChevronRight, Rocket } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { OfflineAwareButton } from '@/components/dashboard/shared/offline-aware-button';
 import { cn } from '@/lib/shared/utils';
+import { PAGE_MAX_W } from '@/components/dashboard/shared/page-column';
 
 interface SetupWizardNavProps {
   currentStep: number;  // 0-indexed
@@ -135,7 +148,24 @@ export function SetupWizardNav({
   );
 
   return (
-    <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-30 mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+    <div
+      className={cn(
+      // [PRESISI] `mt-6` — jarak antara isi dan pill.
+      //
+      // Terukur sebelumnya: tepi bawah panel terakhir dan tepi atas pill
+      // sama-sama di y=710. Nol piksel. Tidak bertumpuk, tapi menempel.
+      //
+      // `pb-*` di kerangka halaman TIDAK bisa menghasilkan jarak ini — ia
+      // menambah ruang DI BAWAH pill (anak terakhir), bukan di antara
+      // keduanya. Yang dibutuhkan margin pada pill-nya sendiri.
+      //
+      // Di bawah md pill-nya `fixed` sehingga margin tidak berlaku, dan
+      // memang tidak perlu: di sana ia melayang dengan bottom-20.
+      'mt-6 ' +
+        'fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-30 mx-auto flex items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm',
+        PAGE_MAX_W,
+      )}
+    >
       {prevButton}
       {stepCounter}
       {nextOrSubmitButton}

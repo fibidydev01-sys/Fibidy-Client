@@ -17,7 +17,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2, Pencil, Percent, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -31,6 +30,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { MahkotaKecil } from '@/components/dashboard/shared/notice-mahkota';
+import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
+import { GUIDE } from '@/lib/constants/dashboard/guide-links';
+import { useKasirLock } from '@/hooks/dashboard/use-kasir-lock';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/api/client';
 import { formatPriceIDR } from '@/lib/shared/format';
@@ -41,12 +44,20 @@ import {
   useUpdateDiskonPreset,
 } from '@/hooks/dashboard/use-kasir';
 import type { DiskonPreset } from '@/types/kasir';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // Nominal contoh untuk pratinjau dampak diskon saat mengetik persen.
 const CONTOH_SUBTOTAL = 100000;
 
 export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
   const t = useTranslations('dashboard.kasir.settingsDiskon');
+  const tTaut = useTranslations('dashboard.kasir.emptyLinks');
+
+  // Mahkota di TOMBOL, bukan di entri navigasi. Daftar presetnya sendiri
+  // tetap tampil apa adanya untuk tenant FREE — yang dimahkotai cuma aksi
+  // yang menulis. `jaga` membuka modal upgrade alih-alih menjalankan aksinya.
+  const { terkunci, jaga } = useKasirLock();
 
   const { data: presets, isLoading } = useDiskonPresets();
   const { mutate: create, isPending: creating } = useCreateDiskonPreset();
@@ -107,7 +118,7 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
   // ── Form tambah / edit ────────────────────────────────────────────────
   if (mode === 'form') {
     return (
-      <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+      <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
         <div className="flex-1 space-y-6 pb-20 md:pb-6">
           <div>
             <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -181,7 +192,8 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
 
         <WizardNav
           onBack={tutupForm}
-          onSave={simpan}
+          onSave={jaga(simpan)}
+          saveTerkunci={terkunci}
           isSaving={creating || updating}
           saveLabel={t('save')}
           savingLabel={t('saving')}
@@ -192,7 +204,7 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
 
   // ── Daftar ────────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+    <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
       <div className="flex-1 space-y-6 pb-20 md:pb-6">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -205,33 +217,33 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+              <Skeleton key={i} className="h-16 w-full rounded-[var(--shape-panel)]" />
             ))}
           </div>
         ) : (presets ?? []).length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <Percent className="h-5 w-5 text-muted-foreground" aria-hidden />
-              </div>
-              <div>
-                <p className="font-medium">{t('emptyTitle')}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {t('emptyDescription')}
-                </p>
-              </div>
-              <Button onClick={() => bukaForm()} className="gap-2">
-                <Plus className="h-4 w-4" aria-hidden />
-                {t('addButton')}
-              </Button>
-            </CardContent>
-          </Card>
+          // Dulu Card + markup buatan sendiri: bulatan ikon 48px, jarak dan
+          // ukuran teks yang tidak sama dengan blok kosong mana pun di
+          // aplikasi ini. Sekarang Empty yang sama dengan Kasir dan Produk.
+          <EmptyPanel
+            icon={<Percent aria-hidden />}
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
+            action={{
+              label: t('addButton'),
+              icon: <Plus className="h-4 w-4" aria-hidden />,
+              onClick: jaga(() => bukaForm()),
+              terkunci,
+            }}
+            learnLabel={tTaut('diskon.learn')}
+            learnHref={GUIDE.diskon}
+            helpLabel={tTaut('diskon.help')}
+          />
         ) : (
           <div className="space-y-2">
             {(presets ?? []).map((preset) => (
               <div
                 key={preset.id}
-                className="flex items-center gap-3 rounded-xl border px-3 py-3"
+                className="flex items-center gap-3 rounded-[var(--shape-panel)] border px-3 py-3"
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
                   {preset.persen}%
@@ -242,26 +254,38 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => bukaForm(preset)}
+                  onClick={jaga(() => bukaForm(preset))}
                   aria-label={t('editAria', { nama: preset.nama })}
                 >
-                  <Pencil className="h-4 w-4" aria-hidden />
+                  {terkunci ? (
+                    <MahkotaKecil />
+                  ) : (
+                    <Pencil className="h-4 w-4" aria-hidden />
+                  )}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setKonfirmasiHapus(preset)}
+                  onClick={jaga(() => setKonfirmasiHapus(preset))}
                   aria-label={t('deleteAria', { nama: preset.nama })}
                   className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <Trash2 className="h-4 w-4" aria-hidden />
+                  {terkunci ? (
+                    <MahkotaKecil />
+                  ) : (
+                    <Trash2 className="h-4 w-4" aria-hidden />
+                  )}
                 </Button>
               </div>
             ))}
 
             {/* Aksi utama halaman = bar melayang selebar kolom konten. */}
-            <Button onClick={() => bukaForm()} className="w-full gap-2">
-              <Plus className="h-4 w-4" aria-hidden />
+            <Button onClick={jaga(() => bukaForm())} className="w-full gap-2">
+              {terkunci ? (
+                <MahkotaKecil />
+              ) : (
+                <Plus className="h-4 w-4" aria-hidden />
+              )}
               {t('addButton')}
             </Button>
           </div>

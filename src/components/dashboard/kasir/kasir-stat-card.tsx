@@ -19,7 +19,6 @@
 // memang butuh ditemukan lebih dulu dari yang lain.
 // ============================================================================
 
-import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import {
   Card,
@@ -31,6 +30,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/shared/utils';
+import { Link } from '@/i18n/navigation';
 
 export type KasirStatTone = 'default' | 'warning' | 'danger' | 'success';
 

@@ -9,11 +9,11 @@
 // ============================================================================
 
 import { useCallback, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { subscriptionApi } from '@/lib/api/subscription';
 import { getErrorMessage, ApiRequestError } from '@/lib/api/client';
+import { useRouter } from '@/i18n/navigation';
 
 /** UUID v4. `crypto.randomUUID` tersedia di semua browser target + HTTPS. */
 function createIdempotencyKey(): string {

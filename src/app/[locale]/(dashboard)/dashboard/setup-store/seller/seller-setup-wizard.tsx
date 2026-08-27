@@ -38,7 +38,10 @@ import { StepSocial } from './step-social';
 import { SellerSetupDone } from './seller-setup-done';
 import { SetupStepIndicator } from '@/components/dashboard/setup-store/setup-step-indicator';
 import { SetupWizardNav } from '@/components/dashboard/setup-store/setup-wizard-nav';
+import { generateStoreLogo } from './logo-generator';
 import type { CompleteSetupInput, FeatureItem, SocialLinks } from '@/types/tenant';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN, NAV_PILL_CLEARANCE } from '@/components/dashboard/shared/page-column';
 
 // ── Form State ────────────────────────────────────────────────────────────────
 
@@ -95,7 +98,16 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
     case 'APPLY_AUTOFILL':
       return {
         form: { ...state.form, ...action.patch },
-        autofilledFields: action.fields,
+        // MENGGABUNG, bukan menimpa. Dulu `action.fields` langsung dipasang,
+        // yang aman selama autofill cuma sekali. Begitu logo diisikan lewat
+        // lemparan KEDUA (pembuatannya asinkron), penimpaan itu akan
+        // menghapus seluruh penanda dari lemparan pertama — dan lencana
+        // "terisi otomatis" di Hero, Warna, Cerita, sampai Kontak lenyap
+        // serentak tanpa ada yang menyentuhnya.
+        //
+        // Autofill hanya pernah MENAMBAH; pencabutan satu-satunya lewat
+        // CLEAR_AUTOFILL_FIELD saat penjual menyuntingnya.
+        autofilledFields: new Set([...state.autofilledFields, ...action.fields]),
       };
     case 'CLEAR_AUTOFILL_FIELD': {
       if (!state.autofilledFields.has(action.field)) return state;
@@ -281,6 +293,28 @@ export function SellerSetupWizard() {
 
   const { form, autofilledFields } = wizardState;
 
+  // ── Penanda "logo sedang dibuat" ────────────────────────────────────────
+  //
+  // Autofill hero SINKRON — ia cuma menyalin URL preset, jadi slot hero tidak
+  // pernah sempat terlihat kosong. Autofill logo ASINKRON: SVG dibuat lalu
+  // diunggah, ~1 detik. Selama itu slotnya menampilkan ajakan "Upload Logo"
+  // yang lalu ditimpa logo — kedipan yang bikin dua panel bersebelahan
+  // berperilaku beda saat halaman dimuat ulang.
+  //
+  // Nilai awalnya DIHITUNG SAAT INISIALISASI, bukan disetel di dalam efek.
+  // Efek berjalan setelah cat pertama, jadi menyalakannya di sana tetap
+  // menyisakan satu bingkai berisi ajakan itu — persis kedipan yang mau
+  // dihilangkan.
+  //
+  // Syaratnya SAMA PERSIS dengan syarat efeknya membuat logo, dan itu
+  // disengaja: kalau keduanya bisa berbeda, ada kombinasi yang menyalakan
+  // pemuat tanpa ada yang pernah mematikannya. Pemuat yang menggantung
+  // selamanya adalah kelas bug yang sudah pernah menggigit di seksi Mode
+  // Dagang; ia tidak dibuat ulang di sini.
+  const [membuatLogo, setMembuatLogo] = useState(() =>
+    Boolean(tenant?.name && tenant?.category && !tenant?.logo),
+  );
+
   const [currentStep, setCurrentStep] = useState(1);
 
   const [validationOpen, setValidationOpen] = useState(false);
@@ -341,6 +375,7 @@ export function SellerSetupWizard() {
   useEffect(() => {
     if (!tenant?.category) return;
 
+    let dilepas = false;
     const patch: Partial<SellerWizardFormState> = {};
     const fields = new Set<string>();
 
@@ -388,8 +423,52 @@ export function SellerSetupWizard() {
       contactTitle: autofill.contactTitle,
       contactSubtitle: autofill.contactSubtitle,
     };
+    // ── Logo ──────────────────────────────────────────────────────────
+    //
+    // Ditaruh di ekor efek yang SAMA, bukan efek sendiri. Versi pertama
+    // memisahkannya dengan deps `[tenant?.name, form.logo,
+    // form.primaryColor]` + bendera pembatalan di cleanup — dan efek INI
+    // mengubah primaryColor, jadi cleanup-nya berjalan di tengah unggahan,
+    // bendera menyala, lalu hasil yang datang beberapa ratus milidetik
+    // kemudian DIBUANG. Logonya terunggah, hasilnya dibuang kode saya
+    // sendiri.
+    //
+    // Di sini masalahnya lenyap: efeknya cuma dikunci `tenant?.category`,
+    // dan yang membatalkan hanya pelepasan komponen.
+    //
+    // Unggahannya TIDAK ditunggu — autofill lain sudah dilempar di baris
+    // atas, jadi penjual melihat formulirnya terisi seketika dan logonya
+    // menyusul.
+    //
+    // Penjaga "sekali saja" ada di dalam generateStoreLogo() sebagai
+    // memoisasi tingkat modul. Terukur: penjaga berupa useRef tetap
+    // meloloskan DUA unggahan, 178ms berselang, karena `client.tsx`
+    // merender `null` selama tenant dimuat lalu memasang wizard-nya —
+    // pemasangan baru berarti ref baru.
+    if (tenant?.name && !tenant.logo && !form.logo) {
+      void generateStoreLogo(tenant.name, autofill.primaryColor)
+        .then((url) => {
+          if (dilepas || !url) return;
+          dispatch({
+            type: 'APPLY_AUTOFILL',
+            patch: { logo: url },
+            fields: new Set(['logo']),
+          });
+        })
+        // `finally`, bukan `then`: gagal maupun berhasil, pemuatnya HARUS
+        // berhenti. Mematikannya cuma di jalur sukses berarti penjual yang
+        // unggahannya gagal menatap pemuat yang tidak akan pernah selesai.
+        .finally(() => {
+          if (!dilepas) setMembuatLogo(false);
+        });
+    }
+
+    return () => {
+      dilepas = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenant?.category]);
+
 
   const clearAutofillIfChanged = useCallback(
     (fieldName: keyof AutofillSnapshot, newValue: string) => {
@@ -570,12 +649,13 @@ export function SellerSetupWizard() {
   ];
 
   return (
-    // pb-32 → pb-40 md:pb-8 — SetupWizardNav's mobile variant is now
-    // `fixed`, floating bottom-20 above the viewport edge with its own
-    // ~62px height (no MobileNavbar to also clear here — setup-store
-    // hides it — but the pill itself still needs clearance). At md+ it
-    // reverts to `sticky` (in-flow), so the large reserve isn't needed.
-    <div className="max-w-3xl mx-auto pb-40 md:pb-8">
+    // [PRESISI] Dulu `pb-40 md:pb-8`. Yang 32px di desktop KURANG: pill
+    // SetupWizardNav tingginya 62px dan mengambang 16px dari tepi, jadi
+    // butuh 78px. Isian terakhir tenggelam di baliknya — dan karena
+    // pill-nya bg-background/90, ia terbaca sebagai teks berbayang, bukan
+    // sebagai batas. Angkanya sekarang dibaca dari satu konstanta yang juga
+    // dipakai halaman Pengaturan.
+    <div className={cn(PAGE_COLUMN, NAV_PILL_CLEARANCE, 'flex min-h-full flex-col')}>
       <div className="mb-8">
         <SetupStepIndicator
           steps={STEPS}
@@ -584,13 +664,31 @@ export function SellerSetupWizard() {
         />
       </div>
 
-      <div className="min-h-[400px]">
+      {/*
+        [NEMPEL KE BAWAH] Dulu `min-h-[400px]`. Angka itu cadangan mati:
+        isi Langkah 2 cuma ~330px, jadi 400px menyisakan ~70px kosong yang
+        mendorong pill turun tanggung — tidak menempel isi, tidak menempel
+        layar, menggantung di antara keduanya.
+        Terukur di tangkapan pemilik produk: isi berakhir y=435, pill mulai
+        y=540. Selisih 105px, dan 81px-nya murni dari cadangan ini.
+
+        `flex-1` menggantikannya: kolom mengisi tinggi yang tersedia, dan
+        pill sebagai anak TERAKHIR selalu mendarat di dasarnya. Langkah
+        pendek maupun panjang menaruh tombol Selanjutnya di tempat yang
+        sama — itu yang membuatnya bisa dihafal tangan.
+
+        `min-h-0` WAJIB menyertai `flex-1` di sini: anak flex yang
+        overflow-nya visible punya `min-height:auto`, yang resolusinya
+        min-content — dan itu membatalkan batas atas dari induknya begitu
+        isinya lebih tinggi dari layar.
+      */}
+      <div className="min-h-0 flex-1">
         {currentStep === 1 && (
           <StepVisual
             logo={form.logo}
+            isGeneratingLogo={membuatLogo}
             primaryColor={form.primaryColor}
             heroBackgroundImage={form.heroBackgroundImage}
-            storeName={tenant?.name ?? ''}
             onLogoChange={handleLogoChange}
             onColorChange={handleColorChange}
             onHeroBgChange={handleHeroBgChange}

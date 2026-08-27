@@ -44,7 +44,6 @@ import { useTranslations } from 'next-intl';
 import { Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Combobox,
   ComboboxContent,
@@ -57,10 +56,12 @@ import {
   ComboboxSeparator,
 } from '@/components/ui/combobox';
 import { cn } from '@/lib/shared/utils';
-import { FEATURES } from '@/lib/config/features';
 import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
 import type { ProductFormData } from '@/lib/shared/validations';
 import type { UseFormReturn } from 'react-hook-form';
+import { PAGE_GRID_2_FORM_TIGHT, PAGE_SPAN_2 } from '@/components/dashboard/shared/page-column';
+import { CharCounter } from './char-counter';
+import { PRODUCT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 
 interface StepDetailsProps {
   form: UseFormReturn<ProductFormData>;
@@ -81,9 +82,10 @@ interface StepDetailsProps {
 // [MAX-LENGTH GUARDRAIL] Mirrors CreateProductDto's @MaxLength decorators
 // (server/src/products/dto/create-product.dto.ts) — keep these two numbers
 // in sync with the backend if that DTO ever changes.
-const NAME_MAX_LENGTH = 200;
-const DESCRIPTION_MAX_LENGTH = 1000;
-const CATEGORY_MAX_LENGTH = 100;
+// Cermin DTO umkm-server, lewat satu daftar bersama — bukan dua angka yang
+// harus disamakan dengan tangan setiap kali create-product.dto.ts berubah.
+const NAME_MAX_LENGTH = PRODUCT_LIMITS.name.max;
+const CATEGORY_MAX_LENGTH = PRODUCT_LIMITS.category.max;
 
 function parseRupiahInput(value: string): number {
   if (value === '' || value == null) return 0;
@@ -94,23 +96,6 @@ function parseRupiahInput(value: string): number {
 /** [MAX-LENGTH GUARDRAIL] Small right-aligned "used/max" counter, shared
  *  by name + description. Color escalates as the field fills up so the
  *  seller gets a passive warning before they actually hit the wall. */
-function CharCounter({ current, max }: { current: number; max: number }) {
-  const ratio = max > 0 ? current / max : 0;
-  return (
-    <span
-      className={cn(
-        'text-xs tabular-nums shrink-0',
-        ratio >= 1
-          ? 'text-destructive font-medium'
-          : ratio >= 0.9
-            ? 'text-amber-600 dark:text-amber-400'
-            : 'text-muted-foreground/70',
-      )}
-    >
-      {current}/{max}
-    </span>
-  );
-}
 
 export function StepDetails({
   form,
@@ -153,7 +138,6 @@ export function StepDetails({
   const selectedCategory = watch('category') ?? '';
   // [MAX-LENGTH GUARDRAIL] watch() drives the live counters below.
   const nameValue = watch('name') ?? '';
-  const descriptionValue = watch('description') ?? '';
 
   // [ESLINT set-state-in-effect FIX — Aug 2026]
   // categoryQuery has two writers: (1) commitCategory below, whenever the
@@ -207,7 +191,12 @@ export function StepDetails({
   const hasPriceError = fieldErrors.has('price');
 
   return (
-    <div className="space-y-6">
+    // [LEBAR KONSISTEN] Halaman ini ikut PAGE_COLUMN (1024px di lg+), jadi
+    // satu kolom membuat tiap isian jadi input selebar 1024px — terlalu lebar,
+    // sama salahnya dengan terlalu sempit. Nama & Deskripsi memakai kedua
+    // kolom (judul dan teks panjang memang minta lebar); sisanya berpasangan.
+    // Di bawah lg tetap satu kolom, gap-6 == space-y-6 sebelumnya.
+    <div className={PAGE_GRID_2_FORM_TIGHT}>
 
       {/* ── Name ──────────────────────────────────────────────────────── */}
       {/*
@@ -215,7 +204,7 @@ export function StepDetails({
         scrollToFirstFieldError() scroll ke sini saat name kosong.
       */}
       <div
-        className="space-y-2"
+        className={cn('space-y-2', PAGE_SPAN_2)}
         data-field-error={hasNameError ? 'true' : undefined}
       >
         <Label htmlFor="name">
@@ -250,27 +239,6 @@ export function StepDetails({
             )}
           </div>
           <CharCounter current={nameValue.length} max={NAME_MAX_LENGTH} />
-        </div>
-      </div>
-
-      {/* ── Description ───────────────────────────────────────────────── */}
-      <div className="space-y-2">
-        <Label htmlFor="description">{t('descriptionLabel')}</Label>
-        <Textarea
-          id="description"
-          placeholder={t('descriptionPlaceholder')}
-          rows={4}
-          maxLength={DESCRIPTION_MAX_LENGTH}
-          {...register('description')}
-          aria-invalid={!!errors.description}
-        />
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
-          <CharCounter current={descriptionValue.length} max={DESCRIPTION_MAX_LENGTH} />
         </div>
       </div>
 
@@ -415,7 +383,7 @@ export function StepDetails({
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          {FEATURES.digitalProducts ? t('priceHelper') : t('priceHelperNoDigital')}
+          {t('priceHelper')}
         </p>
         {hasPriceError && (
           <p className="text-sm text-destructive font-medium">
@@ -474,7 +442,7 @@ export function StepDetails({
         // ── Durasi layanan ────────────────────────────────────────────
         // Keduanya opsional: ada layanan yang selesai saat itu juga (potong
         // rambut) dan tidak punya estimasi untuk disampaikan ke pelanggan.
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className={cn('grid gap-4 sm:grid-cols-2', PAGE_SPAN_2)}>
           <div className="space-y-2">
             <Label htmlFor="durasiLabel">{t('durasiLabelLabel')}</Label>
             <Input
@@ -532,7 +500,7 @@ export function StepDetails({
           </div>
         </div>
       ) : (
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={cn('grid gap-4 sm:grid-cols-2', PAGE_SPAN_2)}>
         <div className="space-y-2">
           <Label htmlFor="stok">{t('stokLabel')}</Label>
           <Input

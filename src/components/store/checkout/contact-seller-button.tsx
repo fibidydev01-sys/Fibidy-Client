@@ -6,7 +6,7 @@
 //
 // Repurposed from WhatsAppOrderButton.
 // Purpose: pre-sales contact channel via WhatsApp.
-// Buyer can ask the seller questions before buying via Stripe.
+// Pembeli bisa bertanya ke penjual sebelum memesan lewat WhatsApp.
 //
 // Used in:
 //   - Discover detail page (alongside Buy button)
@@ -30,9 +30,8 @@
 // `store.checkout.contactSellerWhatsappLabels.{price,name,question}` and
 // interpolate them into the `{pricePart}/{namePart}/{questionPart}` slots.
 //
-// Also use `formatPrice()` from `lib/shared/format.ts` for the price part
-// so currency formatting is consistent with the rest of the app (instead
-// of the ad-hoc `$X.XX` formatting).
+// Also use `formatPriceIDR()` from `lib/shared/format.ts` for the price
+// part so formatting konsisten dengan sisa aplikasi (bukan `$X.XX` ad-hoc).
 //
 // REQUIRED JSON additIONS (messages/en/checkout.json):
 //
@@ -46,10 +45,8 @@
 //     ...
 //   }
 //
-// [IDR MIGRATION — May 2026]
-// Default `currency` prop: 'USD' → 'IDR'. Caller (DiscoverDetailClient)
-// passes `product.currency` which can be undefined → default fires.
-// Must match platform default to render Rp formatting in WA template.
+// [PANGKAS PRODUK DIGITAL] Prop `currency` dicabut — platform ini hanya
+// melayani Rupiah, dan kolom Product.currency sudah tidak ada.
 // ==========================================
 
 import { useState, type ReactNode } from 'react';
@@ -62,14 +59,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/shared/utils';
-import { generateWhatsAppLink, formatPrice } from '@/lib/shared/format';
+import { generateWhatsAppLink, formatPriceIDR } from '@/lib/shared/format';
 
 interface ContactSellerButtonProps {
   productName: string;
   sellerName: string;
   sellerWhatsapp: string;
   price?: number;
-  currency?: string;
   className?: string;
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -81,7 +77,6 @@ export function ContactSellerButton({
   sellerName,
   sellerWhatsapp,
   price,
-  currency = 'IDR',
   className,
   variant = 'outline',
   size = 'default',
@@ -103,7 +98,7 @@ export function ContactSellerButton({
     // `{pricePart}`, `{namePart}`, `{questionPart}` so the outer
     // structure stays under translator control.
     const pricePart = price
-      ? `\n${tLabels('price')}: ${formatPrice(price, currency)}`
+      ? `\n${tLabels('price')}: ${formatPriceIDR(price)}`
       : '';
     const namePart = name ? `\n${tLabels('name')}: ${name}` : '';
     const questionPart = question ? `\n${tLabels('question')}: ${question}` : '';

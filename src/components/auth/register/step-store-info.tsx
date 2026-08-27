@@ -82,7 +82,6 @@ export function StepStoreInfo({
       <div className="space-y-1.5">
         <Label
           htmlFor="store-name"
-          className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground"
         >
           {t('nameLabel')}
         </Label>
@@ -92,7 +91,6 @@ export function StepStoreInfo({
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
           className={cn(
-            'h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50',
             hasNameError && 'border-destructive focus-visible:ring-destructive',
           )}
         />
@@ -117,7 +115,6 @@ export function StepStoreInfo({
       <div className="space-y-1.5">
         <Label
           htmlFor="store-slug"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('slugLabel')}
         </Label>
@@ -128,8 +125,7 @@ export function StepStoreInfo({
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             className={cn(
-              'h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50',
-              hasSlugError && 'border-destructive focus-visible:ring-destructive',
+            hasSlugError && 'border-destructive focus-visible:ring-destructive',
             )}
           />
           {showAvailability && (
@@ -171,7 +167,6 @@ export function StepStoreInfo({
       <div className="space-y-1.5">
         <Label
           htmlFor="store-desc"
-          className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
         >
           {t('descriptionLabel')}{' '}
           <span className="normal-case font-normal text-muted-foreground/70">{t('descriptionOptional')}</span>
@@ -183,7 +178,7 @@ export function StepStoreInfo({
           value={description}
           onChange={(e) => handleDescriptionChange(e.target.value)}
           maxLength={500}
-          className="resize-none text-sm placeholder:text-muted-foreground/50"
+          className="resize-none"
         />
         <div className="flex justify-between text-[11px] text-muted-foreground">
           <span>{t('descriptionHelper')}</span>

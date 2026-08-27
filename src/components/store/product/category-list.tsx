@@ -1,10 +1,11 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { productsUrl } from '@/lib/public/store-url';
+import { useRouter } from '@/i18n/navigation';
 
 interface CategoryListProps {
   categories: string[];

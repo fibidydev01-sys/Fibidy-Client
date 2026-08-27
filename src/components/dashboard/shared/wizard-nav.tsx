@@ -26,6 +26,22 @@
 // visibly different bar width, which read as broken rather than adaptive.
 // One width, everywhere, no exceptions.
 //
+// [UI/UX — Aug 2026 v7] Aturan di atas TETAP BERLAKU; yang berubah cuma di
+// mana konstantanya tinggal. Lebarnya sekarang `PAGE_MAX_W` dari
+// shared/page-column.tsx: `max-w-2xl lg:max-w-5xl`.
+//
+// Ini BUKAN prop per-pemanggil yang dilarang paragraf di atas. Nilainya tetap
+// satu, tetap dipakai semua pemanggil, dan tetap tidak bisa ditimpa dari luar.
+// Yang bergeser: halamannya kini membaca konstanta yang SAMA, jadi bar ini
+// tidak lagi "sengaja tidak mengikuti" kolom kontennya — ia sejajar dengannya
+// secara struktural, bukan kebetulan.
+//
+// Kenapa itu penting: sebelum ini settings/hero.tsx dan product/form/
+// product.tsx merender formulir selebar layar sambil memasang bar 672px di
+// tengah. "Satu lebar di mana-mana" terpenuhi, tapi hasilnya tetap terlihat
+// rusak karena kontennya bukan lebar itu. Satu konstanta bersama menutup
+// celah itu tanpa membuka pintu prop per-pemanggil.
+//
 // [UI/UX — Aug 2026 v2] Desktop bar switched from `fixed` (positioned
 // against the viewport, with `left: var(--sidebar-width)` hand-approximating
 // where the content column starts) to `sticky` (positioned as a normal
@@ -111,11 +127,24 @@
 // case v5 already fixed and must stay untouched.
 // ==========================================
 
-import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
+// ── BENTUK: PIL, MENGIKUTI DIALEK DASBOR ──────────────────────────────────
+//
+// Bilah ini dan kedua tombolnya `rounded-full`. Sempat dilepas ke 12px/8px
+// atas dasar expo.design.md ("pill geometry is reserved for badges only"),
+// lalu DIKEMBALIKAN: pemilik produk menolak bentuk kotak itu setelah
+// melihatnya di layar. Lihat catatan panjangnya di globals.css, blok
+// [data-surface="app"] — dialek dasbor memang pil, dan itu pilihan, bukan
+// kelalaian.
+//
+// Tinggi tombolnya TIDAK dikembalikan ke h-9: 40px adalah ukuran baku
+// Button sekarang, dan tidak ada yang mempermasalahkannya.
+
+import { ChevronLeft, ChevronRight, Crown, Save, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { StepDots } from '@/components/dashboard/shared/step-wizard';
 import { cn } from '@/lib/shared/utils';
+import { PAGE_MAX_W } from './page-column';
 
 interface Step {
   title: string;
@@ -130,6 +159,16 @@ interface WizardNavProps {
   savingLabel?: string;
   // Back-only bar — instant-apply sections (e.g. Language) with nothing to save
   hideSaveButton?: boolean;
+  /**
+   * Aksi simpannya perlu paket berbayar.
+   *
+   * Tombolnya TIDAK dimatikan — ia tetap terlihat dan tetap bisa ditekan,
+   * cuma ikonnya berganti mahkota. Tombol mati tidak memberi tahu apa pun:
+   * penjual menekannya, tidak terjadi apa-apa, dan dia tidak tahu kenapa.
+   * Yang menahan aksinya ada di `onSave` pemanggil (lewat `useKasirLock`),
+   * dan di sana pula modal upgrade dibuka.
+   */
+  saveTerkunci?: boolean;
 
   // Universal back — step 0: caller tentukan kemana
   onBack?: () => void;
@@ -153,6 +192,7 @@ export function WizardNav({
   saveLabel,
   savingLabel,
   hideSaveButton = false,
+  saveTerkunci = false,
   onBack,
   steps,
   currentStep = 0,
@@ -195,13 +235,30 @@ export function WizardNav({
   // ── Save-only mode (shipping, social, about) ─────────────────────────
   if (!hasSteps) {
     return (
-      <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-2xl items-center justify-between gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+      <div
+        className={cn(
+        // [PRESISI] `mt-6` — jarak antara isi dan pill.
+      //
+      // Terukur sebelumnya: tepi bawah panel terakhir dan tepi atas pill
+      // sama-sama di y=710. Nol piksel. Tidak bertumpuk, tapi menempel.
+      //
+      // `pb-*` di kerangka halaman TIDAK bisa menghasilkan jarak ini — ia
+      // menambah ruang DI BAWAH pill (anak terakhir), bukan di antara
+      // keduanya. Yang dibutuhkan margin pada pill-nya sendiri.
+      //
+      // Di bawah md pill-nya `fixed` sehingga margin tidak berlaku, dan
+      // memang tidak perlu: di sana ia melayang dengan bottom-20.
+      'mt-6 ' +
+        'fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex items-center justify-between gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm',
+          PAGE_MAX_W,
+        )}
+      >
         {/* Back button (save-only mode) */}
         {onBack ? (
           <Button
             variant="outline"
             onClick={onBack}
-            className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+            className="gap-1.5 text-sm rounded-full sm:min-w-[130px]"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t('back')}</span>
@@ -214,9 +271,13 @@ export function WizardNav({
           <Button
             onClick={onSave}
             disabled={isSaving}
-            className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+            className="gap-1.5 text-sm rounded-full sm:min-w-[130px]"
           >
-            <Save className="h-3.5 w-3.5" />
+            {saveTerkunci ? (
+              <Crown className="h-3.5 w-3.5 text-amber-300" aria-hidden />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
             <span className="hidden sm:inline">
               {isSaving ? resolvedSavingLabel : resolvedSaveLabel}
             </span>
@@ -228,12 +289,29 @@ export function WizardNav({
 
   // ── Multi-step mode (hero, contact, payment, product, register) ───────
   return (
-    <div className="fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+    <div
+      className={cn(
+      // [PRESISI] `mt-6` — jarak antara isi dan pill.
+      //
+      // Terukur sebelumnya: tepi bawah panel terakhir dan tepi atas pill
+      // sama-sama di y=710. Nol piksel. Tidak bertumpuk, tapi menempel.
+      //
+      // `pb-*` di kerangka halaman TIDAK bisa menghasilkan jarak ini — ia
+      // menambah ruang DI BAWAH pill (anak terakhir), bukan di antara
+      // keduanya. Yang dibutuhkan margin pada pill-nya sendiri.
+      //
+      // Di bawah md pill-nya `fixed` sehingga margin tidak berlaku, dan
+      // memang tidak perlu: di sana ia melayang dengan bottom-20.
+      'mt-6 ' +
+        'fixed md:sticky bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:w-full z-40 mx-auto flex items-center justify-between gap-2 sm:gap-4 rounded-full border bg-background/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm',
+        PAGE_MAX_W,
+      )}
+    >
       <Button
         variant="outline"
         onClick={handlePrev}
         className={cn(
-          'gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]',
+          'gap-1.5 text-sm rounded-full sm:min-w-[130px]',
           !showPrevButton && 'invisible',
         )}
       >
@@ -247,7 +325,7 @@ export function WizardNav({
         <Button
           onClick={handleLastStep}
           disabled={isSaving}
-          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+          className="gap-1.5 text-sm rounded-full sm:min-w-[130px]"
         >
           <LastStepIcon className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">
@@ -257,7 +335,7 @@ export function WizardNav({
       ) : (
         <Button
           onClick={onNext}
-          className="gap-1.5 h-9 text-sm rounded-full sm:min-w-[130px]"
+          className="gap-1.5 text-sm rounded-full sm:min-w-[130px]"
         >
           <span className="hidden sm:inline">{t('next')}</span>
           <ChevronRight className="h-3.5 w-3.5" />

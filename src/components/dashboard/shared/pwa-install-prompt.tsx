@@ -60,7 +60,7 @@ function AndroidBanner({
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
               {/* App icon */}
-              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-md">
+              <div className="w-12 h-12 rounded-[var(--shape-panel)] bg-primary flex items-center justify-center shrink-0 shadow-md">
                 <Smartphone className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
@@ -186,7 +186,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-md">
+              <div className="w-11 h-11 rounded-[var(--shape-panel)] bg-primary flex items-center justify-center shadow-md">
                 <Smartphone className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
@@ -245,7 +245,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           </div>
 
           {/* iOS Share icon hint */}
-          <div className="flex items-center gap-2 rounded-xl bg-muted/50 border border-border/60 px-4 py-3 mb-4">
+          <div className="flex items-center gap-2 rounded-[var(--shape-panel)] bg-muted/50 border border-border/60 px-4 py-3 mb-4">
             <Share className="h-4 w-4 text-primary shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               {t('shareHintPrefix')} <span className="font-semibold text-foreground">{t('shareHintBold')}</span> {t('shareHintSuffix')}
@@ -256,7 +256,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           <button
             type="button"
             onClick={handleDismiss}
-            className="w-full h-11 rounded-xl border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+            className="w-full h-11 rounded-[var(--shape-panel)] border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
             {t('close')}
           </button>

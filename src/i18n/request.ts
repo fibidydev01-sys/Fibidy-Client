@@ -24,18 +24,15 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? requested
     : routing.defaultLocale;
 
-  // Merge all 15 namespaced message files at top level.
+  // Merge all 11 namespaced message files at top level.
   // Each file contributes its own top-level keys (no nesting under namespace).
   const messages = {
     ...(await import(`../../messages/${locale}/common.json`)).default,
     ...(await import(`../../messages/${locale}/auth.json`)).default,
-    ...(await import(`../../messages/${locale}/admin.json`)).default,
     ...(await import(`../../messages/${locale}/dashboard.json`)).default,
     ...(await import(`../../messages/${locale}/studio.json`)).default,
     ...(await import(`../../messages/${locale}/settings.json`)).default,
-    ...(await import(`../../messages/${locale}/discover.json`)).default,
     ...(await import(`../../messages/${locale}/store.json`)).default,
-    ...(await import(`../../messages/${locale}/checkout.json`)).default,
     ...(await import(`../../messages/${locale}/legal.json`)).default,
     ...(await import(`../../messages/${locale}/validation.json`)).default,
     ...(await import(`../../messages/${locale}/toast.json`)).default,

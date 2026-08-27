@@ -6,11 +6,11 @@
 // Intercept Link click + router.push
 //
 // Dipakai di: dashboard-sidebar, mobile-navbar
-// (Admin tidak butuh — tidak ada builder)
+// (Hanya relevan di builder Studio)
 // ==========================================
 
-import { usePathname, useRouter } from 'next/navigation';
 import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 interface UseNavGuardReturn {
   handleNavClick: (e: React.MouseEvent, href: string) => void;

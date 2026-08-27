@@ -14,18 +14,21 @@
 // ditampilkan sebagai dialog yang harus ditutup manual.
 // ============================================================================
 
+import { useMemo } from 'react';
 import {
   keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
+  type UseMutationOptions,
   type UseQueryOptions,
 } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { kasirApi } from '@/lib/api/kasir';
+import { isKasirPlanRequired, kasirApi } from '@/lib/api/kasir';
 import { getErrorMessage } from '@/lib/api/client';
 import { queryKeys } from '@/lib/shared/query-keys';
+import { useKasirLock } from './use-kasir-lock';
 import type {
   BayarTransaksiInput,
   CreateDiskonPresetInput,
@@ -58,6 +61,55 @@ function retryKecualiKlien(failureCount: number, error: unknown) {
   return failureCount < 1;
 }
 
+// ── Gerbang paket untuk SETIAP mutasi ───────────────────────────────────────
+//
+// Semua hook mutasi di berkas ini memakai `useKasirMutation`, bukan
+// `useMutation` langsung. Untuk tenant FREE, `mutate` diganti penjelasan —
+// permintaannya TIDAK PERNAH berangkat.
+//
+// Kenapa mengganti `mutate` alih-alih menolak di dalam `mutationFn`: menolak
+// di sana berarti janjinya ditolak, `onError` berjalan, dan penjual menerima
+// toast GALAT untuk sesuatu yang bukan galat. Yang benar bukan "gagal",
+// melainkan "belum tersedia di paketmu" — dan itu satu pesan, bukan dua.
+//
+// `terkunci` ikut dikembalikan supaya tombol bisa memasang mahkota tanpa
+// memanggil hook paket lagi sendiri-sendiri.
+function useKasirMutation<TData, TError, TVars, TCtx>(
+  options: UseMutationOptions<TData, TError, TVars, TCtx>,
+) {
+  const { terkunci, jelaskan } = useKasirLock();
+  const mutation = useMutation({
+    ...options,
+    // Jaring pengaman kalau gerbang klien BOCOR — tombol yang lupa dijaga,
+    // atau paket yang habis persis saat halaman sedang terbuka. Server
+    // menolaknya 403 KASIR_PLAN_REQUIRED, dan tanpa cabang ini penjual
+    // menerima pesan galat mentah untuk sesuatu yang bukan galat.
+    onError: (...args) => {
+      if (isKasirPlanRequired(args[0])) {
+        jelaskan();
+        return;
+      }
+      options.onError?.(...args);
+    },
+  });
+
+  return useMemo(() => {
+    if (!terkunci) return { ...mutation, terkunci };
+    return {
+      ...mutation,
+      terkunci,
+      mutate: (() => jelaskan()) as typeof mutation.mutate,
+      mutateAsync: (() => {
+        jelaskan();
+        // Janji yang TIDAK PERNAH selesai akan menggantungkan pemanggil yang
+        // menunggunya. Ditolak dengan alasan yang jelas supaya `await` di
+        // pemanggil berakhir, dan pesannya sudah keluar lewat `jelaskan()`.
+        return Promise.reject(new Error('KASIR_TERKUNCI'));
+      }) as typeof mutation.mutateAsync,
+    };
+  }, [mutation, terkunci, jelaskan]);
+}
+
 // ── Config ──────────────────────────────────────────────────────────────────
 
 export function useKasirConfig(
@@ -76,7 +128,7 @@ export function useUpdateKasirConfig() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (data: UpdateKasirConfigInput) => kasirApi.updateConfig(data),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.kasir.config(), data);
@@ -162,7 +214,7 @@ export function useRestock() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({
       productId,
       jumlah,
@@ -183,7 +235,7 @@ export function useRestock() {
 export function useOpname() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({
       productId,
       stokFisik,
@@ -215,7 +267,7 @@ export function useCreateDiskonPreset() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (data: CreateDiskonPresetInput) =>
       kasirApi.createDiskonPreset(data),
     onSuccess: () => {
@@ -229,7 +281,7 @@ export function useUpdateDiskonPreset() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({
       id,
       data,
@@ -248,7 +300,7 @@ export function useDeleteDiskonPreset() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (id: string) => kasirApi.deleteDiskonPreset(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kasir.presets() });
@@ -281,7 +333,7 @@ export function useCreatePromoRule() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (data: CreatePromoRuleInput) => kasirApi.createPromoRule(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promos() });
@@ -295,7 +347,7 @@ export function useDeletePromoRule() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (id: string) => kasirApi.deletePromoRule(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.kasir.promos() });
@@ -310,7 +362,7 @@ export function useDeletePromoRule() {
 export function useCreateTransaksi() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (data: CreateTransaksiInput) => kasirApi.createTransaksi(data),
     onSuccess: () => {
       // Transaksi menggeser stok, omzet, dan daftar produk sekaligus.
@@ -355,7 +407,7 @@ export function useBayarTransaksi() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({ id, data }: { id: string; data: BayarTransaksiInput }) =>
       kasirApi.bayarTransaksi(id, data),
     onSuccess: () => {
@@ -369,7 +421,7 @@ export function useVoidTransaksi() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({ id, alasan }: { id: string; alasan?: string }) =>
       kasirApi.voidTransaksi(id, alasan),
     onSuccess: () => {
@@ -383,7 +435,7 @@ export function useRefundTransaksi() {
   const t = useTranslations('dashboard.kasir.toast');
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: ({ id, alasan }: { id: string; alasan: string }) =>
       kasirApi.refundTransaksi(id, alasan),
     onSuccess: () => {
@@ -418,7 +470,7 @@ export function usePapanKerja(params?: {
 export function useUpdateStatusItem() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useKasirMutation({
     mutationFn: (input: UpdateStatusItemInput) =>
       kasirApi.updateStatusItem(input),
     onSuccess: (_hasil, input) => {

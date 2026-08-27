@@ -122,7 +122,7 @@ export function StepCategory({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(
-              'pl-9 h-10',
+              'pl-9',
               hasCategoryError && 'border-destructive focus-visible:ring-destructive',
             )}
           />
@@ -169,7 +169,7 @@ export function StepCategory({
           ) : (
             groups.map((group) => (
               <div key={group.key} className="space-y-2">
-                <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground px-1">
+                <p className="px-1">
                   {group.label}
                 </p>
                 <div className="space-y-2">
@@ -232,7 +232,6 @@ export function StepCategory({
                   handleSelectCustom();
                 }
               }}
-              className="h-10"
             />
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">

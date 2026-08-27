@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { Clock, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { formatPrice } from '@/lib/shared/format';
+import { formatPriceIDR } from '@/lib/shared/format';
 import { getProductPricing, formatDurasiLayanan } from '@/lib/shared/product-utils';
 import type { Product } from '@/types/product';
 
@@ -27,7 +27,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const { isCustomPrice, hasDiscount, discountPercent } = getProductPricing(product);
 
   // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
-  const currency = product.currency ?? 'IDR';
 
   // [KASIR JASA] Layanan dan barang tampil di etalase yang sama. Tanpa
   // penanda, "Cuci Setrika Kilat — Rp 15.000" terbaca sebagai barang yang
@@ -71,12 +70,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {!isCustomPrice && (
         <div className="flex items-baseline gap-3">
           <span className="text-3xl font-bold text-primary">
-            {formatPrice(product.price, currency)}
+            {formatPriceIDR(product.price)}
           </span>
           {hasDiscount && (
             <>
               <span className="text-lg text-muted-foreground line-through">
-                {formatPrice(product.comparePrice!, currency)}
+                {formatPriceIDR(product.comparePrice!)}
               </span>
               <Badge variant="destructive">{t('discountBadge', { percent: discountPercent })}</Badge>
             </>

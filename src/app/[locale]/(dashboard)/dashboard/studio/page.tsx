@@ -118,6 +118,9 @@ export default function LandingBuilderPage() {
 
   const { config: landingConfig, hasUnsavedChanges, isSaving, updateConfig: setLandingConfig, publishChanges: publishToServer, publishWithOverride } = useLandingConfig({
     initialConfig: tenant?.landingConfig,
+    // Server yang menolak, bukan klien. Modal upgrade baru muncul kalau
+    // permintaannya sungguh ditolak — bukan ditebak sebelum dikirim.
+    onPlanRejected: () => setUpgradeModalOpen(true),
     onSaveSuccess: async ({ wasFirstPublish }) => {
       await Promise.all([refresh(), refetchPrivateTenant()]);
       if (wasFirstPublish) {
@@ -128,6 +131,9 @@ export default function LandingBuilderPage() {
   });
 
   const normalizedConfig = useMemo(() => normalizeLandingConfig(landingConfig), [landingConfig]);
+
+  // Blok yang dipilih sekarang di luar jatah paket. Ini cuma untuk lencana
+  // mahkota — jujur menyebut bloknya berbayar, tanpa menahan tombol apa pun.
   const configHasProBlocks = !isBusiness && normalizedConfig !== null && hasProBlocks(normalizedConfig, blockVariantLimit);
   const heroEnabled = landingConfig?.hero?.enabled === true;
   const hasPublishedOnce = privateTenant?.hasPublishedOnce === true;
@@ -182,11 +188,19 @@ export default function LandingBuilderPage() {
     await publishWithOverride(overrideConfig);
   }, [landingConfig, publishWithOverride]);
 
+  // Dulu di sini ada gembok kedua: kalau configHasProBlocks, tombol terbit
+  // membuka modal upgrade dan permintaannya TIDAK PERNAH dikirim. Akibatnya
+  // penjual yang paketnya turun tidak bisa memperbaiki satu salah ketik pun
+  // di landing-nya — diblokir sebelum permintaannya sempat lahir.
+  //
+  // Sekarang permintaannya selalu dikirim. Server (tenants.service.ts) yang
+  // memutuskan, dan server memberi grandfathering: blok lama yang sudah
+  // tersimpan tetap diterima. Kalau server benar-benar menolak,
+  // onPlanRejected di atas yang membuka modal upgrade.
   const handlePublish = useCallback(async () => {
-    if (configHasProBlocks) { setUpgradeModalOpen(true); return; }
     if (!heroEnabled) { setOnboardingPhase('enable'); return; }
     await publishToServer();
-  }, [configHasProBlocks, heroEnabled, publishToServer]);
+  }, [heroEnabled, publishToServer]);
 
   const handleBlockSelect = useCallback((block: string) => {
     if (!landingConfig) return;
@@ -237,7 +251,15 @@ export default function LandingBuilderPage() {
     <>
       <SaveStatusPill hasUnsavedChanges={hasUnsavedChanges} isSaving={isSaving} />
 
-      <div className="fixed inset-0 overflow-y-auto overscroll-contain bg-background">
+      {/* DULU `fixed inset-0`: pratinjau menutupi SELURUH viewport, termasuk
+          sidebar dan celah 8px panel. Sidebar jadi terlihat seperti ditempel
+          di atas gambar, dan seluruh bentuk inset yang dipakai halaman lain
+          hilang begitu penjual membuka Studio.
+
+          Sekarang ia mengisi PANEL: tinggi penuh, lebar penuh, menggulir
+          sendiri. Sudut membulatnya datang dari `overflow-hidden` milik
+          SidebarInset, jadi pratinjau ikut terpotong mengikuti panel. */}
+      <div className="h-full w-full overflow-y-auto overscroll-contain bg-background">
         {isOnboardingPhase ? (
           <div className={cn('w-full h-full flex items-center justify-center', 'bg-gradient-to-br from-background via-muted/20 to-background')}>
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`, backgroundSize: '32px 32px' }} />

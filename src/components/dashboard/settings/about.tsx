@@ -13,6 +13,8 @@ import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { AboutFormData, FeatureItem } from '@/types/tenant';
 import { StepHighlights } from './form/about/step-highlights';
+import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ============================================================================
 // ABOUT SETTINGS SECTION
@@ -123,7 +125,7 @@ export function AboutSection({ onBack }: AboutSectionProps) {
   if (!tenant || !formData) return null;
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       <UpgradeModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}

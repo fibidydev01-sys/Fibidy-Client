@@ -10,10 +10,9 @@
 //
 // Effect: Google would index /id/dashboard/products (auth-required),
 // crawl them, get redirected to /id/login, and report soft-404 / poor
-// UX signals. Same for /id/admin/*, /id/checkout/*, etc.
+// UX signals. Same for /id/dashboard/*, dll.
 //
-// Fix: list both /xxx and /id/xxx variants explicitly. Also added
-// /checkout/* and /onboard/* (Stripe + KYC flows — never indexable).
+// Fix: list both /xxx and /id/xxx variants explicitly.
 // robots.txt disallow list mirrors the same expansion so honest bots
 // respect the rules even before sitemap regeneration.
 //
@@ -46,27 +45,6 @@ module.exports = {
     '/dashboard/*',
     '/id/dashboard',
     '/id/dashboard/*',
-
-    // ── Admin (en + id) ───────────────────────────────────────────
-    '/admin',
-    '/admin/*',
-    '/id/admin',
-    '/id/admin/*',
-
-    // ── Checkout flow (en + id) ───────────────────────────────────
-    // Stripe redirect target — depends on ?session_id=... query.
-    // Indexing these would create a flood of dead URLs in Google.
-    '/checkout/cancel',
-    '/checkout/success',
-    '/id/checkout/cancel',
-    '/id/checkout/success',
-
-    // ── Onboard (en + id) ─────────────────────────────────────────
-    // Stripe Connect / KYC return URL — same reason as checkout.
-    '/onboard',
-    '/onboard/*',
-    '/id/onboard',
-    '/id/onboard/*',
 
     // ── API ──────────────────────────────────────────────────────
     '/api/*',
@@ -104,9 +82,6 @@ module.exports = {
           // Dashboard
           '/dashboard/',
           '/id/dashboard/',
-          // Admin
-          '/admin/',
-          '/id/admin/',
           // API
           '/api/',
           // Next.js internals
@@ -118,11 +93,6 @@ module.exports = {
           '/id/register',
           '/forgot-password',
           '/id/forgot-password',
-          // Checkout / Onboard
-          '/checkout/',
-          '/id/checkout/',
-          '/onboard/',
-          '/id/onboard/',
         ],
       },
       {
@@ -138,17 +108,11 @@ module.exports = {
         disallow: [
           '/dashboard/',
           '/id/dashboard/',
-          '/admin/',
-          '/id/admin/',
           '/api/',
           '/login',
           '/id/login',
           '/register',
           '/id/register',
-          '/checkout/',
-          '/id/checkout/',
-          '/onboard/',
-          '/id/onboard/',
         ],
       },
       // Aggressive scrapers — full block

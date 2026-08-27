@@ -41,8 +41,6 @@ const STEP_CATEGORY = 2;
 const STEP_STORE_INFO = 3;
 const STEP_ACCOUNT_SELLER = 4;
 const STEP_REVIEW_SELLER = 5;
-const STEP_ACCOUNT_BUYER = 2;
-const STEP_REVIEW_BUYER = 3;
 
 // ============================================================
 // TYPES
@@ -104,16 +102,16 @@ function sanitizeCategoryFromQuery(raw: string | null): string | null {
   return getCategoryConfig(raw) ? raw : null;
 }
 
-export function getTotalSteps(intent: RegisterIntent | null): number {
-  return intent === 'BUYER' ? 3 : 5;
+export function getTotalSteps(): number {
+  return 5;
 }
 
-export function getAccountStep(intent: RegisterIntent | null): number {
-  return intent === 'BUYER' ? STEP_ACCOUNT_BUYER : STEP_ACCOUNT_SELLER;
+export function getAccountStep(): number {
+  return STEP_ACCOUNT_SELLER;
 }
 
-export function getReviewStep(intent: RegisterIntent | null): number {
-  return intent === 'BUYER' ? STEP_REVIEW_BUYER : STEP_REVIEW_SELLER;
+export function getReviewStep(): number {
+  return STEP_REVIEW_SELLER;
 }
 
 // ============================================================
@@ -191,8 +189,6 @@ export function useRegisterWizard() {
   };
 
   const nextStep = () => {
-    const intent = state.intent;
-
     setState((prev) => {
       const cur = prev.currentStep;
 
@@ -200,11 +196,7 @@ export function useRegisterWizard() {
         return { ...prev, currentStep: STEP_INTENT };
       }
 
-      if (intent === 'BUYER' && cur === STEP_INTENT) {
-        return { ...prev, currentStep: STEP_ACCOUNT_BUYER };
-      }
-
-      const total = getTotalSteps(intent);
+      const total = getTotalSteps();
       const next = cur + 1;
       if (next <= total + 1) {
         return { ...prev, currentStep: next };
@@ -214,17 +206,11 @@ export function useRegisterWizard() {
   };
 
   const prevStep = () => {
-    const intent = state.intent;
-
     setState((prev) => {
       const cur = prev.currentStep;
 
       if (cur === STEP_INTENT) {
         return { ...prev, currentStep: STEP_WELCOME };
-      }
-
-      if (intent === 'BUYER' && cur === STEP_ACCOUNT_BUYER) {
-        return { ...prev, currentStep: STEP_INTENT };
       }
 
       if (cur > STEP_WELCOME) {
@@ -235,7 +221,7 @@ export function useRegisterWizard() {
   };
 
   const goToStep = (step: number) => {
-    const total = getTotalSteps(state.intent);
+    const total = getTotalSteps();
     if (step >= STEP_WELCOME && step <= total + 1) {
       setState((prev) => ({ ...prev, currentStep: step }));
     }
@@ -258,10 +244,8 @@ export function useRegisterWizard() {
     clearBuilderBridge();
   };
 
-  const totalSteps = getTotalSteps(state.intent);
-  const isLastStep = state.intent === 'BUYER'
-    ? state.currentStep === STEP_REVIEW_BUYER
-    : state.currentStep === STEP_REVIEW_SELLER;
+  const totalSteps = getTotalSteps();
+  const isLastStep = state.currentStep === STEP_REVIEW_SELLER;
 
   return {
     state,

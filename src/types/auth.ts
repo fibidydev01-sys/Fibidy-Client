@@ -1,15 +1,14 @@
 // src/types/auth.ts
 //
 // [PHASE D — May 2026]
-// +RegisterIntent = 'BUYER' | 'SELLER' | 'EDU'
+// +RegisterIntent = 'SELLER' | 'EDU'
 //   Used in FE wizard state only — not sent to BE directly.
-//   BUYER  → calls authApi.registerBuyer (separate endpoint)
 //   SELLER → calls authApi.register with intent: 'SELLER'
 //   EDU    → calls authApi.register with intent: 'EDU'
 //
-// RegisterInput: +intent field (SELLER | EDU only — BUYER uses RegisterBuyerInput)
+// RegisterInput: +intent field (SELLER | EDU)
 
-export type RegisterIntent = 'BUYER' | 'SELLER' | 'EDU';
+export type RegisterIntent = 'SELLER' | 'EDU';
 
 export interface LoginInput {
   email: string;
@@ -38,7 +37,3 @@ export interface RegisterInput {
  * Register buyer request payload — BUYER intent
  * Hanya email + password. Role BUYER + slug auto-generated di server.
  */
-export interface RegisterBuyerInput {
-  email: string;
-  password: string;
-}

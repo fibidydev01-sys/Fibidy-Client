@@ -28,11 +28,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { useKasirLock } from '@/hooks/dashboard/use-kasir-lock';
 import { toast } from 'sonner';
 import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 import { getErrorMessage } from '@/lib/api/client';
 import { useKasirConfig, useUpdateKasirConfig } from '@/hooks/dashboard/use-kasir';
 import type { KasirConfig, KasirDagangType } from '@/types/kasir';
+import { Button } from '@/components/ui/button';
 
 /// Yang dijanjikan tiap mode, ditulis sebagai akibat yang bisa dilihat seller
 /// di layarnya — bukan istilah internal. "HYBRID" tidak berarti apa-apa buat
@@ -71,15 +74,37 @@ const PAPER_WIDTHS = [58, 80] as const;
 
 export function KasirModeDagangSection({ onBack }: { onBack: () => void }) {
   const t = useTranslations('dashboard.kasir.settingsKasir');
-  const { data: config, isLoading } = useKasirConfig();
+  const { data: config, isLoading, refetch } = useKasirConfig();
 
-  if (isLoading || !config) {
+  // [FINALISASI] Dulu satu baris: `if (isLoading || !config)`. Bentuk itu
+  // punya jalan buntu — begitu permintaan GAGAL, `isLoading` jadi false tapi
+  // `config` tetap undefined, sehingga syaratnya benar SELAMANYA dan
+  // skeletonnya tidak pernah selesai. Tenant FREE kena persis itu: setiap
+  // endpoint kasir menolak mereka dengan 403, dan halaman ini menggantung
+  // tanpa satu pun petunjuk.
+  //
+  // Sekarang ketiga keadaan dipisah. Kasus 403 sendiri sudah ditangani
+  // KasirPlanGate di settings/client.tsx sebelum komponen ini dipasang;
+  // cabang di bawah menangani kegagalan LAIN (jaringan, 500) yang dulu ikut
+  // tersedot ke jalan buntu yang sama.
+  if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4 pb-20 md:pb-6">
+      <div className={cn(PAGE_COLUMN, 'space-y-4 pb-20 md:pb-6')}>
         <Skeleton className="h-8 w-52" />
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-28 w-full" />
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <div className={cn(PAGE_COLUMN, 'space-y-3 pb-20 md:pb-6')}>
+        <p className="text-sm text-muted-foreground">{t('gagalMuat')}</p>
+        <Button variant="outline" size="sm" onClick={() => void refetch()}>
+          {t('cobaLagi')}
+        </Button>
       </div>
     );
   }
@@ -102,6 +127,10 @@ function FormKasir({
   t: (key: string, values?: Record<string, string | number>) => string;
 }) {
   const { mutate: simpanConfig, isPending } = useUpdateKasirConfig();
+
+  // Mahkota di tombol simpan. Seluruh pengaturannya tetap terlihat dan tetap
+  // bisa diutak-atik tenant FREE — yang ditahan cuma menyimpannya.
+  const { terkunci, jaga } = useKasirLock();
 
   const [dagangType, setDagangType] = useState<KasirDagangType>(
     config.dagangType,
@@ -127,7 +156,7 @@ function FormKasir({
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+    <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
       <div className="flex-1 space-y-8 pb-20 md:pb-6">
         {/* ── Mode dagang ────────────────────────────────────────────────── */}
         <section>
@@ -151,7 +180,7 @@ function FormKasir({
                   aria-checked={aktif}
                   onClick={() => setDagangType(m.id)}
                   className={cn(
-                    'w-full rounded-xl border p-4 text-left transition-colors',
+                    'w-full rounded-[var(--shape-panel)] border p-4 text-left transition-colors',
                     aktif
                       ? 'border-primary bg-primary/[0.06]'
                       : 'hover:bg-muted/50',
@@ -266,7 +295,7 @@ function FormKasir({
                     aria-pressed={aktif}
                     onClick={() => setPaperWidth(lebar)}
                     className={cn(
-                      'rounded-xl border px-3 py-3 text-left transition-colors',
+                      'rounded-[var(--shape-panel)] border px-3 py-3 text-left transition-colors',
                       aktif
                         ? 'border-primary bg-primary/[0.06]'
                         : 'hover:bg-muted/50',
@@ -288,7 +317,8 @@ function FormKasir({
 
       <WizardNav
         onBack={onBack}
-        onSave={simpan}
+        onSave={jaga(simpan)}
+        saveTerkunci={terkunci}
         isSaving={isPending}
         saveLabel={t('save')}
         savingLabel={t('saving')}

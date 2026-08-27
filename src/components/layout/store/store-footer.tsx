@@ -48,13 +48,13 @@
 // ============================================================================
 
 import * as React from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
 import type { PublicTenant } from '@/types/tenant';
+import { Link } from '@/i18n/navigation';
 
 // ==========================================
 // SOCIAL MEDIA ICONS (SVG inline)

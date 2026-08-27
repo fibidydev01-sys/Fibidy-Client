@@ -3,7 +3,7 @@
 // [PHASE D — May 2026]
 // Tenant interface: +isEduMode?: boolean
 // PublicTenant interface: +isEduMode?: boolean (needed for EduBanner in storefront)
-// UpdateTenantInput: isEduMode NOT included — only admin/dedicated endpoint can change it
+// UpdateTenantInput: isEduMode NOT included — ditetapkan sekali saat daftar
 //
 // [PHASE C v2 — May 2026]
 // +hasPublishedOnce, +dismissedFirstProductDialog
@@ -15,8 +15,6 @@
 // Rename ke `image` agar semantik jelas. DB migration: migrate-icon-to-image.sql
 
 import type { TenantLandingConfig } from './landing';
-
-export type TenantRole = 'BUYER' | 'SELLER';
 
 export interface SocialLinks {
   instagram?: string;
@@ -46,7 +44,6 @@ interface BaseTenant {
   slug: string;
   name: string;
   email: string;
-  role: TenantRole;
   category: string;
   description?: string;
   whatsapp?: string;
@@ -128,13 +125,6 @@ export interface CompleteSetupInput {
   locationLat?: number;
   locationLng?: number;
   socialLinks: SocialLinks;
-}
-
-export interface UpgradeToSellerInput {
-  slug: string;
-  name: string;
-  category: string;
-  whatsapp: string;
 }
 
 export interface HeroFormData {

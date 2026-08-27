@@ -53,10 +53,6 @@
     "metadata": {
       "productsTitle": "Produk",
       "productsDescription": "Kelola produk kamu",
-      "libraryTitle": "Library",
-      "libraryDescription": "Produk yang sudah kamu beli",
-      "downloadsTitle": "Riwayat Download",
-      "downloadsDescription": "Riwayat download produk",
       "setupStoreTitle": "Mulai Jualan",
       "setupStoreDescription": "Siapkan toko kamu dan mulai jualan",
       "settingsTitle": "Pengaturan",
@@ -74,17 +70,18 @@
       "more": "Lainnya",
       "products": "Produk",
       "studio": "Studio",
-      "downloads": "Riwayat",
-      "library": "Library",
       "settings": "Pengaturan",
       "subscription": "Langganan",
-      "startSelling": "Mulai Jualan",
-      "sell": "Jual",
-      "discover": "Jelajah",
       "signOut": "Keluar",
       "logout": "Logout",
-      "onboard": "Verifikasi",
-      "kasir": "Kasir"
+      "kasir": "Kasir",
+      "groupStore": "Toko",
+      "groupAccount": "Akun",
+      "plan": {
+        "free": "Gratis",
+        "starter": "Starter",
+        "business": "Business"
+      }
     },
     "products": {
       "title": "Produk",
@@ -151,9 +148,9 @@
             "title": "Detail",
             "desc": "Nama, deskripsi & harga"
           },
-          "file": {
-            "title": "File",
-            "desc": "Upload file produk"
+          "deskripsi": {
+            "title": "Deskripsi",
+            "desc": "Ceritakan produkmu"
           },
           "cover": {
             "title": "Cover",
@@ -178,8 +175,7 @@
           "priceLabel": "Harga (Rp)",
           "priceRequired": "Mohon masukkan harga minimal Rp 1.000.",
           "pricePlaceholder": "50000",
-          "priceHelper": "Atur dalam Rupiah. Pembeli bayar via Stripe, settlement langsung dalam IDR.",
-          "priceHelperNoDigital": "Harga yang dilihat pembeli di toko kamu.",
+          "priceHelper": "Harga yang dilihat pembeli di toko kamu.",
           "comparePriceLabel": "Harga pembanding",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Harga asli sebelum diskon ditampilkan dengan coretan. Kosongkan jika tidak sedang diskon.",
@@ -212,16 +208,7 @@
           "kycDropzoneDisabled": "Upload tersedia setelah verifikasi selesai",
           "dropzoneInfo": "Upload file produk {types} · Max {size} · {usedGb}GB / {totalGb}GB terpakai",
           "dropzoneInfoLoading": "Memuat info penyimpanan...",
-          "dropzoneLoading": "Memuat konfigurasi penyimpanan...",
-          "kycStates": {
-            "NOT_STARTED": "Kamu belum setup pembayaran. Selesaikan verifikasi dulu untuk upload produk.",
-            "PENDING": "Verifikasi sedang diproses. Tunggu konfirmasi sebelum upload produk.",
-            "NEEDS_MORE_INFO": "Butuh informasi tambahan. Selesaikan verifikasi untuk upload produk.",
-            "PAST_DUE": "Batas waktu verifikasi sudah lewat. Segera selesaikan untuk mencegah akun dinonaktifkan.",
-            "CHARGES_ONLY": "Akun kamu bisa menerima pembayaran, tapi payout belum aktif. Selesaikan verifikasi dulu.",
-            "REJECTED": "Verifikasi ditolak. Hubungi support di halaman Pengaturan.",
-            "fallback": "Selesaikan verifikasi dulu untuk upload dan jual produk."
-          }
+          "dropzoneLoading": "Memuat konfigurasi penyimpanan..."
         },
         "media": {
           "descriptionBusiness": "Upload hingga 5 foto. Foto pertama jadi thumbnail utama.",
@@ -246,7 +233,6 @@
           "descriptionEdit": "Cek ulang detail listing sebelum disimpan.",
           "noName": "Tanpa nama",
           "sectionDetails": "Detail",
-          "sectionDigitalFile": "File Produk",
           "sectionCoverImages": "Gambar Cover",
           "sectionPrice": "Harga",
           "sectionStatus": "Status",
@@ -257,7 +243,6 @@
           "rowPhotos": "Foto",
           "rowSellingPrice": "Harga jual",
           "rowComparePrice": "Harga pembanding",
-          "rowCurrency": "Mata uang",
           "rowVisibility": "Visibilitas",
           "notFilledIn": "Belum diisi",
           "noCategory": "Tanpa kategori",
@@ -281,22 +266,19 @@
         "upload_dropzone": {
           "dropText": "Drop file di sini atau klik untuk browse",
           "hint": "{types} · Max {size}"
-        }
-      },
-      "downloads": {
-        "title": "Riwayat Download",
-        "backTooltip": "Kembali",
-        "subtitleCount": "{count} total download",
-        "filterPlaceholder": "Filter berdasarkan produk",
-        "allProducts": "Semua Produk",
-        "empty": "Belum ada riwayat download.",
-        "columns": {
-          "product": "Produk",
-          "buyer": "Pembeli",
-          "time": "Waktu",
-          "ip": "IP"
         },
-        "dash": "—"
+        "description": {
+          "upgradeTitle": "Format teks tersedia di paket berbayar",
+          "upgradeBody": "Upgrade untuk memakai tebal, miring, dan daftar di deskripsi produk.",
+          "bold": "Tebal",
+          "italic": "Miring",
+          "bulletList": "Daftar berpoin",
+          "orderedList": "Daftar bernomor",
+          "link": "Tautan",
+          "unlink": "Hapus tautan",
+          "linkPrompt": "Tempel alamat tautan",
+          "linkApply": "Pasang"
+        }
       },
       "fetchError": {
         "title": "Produk gagal dimuat",
@@ -308,51 +290,51 @@
       "kind": {
         "barang": "Barang",
         "jasa": "Layanan"
-      }
-    },
-    "library": {
-      "title": "Library",
-      "subtitleCount": "{count} produk dimiliki",
-      "empty": "Library kamu masih kosong.",
-      "emptyCta": "Telusuri produk di",
-      "emptyCtaLink": "Jelajah",
-      "card": {
-        "accessRevoked": "Akses Dicabut",
-        "accessRevokedReasonRefund": "Akses dicabut karena refund disetujui.",
-        "accessRevokedReasonGeneric": "Akses download untuk produk ini sudah dicabut.",
-        "download": "Download"
       },
-      "refund": {
-        "button": {
-          "refunded": "Di-refund",
-          "rejected": "Refund Ditolak",
-          "processing": "Memproses...",
-          "expired": "Refund Kedaluwarsa",
-          "expiredTooltip": "Masa refund (7 hari) sudah lewat.",
-          "request": "Ajukan Refund",
-          "daysLeft": "(sisa {days}h)"
-        },
-        "rejectReasons": {
-          "FILE_ACCESSIBLE_AND_VALID": "File bisa diakses dan tidak rusak. Refund ditolak sesuai kebijakan.",
-          "OUTSIDE_TIME_WINDOW": "Masa refund (7 hari) sudah lewat.",
-          "ALREADY_REFUNDED": "Pembelian ini sudah di-refund sebelumnya.",
-          "fallback": "Permintaan refund ditolak."
-        },
-        "dialog": {
-          "title": "Ajukan Refund",
-          "policyIntro": "Sistem kami akan otomatis memverifikasi file dan mengevaluasi permintaan kamu. Proses ini memakan 5-30 detik.",
-          "approvedBold": "Disetujui",
-          "approvedFileUndownloadable": "jika file tidak bisa didownload",
-          "approvedFileCorrupted": "jika file rusak atau tidak bisa dibaca",
-          "notApprovedBold": "Tidak disetujui",
-          "rejectedContentMismatch": "untuk alasan \"konten tidak sesuai ekspektasi\"",
-          "rejectedNoLongerNeed": "untuk alasan \"saya tidak membutuhkannya lagi\"",
-          "rejectedAccident": "untuk alasan \"saya beli tidak sengaja\"",
-          "previewReminder": "Kamu sudah punya akses preview sebelum membeli. Refund hanya diberikan untuk masalah teknis pengiriman file, bukan alasan subjektif.",
-          "cancel": "Batal",
-          "confirm": "Ajukan Refund",
-          "evaluating": "Mengevaluasi..."
-        }
+      "collection": {
+        "searchLabel": "Cari",
+        "searchPlaceholder": "Cari berdasarkan nama",
+        "sortLabel": "Urutkan",
+        "sortNewest": "Terbaru",
+        "sortOldest": "Terlama",
+        "sortNameAsc": "Nama A–Z",
+        "sortNameDesc": "Nama Z–A",
+        "sortPriceAsc": "Harga terendah",
+        "sortPriceDesc": "Harga tertinggi",
+        "categoryLabel": "Kategori",
+        "categoryAll": "Semua kategori",
+        "viewGrid": "Tampilan grid",
+        "viewList": "Tampilan daftar",
+        "colProduct": "Produk",
+        "colPrice": "Harga",
+        "colStatus": "Status",
+        "colStock": "Stok",
+        "statusActive": "Aktif",
+        "statusInactive": "Nonaktif",
+        "noMatch": "Tidak ada produk yang cocok",
+        "noMatchHint": "Coba kata kunci lain atau kosongkan pencarian.",
+        "clearSearch": "Kosongkan pencarian",
+        "resultCount": "{count} dari {total} produk",
+        "rowsPerPage": "Baris per halaman",
+        "pageOf": "Halaman {page} dari {total}",
+        "prev": "Halaman sebelumnya",
+        "next": "Halaman berikutnya",
+        "first": "Halaman pertama",
+        "last": "Halaman terakhir",
+        "goToPage": "Ke halaman {page}",
+        "rowActions": "Aksi",
+        "edit": "Ubah",
+        "delete": "Hapus",
+        "activate": "Aktifkan",
+        "deactivate": "Nonaktifkan",
+        "selectAll": "Pilih semua",
+        "selectRow": "Pilih {name}",
+        "selectedCount": "{count} dipilih",
+        "deleteSelected": "Hapus",
+        "clearSelection": "Batal",
+        "bulkDeleteDescription": "Produk yang dipilih akan dihapus permanen dari tokomu. Tindakan ini tidak bisa dibatalkan.",
+        "bulkToolbar": "Aksi untuk {count} produk terpilih",
+        "selectedProducts": "{count} produk dipilih"
       }
     },
     "subscription": {
@@ -360,8 +342,6 @@
       "subtitle": "Kelola paket dan tagihan kamu",
       "currentPlan": "Paket saat ini",
       "planSuffix": "Plan",
-      "cancel": "Batalkan langganan",
-      "cancelling": "Membatalkan...",
       "activeUntil": "Aktif sampai {date} (sisa {days} hari)",
       "comingSoonBadge": "Segera Hadir",
       "comingSoon": {
@@ -372,7 +352,7 @@
       },
       "badge": {
         "active": "Aktif",
-        "pastDue": "Pembayaran Terlambat",
+        "pastDue": "Masa aktif habis",
         "canceled": "Dibatalkan",
         "free": "Gratis"
       },
@@ -382,19 +362,17 @@
         "completedTitle": "Langganan aktif!",
         "completedBody": "Paket kamu sudah di-upgrade. Nikmati fitur barunya! 🎉",
         "failedTitle": "Verifikasi pembayaran gagal.",
-        "failedBody": "Jika kartu kamu sudah ditagih, pembayaran akan diverifikasi otomatis dalam beberapa menit. Kamu bisa coba lagi atau hubungi support di",
+        "failedBody": "Kalau pembayaranmu sudah terkirim, aktivasinya akan terverifikasi sendiri dalam beberapa menit. Kamu bisa coba lagi atau hubungi kami di",
         "supportEmail": "admin@fibidy.com",
         "retryButton": "Coba verifikasi lagi"
       },
       "overLimit": {
         "titlePattern": "Limit paket {planName} tercapai",
         "productsPart": "Produk: {used}/{max}. ",
-        "digitalProductsPart": "File produk: {used}/{max}. ",
         "suffix": "Upgrade untuk menambah kapasitas."
       },
       "usage": {
         "products": "Produk",
-        "digital": "File",
         "storage": "Penyimpanan",
         "infinity": "∞"
       },
@@ -407,11 +385,6 @@
             "20 produk",
             "2 foto per produk",
             "3 template hero"
-          ],
-          "digitalFeatures": [
-            "3 file produk",
-            "Penyimpanan 0.5 GB",
-            "Maks 20 MB per file"
           ]
         },
         "STARTER": {
@@ -421,12 +394,8 @@
           "features": [
             "50 produk",
             "3 foto per produk",
-            "12 template hero"
-          ],
-          "digitalFeatures": [
-            "20 file produk",
-            "Penyimpanan 1 GB",
-            "Maks 50 MB per file"
+            "12 template hero",
+            "Kasir & catatan penjualan"
           ]
         },
         "BUSINESS": {
@@ -434,32 +403,20 @@
           "price": "Rp 149.000",
           "priceNote": "/bulan",
           "features": [
-            "50 produk",
+            "Produk tanpa batas",
             "5 foto per produk",
-            "Semua template hero"
-          ],
-          "digitalFeatures": [
-            "50 file produk",
-            "Penyimpanan 20 GB",
-            "Maks 500 MB per file"
+            "Semua template hero",
+            "Kasir & catatan penjualan"
           ]
         }
-      },
-      "platformFee": {
-        "label": "Biaya platform",
-        "FREE": "15%",
-        "STARTER": "5%",
-        "BUSINESS": "2%"
       },
       "cta": {
         "currentPlan": "Paket saat ini",
         "upgradeStarter": "Upgrade ke Starter",
         "upgradeBusiness": "Upgrade ke Business",
-        "requiresStarterFirst": "Butuh Starter dulu",
         "notYetQualified": "Belum memenuhi syarat",
-        "downgrade": "Downgrade",
-        "foreverFree": "Gratis selamanya",
-        "businessComingSoon": "Segera Hadir"
+        "renew": "Perpanjang",
+        "renewCarryOver": "Sisa {days} hari kamu ikut terbawa."
       },
       "businessUnlock": {
         "title": "Progress unlock Business",
@@ -470,21 +427,9 @@
         "totalTransactionsValue": "{count} / {threshold}",
         "or": "atau"
       },
-      "cancelDialog": {
-        "title": "Batalkan langganan?",
-        "descriptionPrefix": "Langganan kamu tetap aktif sampai akhir periode tagihan saat ini",
-        "descriptionPeriodSuffix": " ({date})",
-        "descriptionSuffix": ". Setelah itu, akun kamu otomatis turun ke paket Free.",
-        "cancel": "Batal",
-        "confirm": "Ya, batalkan",
-        "canceling": "Membatalkan..."
-      },
       "provider": {
-        "viaCard": "Kartu",
         "viaQris": "QRIS",
-        "renewsOn": "Diperpanjang otomatis pada",
         "activeUntilDate": "Aktif sampai",
-        "cardNotice": "Langganan diperpanjang otomatis setiap periode. Kamu bisa berhenti kapan saja akses tetap jalan sampai periode berjalan habis.",
         "qrisNotice": "Pembayaran QRIS tidak diperpanjang otomatis. Akses berakhir sendiri saat periode habis tidak perlu dibatalkan. Kalau mau lanjut, cukup bayar lagi sebelum tanggal berakhir.",
         "qrisNoAutoRenewToast": "Langganan QRIS tidak diperpanjang otomatis, jadi tidak ada yang perlu dibatalkan."
       },
@@ -497,11 +442,6 @@
           "title": "QRIS",
           "subtitle": "Scan pakai GoPay, OVO, DANA, ShopeePay, atau m-banking.",
           "noAutoRenew": "Sekali bayar tidak diperpanjang otomatis"
-        },
-        "card": {
-          "title": "Kartu kredit / debit",
-          "subtitle": "Visa, Mastercard, dan kartu internasional lainnya.",
-          "autoRenew": "Diperpanjang otomatis tiap periode"
         }
       },
       "tripay": {
@@ -529,25 +469,11 @@
         "retry": "Coba lagi",
         "reusedNotice": "Kamu masih punya tagihan yang aktif kami tampilkan kode QR yang sama, bukan membuat tagihan baru.",
         "unreachable": "Belum bisa terhubung ke penyedia pembayaran. Cek halaman langganan sebentar lagi tagihannya mungkin sudah terbuat."
-      }
-    },
-    "comingSoon": {
-      "digitalProducts": {
-        "title": "File Produk Segera Hadir",
-        "description": "Kami lagi sempurnakan pengalaman jualan produk berbasis file untuk seller Indonesia. Jual ebook, template, course, dan banyak lagi segera."
       },
-      "discover": {
-        "title": "Marketplace Digital Produk Segera Hadir",
-        "description": "Halaman Jelajah akan memungkinkan pembeli menelusuri produk dari seller di seluruh Fibidy. Pantau terus!"
-      },
-      "library": {
-        "title": "Library Segera Hadir",
-        "description": "Produk yang sudah kamu beli akan tersimpan di sini. Library akan siap saat marketplace kami diluncurkan."
-      },
-      "cta": {
-        "backToProducts": "Kembali ke Produk",
-        "backToDashboard": "Kembali ke Dashboard",
-        "backToHome": "Kembali ke Beranda"
+      "spanduk": {
+        "sisaHari": "Masa aktif paketmu tinggal {hari} hari lagi.",
+        "tenggang": "Masa aktif paketmu sudah lewat. Semua alat masih jalan {hari} hari lagi.",
+        "aksi": "Perpanjang sekarang"
       }
     },
     "setupStore": {
@@ -607,7 +533,7 @@
       "seller": {
         "title": "Bangun Toko Kamu",
         "subtitle": "Hampir selesai isi detailnya biar toko kamu siap tampil",
-        "autofillBadge": "Terisi otomatis ketuk untuk edit",
+        "autofillBadge": "Terisi otomatis — ketuk isiannya untuk mengubah",
         "stepIndicator": "Langkah {current} dari {total}",
         "steps": {
           "visual": {
@@ -639,11 +565,7 @@
           "logoLabel": "Logo Toko",
           "logoHelper": "Gambar persegi, JPG/PNG, min 200×200 px. Ini brand kamu bikin berkesan.",
           "uploadLogo": "Upload Logo",
-          "logoGenerate": "Buatkan dari nama toko",
           "logoGenerating": "Membuat...",
-          "logoGenerateOr": "atau",
-          "logoGenerateSuccess": "Logo dibuat dan diunggah",
-          "logoGenerateFailed": "Gagal membuat logo. Coba unggah manual.",
           "logoRequired": "Mohon upload logo toko atau buat otomatis",
           "colorLabel": "Warna Brand",
           "colorHelper": "Dipakai untuk tombol, link, dan aksen di seluruh toko kamu.",
@@ -676,7 +598,10 @@
           "descriptionLabel": "Deskripsi",
           "descriptionRequired": "Deskripsi terlalu pendek (min. 10 karakter)",
           "titlePlaceholder": "cth. Fresh Daily",
-          "descriptionPlaceholder": "cth. Bahan diambil setiap pagi dari petani lokal"
+          "descriptionPlaceholder": "cth. Bahan diambil setiap pagi dari petani lokal",
+          "panelTitle": "Highlight",
+          "reorderLabel": "Ubah urutan Highlight",
+          "reorderHint": "Seret ikon gagang untuk mengubah urutannya."
         },
         "contact": {
           "sectionCopyHeading": "Section Heading",
@@ -722,7 +647,8 @@
           "intro": "Tambah minimal satu link sosial agar pengunjung bisa mengikuti toko kamu.",
           "statusFilled": "{count} platform ditambahkan",
           "statusEmpty": "Belum ada minimal 1 harus diisi",
-          "emptyReminder": "Kamu perlu isi minimal satu link sosial sebelum bisa lanjut."
+          "emptyReminder": "Kamu perlu isi minimal satu link sosial sebelum bisa lanjut.",
+          "linksTitle": "Tautan Sosial"
         },
         "review": {
           "visual": "Tampilan",
@@ -852,40 +778,6 @@
         }
       }
     },
-    "onboard": {
-      "refreshing": "Memperbarui link verifikasi..."
-    },
-    "kycBanner": {
-      "label": "Verifikasi Pembayaran",
-      "loading": "Memuat status verifikasi...",
-      "polling": "Memeriksa status verifikasi...",
-      "states": {
-        "comingSoon": "Verifikasi pembayaran bakal aktif begitu fitur file produk rilis. Sabar ya kami pasti kabari.",
-        "notStartedFresh": "Setup pembayaran untuk mulai jualan.",
-        "notStartedReturning": "Kamu belum selesai setup pembayaran. Lanjutkan dari tempat terakhir.",
-        "pending": "Verifikasi sedang diproses. Biasanya butuh 1–2 hari kerja.",
-        "needsMoreInfoTitle": "Verifikasi butuh perbaikan:",
-        "needsMoreInfoGeneric": "Butuh informasi tambahan untuk melanjutkan verifikasi akun.",
-        "pastDueHeadline": "URGENT: Batas waktu verifikasi sudah lewat.",
-        "pastDueBody": "Akun kamu terancam dinonaktifkan. Selesaikan verifikasi sekarang.",
-        "chargesOnly": "Akun aktif menerima pembayaran. Payout ke bank belum aktif selesaikan verifikasi untuk aktifkan payout.",
-        "activeWithFutureReq": "Akun aktif. Ada update persyaratan baru yang perlu diselesaikan",
-        "activeWithFutureReqDeadline": " sebelum {date}",
-        "activeClean": "Akun terverifikasi. Kamu bisa menerima pembayaran dan tarik dana.",
-        "rejected": "Verifikasi akun ditolak. Hubungi tim support kami untuk bantuan."
-      },
-      "actions": {
-        "comingSoonButton": "Segera Hadir",
-        "setupPayments": "Setup Pembayaran",
-        "continueSetup": "Lanjutkan Setup",
-        "completeDocuments": "Lengkapi Dokumen",
-        "completeNow": "Selesaikan Sekarang",
-        "activatePayouts": "Aktifkan Payout",
-        "viewUpdates": "Lihat Update",
-        "contactSupport": "Hubungi Support",
-        "loading": "Memuat..."
-      }
-    },
     "pwa": {
       "android": {
         "title": "Pasang Fibidy",
@@ -925,8 +817,8 @@
     "upgradeModal": {
       "defaultTitle": "Limit paket tercapai",
       "defaultDescription": "Upgrade paket untuk unlock limit lebih tinggi dan fitur premium.",
-      "upgradeStarterLabel": "Upgrade ke Starter Rp 35.000/bln",
-      "upgradeBusinessLabel": "Upgrade ke Business Rp 149.000/bln",
+      "upgradeStarterLabel": "Upgrade ke Starter",
+      "upgradeBusinessLabel": "Upgrade ke Business",
       "viewAllPlans": "Lihat semua paket",
       "viewUpgradePlans": "Lihat paket upgrade",
       "maybeLater": "Mungkin nanti"
@@ -947,6 +839,12 @@
       "searchPlaceholder": "Cari produk…",
       "searchLayananPlaceholder": "Cari layanan…",
       "clearSearch": "Hapus pencarian",
+      "searchLabel": "Cari",
+      "categoryLabel": "Kategori",
+      "categoryAll": "Semua kategori",
+      "viewGrid": "Tampilan grid",
+      "viewList": "Tampilan daftar",
+      "addShort": "Tambah",
       "error": {
         "title": "Gagal memuat produk",
         "description": "Daftar produk tidak bisa diambil. Periksa koneksi lalu coba lagi.",
@@ -1171,7 +1069,10 @@
         "prevPage": "Sebelumnya",
         "nextPage": "Berikutnya",
         "tableCaption": "Menampilkan {tampil} dari {total} transaksi",
-        "actionsColumn": "Aksi"
+        "actionsColumn": "Aksi",
+        "emptyAction": "Mulai jualan",
+        "viewGrid": "Tampilan kartu",
+        "viewList": "Tampilan tabel"
       },
       "stok": {
         "title": "Kelola stok",
@@ -1232,11 +1133,14 @@
         "noFilterMatchTitle": "Tidak ada produk pada filter ini",
         "noFilterMatchDescription": "Ganti filter di atas untuk melihat produk lain.",
         "resetFilter": "Tampilkan semua",
-        "onlyActionNeeded": "Hanya yang perlu tindakan"
+        "onlyActionNeeded": "Hanya yang perlu tindakan",
+        "emptyAction": "Tambah produk"
       },
       "laporan": {
         "title": "Laporan kasir",
         "subtitle": "Ringkasan omzet, produk terlaris, dan kondisi stok.",
+        "emptyTitle": "Belum ada laporan",
+        "emptyDescription": "Laporan muncul sendiri begitu transaksi pertama tercatat di Kasir.",
         "errorTitle": "Gagal memuat laporan",
         "errorDescription": "Ringkasan tidak bisa diambil. Periksa koneksi lalu coba lagi.",
         "retry": "Coba lagi",
@@ -1281,10 +1185,7 @@
       },
       "planGate": {
         "title": "Kasir tersedia di paket berbayar",
-        "description": "Fitur kasir untuk penjualan langsung di toko termasuk dalam paket STARTER dan BUSINESS.",
-        "point1": "Catat transaksi walk-in lengkap dengan struk digital",
-        "point2": "Stok otomatis berkurang setiap penjualan, dengan log yang bisa diaudit",
-        "point3": "Rekap omzet harian, produk terlaris, dan peringatan stok kritis",
+        "description": "Data kasirmu tetap bisa dilihat. Untuk mencatat transaksi lagi, aktifkan paket Starter atau Business.",
         "cta": "Lihat paket"
       },
       "toast": {
@@ -1390,7 +1291,39 @@
         "paperWidth58Hint": "Printer thermal kecil, paling umum",
         "paperWidth80Hint": "Printer thermal lebar",
         "save": "Simpan",
-        "saving": "Menyimpan…"
+        "saving": "Menyimpan…",
+        "gagalMuat": "Pengaturan kasir gagal dimuat.",
+        "cobaLagi": "Coba lagi"
+      },
+      "terkunci": {
+        "judul": "Perlu paket berbayar",
+        "pesan": "Data kasirmu tetap bisa dilihat. Untuk mencatat lagi, aktifkan paket Starter atau Business."
+      },
+      "emptyLinks": {
+        "jual": {
+          "learn": "Pelajari cara pakai Kasir",
+          "help": "Butuh bantuan mulai jualan?"
+        },
+        "riwayat": {
+          "learn": "Pelajari cara pakai Kasir",
+          "help": "Butuh bantuan mencatat penjualan?"
+        },
+        "stok": {
+          "learn": "Pelajari cara kelola stok",
+          "help": "Butuh bantuan atur stok?"
+        },
+        "laporan": {
+          "learn": "Pelajari cara baca laporan",
+          "help": "Butuh bantuan baca laporan?"
+        },
+        "diskon": {
+          "learn": "Pelajari cara pakai diskon",
+          "help": "Butuh bantuan atur diskon?"
+        },
+        "promo": {
+          "learn": "Pelajari cara pakai promo",
+          "help": "Butuh bantuan atur promo?"
+        }
       }
     }
   }

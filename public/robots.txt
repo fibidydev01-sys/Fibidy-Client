@@ -8,8 +8,6 @@ Allow: /id/store/
 Allow: /id/legal/
 Disallow: /dashboard/
 Disallow: /id/dashboard/
-Disallow: /admin/
-Disallow: /id/admin/
 Disallow: /api/
 Disallow: /_next/
 Disallow: /login
@@ -18,10 +16,6 @@ Disallow: /register
 Disallow: /id/register
 Disallow: /forgot-password
 Disallow: /id/forgot-password
-Disallow: /checkout/
-Disallow: /id/checkout/
-Disallow: /onboard/
-Disallow: /id/onboard/
 
 # Googlebot
 User-agent: Googlebot
@@ -33,17 +27,11 @@ Allow: /id/store/
 Allow: /id/legal/
 Disallow: /dashboard/
 Disallow: /id/dashboard/
-Disallow: /admin/
-Disallow: /id/admin/
 Disallow: /api/
 Disallow: /login
 Disallow: /id/login
 Disallow: /register
 Disallow: /id/register
-Disallow: /checkout/
-Disallow: /id/checkout/
-Disallow: /onboard/
-Disallow: /id/onboard/
 
 # AhrefsBot
 User-agent: AhrefsBot

@@ -94,7 +94,9 @@ export function KasirEmptyState({
   className?: string;
 }) {
   return (
-    <Empty className={cn('border', className)}>
+    // `border` tidak lagi ditambal di sini — bingkainya sudah bawaan Empty.
+    // Lihat catatan di ui/empty.tsx soal kenapa ia dipindah ke primitifnya.
+    <Empty className={className}>
       <EmptyHeader>
         <EmptyMedia variant="icon">{icon}</EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
@@ -112,7 +114,9 @@ export function KasirEmptyState({
 /** Versi ringkas tanpa ikon — untuk kolom papan yang kebetulan kosong. */
 export function KasirEmptySlot({ label }: { label: string }) {
   return (
-    <Empty className="border border-dashed py-8 md:p-8">
+    // Kolom papan memang perlu ringkas: `min-h-0` menimpa tinggi minimum
+    // bawaan supaya kolom yang kosong tidak menjulang setinggi kolom berisi.
+    <Empty className="min-h-0 py-8 sm:p-8 md:p-8">
       <EmptyHeader>
         <EmptyDescription className="text-xs">{label}</EmptyDescription>
       </EmptyHeader>
@@ -146,7 +150,7 @@ export function KasirRowsSkeleton({
               <Skeleton className="h-4 w-2/5" />
               <Skeleton className="h-3 w-1/4" />
             </div>
-            {trailing === 'stepper' && <Skeleton className="h-9 w-9 rounded-lg" />}
+            {trailing === 'stepper' && <Skeleton className="h-9 w-9 rounded-[var(--shape-panel)]" />}
             {trailing === 'amount' && <Skeleton className="h-5 w-20" />}
           </KasirRowContent>
         </KasirRowCard>

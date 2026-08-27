@@ -18,7 +18,6 @@
 // ============================================================================
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useLogin } from '@/hooks/auth/use-auth';
+import { Link } from '@/i18n/navigation';
 
 // [I1 FIX] Schema TIDAK lagi di-define di module level.
 // Dipindah ke dalam komponen agar bisa pakai useTranslations.
@@ -107,7 +107,7 @@ export function LoginForm() {
                 <FormLabel>{t('passwordLabel')}</FormLabel>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-primary hover:underline"
+                  className="text-xs text-link hover:underline"
                 >
                   {t('forgotPasswordLink')}
                 </Link>
@@ -156,7 +156,7 @@ export function LoginForm() {
         {/* Register Link */}
         <p className="text-center text-sm text-muted-foreground">
           {t('noAccountPrompt')}{' '}
-          <Link href="/register" className="text-primary hover:underline font-medium">
+          <Link href="/register" className="text-link hover:underline font-medium">
             {t('createAccountLink')}
           </Link>
         </p>

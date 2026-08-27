@@ -2,32 +2,27 @@
 
 // ==========================================
 // PRODUCT CARD — Public Store
-// Adaptive: Digital (fileKey != null) vs Custom/Service (fileKey == null)
 //
 // [IDR MIGRATION — May 2026]
-// Removed `(isDigital ? 'USD' : 'IDR')` ternary.
-// Post-migration uniform default IDR — see product-info.tsx for rationale.
+// Uniform default IDR — see product-info.tsx for rationale.
 //
-// [UI/UX — Aug 2026] Dropped the "Digital"/"Custom" product-type badge —
-// it exposed an internal fileKey distinction that means nothing to a
-// buyer. The only badge shown here now is the discount one. `isDigital`
-// is still used for the fallback icon (FileText vs Package) when a
-// product has no photo.
+// [UI/UX — Aug 2026] Badge tipe produk dihapus; satu-satunya badge di sini
+// adalah diskon.
 // ==========================================
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import Link from 'next/link';
-import { Package, FileText, Clock } from 'lucide-react';
+import { Package, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatPrice } from '@/lib/shared/format';
+import { formatPriceIDR } from '@/lib/shared/format';
 import { productUrl } from '@/lib/public/store-url';
 import {
   getProductPricing,
   formatDurasiLayanan,
 } from '@/lib/shared/product-utils';
 import type { Product } from '@/types/product';
+import { Link } from '@/i18n/navigation';
 
 interface ProductCardProps {
   product: Product;
@@ -39,13 +34,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
   const tCommon = useTranslations('common.productType');
   const { hasDiscount, discountPercent, isCustomPrice } = getProductPricing(product);
 
-  // ── Adaptive: detect product type from fileKey ─────────────────
-  // fileKey != null → Digital → Stripe checkout
-  // fileKey == null → Custom/Service → WA order
-  const isDigital = !!product.fileKey;
-
-  // [IDR MIGRATION] Default to IDR uniformly. Was: ternary digital→USD.
-  const currency = product.currency ?? 'IDR';
+  // [IDR MIGRATION] Default to IDR uniformly.
   const durasi = formatDurasiLayanan(product.durasiJam);
 
   // Use the first thumbnail from the images array
@@ -69,19 +58,13 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
               className="object-cover transition-transform group-hover:scale-105"
               fallback={
                 <div className="flex h-full items-center justify-center">
-                  {isDigital
-                    ? <FileText className="h-10 w-10 text-muted-foreground/30" />
-                    : <Package className="h-10 w-10 text-muted-foreground/30" />
-                  }
+                  <Package className="h-10 w-10 text-muted-foreground/30" />
                 </div>
               }
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              {isDigital
-                ? <FileText className="h-10 w-10 text-muted-foreground/30" />
-                : <Package className="h-10 w-10 text-muted-foreground/30" />
-              }
+              <Package className="h-10 w-10 text-muted-foreground/30" />
             </div>
           )}
 
@@ -127,11 +110,11 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
           {!isCustomPrice && (
             <div className="mt-1.5 flex items-baseline gap-1.5">
               <span className="font-semibold text-sm text-primary">
-                {formatPrice(product.price, currency)}
+                {formatPriceIDR(product.price)}
               </span>
               {hasDiscount && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {formatPrice(product.comparePrice!, currency)}
+                  {formatPriceIDR(product.comparePrice!)}
                 </span>
               )}
             </div>

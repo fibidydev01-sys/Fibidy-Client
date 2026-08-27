@@ -1,11 +1,30 @@
 'use client';
 
+// ============================================================================
+// STEP IDENTITY — Pengaturan → Hero, langkah 1
+// File: src/components/dashboard/settings/form/hero/step-identity.tsx
+//
+// Langkah inilah yang dipakai pemilik produk sebagai ACUAN bentuk isian:
+// label, isian pil, penghitung di dalam isian, gembok pada medan terkunci.
+// Sejak berkas ini memakai FormField, acuan itu tidak lagi berupa markup yang
+// harus ditiru dengan mata — ia komponen yang dipakai bersama.
+//
+// Yang berubah dari versi tulis-tangan sebelumnya:
+//
+//   · Nama Toko akhirnya PUNYA batas (100, sesuai @MaxLength(100) di
+//     update-tenant.dto.ts). Sebelumnya tidak, jadi nama 300 karakter lolos
+//     sampai server menolaknya dalam bahasa Inggris.
+//   · Ambang peringatan penghitung tidak lagi `>= 14` yang ditulis tangan,
+//     melainkan 90% dari batas — rumus yang sama dengan seluruh dasbor.
+//   · Gembok tidak lagi disalin di tiga label; `locked` yang mengurusnya.
+// ============================================================================
+
 import { useTranslations } from 'next-intl';
-import { Label } from '@/components/ui/label';
+import { FieldShell, FormField } from '@/components/dashboard/shared/form-field';
 import { Input } from '@/components/ui/input';
-import { Lock } from 'lucide-react';
-import { cn } from '@/lib/shared/utils';
+import { TENANT_LIMITS } from '@/lib/constants/dashboard/field-limits';
 import type { HeroFormData } from '@/types/tenant';
+import { PAGE_GRID_2_FORM } from '@/components/dashboard/shared/page-column';
 
 interface StepIdentityProps {
   formData: HeroFormData;
@@ -25,86 +44,55 @@ export function StepIdentity({
   const t = useTranslations('settings.hero.identity');
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto">
+    // [LEBAR KONSISTEN] Dulu `space-y-8 max-w-2xl mx-auto`: lima isian
+    // pendek diantre satu kolom 672px, menyisakan ruang kosong sepanjang
+    // layar di bawahnya. Isian sependek ini memang meminta dijejer.
+    <div className={PAGE_GRID_2_FORM}>
 
-      {/* Store Name */}
-      <div id="tour-store-name" className="space-y-1.5">
-        <Label htmlFor="name" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          {t('storeName')}
-        </Label>
-        <Input
-          id="name"
-          placeholder={t('storeNamePlaceholder')}
-          value={formData.name}
-          onChange={(e) => updateFormData('name', e.target.value)}
-          className="h-11 text-base font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50"
-        />
-      </div>
+      <FormField
+        id="name"
+        anchorId="tour-store-name"
+        label={t('storeName')}
+        placeholder={t('storeNamePlaceholder')}
+        value={formData.name}
+        onChange={(v) => updateFormData('name', v)}
+        limit={TENANT_LIMITS.name}
+      />
 
-      {/* Button Label */}
-      <div id="tour-cta-button-label" className="space-y-1.5">
-        <Label htmlFor="cta" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-          {t('buttonLabel')}
-        </Label>
-        <div className="relative">
-          <Input
-            id="cta"
-            placeholder={t('buttonLabelPlaceholder')}
-            value={formData.heroCtaText}
-            onChange={(e) => onCtaTextChange(e.target.value)}
-            className="h-11 text-sm font-semibold tracking-tight placeholder:font-normal placeholder:text-muted-foreground/50 pr-12"
-            maxLength={15}
-          />
-          <span className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-mono tabular-nums pointer-events-none',
-            formData.heroCtaText.length >= 14 ? 'text-amber-500 font-semibold' : 'text-muted-foreground/50'
-          )}>
-            {t('buttonLabelCounter', { current: formData.heroCtaText.length, max: 15 })}
-          </span>
-        </div>
-      </div>
+      <FormField
+        id="cta"
+        anchorId="tour-cta-button-label"
+        label={t('buttonLabel')}
+        placeholder={t('buttonLabelPlaceholder')}
+        value={formData.heroCtaText}
+        onChange={onCtaTextChange}
+        limit={TENANT_LIMITS.heroCtaText}
+      />
 
-      {/* Category */}
-      <div id="tour-category" className="space-y-1.5">
-        <Label htmlFor="category" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground flex items-center gap-1.5">
-          {t('category')}
-          <Lock className="h-3 w-3 text-muted-foreground/50" />
-        </Label>
+      {/* ── Medan terkunci ────────────────────────────────────────────────
+          Ketiganya ditampilkan supaya penjual TAHU isinya, bukan supaya
+          mengubahnya. Memakai FieldShell (bukan FormField) karena tidak ada
+          nilai yang berubah — dan penghitung pada isian yang tidak bisa
+          diketik cuma kebisingan. */}
+      <FieldShell htmlFor="category" label={t('category')} locked>
         <Input
           id="category"
           value={formData.category || t('categoryNotSet')}
           disabled
-          className="h-11 text-sm bg-muted/30 text-muted-foreground cursor-not-allowed"
         />
-      </div>
+      </FieldShell>
 
-      {/* Email */}
-      <div className="space-y-1.5">
-        <Label htmlFor="tenantEmail" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground flex items-center gap-1.5">
-          {t('email')}
-          <Lock className="h-3 w-3 text-muted-foreground/50" />
-        </Label>
-        <Input
-          id="tenantEmail"
-          value={tenantEmail}
-          disabled
-          className="h-11 text-sm bg-muted/30 text-muted-foreground cursor-not-allowed"
-        />
-      </div>
+      <FieldShell htmlFor="tenantEmail" label={t('email')} locked>
+        <Input id="tenantEmail" value={tenantEmail} disabled />
+      </FieldShell>
 
-      {/* Store Domain */}
-      <div className="space-y-1.5">
-        <Label htmlFor="tenantDomain" className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground flex items-center gap-1.5">
-          {t('storeDomain')}
-          <Lock className="h-3 w-3 text-muted-foreground/50" />
-        </Label>
+      <FieldShell htmlFor="tenantDomain" label={t('storeDomain')} locked>
         <Input
           id="tenantDomain"
           value={t('domainSuffix', { slug: tenantSlug })}
           disabled
-          className="h-11 text-sm font-mono bg-muted/30 text-muted-foreground cursor-not-allowed"
         />
-      </div>
+      </FieldShell>
 
     </div>
   );

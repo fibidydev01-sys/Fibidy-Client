@@ -62,7 +62,7 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
       <div id="tour-social-links" className="space-y-7">
         {SOCIAL_GROUPS.map((group) => (
           <div key={group.groupKey} className="space-y-3">
-            <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground/60 border-b pb-1.5">
+            <p className="text-caption-uppercase caption-uppercase text-muted-foreground/60 border-b pb-1.5">
               {t(`groups.${group.groupKey}`)}
             </p>
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -74,7 +74,6 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
                     <div className="flex items-center gap-1.5">
                       <Label
                         htmlFor={`d-${key}`}
-                        className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
                       >
                         {tFields(`${i18nKey}.label`)}
                       </Label>
@@ -87,7 +86,6 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
                       placeholder={tFields(`${i18nKey}.placeholder`)}
                       value={val}
                       onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                      className="h-9 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/40"
                     />
                   </div>
                 );
@@ -108,13 +106,20 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
 
   // ── MOBILE ───────────────────────────────────────────────────────────────
   return (
-    <div id="tour-social-links" className="space-y-5 max-w-sm mx-auto">
+    // [LEBAR KONSISTEN] `max-w-sm mx-auto` dilepas. Varian ini tampil
+    // 0–1023px, jadi ia juga yang dipakai TABLET — dan di sana 384px itu
+    // duduk di tengah kolom 672px, meleset 144px dari pill WizardNav di
+    // bawahnya. Di ponsel tidak ada bedanya (358px < 384px), jadi yang
+    // diperbaiki cuma tablet.
+    <div id="tour-social-links" className="space-y-5">
       {SOCIAL_GROUPS.map((group) => (
         <div key={group.groupKey} className="space-y-3">
-          <p className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground/60 border-b pb-1.5">
+          <p className="text-caption-uppercase caption-uppercase text-muted-foreground/60 border-b pb-1.5">
             {t(`groups.${group.groupKey}`)}
           </p>
-          <div className="space-y-3">
+          {/* gap-3 == space-y-3 saat satu kolom, jadi tampilan ponsel persis
+              seperti sebelumnya; dua kolom baru muncul dari md ke atas. */}
+          <div className="grid gap-3 md:grid-cols-2">
             {group.fields.map(({ key, i18nKey }) => {
               const val = formData.socialLinks[key] || '';
               const filled = Boolean(val);
@@ -123,7 +128,6 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
                   <div className="flex items-center gap-1.5">
                     <Label
                       htmlFor={`m-${key}`}
-                      className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
                     >
                       {tFields(`${i18nKey}.label`)}
                     </Label>
@@ -136,7 +140,6 @@ export function StepSocialLinks({ formData, onSocialLinkChange, isDesktop = fals
                     placeholder={tFields(`${i18nKey}.placeholder`)}
                     value={val}
                     onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                    className="h-9 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/40"
                   />
                 </div>
               );

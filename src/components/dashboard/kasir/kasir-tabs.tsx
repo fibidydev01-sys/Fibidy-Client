@@ -36,80 +36,33 @@
 // ============================================================================
 
 import { useEffect, useSyncExternalStore } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import {
-  BarChart3,
-  Boxes,
-  ClipboardList,
-  History,
-  ShoppingCart,
-  type LucideIcon,
-} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
-import type { KasirDagangType } from '@/types/kasir';
+import {
+  bacaCacheDagangType,
+  layarKasirUntuk,
+  tulisCacheDagangType,
+} from '@/lib/constants/dashboard/kasir-screens';
+import { Link, usePathname } from '@/i18n/navigation';
 
-interface KasirTab {
-  href: string;
-  labelKey: string;
-  icon: LucideIcon;
-  /** true = hanya aktif pada path persis, bukan prefix. */
-  exact?: boolean;
-  /**
-   * [G7] Mode dagang yang boleh melihat tab ini. Tidak diisi = selalu tampil.
-   *
-   * Menyembunyikan, bukan mengosongkan: tab Stok pada toko laundry akan
-   * selamanya kosong karena layanan tidak punya persediaan, dan menu yang
-   * selalu kosong membuat seller mengira datanya hilang.
-   */
-  untuk?: KasirDagangType[];
-}
+// ── DAFTAR LAYAR: PINDAH KE MODUL BERSAMA ─────────────────────────────────
+//
+// `TABS`, `KasirTab`, `CACHE_KEY`, dan `bacaCache` dulu tinggal di sini.
+// Semuanya pindah ke lib/constants/dashboard/kasir-screens.ts karena SIDEBAR
+// juga butuh daftar yang sama — dan selama daftarnya dua, keduanya sempat
+// berbeda: sidebar menampilkan Papan Kerja pada toko PRODUK, strip ini tidak.
+// Lihat catatan lengkapnya di modul itu.
 
-const TABS: KasirTab[] = [
-  { href: '/dashboard/kasir', labelKey: 'jual', icon: ShoppingCart, exact: true },
-  {
-    href: '/dashboard/kasir/papan',
-    labelKey: 'papan',
-    icon: ClipboardList,
-    untuk: ['JASA', 'HYBRID'],
-  },
-  { href: '/dashboard/kasir/riwayat', labelKey: 'riwayat', icon: History },
-  {
-    href: '/dashboard/kasir/stok',
-    labelKey: 'stok',
-    icon: Boxes,
-    untuk: ['PRODUK', 'HYBRID'],
-  },
-  { href: '/dashboard/kasir/laporan', labelKey: 'laporan', icon: BarChart3 },
-];
-
-const CACHE_KEY = 'fibidy.kasir.dagangType';
-
-function bacaCache(): KasirDagangType | null {
-  try {
-    const nilai = window.localStorage.getItem(CACHE_KEY);
-    return nilai === 'PRODUK' || nilai === 'JASA' || nilai === 'HYBRID'
-      ? nilai
-      : null;
-  } catch {
-    // Safari mode privat melempar saat localStorage disentuh. Tebakan awal
-    // hilang, tab tetap benar setelah config datang.
-    return null;
-  }
-}
-
-function stripLocalePrefix(pathname: string): string {
-  const match = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
-  if (!match) return pathname;
-  return match[2] || '/';
-}
+// [FIX — locale hilang] `stripLocalePrefix` dihapus: `usePathname` kini
+// datang dari '@/i18n/navigation' dan sudah mengembalikan path tanpa prefix
+// locale, jadi helper-nya tidak pernah mengubah apa pun. Lihat catatan
+// panjangnya di dashboard-route-guard.tsx.
 
 export function KasirTabs() {
   const t = useTranslations('dashboard.kasir.tabs');
-  const pathname = stripLocalePrefix(usePathname());
+  const pathname = usePathname();
 
   const { data: config, isLoading } = useKasirConfig();
 
@@ -120,17 +73,14 @@ export function KasirTabs() {
   // render hidrasi, snapshot klien dipakai setelahnya.
   const cache = useSyncExternalStore(
     () => () => undefined,
-    bacaCache,
+    bacaCacheDagangType,
     () => null,
   );
 
+  // Strip ini satu-satunya penulis cache. Sidebar cuma membacanya — ia tidak
+  // memanggil useKasirConfig() sendiri; lihat kasir-screens.ts.
   useEffect(() => {
-    if (!config?.dagangType) return;
-    try {
-      window.localStorage.setItem(CACHE_KEY, config.dagangType);
-    } catch {
-      /* tanpa cache pun tab tetap benar */
-    }
+    if (config?.dagangType) tulisCacheDagangType(config.dagangType);
   }, [config?.dagangType]);
 
   const dagangType = config?.dagangType ?? cache;
@@ -138,12 +88,10 @@ export function KasirTabs() {
   // Tinggi h-9 sama persis dengan TabsList, jadi pergantian
   // skeleton → tab tidak menggeser satu piksel pun secara vertikal.
   if (!dagangType && isLoading) {
-    return <Skeleton className="h-9 w-full max-w-md rounded-lg" />;
+    return <Skeleton className="h-9 w-full max-w-md rounded-[var(--shape-control)]" />;
   }
 
-  const tabsTampil = TABS.filter(
-    (tab) => !tab.untuk || tab.untuk.includes(dagangType ?? 'PRODUK'),
-  );
+  const tabsTampil = layarKasirUntuk(dagangType);
 
   // Tab "Jual" hanya aktif pada path persis — tanpa ini ia ikut menyala
   // di /riwayat, /stok, dan /laporan yang semuanya berawalan sama.
@@ -167,7 +115,7 @@ export function KasirTabs() {
           >
             <Link href={tab.href}>
               <tab.icon className="h-4 w-4" aria-hidden />
-              {t(tab.labelKey)}
+              {t(tab.key)}
             </Link>
           </TabsTrigger>
         ))}

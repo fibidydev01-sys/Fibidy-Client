@@ -18,6 +18,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/shared/utils';
 import type { SocialLinks } from '@/types/tenant';
+import {
+  FormSection,
+  FormPanel,
+  PANEL_FIELDS_2,
+} from '@/components/dashboard/shared/form-panel';
 
 interface StepSocialProps {
   socialLinks: SocialLinks;
@@ -60,61 +65,70 @@ export function StepSocial({
   };
 
   return (
-    <div className="space-y-6 max-w-lg mx-auto">
-      <p className="text-sm text-muted-foreground">{t('intro')}</p>
-
-      {/* Status pill */}
-      <div className={cn(
-        'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border transition-colors',
-        hasSocialError && 'border-destructive/50 bg-destructive/5',
-      )}>
-        {filledCount > 0 ? (
-          <span className="text-emerald-600">{t('statusFilled', { count: filledCount })}</span>
-        ) : (
-          <span className={cn(hasSocialError ? 'text-destructive' : 'text-destructive')}>
-            {t('statusEmpty')}
-          </span>
-        )}
-      </div>
-
-      {/*
-        [SCROLL FIX] data-field-error di container social links.
-        scrollToFirstFieldError() scroll ke sini saat semua links kosong.
-      */}
-      <div
-        className={cn(
-          'space-y-4 rounded-lg p-3 transition-all',
-          hasSocialError && 'ring-2 ring-destructive ring-offset-2',
-        )}
-        data-field-error={hasSocialError ? 'true' : undefined}
+    // [PRESISI] Dulu intro, pil status, dan dua paragraf pengingat semuanya
+    // ANAK LANGSUNG grid dua kolom — empat sel terpakai sebelum satu pun
+    // isian muncul. Sekarang intro dan pil naik ke kepala langkah, dan
+    // kedelapan tautan tinggal di satu panel dengan grid seragam di dalamnya.
+    <FormSection
+      intro={t('intro')}
+      badge={
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+            hasSocialError && 'border-destructive/50 bg-destructive/5',
+          )}
+        >
+          {filledCount > 0 ? (
+            <span className="text-emerald-600">
+              {t('statusFilled', { count: filledCount })}
+            </span>
+          ) : (
+            <span className="text-destructive">{t('statusEmpty')}</span>
+          )}
+        </span>
+      }
+    >
+      <FormPanel
+        wide
+        title={t('linksTitle')}
+        description={
+          filledCount === 0 ? (
+            <span className="font-medium text-destructive">
+              {t('emptyReminder')}
+            </span>
+          ) : undefined
+        }
       >
-        {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
-          <div key={key} className="space-y-1.5">
-            <Label
-              htmlFor={`social-${key}`}
-              className="text-[11px] font-medium tracking-widests uppercase text-muted-foreground"
-            >
-              {label}
-            </Label>
-            <Input
-              id={`social-${key}`}
-              type="url"
-              placeholder={placeholder}
-              value={socialLinks[key] ?? ''}
-              onChange={(e) => handleChange(key, e.target.value)}
-              className="h-10 text-sm"
-            />
-          </div>
-        ))}
-      </div>
-
-      {hasSocialError && (
-        <p className="text-xs text-destructive font-medium">{t('emptyReminder')}</p>
-      )}
-
-      {filledCount === 0 && !hasSocialError && (
-        <p className="text-xs text-destructive">{t('emptyReminder')}</p>
-      )}
-    </div>
+        {/*
+          [SCROLL FIX] data-field-error di wadah tautan.
+          scrollToFirstFieldError() mendarat di sini saat semuanya kosong.
+        */}
+        <div
+          className={cn(
+            PANEL_FIELDS_2,
+            'rounded-lg transition-all',
+            hasSocialError && 'ring-2 ring-destructive ring-offset-2',
+          )}
+          data-field-error={hasSocialError ? 'true' : undefined}
+        >
+          {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1.5">
+              <Label
+                htmlFor={`social-${key}`}
+              >
+                {label}
+              </Label>
+              <Input
+                id={`social-${key}`}
+                type="url"
+                placeholder={placeholder}
+                value={socialLinks[key] ?? ''}
+                onChange={(e) => handleChange(key, e.target.value)}
+              />
+            </div>
+          ))}
+        </div>
+      </FormPanel>
+    </FormSection>
   );
 }

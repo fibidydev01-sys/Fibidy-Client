@@ -5,7 +5,6 @@ import type {
   UpdateTenantInput,
   CompleteSetupInput,
   DashboardStats,
-  UpgradeToSellerInput,
 } from '@/types/tenant';
 
 // ==========================================
@@ -38,9 +37,6 @@ export const tenantsApi = {
 
   checkSlug: async (slug: string): Promise<{ slug: string; available: boolean }> =>
     api.get<{ slug: string; available: boolean }>(`/tenants/check-slug/${slug}`),
-
-  upgradeTenantToSeller: (data: UpgradeToSellerInput): Promise<{ message: string; tenant: Tenant }> =>
-    api.patch<{ message: string; tenant: Tenant }>('/tenants/upgrade-to-seller', data),
 
   /**
    * [TIDUR-NYENYAK FIX #5]

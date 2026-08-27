@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ProductGrid } from './product-grid';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
 import type { Product } from '@/types/product';
+import { Link } from '@/i18n/navigation';
 
 interface FeaturedProductsProps {
   products: Product[];

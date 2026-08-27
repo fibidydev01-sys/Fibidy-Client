@@ -11,7 +11,6 @@
 // ==========================================
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Clock } from 'lucide-react';
@@ -36,6 +35,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Link } from '@/i18n/navigation';
 
 export function ForgotPasswordForm() {
   const t = useTranslations('auth.forgotPassword');

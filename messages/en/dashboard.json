@@ -53,10 +53,6 @@
     "metadata": {
       "productsTitle": "Products",
       "productsDescription": "Manage your products",
-      "libraryTitle": "Library",
-      "libraryDescription": "Products you have purchased",
-      "downloadsTitle": "Download History",
-      "downloadsDescription": "Product download history",
       "setupStoreTitle": "Start Selling",
       "setupStoreDescription": "Set up your store and start selling",
       "settingsTitle": "Settings",
@@ -74,17 +70,18 @@
       "more": "More",
       "products": "Products",
       "studio": "Studio",
-      "downloads": "History",
-      "library": "Library",
       "settings": "Settings",
       "subscription": "Subscription",
-      "startSelling": "Start Selling",
-      "sell": "Sell",
-      "discover": "Discover",
       "signOut": "Sign out",
       "logout": "Logout",
-      "onboard": "Verification",
-      "kasir": "Cashier"
+      "kasir": "Cashier",
+      "groupStore": "Store",
+      "groupAccount": "Account",
+      "plan": {
+        "free": "Free",
+        "starter": "Starter",
+        "business": "Business"
+      }
     },
     "products": {
       "title": "Products",
@@ -151,9 +148,9 @@
             "title": "Details",
             "desc": "Name, description & pricing"
           },
-          "file": {
-            "title": "File",
-            "desc": "Upload product file"
+          "deskripsi": {
+            "title": "Description",
+            "desc": "Tell buyers about it"
           },
           "cover": {
             "title": "Cover",
@@ -178,8 +175,7 @@
           "priceLabel": "Price (IDR)",
           "priceRequired": "Please enter a price of at least Rp 1.000.",
           "pricePlaceholder": "50000",
-          "priceHelper": "Set in Rupiah. Buyers pay through Stripe and settlement is in IDR.",
-          "priceHelperNoDigital": "The price shown to buyers on your storefront.",
+          "priceHelper": "The price shown to buyers on your storefront.",
           "comparePriceLabel": "Compare-at price",
           "comparePricePlaceholder": "75000",
           "comparePriceHelper": "Original price before discount shown with a strikethrough. Leave empty if not on sale.",
@@ -212,16 +208,7 @@
           "kycDropzoneDisabled": "Upload available after verification is complete",
           "dropzoneInfo": "Upload product file {types} · Max {size} · {usedGb}GB / {totalGb}GB used",
           "dropzoneInfoLoading": "Loading storage info...",
-          "dropzoneLoading": "Loading storage configuration...",
-          "kycStates": {
-            "NOT_STARTED": "You haven't set up payments yet. Complete verification first to upload products.",
-            "PENDING": "Verification is being processed. Please wait for confirmation before uploading products.",
-            "NEEDS_MORE_INFO": "Additional information is required. Complete verification to upload products.",
-            "PAST_DUE": "The verification deadline has passed. Complete it immediately to avoid account deactivation.",
-            "CHARGES_ONLY": "Your account can accept payments, but payouts are not yet active. Complete verification first.",
-            "REJECTED": "Verification was rejected. Contact support on the Settings page.",
-            "fallback": "Complete verification first to upload and sell products."
-          }
+          "dropzoneLoading": "Loading storage configuration..."
         },
         "media": {
           "descriptionBusiness": "Upload up to 5 photos. The first photo becomes the main thumbnail.",
@@ -246,7 +233,6 @@
           "descriptionEdit": "Double-check your listing details before saving.",
           "noName": "No name",
           "sectionDetails": "Details",
-          "sectionDigitalFile": "Product File",
           "sectionCoverImages": "Cover Images",
           "sectionPrice": "Price",
           "sectionStatus": "Status",
@@ -257,7 +243,6 @@
           "rowPhotos": "Photos",
           "rowSellingPrice": "Selling price",
           "rowComparePrice": "Compare-at price",
-          "rowCurrency": "Currency",
           "rowVisibility": "Visibility",
           "notFilledIn": "Not filled in",
           "noCategory": "No category",
@@ -281,22 +266,19 @@
         "upload_dropzone": {
           "dropText": "Drop file here or click to browse",
           "hint": "{types} · Max {size}"
-        }
-      },
-      "downloads": {
-        "title": "Download History",
-        "backTooltip": "Back",
-        "subtitleCount": "{count} total downloads",
-        "filterPlaceholder": "Filter by product",
-        "allProducts": "All Products",
-        "empty": "No download history yet.",
-        "columns": {
-          "product": "Product",
-          "buyer": "Buyer",
-          "time": "Time",
-          "ip": "IP"
         },
-        "dash": "—"
+        "description": {
+          "upgradeTitle": "Text formatting is on paid plans",
+          "upgradeBody": "Upgrade to use bold, italics, and lists in your product description.",
+          "bold": "Bold",
+          "italic": "Italic",
+          "bulletList": "Bulleted list",
+          "orderedList": "Numbered list",
+          "link": "Link",
+          "unlink": "Remove link",
+          "linkPrompt": "Paste the link address",
+          "linkApply": "Apply"
+        }
       },
       "fetchError": {
         "title": "Failed to load products",
@@ -308,51 +290,51 @@
       "kind": {
         "barang": "Goods",
         "jasa": "Service"
-      }
-    },
-    "library": {
-      "title": "Library",
-      "subtitleCount": "{count} products owned",
-      "empty": "Your library is still empty.",
-      "emptyCta": "Browse products on",
-      "emptyCtaLink": "Discover",
-      "card": {
-        "accessRevoked": "Access Revoked",
-        "accessRevokedReasonRefund": "Access revoked because the refund has been approved.",
-        "accessRevokedReasonGeneric": "Download access for this product has been revoked.",
-        "download": "Download"
       },
-      "refund": {
-        "button": {
-          "refunded": "Refunded",
-          "rejected": "Refund Rejected",
-          "processing": "Processing...",
-          "expired": "Refund Expired",
-          "expiredTooltip": "Refund window (7 days) has expired.",
-          "request": "Request Refund",
-          "daysLeft": "({days}d left)"
-        },
-        "rejectReasons": {
-          "FILE_ACCESSIBLE_AND_VALID": "File is accessible and not corrupted. Refund denied as per policy.",
-          "OUTSIDE_TIME_WINDOW": "Refund window (7 days) has expired.",
-          "ALREADY_REFUNDED": "This purchase has already been refunded.",
-          "fallback": "Refund request was rejected."
-        },
-        "dialog": {
-          "title": "Request Refund",
-          "policyIntro": "Our system will automatically verify your file and evaluate your request. This process takes 5-30 seconds.",
-          "approvedBold": "Approved",
-          "approvedFileUndownloadable": "if the file cannot be downloaded",
-          "approvedFileCorrupted": "if the file is corrupted or unreadable",
-          "notApprovedBold": "Not approved",
-          "rejectedContentMismatch": "for \"content doesn't match expectations\"",
-          "rejectedNoLongerNeed": "for \"I don't need it anymore\"",
-          "rejectedAccident": "for \"I bought by accident\"",
-          "previewReminder": "You had access to a preview before purchasing. Refunds are only granted for technical issues with file delivery, not subjective reasons.",
-          "cancel": "Cancel",
-          "confirm": "Request Refund",
-          "evaluating": "Evaluating..."
-        }
+      "collection": {
+        "searchLabel": "Search",
+        "searchPlaceholder": "Search by name",
+        "sortLabel": "Sort",
+        "sortNewest": "Newest",
+        "sortOldest": "Oldest",
+        "sortNameAsc": "Name A–Z",
+        "sortNameDesc": "Name Z–A",
+        "sortPriceAsc": "Lowest price",
+        "sortPriceDesc": "Highest price",
+        "categoryLabel": "Category",
+        "categoryAll": "All categories",
+        "viewGrid": "Grid view",
+        "viewList": "List view",
+        "colProduct": "Product",
+        "colPrice": "Price",
+        "colStatus": "Status",
+        "colStock": "Stock",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "noMatch": "No product matches",
+        "noMatchHint": "Try another keyword or clear the search.",
+        "clearSearch": "Clear search",
+        "resultCount": "{count} of {total} products",
+        "rowsPerPage": "Rows per page",
+        "pageOf": "Page {page} of {total}",
+        "prev": "Previous page",
+        "next": "Next page",
+        "first": "First page",
+        "last": "Last page",
+        "goToPage": "Go to page {page}",
+        "rowActions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "selectAll": "Select all",
+        "selectRow": "Select {name}",
+        "selectedCount": "{count} selected",
+        "deleteSelected": "Delete",
+        "clearSelection": "Clear",
+        "bulkDeleteDescription": "The selected products will be permanently removed from your store. This cannot be undone.",
+        "bulkToolbar": "Bulk actions for {count} selected products",
+        "selectedProducts": "{count} products selected"
       }
     },
     "subscription": {
@@ -360,8 +342,6 @@
       "subtitle": "Manage your plan and billing",
       "currentPlan": "Current plan",
       "planSuffix": "Plan",
-      "cancel": "Cancel subscription",
-      "cancelling": "Canceling...",
       "activeUntil": "Active until {date} ({days} days left)",
       "comingSoonBadge": "Coming Soon",
       "comingSoon": {
@@ -372,7 +352,7 @@
       },
       "badge": {
         "active": "Active",
-        "pastDue": "Payment Past Due",
+        "pastDue": "Access period ended",
         "canceled": "Canceled",
         "free": "Free"
       },
@@ -382,19 +362,17 @@
         "completedTitle": "Subscription active!",
         "completedBody": "Your plan has been upgraded. Enjoy your new features! 🎉",
         "failedTitle": "Payment verification failed.",
-        "failedBody": "If your card has already been charged, the payment will be verified automatically within a few minutes. You can try again or contact support at",
+        "failedBody": "If your payment went through, activation verifies itself within a few minutes. You can try again or contact us at",
         "supportEmail": "admin@fibidy.com",
         "retryButton": "Retry verification"
       },
       "overLimit": {
         "titlePattern": "{planName} plan limit reached",
         "productsPart": "Products: {used}/{max}. ",
-        "digitalProductsPart": "Product files: {used}/{max}. ",
         "suffix": "Upgrade to increase capacity."
       },
       "usage": {
         "products": "Products",
-        "digital": "Files",
         "storage": "Storage",
         "infinity": "∞"
       },
@@ -407,11 +385,6 @@
             "20 products",
             "2 photos per product",
             "3 hero template"
-          ],
-          "digitalFeatures": [
-            "3 product files",
-            "0.5 GB storage",
-            "Max 20 MB per file"
           ]
         },
         "STARTER": {
@@ -421,12 +394,8 @@
           "features": [
             "50 products",
             "3 photos per product",
-            "12 hero templates"
-          ],
-          "digitalFeatures": [
-            "20 product files",
-            "1 GB storage",
-            "Max 50 MB per file"
+            "12 hero templates",
+            "Cashier & sales records"
           ]
         },
         "BUSINESS": {
@@ -434,32 +403,20 @@
           "price": "Rp 149.000",
           "priceNote": "/month",
           "features": [
-            "50 products",
+            "Unlimited products",
             "5 photos per product",
-            "All hero templates"
-          ],
-          "digitalFeatures": [
-            "50 product files",
-            "20 GB storage",
-            "Max 500 MB per file"
+            "All hero templates",
+            "Cashier & sales records"
           ]
         }
-      },
-      "platformFee": {
-        "label": "Platform fee",
-        "FREE": "15%",
-        "STARTER": "5%",
-        "BUSINESS": "2%"
       },
       "cta": {
         "currentPlan": "Current plan",
         "upgradeStarter": "Upgrade to Starter",
         "upgradeBusiness": "Upgrade to Business",
-        "requiresStarterFirst": "Requires Starter first",
         "notYetQualified": "Not yet qualified",
-        "downgrade": "Downgrade",
-        "foreverFree": "Forever free",
-        "businessComingSoon": "Coming Soon"
+        "renew": "Renew",
+        "renewCarryOver": "Your remaining {days} days carry over."
       },
       "businessUnlock": {
         "title": "Business unlock progress",
@@ -470,21 +427,9 @@
         "totalTransactionsValue": "{count} / {threshold}",
         "or": "or"
       },
-      "cancelDialog": {
-        "title": "Cancel subscription?",
-        "descriptionPrefix": "Your subscription will remain active until the end of the current billing period",
-        "descriptionPeriodSuffix": " ({date})",
-        "descriptionSuffix": ". After that, your account will automatically downgrade to Free plan.",
-        "cancel": "Cancel",
-        "confirm": "Yes, cancel",
-        "canceling": "Canceling..."
-      },
       "provider": {
-        "viaCard": "Card",
         "viaQris": "QRIS",
-        "renewsOn": "Renews automatically on",
         "activeUntilDate": "Active until",
-        "cardNotice": "Your subscription renews automatically each period. You can cancel anytime access continues until the current period ends.",
         "qrisNotice": "QRIS payments don't renew automatically. Access simply ends when the period is over nothing to cancel. To continue, just pay again before the end date.",
         "qrisNoAutoRenewToast": "QRIS subscriptions don't renew automatically, so there's nothing to cancel."
       },
@@ -497,11 +442,6 @@
           "title": "QRIS",
           "subtitle": "Scan with GoPay, OVO, DANA, ShopeePay, or mobile banking.",
           "noAutoRenew": "One-time payment no auto-renewal"
-        },
-        "card": {
-          "title": "Credit / debit card",
-          "subtitle": "Visa, Mastercard, and other international cards.",
-          "autoRenew": "Renews automatically each period"
         }
       },
       "tripay": {
@@ -529,25 +469,11 @@
         "retry": "Try again",
         "reusedNotice": "You still have an active payment we're showing the same QR code instead of creating a new one.",
         "unreachable": "Couldn't reach the payment provider yet. Check the subscription page shortly your payment may already have been created."
-      }
-    },
-    "comingSoon": {
-      "digitalProducts": {
-        "title": "Product Files Coming Soon",
-        "description": "We're polishing the file-based product experience for Indonesian sellers. Sell ebooks, templates, courses, and more soon."
       },
-      "discover": {
-        "title": "Marketplace Digital Products Coming Soon",
-        "description": "The Discover marketplace will let buyers browse products from sellers across Fibidy. Stay tuned!"
-      },
-      "library": {
-        "title": "Library Coming Soon",
-        "description": "Your purchased products will live here. The Library will be ready when our marketplace launches."
-      },
-      "cta": {
-        "backToProducts": "Back to Products",
-        "backToDashboard": "Back to Dashboard",
-        "backToHome": "Back to Home"
+      "spanduk": {
+        "sisaHari": "Your plan has {hari} days left.",
+        "tenggang": "Your plan has lapsed. Everything keeps working for {hari} more days.",
+        "aksi": "Renew now"
       }
     },
     "setupStore": {
@@ -607,7 +533,7 @@
       "seller": {
         "title": "Build Your Store",
         "subtitle": "Almost there fill in the details to make your store presentable",
-        "autofillBadge": "Autofilled tap to edit",
+        "autofillBadge": "Autofilled — tap the field to edit",
         "stepIndicator": "Step {current} of {total}",
         "steps": {
           "visual": {
@@ -639,11 +565,7 @@
           "logoLabel": "Store Logo",
           "logoHelper": "Square image, JPG/PNG, min 200×200 px. This is your brand make it count.",
           "uploadLogo": "Upload Logo",
-          "logoGenerate": "Generate from store name",
           "logoGenerating": "Generating...",
-          "logoGenerateOr": "or",
-          "logoGenerateSuccess": "Logo generated and uploaded",
-          "logoGenerateFailed": "Failed to generate logo. Try uploading instead.",
           "logoRequired": "Please upload a store logo or generate one",
           "colorLabel": "Brand Color",
           "colorHelper": "Used for buttons, links, and accents across your store.",
@@ -676,7 +598,10 @@
           "descriptionLabel": "Description",
           "descriptionRequired": "Description is too short (min. 10 characters)",
           "titlePlaceholder": "e.g. Fresh Daily",
-          "descriptionPlaceholder": "e.g. Sourced every morning from local farms"
+          "descriptionPlaceholder": "e.g. Sourced every morning from local farms",
+          "panelTitle": "Highlight",
+          "reorderLabel": "Reorder Highlight",
+          "reorderHint": "Drag the grip icon to change the order."
         },
         "contact": {
           "sectionCopyHeading": "Section Heading",
@@ -722,7 +647,8 @@
           "intro": "Add at least one social link so visitors can follow your store.",
           "statusFilled": "{count} platform added",
           "statusEmpty": "None added yet at least 1 required",
-          "emptyReminder": "You need to fill in at least one social link before you can continue."
+          "emptyReminder": "You need to fill in at least one social link before you can continue.",
+          "linksTitle": "Social Links"
         },
         "review": {
           "visual": "Look & Feel",
@@ -852,40 +778,6 @@
         }
       }
     },
-    "onboard": {
-      "refreshing": "Refreshing verification link..."
-    },
-    "kycBanner": {
-      "label": "Payment Verification",
-      "loading": "Loading verification status...",
-      "polling": "Checking verification status...",
-      "states": {
-        "comingSoon": "Payment verification will open up once product files launch. Sit tight we'll let you know.",
-        "notStartedFresh": "Set up payments to start selling.",
-        "notStartedReturning": "You haven't finished setting up payments. Pick up where you left off.",
-        "pending": "Verification in progress. This usually takes 1–2 business days.",
-        "needsMoreInfoTitle": "Verification requires fixes:",
-        "needsMoreInfoGeneric": "Additional information is needed to continue account verification.",
-        "pastDueHeadline": "URGENT: The verification deadline has passed.",
-        "pastDueBody": "Your account is at risk of being deactivated soon. Complete verification now.",
-        "chargesOnly": "Account active for accepting payments. Payouts to your bank are not yet active complete verification to enable payouts.",
-        "activeWithFutureReq": "Account active. New requirement updates need to be completed",
-        "activeWithFutureReqDeadline": " before {date}",
-        "activeClean": "Account verified. You can accept payments and withdraw funds.",
-        "rejected": "Account verification was rejected. Contact our support team for help."
-      },
-      "actions": {
-        "comingSoonButton": "Coming Soon",
-        "setupPayments": "Set Up Payments",
-        "continueSetup": "Continue Setup",
-        "completeDocuments": "Complete Documents",
-        "completeNow": "Complete Now",
-        "activatePayouts": "Activate Payouts",
-        "viewUpdates": "View Updates",
-        "contactSupport": "Contact Support",
-        "loading": "Loading..."
-      }
-    },
     "pwa": {
       "android": {
         "title": "Install Fibidy",
@@ -925,8 +817,8 @@
     "upgradeModal": {
       "defaultTitle": "Plan limit reached",
       "defaultDescription": "Upgrade your plan to unlock higher limits and premium features.",
-      "upgradeStarterLabel": "Upgrade to Starter Rp 35.000/mo",
-      "upgradeBusinessLabel": "Upgrade to Business Rp 149.000/mo",
+      "upgradeStarterLabel": "Upgrade to Starter",
+      "upgradeBusinessLabel": "Upgrade to Business",
       "viewAllPlans": "View all plans",
       "viewUpgradePlans": "View upgrade plans",
       "maybeLater": "Maybe later"
@@ -947,6 +839,12 @@
       "searchPlaceholder": "Search products…",
       "searchLayananPlaceholder": "Search services…",
       "clearSearch": "Clear search",
+      "searchLabel": "Search",
+      "categoryLabel": "Category",
+      "categoryAll": "All categories",
+      "viewGrid": "Grid view",
+      "viewList": "List view",
+      "addShort": "Add",
       "error": {
         "title": "Couldn't load products",
         "description": "The product list couldn't be fetched. Check your connection and try again.",
@@ -1171,7 +1069,10 @@
         "prevPage": "Previous",
         "nextPage": "Next",
         "tableCaption": "Showing {tampil} of {total} transactions",
-        "actionsColumn": "Actions"
+        "actionsColumn": "Actions",
+        "emptyAction": "Start selling",
+        "viewGrid": "Card view",
+        "viewList": "Table view"
       },
       "stok": {
         "title": "Stock management",
@@ -1232,11 +1133,14 @@
         "noFilterMatchTitle": "No products in this filter",
         "noFilterMatchDescription": "Change the filter above to see other products.",
         "resetFilter": "Show all",
-        "onlyActionNeeded": "Only needs action"
+        "onlyActionNeeded": "Only needs action",
+        "emptyAction": "Add product"
       },
       "laporan": {
         "title": "Cashier reports",
         "subtitle": "Revenue summary, best sellers, and stock health.",
+        "emptyTitle": "No reports yet",
+        "emptyDescription": "Reports appear on their own once your first transaction is recorded in the Cashier.",
         "errorTitle": "Couldn't load reports",
         "errorDescription": "The summary couldn't be fetched. Check your connection and try again.",
         "retry": "Try again",
@@ -1280,11 +1184,8 @@
         "stokKritisTitle": "Most critical products"
       },
       "planGate": {
-        "title": "Cashier is a paid plan feature",
-        "description": "In-store selling with the cashier module is included in the STARTER and BUSINESS plans.",
-        "point1": "Record walk-in sales with a digital receipt",
-        "point2": "Stock drops automatically on every sale, with an auditable log",
-        "point3": "Daily revenue summary, best sellers, and low-stock warnings",
+        "title": "Cashier is on the paid plans",
+        "description": "Your cashier data stays visible. To record transactions again, activate the Starter or Business plan.",
         "cta": "See plans"
       },
       "toast": {
@@ -1390,7 +1291,39 @@
         "paperWidth58Hint": "Small thermal printer, the most common",
         "paperWidth80Hint": "Wide thermal printer",
         "save": "Save",
-        "saving": "Saving…"
+        "saving": "Saving…",
+        "gagalMuat": "Could not load cashier settings.",
+        "cobaLagi": "Try again"
+      },
+      "terkunci": {
+        "judul": "Paid plan required",
+        "pesan": "Your cashier data stays visible. To record again, activate the Starter or Business plan."
+      },
+      "emptyLinks": {
+        "jual": {
+          "learn": "Learn how the cashier works",
+          "help": "Need help making your first sale?"
+        },
+        "riwayat": {
+          "learn": "Learn how the cashier works",
+          "help": "Need help recording a sale?"
+        },
+        "stok": {
+          "learn": "Learn how stock tracking works",
+          "help": "Need help managing stock?"
+        },
+        "laporan": {
+          "learn": "Learn how to read the reports",
+          "help": "Need help reading reports?"
+        },
+        "diskon": {
+          "learn": "Learn how discounts work",
+          "help": "Need help setting up a discount?"
+        },
+        "promo": {
+          "learn": "Learn how promos work",
+          "help": "Need help setting up a promo?"
+        }
       }
     }
   }

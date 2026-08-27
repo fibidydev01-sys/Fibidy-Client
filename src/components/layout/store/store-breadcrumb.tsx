@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import {
   Breadcrumb,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Fragment } from 'react';
 import { useStoreUrls } from '@/lib/public/use-store-urls';
+import { Link } from '@/i18n/navigation';
 
 // ==========================================
 // STORE BREADCRUMB COMPONENT

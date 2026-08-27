@@ -10,51 +10,117 @@
    ========================================== */
 
 :root {
-  --radius: 0.625rem;
+  /* ==========================================
+     RADIUS — skala Expo, ditulis eksplisit
+     ==========================================
+     Sebelumnya delapan langkah diturunkan dari satu basis 10px, jadi
+     `lg` = 10px dan `xl` = 14px — dua angka yang tidak ada di spec mana
+     pun. Expo memberi tangga sendiri: 4 / 6 / 8 / 12 / 16 / 24. `--radius`
+     tetap ada karena `sonner` dan `input-group` membacanya langsung, dan
+     nilainya sekarang = radius CTA. */
+  --radius: 8px;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* ==========================================
+     KANVAS & TINTA
+     ========================================== */
+  --background: #ffffff;          /* canvas */
+  --foreground: #171717;          /* ink */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card: #ffffff;                /* surface-card */
+  --card-foreground: #171717;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover: #ffffff;
+  --popover-foreground: #171717;
 
-  --primary: oklch(0.656 0.241 354.308);
-  --primary-foreground: oklch(1 0 0);
+  /* Satu-satunya voltase aksi. Bukan aksen, bukan warna merek kedua —
+     hitam murni di setiap tombol primer. Tautan teks biru
+     (`--text-link`) tidak pernah naik ke tombol. */
+  --primary: #000000;
+  --primary-foreground: #ffffff;  /* on-primary */
 
-  --secondary: oklch(0.971 0.014 343.198);
-  --secondary-foreground: oklch(0.345 0.212 349.761);
+  --secondary: #f0f0f3;           /* surface-strong */
+  --secondary-foreground: #171717;
 
-  --muted: oklch(0.971 0.014 343.198);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted: #f5f5f7;               /* hairline-soft */
+  --muted-foreground: #60646c;    /* body */
 
-  --accent: oklch(0.948 0.028 342.258);
-  --accent-foreground: oklch(0.345 0.212 349.761);
+  --accent: #f0f0f3;              /* surface-strong */
+  --accent-foreground: #171717;
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(1 0 0);
+  /* Expo hanya memberi `semantic-error: #eb8e90` — itu rona lembut untuk
+     garis dan latar peringatan, kontrasnya 2.1:1 dengan teks putih. Tombol
+     "Hapus transaksi" di kasir tidak boleh setipis itu, jadi aksi merusak
+     memakai versi pekat pada rona yang sama (5.1:1), dan nilai spec-nya
+     tetap tersedia sebagai `--semantic-error` di bawah. */
+  --destructive: #c8383c;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.922 0.01 340);
-  --input: oklch(0.922 0.01 340);
-  --ring: oklch(0.656 0.241 354.308);
+  /* `--border` memakai hairline-strong, bukan hairline. Di app ini garis
+     mengerjakan pekerjaan struktural — tabel kasir, tepi input, pemisah
+     baris — dan #f0f0f3 (1.06:1) hilang di sana. Hairline halus tetap
+     bisa dipanggil eksplisit lewat `border-hairline`. */
+  --border: #dcdee0;              /* hairline-strong */
+  --input: #dcdee0;
+  --ring: #171717;                /* fokus = tinta, bukan warna merek */
 
-  --chart-1: oklch(0.656 0.241 354.308);
-  --chart-2: oklch(0.718 0.202 349.761);
-  --chart-3: oklch(0.808 0.151 343.198);
-  --chart-4: oklch(0.345 0.212 349.761);
-  --chart-5: oklch(0.496 0.265 354.308);
+  /* Bagan: Expo tidak menetapkan palet kategorikal, tapi ia menyediakan
+     enam aksen. Lima di antaranya cukup terpisah rona untuk jadi seri. */
+  --chart-1: #0d74ce;             /* text-link */
+  --chart-2: #16a34a;             /* semantic-success */
+  --chart-3: #ab6400;             /* accent-warning */
+  --chart-4: #8145b5;             /* accent-preview */
+  --chart-5: #47c2ff;             /* accent-link-bright */
 
-  --sidebar: oklch(0.985 0.007 343.198);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.656 0.241 354.308);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.948 0.028 342.258);
-  --sidebar-accent-foreground: oklch(0.345 0.212 349.761);
-  --sidebar-border: oklch(0.922 0.01 340);
-  --sidebar-ring: oklch(0.656 0.241 354.308);
+  --sidebar: #fafafa;             /* canvas-soft */
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f0f3;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #f0f0f3;
+  --sidebar-ring: #171717;
 
+  /* ==========================================
+     TOKEN EXPO YANG TIDAK PUNYA SLOT shadcn
+     ==========================================
+     Enam nama di atas (background/card/muted/...) adalah kontrak shadcn.
+     Sisa palet Expo tidak punya rumah di sana, tapi tetap dipakai —
+     jadi ditulis apa adanya dan diekspos sebagai utility di @theme. */
+  --ink: #171717;
+  --body: #60646c;
+  --body-strong: #171717;
+  --muted-strong: #999999;        /* muted */
+  --muted-softer: #cccccc;        /* muted-soft */
+
+  --hairline: #f0f0f3;
+  --hairline-soft: #f5f5f7;
+  --hairline-strong: #dcdee0;
+
+  --canvas-soft: #fafafa;
+  --surface-strong: #f0f0f3;
+  --surface-dark: #171717;
+  --surface-dark-elevated: #1a1a1a;
+  --on-dark: #ffffff;
+  --on-dark-soft: #b0b4ba;
+
+  --primary-active: #1a1a1a;
+  --text-link: #0d74ce;
+  --text-link-secondary: #476cff;
+
+  /* Cuci atmosferik. Hanya di belakang hero — di luar itu kanvas putih
+     polos, dan menyalinnya ke seksi lain merusak sistemnya. */
+  --gradient-sky-light: #cfe7ff;
+  --gradient-sky-mid: #a8c8e8;
+
+  --accent-warning: #ab6400;
+  --accent-preview: #8145b5;
+  --accent-link-bright: #47c2ff;
+  --semantic-error: #eb8e90;
+  --semantic-success: #16a34a;
+
+  /* ==========================================
+     BAYANGAN — hairline + satu jatuh lembut
+     ========================================== */
   --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -64,27 +130,25 @@
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 
-  /* [v15.3.3] Geist via the OFFICIAL `geist` npm package — FAIL-LOUD.
-     Switched from `next/font/google` (used in v15.3.0–v15.3.2) to
-     `geist@^1.7.0`, which Vercel themselves use on vercel.com. The
-     package self-hosts the canonical .woff2 files via next/font/local
-     under the hood — no Google CDN dependency, full glyph set,
-     font-feature-settings support, and tracks the upstream
-     vercel/geist-font releases.
+  /* Pasangan huruf expo.design.md, dituruti persis termasuk rantai
+     fallback-nya:
 
-     The CSS variable names (`--font-geist-sans`, `--font-geist-mono`)
-     are baked into the package by Vercel — same names as the previous
-     next/font/google jalur, so this rule and every consumer below
-     keeps working without a single CSS edit.
+       sans : "'Inter', -apple-system, system-ui, sans-serif"
+       mono : "'JetBrains Mono', 'Fira Code', monospace"
 
-     Inter is STILL deliberately removed from the fallback chain. If
-     Geist fails to load, we WANT the page to fall straight to system
-     sans-serif so the regression is visible immediately. With Inter
-     as a stealth fallback, a Geist outage could ship to production
-     unnoticed. Same logic for --font-mono. */
-  --font-sans: var(--font-geist-sans), sans-serif;
+     Catatan fail-loud yang dulu ada di sini sengaja melubangi rantai
+     fallback: Inter dicabut supaya Geist yang mati langsung terlihat.
+     Alasannya masuk akal dan tidak pernah bekerja — situsnya memang
+     sudah jatuh ke ui-sans-serif selama ini tanpa ada yang menyadari,
+     karena --font-geist-sans hidup di <body> sementara --font-sans
+     dideklarasikan di :root.
+
+     Penggantinya bukan komentar melainkan pengukuran: verifikasi
+     membaca getComputedStyle(body).fontFamily di build produksi dan
+     menolak hasil yang tidak memuat "Inter". */
+  --font-sans: var(--font-inter), -apple-system, system-ui, sans-serif;
   --font-serif: "Playfair Display", serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  --font-mono: var(--font-jetbrains-mono), 'Fira Code', monospace;
   --color-1: oklch(66.2% 0.225 25.9);
   --color-2: oklch(60.4% 0.26 302);
   --color-3: oklch(69.6% 0.165 251);
@@ -93,57 +157,294 @@
 }
 
 /* ==========================================
-   DARK MODE
+   MODE GELAP
+   ==========================================
+   Expo menyebut dirinya light-only: kanvas selalu putih, dan gelap dipakai
+   sebagai ALAT KONTRAS di dalam halaman terang — kartu fitur gelap, blok
+   kode, mockup IDE, tier harga unggulan. Tapi app ini punya mode gelap
+   sungguhan (next-themes, `enableSystem`), dipakai orang, dan mencabutnya
+   bukan bagian dari permintaan.
+
+   Jadi yang dipakai bukan "kanvas Expo", melainkan LOGIKA INVERSI Expo:
+   surface-dark (#171717) jadi kanvas, surface-dark-elevated (#1a1a1a) jadi
+   kartu, on-dark/on-dark-soft jadi tinta. Satu hal wajib berubah — primer.
+   Hitam murni di atas #171717 adalah tombol tak terlihat, jadi di gelap
+   voltase membalik ke putih dengan tinta gelap di atasnya. Disiplinnya
+   tetap sama: satu warna aksi, tanpa aksen jenuh.
    ========================================== */
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --background: #171717;          /* surface-dark */
+  --foreground: #ffffff;          /* on-dark */
 
-  --card: oklch(0.178 0.005 343.198);
-  --card-foreground: oklch(0.985 0 0);
+  --card: #1a1a1a;                /* surface-dark-elevated */
+  --card-foreground: #ffffff;
 
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
 
-  --primary: oklch(0.718 0.202 349.761);
-  --primary-foreground: oklch(0.145 0 0);
+  --primary: #ffffff;             /* inversi wajib — lihat catatan di atas */
+  --primary-foreground: #171717;
 
-  --secondary: oklch(0.269 0.02 343.198);
-  --secondary-foreground: oklch(0.985 0 0);
+  --secondary: #26262a;
+  --secondary-foreground: #ffffff;
 
-  --muted: oklch(0.269 0.02 343.198);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: #26262a;
+  --muted-foreground: #b0b4ba;    /* on-dark-soft */
 
-  --accent: oklch(0.269 0.02 343.198);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: #26262a;
+  --accent-foreground: #ffffff;
 
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
+  /* Di kanvas gelap, justru nilai spec yang benar: #eb8e90 terbaca jelas
+     di atas #171717 (7.4:1) dan tinta gelap di atasnya juga aman. */
+  --destructive: #eb8e90;
+  --destructive-foreground: #171717;
 
-  --border: oklch(0.269 0.02 343.198);
-  --input: oklch(0.269 0.02 343.198);
-  --ring: oklch(0.718 0.202 349.761);
+  --border: #2a2a2e;
+  --input: #33333a;
+  --ring: #ffffff;
 
-  --chart-1: oklch(0.718 0.202 349.761);
-  --chart-2: oklch(0.808 0.151 343.198);
-  --chart-3: oklch(0.656 0.241 354.308);
-  --chart-4: oklch(0.948 0.028 342.258);
-  --chart-5: oklch(0.496 0.265 354.308);
+  --chart-1: #47c2ff;             /* accent-link-bright — versi terang */
+  --chart-2: #4ade80;
+  --chart-3: #e0a020;
+  --chart-4: #a97fd0;
+  --chart-5: #8fd8ff;
 
-  --sidebar: oklch(0.178 0.005 343.198);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.718 0.202 349.761);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0.02 343.198);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0.02 343.198);
-  --sidebar-ring: oklch(0.718 0.202 349.761);
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #171717;
+  --sidebar-accent: #26262a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2a2a2e;
+  --sidebar-ring: #ffffff;
+
+  /* Token Expo di luar kontrak shadcn — dibalikkan dengan aturan yang sama */
+  --ink: #ffffff;
+  --body: #b0b4ba;
+  --body-strong: #ffffff;
+  --muted-strong: #8b8f96;
+  --muted-softer: #5c6068;
+
+  --hairline: #232327;
+  --hairline-soft: #1f1f23;
+  --hairline-strong: #33333a;
+
+  --canvas-soft: #1a1a1a;
+  --surface-strong: #26262a;
+
+  --primary-active: #e6e6e6;
+  --text-link: #47c2ff;           /* accent-link-bright: #0d74ce terlalu gelap di sini */
+  --text-link-secondary: #7f96ff;
+
   --color-1: oklch(66.2% 0.225 25.9);
   --color-2: oklch(60.4% 0.26 302);
   --color-3: oklch(69.6% 0.165 251);
   --color-4: oklch(80.2% 0.134 225);
   --color-5: oklch(90.7% 0.231 133);
+}
+
+/* ============================================================================
+   DIALEK APP — bentuk & elevasi khusus dashboard
+   ============================================================================
+   Marketing, legal, dan storefront memakai dialek baku expo.design.md: CTA
+   8px, kartu 12px, kanvas putih. Dashboard memakai dialek EAS: field dan
+   tombol berbentuk pil, panel 16px, dan tiga tingkat elevasi yang dipaksa
+   oleh sidebar inset.
+
+   Keduanya komponen yang SAMA. Yang membedakan cuma token yang dibacanya,
+   dan penanda `data-surface="app"` dipasang satu kali di SidebarProvider
+   (`dashboard-layout.tsx`) — bukan di DashboardShell, karena latar terluar
+   inset dirender oleh provider, DI LUAR shell.
+
+   ── URUTAN BLOK INI PENTING ────────────────────────────────────────────
+   `:root` dan `[data-surface="app"]` sama-sama berspesifisitas 0,1,0.
+   Yang menang adalah urutan sumber, jadi blok ini WAJIB berada setelah
+   `:root` dan `.dark` di atas. Memindahkannya ke atas akan membuat
+   dashboard diam-diam kembali ke dialek marketing.
+   ========================================================================= */
+
+:root {
+  /* Bentuk baku. `--radius-md` = 8px = {rounded.md} = CTA marketing. */
+  /* ── PIL ADALAH BAKU, DAN ITU DISENGAJA ───────────────────────────────
+     Dulu baku di sini 8/8/12 dan dasbor menimpanya jadi pil lewat penanda.
+     Arah itu SALAH, dan salahnya bukan soal selera:
+
+     Radix dan Vaul merender Dialog, Drawer, Sheet, AlertDialog, Popover,
+     DropdownMenu, Tooltip, isi Select, dan toast lewat PORTAL ke
+     `document.body`. Apa pun penanda yang dipasang di dalam pohon aplikasi
+     TIDAK sampai ke sana. Jadi selama pil cuma "timpaan", setiap permukaan
+     melayang jatuh balik ke baku — dan itu yang membuat tombol "Ayo Mulai",
+     "Aktifkan & Publish Sekarang", "OK", "Edit/Hapus produk", dan setiap
+     dropdown tetap kotak sementara halamannya pil.
+
+     Membalik arahnya menutup seluruh kelas bug itu sekaligus: pil tidak
+     perlu "sampai" ke mana pun karena ia sudah ada di akar. Yang perlu
+     ditandai justru yang MENYIMPANG — dan itu cuma tiga permukaan publik
+     (marketing, legal, storefront), yang tidak punya portal sekompleks
+     dasbor.
+
+     JANGAN kembalikan 8px ke sini. Lihat blok DIALEK SITUS di bawah. */
+  --shape-field: var(--radius-pill);
+  --shape-control: var(--radius-pill);
+  --shape-panel: var(--radius-xl);
+
+  /* {text-input}: height 44px, padding 12px 16px — angka spec, bukan
+     tafsiran dari screenshot. */
+  --field-height: 2.75rem;
+  /* Pil beradius 22px menaruh lengkungannya tepat di tempat teks mulai;
+     padding 16px membuat huruf pertama menempel lengkungan, jadi 20px. */
+  --field-pad-x: 1.25rem;
+  --field-pad-y: 0.75rem;
+
+  /* Permukaan cekung: bilah kaki kartu, kepala tabel, baris ringkasan.
+     Selalu SELANGKAH dari `--card`, tidak pernah warna ketiga. */
+  --surface-sunken: #fafafa;             /* {colors.canvas-soft} */
+}
+
+/* ============================================================================
+   DIALEK SITUS — TANGGA expo.design.md (8 / 12 / 16)
+   ============================================================================
+   Marketing, legal, dan storefront. Ketiganya permukaan PUBLIK yang memang
+   mengikuti spec Expo apa adanya:
+
+     button/input  {rounded.md}  8px
+     kartu         {rounded.lg}  12px
+
+   Ini penyimpangan yang DITANDAI, bukan baku yang ditimpa — kebalikan dari
+   susunan sebelumnya, dan alasannya ada di catatan `:root` di atas: yang
+   ditandai harus yang jarang, karena penanda tidak pernah sampai ke portal.
+
+   `body:has()` ikut dipasang supaya dialog/sheet di storefront (checkout,
+   keranjang publik) juga memakai dialek yang sama dengan halamannya.
+   ========================================================================= */
+
+[data-shape="site"],
+body:has([data-shape="site"]) {
+  --shape-field: var(--radius-md);
+  --shape-control: var(--radius-md);
+  --shape-panel: var(--radius-lg);
+  --field-pad-x: 1rem;
+}
+
+[data-surface="app"] {
+  /* ── PIL DITEGASKAN ULANG DI SINI, DAN ITU DISENGAJA ──────────────────
+     Nilainya SAMA PERSIS dengan `:root` di atas. Ini bukan salinan yang
+     terlupa dibersihkan — ini sabuk kedua.
+
+     Baku di `:root` sudah pil, jadi secara teori blok ini tidak perlu ada.
+     Praktiknya, dasbor pernah terlihat kotak di lingkungan sungguhan
+     sementara pengukuran pada CSS hasil build yang sama menunjukkan pil.
+     Penyebabnya belum ketemu, dan selama belum ketemu, satu-satunya jalur
+     menuju pil adalah titik tunggal kegagalan.
+
+     Selektor ini lebih spesifik dari `:root` dan menempel langsung di
+     pembungkus dasbor, jadi ia tidak bergantung pada urutan sumber maupun
+     dukungan `:has()`. Portal tetap mengandalkan `:root` — mereka di luar
+     pohon ini — jadi keduanya saling menutupi, bukan menggandakan.
+
+     Kalau nanti penyebabnya ketemu dan `:root` terbukti selalu sampai,
+     blok ini boleh dihapus. Jangan dihapus hanya karena terlihat redundan. */
+  --shape-field: var(--radius-pill);
+  --shape-control: var(--radius-pill);
+  --shape-panel: var(--radius-xl);
+  --field-pad-x: 1.25rem;
+
+  /* ── Elevasi, TERANG ─────────────────────────────────────────────────
+     ARAHNYA: BINGKAI yang lebih gelap, halaman yang mengambang lebih terang.
+
+     Ini kebalikan dari versi sebelumnya, dan pembalikannya disengaja.
+
+     Versi sebelumnya memasang halaman abu (#f0f0f3) di dalam bingkai putih.
+     Alasannya masuk akal di atas kertas — kartu putih butuh jarak nada ke
+     permukaan di bawahnya — tapi hasilnya melawan bentuk `variant="inset"`
+     itu sendiri: yang dirender sidebar-provider sebagai LATAR TERLUAR adalah
+     `--sidebar`, dan yang dirender SidebarInset sebagai panel mengambang
+     ber-`rounded-xl shadow-sm` adalah `--background`. Menaruh warna terang
+     di luar dan gelap di dalam berarti benda yang mengambang justru lebih
+     berat dari tanahnya. Bayangan panelnya pun tidak terbaca: bayangan gelap
+     di atas latar putih menempel pada panel abu yang lebih gelap lagi.
+
+     EAS memasangnya seperti ini: TANAH abu, panel isi putih bersih
+     mengambang di atasnya, sidebar duduk DI TANAH (bukan mengambang) —
+     karena di varian inset sidebar memang tidak punya panelnya sendiri, ia
+     transparan di atas latar provider.
+
+     Jadi:
+       --sidebar     = tanah   → bingkai + permukaan sidebar   (#f0f0f3)
+       --background  = panel   → halaman mengambang            (#ffffff)
+       --card        = kartu   → di ATAS panel, dipisah HAIRLINE
+
+     Kartu putih di atas halaman putih tidak kehilangan tepinya selama
+     `--border` mengerjakan tugasnya: #dcdee0 di atas #ffffff = 1.35:1,
+     garis yang terbaca. Itu persis sistem expo.design.md — feature-card
+     memang `surface-card` (#ffffff) di atas `canvas` (#ffffff), dan yang
+     memisahkannya hairline, bukan nada. Permukaan cekung (kepala tabel,
+     bilah kaki kartu) tetap punya rumahnya sendiri di `--surface-sunken`. */
+  --sidebar: #f0f0f3;                    /* {colors.surface-strong} — TANAH */
+  --sidebar-foreground: #171717;         /* {colors.ink} */
+  --sidebar-border: #dcdee0;             /* {colors.hairline-strong} */
+  /* Entri aktif = pil PUTIH di atas tanah abu. #f0f0f3 di atas #f0f0f3
+     adalah entri aktif yang tidak terlihat sama sekali — cacat yang lahir
+     otomatis kalau accent-nya ikut dibiarkan seperti sebelum pembalikan. */
+  --sidebar-accent: #ffffff;             /* {colors.surface-card} */
+  --sidebar-accent-foreground: #171717;
+
+  --background: #ffffff;                 /* {colors.canvas} — PANEL MENGAMBANG */
+  --foreground: #171717;                 /* {colors.ink} */
+  --card: #ffffff;                       /* {colors.surface-card} */
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --muted: #f5f5f7;                      /* {colors.hairline-soft} */
+  --muted-foreground: #60646c;           /* {colors.body} */
+  --border: #dcdee0;                     /* {colors.hairline-strong} */
+  --surface-sunken: #fafafa;             /* {colors.canvas-soft} */
+}
+
+/* ── Elevasi tiga lapis, GELAP ────────────────────────────────────────────
+   Latar terluarnya hitam murni — voltase merek dipakai sebagai tanah, dan
+   itu yang membuat panel inset terbaca mengambang di atasnya. Panel isinya
+   `surface-dark`, permukaan yang sama persis dengan kartu fitur gelap dan
+   blok kode di halaman marketing. Satu sistem, dua permukaan. */
+.dark [data-surface="app"] {
+  /* Arah yang sama seperti terang, dibalik nadanya: HALAMAN paling pekat,
+     sidebar dan kartu mengambang di atasnya.
+
+     Versi pertama memasang `--sidebar: #000000` — bingkainya justru yang
+     paling pekat — dan kartu #1a1a1a di atas panel #171717 hanya berjarak
+     1.03:1. Praktis tidak ada tepinya.
+
+     Lebih buruk lagi, `--border` juga #1a1a1a: PERSIS sama dengan `--card`.
+     Setiap garis kartu di seluruh dasbor menggambar dirinya dengan warna
+     kartunya sendiri. Itu yang bikin "outline-nya nggak keliatan" — bukan
+     terlalu tipis, tapi benar-benar tidak ada. */
+  --sidebar: #1a1a1a;                    /* {colors.surface-dark-elevated} */
+  --sidebar-foreground: #ffffff;         /* {colors.on-dark} */
+  --sidebar-accent: #2a2a2e;
+  --sidebar-accent-foreground: #ffffff;
+
+  --background: #000000;                 /* {colors.primary} — HALAMAN */
+  --foreground: #ffffff;                 /* {colors.on-dark} */
+  --card: #171717;                       /* {colors.surface-dark} */
+  --card-foreground: #ffffff;
+  --popover: #171717;
+  --popover-foreground: #ffffff;
+  --muted: #1a1a1a;                      /* {colors.surface-dark-elevated} */
+  --muted-foreground: #b0b4ba;           /* {colors.on-dark-soft} */
+
+  /* expo.design.md tidak punya token hairline untuk kanvas gelap — tiga
+     permukaan gelapnya (#000/#171717/#1a1a1a) semuanya ISIAN: kartu fitur
+     gelap, blok kode, tier harga unggulan. Tidak satu pun pernah jadi wadah
+     bergaris, jadi tidak ada nilai yang bisa disalin.
+     Diturunkan dari {colors.on-dark} pada opasitas rendah alih-alih
+     mengarang hex keempat: ia otomatis benar di atas ketiga permukaan itu,
+     dan tetap benar kalau nadanya digeser lagi nanti. */
+  --border: color-mix(in oklch, var(--on-dark) 12%, transparent);
+  --sidebar-border: color-mix(in oklch, var(--on-dark) 10%, transparent);
+  --input: color-mix(in oklch, var(--on-dark) 18%, transparent);
+
+  --surface-sunken: #1a1a1a;             /* {colors.surface-dark-elevated} */
 }
 
 @theme inline {
@@ -180,14 +481,164 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
 
-  --radius-xs: calc(var(--radius) - 4px);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  /* ==========================================
+     RADIUS — tangga Expo, bukan turunan satu basis
+     ==========================================
+     8px = CTA. 12px = kartu, blok kode, kartu harga. 16px = kartu mockup
+     perangkat. Pil (9999px) hanya untuk badge — Expo tidak pernah
+     memasang pil penuh di tombol, dan justru itu yang membuat tombolnya
+     terbaca sebagai perkakas developer, bukan tombol konsumen. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-4xl: 40px;
+  --radius-pill: 9999px;
+
+  /* ==========================================
+     RITME — kenapa skala jarak design.md TIDAK dipasang bernama
+     ==========================================
+     expo.design.md memberi sembilan langkah bernama (xxs 4 … section 96),
+     dan versi pertama berkas ini memasang semuanya sebagai `--spacing-*`
+     supaya `p-lg` menyebut maksudnya alih-alih `p-6` yang cuma angka.
+
+     Itu MERUSAK 126 tempat, dan diam-diam.
+
+     Di Tailwind v4 namespace `--spacing-*` bukan cuma milik padding dan
+     gap — `max-w-*`, `w-*`, `min-w-*`, dan `h-*` ikut menyelesaikan nama
+     dari sana. Jadi `--spacing-md: 20px` membajak `max-w-md`, yang selama
+     ini 28rem, menjadi 20px. Terukur di build produksi: kotak pencarian
+     `sm:max-w-md` menciut jadi 20px dan terbaca sebagai lingkaran berisi
+     ikon. Dan itu baru satu dari 48 pemakaian `max-w-md`, ditambah 50
+     `max-w-sm`, 19 `max-w-lg`, dan 9 `max-w-xl` di seluruh app.
+
+     Jadi nilainya tetap dituruti — 4/8/12/16/20/24/32/48 memang sama persis
+     dengan p-1..p-12 bawaan Tailwind, jadi tidak ada yang hilang selain
+     namanya. `--spacing-section` di bawah aman karena tidak ada ukuran
+     bernama "section" yang bisa ditabraknya.
+
+     JANGAN tambahkan `--spacing-xs/sm/md/lg/xl` di sini. Kalau nama-nama
+     itu benar-benar dibutuhkan, mereka harus hidup di namespace yang tidak
+     dipakai utilitas ukuran. */
+
+  /* ==========================================
+     WARNA EXPO DI LUAR KONTRAK shadcn
+     ==========================================
+     `--color-body` sengaja TIDAK diekspos: nilainya sama dengan
+     `--muted-foreground`, dan `text-body` akan bertabrakan baca dengan
+     skala tipe `text-body-md` / `text-body-sm` di bawah. */
+  --color-ink: var(--ink);
+  --color-muted-strong: var(--muted-strong);
+  --color-muted-softer: var(--muted-softer);
+
+  --color-hairline: var(--hairline);
+  --color-hairline-soft: var(--hairline-soft);
+  --color-hairline-strong: var(--hairline-strong);
+
+  --color-canvas-soft: var(--canvas-soft);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-dark: var(--surface-dark);
+  --color-surface-dark-elevated: var(--surface-dark-elevated);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-soft: var(--on-dark-soft);
+
+  --color-primary-active: var(--primary-active);
+  --color-link: var(--text-link);
+  --color-link-secondary: var(--text-link-secondary);
+
+  --color-sky-light: var(--gradient-sky-light);
+  --color-sky-mid: var(--gradient-sky-mid);
+
+  --color-accent-warning: var(--accent-warning);
+  --color-accent-preview: var(--accent-preview);
+  --color-accent-link-bright: var(--accent-link-bright);
+  --color-semantic-error: var(--semantic-error);
+  --color-semantic-success: var(--semantic-success);
+
+  /* ==========================================
+     SKALA TIPE EXPO
+     ==========================================
+     Lima belas gaya dari spec, dipasang sebagai token `--text-*` supaya
+     ukuran + bobot + tinggi baris + tracking datang sebagai SATU utility
+     (`text-display-lg`), bukan empat kelas yang bisa lepas satu-satu.
+
+     Fontnya Geist, bukan Inter — lihat catatan di :root. Yang diambil
+     dari spec adalah tracking negatifnya (−1.92px di 64px sampai −0.5px
+     di 22px); itu yang bikin display terasa editorial, dan Geist
+     menerimanya sama baiknya dengan Inter.
+
+     `code` memakai Geist Mono dengan alasan yang sama seperti JetBrains
+     Mono pada spec: satu keluarga mono di SETIAP permukaan kode. */
+  --text-display-mega: 64px;
+  --text-display-mega--line-height: 1.05;
+  --text-display-mega--letter-spacing: -1.92px;
+  --text-display-mega--font-weight: 600;
+
+  --text-display-xl: 48px;
+  --text-display-xl--line-height: 1.1;
+  --text-display-xl--letter-spacing: -1.44px;
+  --text-display-xl--font-weight: 600;
+
+  --text-display-lg: 36px;
+  --text-display-lg--line-height: 1.15;
+  --text-display-lg--letter-spacing: -1.08px;
+  --text-display-lg--font-weight: 600;
+
+  --text-display-md: 28px;
+  --text-display-md--line-height: 1.2;
+  --text-display-md--letter-spacing: -0.84px;
+  --text-display-md--font-weight: 600;
+
+  --text-display-sm: 22px;
+  --text-display-sm--line-height: 1.25;
+  --text-display-sm--letter-spacing: -0.5px;
+  --text-display-sm--font-weight: 600;
+
+  --text-title-md: 18px;
+  --text-title-md--line-height: 1.4;
+  --text-title-md--font-weight: 600;
+
+  --text-title-sm: 16px;
+  --text-title-sm--line-height: 1.4;
+  --text-title-sm--font-weight: 600;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 13px;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 400;
+
+  --text-caption-uppercase: 11px;
+  --text-caption-uppercase--line-height: 1.4;
+  --text-caption-uppercase--letter-spacing: 0.88px;
+  --text-caption-uppercase--font-weight: 600;
+
+  --text-code: 13px;
+  --text-code--line-height: 1.5;
+  --text-code--font-weight: 400;
+
+  --text-button: 14px;
+  --text-button--line-height: 1;
+  --text-button--font-weight: 500;
+
+  --text-nav-link: 14px;
+  --text-nav-link--line-height: 1.4;
+  --text-nav-link--font-weight: 500;
+
+  /* Ritme seksi 96px — `py-section`. Sisa skala jarak Expo (4/8/12/16/
+     20/24/32/48) sudah persis sama dengan p-1..p-12 bawaan Tailwind, jadi
+     tidak ada token baru untuk itu. */
+  --spacing-section: 96px;
 
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
@@ -202,11 +653,10 @@
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
 
-  /* [v15.3.2] Removed orphan `--font-inter: var(--font-inter)` which
-     exposed a `font-inter` Tailwind utility. After the Geist swap it
-     pointed at nothing. `font-sans` / `font-mono` remain the supported
-     utilities — they resolve through --font-sans / --font-mono in
-     :root above. No Inter anywhere in the chain — fail-loud. */
+  /* `font-sans` / `font-mono` adalah satu-satunya utility huruf yang
+     didukung — keduanya menyelesaikan lewat --font-sans / --font-mono
+     di :root. Tidak ada utility `font-inter` terpisah: satu keluarga
+     sans berarti satu nama untuk memanggilnya. */
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -274,6 +724,51 @@
 }
 
 /* ============================================================================
+   CAPTION UPPERCASE — satu-satunya gaya tipe Expo yang butuh utility sendiri
+
+   `--text-caption-uppercase` di @theme sudah membawa ukuran, bobot, tinggi
+   baris, dan tracking 0.88px. Yang tidak bisa dibawa token `--text-*` adalah
+   `text-transform`, jadi satu baris ini melengkapinya. Pakai berdua:
+   `text-caption-uppercase caption-uppercase`.
+   ========================================================================= */
+@utility caption-uppercase {
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   CUCI LANGIT HERO — satu-satunya dekorasi atmosferik di seluruh sistem
+
+   Expo memberi dua warna gradien (`#cfe7ff` → `#a8c8e8`) dan satu aturan
+   keras soal pemakaiannya: HANYA di belakang pita hero. Di luar itu kanvas
+   putih polos. Menyalin cuci ini ke seksi lain — "biar seragam" — persis
+   yang merusak sistemnya, karena kedalaman atmosferik kehilangan artinya
+   begitu ia ada di mana-mana.
+
+   Gradiennya memudar ke transparan, bukan ke putih, supaya pita ini tetap
+   benar saat mode gelap membalik kanvas di bawahnya. Opasitasnya turun di
+   gelap karena #cfe7ff pada #171717 terlalu terang untuk jadi latar.
+   ========================================================================= */
+@utility hero-sky-wash {
+  background-image:
+    radial-gradient(
+      ellipse 90% 60% at 50% 0%,
+      color-mix(in oklch, var(--gradient-sky-light) 85%, transparent) 0%,
+      color-mix(in oklch, var(--gradient-sky-mid) 40%, transparent) 45%,
+      transparent 78%
+    );
+}
+
+.dark .hero-sky-wash {
+  opacity: 0.22;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-sky-wash {
+    background-image: none;
+  }
+}
+
+/* ============================================================================
    BOTTOM INSET — ruang yang harus disisakan bar melayang di bawah layar
    [UI/UX — Agu 2026]
 
@@ -327,10 +822,51 @@
   z-index: 9999 !important;
 }
 
+/* ============================================================================
+   SCROLLBAR SLIM
+   ============================================================================
+   Scrollbar tipis 4px. Memakai token warna sistem supaya otomatis benar
+   di mode gelap.
+ 
+   URUTAN PENTING:
+   1. * { scrollbar-width: thin } — Firefox, semua elemen
+   2. .hide-scrollbar { scrollbar-width: none } — override untuk yang perlu
+      benar-benar disembunyikan
+   3. ::-webkit-scrollbar — Chrome/Safari global
+   4. .hide-scrollbar::-webkit-scrollbar { display: none } — override Chrome
+   ============================================================================ */
+ 
+/* Firefox — global dulu, hide-scrollbar override di bawah */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline-strong) transparent;
+}
+ 
 .hide-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+ 
+/* Chrome/Safari — global dulu, hide-scrollbar override di bawah */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+ 
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: var(--hairline-strong);
+  border-radius: var(--radius-pill);
+}
+ 
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-strong);
+}
+ 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+ 

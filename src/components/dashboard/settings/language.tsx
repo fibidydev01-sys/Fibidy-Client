@@ -51,6 +51,7 @@ import { Check, Languages } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
 import { cn } from '@/lib/shared/utils';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year — matches next-intl's own default
 
@@ -73,7 +74,7 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
   };
 
   return (
-    <div className="h-full flex flex-col max-w-2xl mx-auto w-full">
+    <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
       {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
           takes over from md up where WizardNav is `sticky`/in-flow and
           doesn't need an artificial reserve — see wizard-nav.tsx's v6

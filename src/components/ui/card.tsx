@@ -8,7 +8,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        "bg-card text-card-foreground flex flex-col gap-6 rounded-[var(--shape-panel)] border py-6 shadow-sm",
         className
       )}
       {...props}
@@ -72,11 +72,34 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Kaki kartu. Tanpa kelas tambahan ia cuma baris di dalam padding kartu —
+ * perilaku shadcn apa adanya.
+ *
+ * Dengan `className="border-t"` ia menjadi **bilah aksi** ala EAS: melebar
+ * sampai tepi kartu, latar `--surface-sunken` selangkah dari badan kartu,
+ * dipisah hairline, isinya rata kanan.
+ *
+ * Konvensi `.border-t` sengaja dipakai ulang alih-alih menambah prop baru.
+ * Berkas ini sudah memakainya untuk mengatur padding (`[.border-t]:pt-6`),
+ * jadi "kaki bergaris = kaki yang dipisahkan" sudah jadi bahasa di sini;
+ * yang ditambahkan cuma sisa penampilannya.
+ *
+ * `-mb-6` membatalkan `py-6` milik Card supaya bilahnya benar-benar mencapai
+ * tepi bawah, dan `rounded-b-[inherit]` membuat sudutnya mengikuti radius
+ * kartu — 12px di marketing, 16px di dashboard, tanpa menyebut angkanya.
+ */
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(
+        "flex items-center px-6",
+        "[.border-t]:-mb-6 [.border-t]:justify-end [.border-t]:gap-3",
+        "[.border-t]:rounded-b-[inherit] [.border-t]:bg-surface-sunken",
+        "[.border-t]:px-6 [.border-t]:py-4",
+        className
+      )}
       {...props}
     />
   )

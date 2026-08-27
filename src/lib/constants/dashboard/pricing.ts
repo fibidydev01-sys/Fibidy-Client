@@ -24,16 +24,11 @@
 // Karena itu file ini cuma menyediakan formatter. Menambahkan konstanta
 // harga di sini akan membuat tempat keempat yang harus disamakan manual.
 //
-// ── 🔴 YANG PERLU DICEK SEKARANG ──────────────────────────────────────────
+// ── ✅ SUDAH BERES ────────────────────────────────────────────────────────
 //
-// `TIER_PRICE_IDR` di BACKEND masih 0 / 0. Nilai yang benar sudah terbaca
-// dari i18n yang ada:
-//
-//     STARTER  → 35000
-//     BUSINESS → 149000
-//
-// Isi kedua angka itu di backend sebelum checkout Tripay bisa dipakai —
-// ada guard di BE yang menolak checkout kalau harganya nol.
+// Catatan lama di sini menyebut `TIER_PRICE_IDR` di backend "masih 0 / 0".
+// Itu sudah tidak benar — subscription.constants.ts sekarang berisi
+// STARTER 35_000 dan BUSINESS 149_000, cocok dengan label di i18n.
 //
 // ── ⚠️ RISIKO YANG SUDAH ADA (bukan dibuat patch ini) ─────────────────────
 //

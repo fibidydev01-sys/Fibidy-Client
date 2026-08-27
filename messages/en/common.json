@@ -54,8 +54,7 @@
       "prev": "Previous",
       "next": "Next",
       "showing": "Showing page {current} of {total} ({count} products)",
-      "countSuffix": "({count} products)",
-      "downloadsSuffix": "({count} downloads)"
+      "countSuffix": "({count} products)"
     },
     "breadcrumb": {
       "home": "Home",
@@ -249,9 +248,6 @@
       "daysLeftShort": "({days}d left)"
     },
     "productType": {
-      "digital": "Digital",
-      "custom": "Custom",
-      "fileFallback": "FILE",
       "contactSeller": "Contact seller"
     },
     "price": {

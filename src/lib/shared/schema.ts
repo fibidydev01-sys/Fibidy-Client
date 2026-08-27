@@ -1,4 +1,5 @@
 import { seoConfig } from '@/lib/constants/shared/seo.config';
+import { markdownToPlainText } from './markdown';
 
 // ==========================================
 // SCHEMA.ORG JSON-LD GENERATORS
@@ -15,9 +16,7 @@ import { seoConfig } from '@/lib/constants/shared/seo.config';
 //    Without this, Google displays "$50,000" for Rp 50.000 products.
 //
 // 2. generateLocalBusinessSchema → currenciesAccepted: 'IDR' (was 'USD')
-//    Affects schema.org LocalBusiness markup. Stripe Connect for
-//    Indonesian sellers settles in IDR — must declare correctly.
-//    paymentAccepted stays 'Credit Card, Stripe' (descriptive, not currency).
+//    Affects schema.org LocalBusiness markup.
 //    priceRange stays '$$' (schema.org generic notation, not literal USD).
 //
 // 3. Removed the `(isDigital ? 'USD' : 'USD')` ternary — both branches
@@ -141,8 +140,11 @@ export function generateLocalBusinessSchema(tenant: {
     // priceRange: schema.org generic notation ($-$$$$ scale, not literal USD).
     // Indonesian buyers / Google parsers understand this as "moderate price tier".
     priceRange: '$$',
-    paymentAccepted: 'Credit Card, Stripe',
-    // [IDR MIGRATION] Settlement currency for Stripe Connect transactions.
+    // [PANGKAS PRODUK DIGITAL] Dulu 'Credit Card, Stripe'. Platform ini
+    // tidak pernah memproses pembayaran online: pesanan storefront lewat
+    // WhatsApp, kasir menerima tunai/transfer/debit. Menyebut Stripe di
+    // markup schema.org berarti berbohong ke Google soal cara membayar.
+    paymentAccepted: 'Cash, Bank Transfer, Debit Card',
     currenciesAccepted: 'IDR',
     areaServed: { '@type': 'Country', name: 'Worldwide' },
     contactPoint: tenant.whatsapp
@@ -165,10 +167,8 @@ export function generateProductSchema(
     description?: string | null;
     price: number;
     comparePrice?: number | null;
-    currency?: string | null;
     images?: string[];
     category?: string | null;
-    fileKey?: string | null;
     kind?: 'PRODUK' | 'JASA' | null;
   },
   tenant: {
@@ -181,10 +181,9 @@ export function generateProductSchema(
   const productUrl = getTenantUrl(tenant.slug, productPath);
   const tenantUrl = getTenantUrl(tenant.slug);
 
-  // [IDR MIGRATION] Default to IDR — affects Google rich results SERP display.
-  // Removed prior `(isDigital ? 'USD' : 'USD')` ternary (both branches USD = no-op).
-  // If product explicitly carries a currency override, respect it; otherwise IDR.
-  const priceCurrency = product.currency ?? 'IDR';
+  // [IDR MIGRATION] Platform ini hanya melayani Rupiah — memengaruhi
+  // tampilan rich result di SERP Google.
+  const priceCurrency = 'IDR';
 
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
     .toISOString()
@@ -212,7 +211,10 @@ export function generateProductSchema(
       '@type': 'Service',
       '@id': `${productUrl}/#service`,
       name: product.name,
-      description: product.description || `${product.name} from ${tenant.name}`,
+      // [MARKDOWN] JSON-LD dibaca mesin pencari sebagai teks, bukan markup.
+      description:
+        markdownToPlainText(product.description) ||
+        `${product.name} from ${tenant.name}`,
       url: productUrl,
       image: product.images?.[0] || getFullUrl(seoConfig.defaultOgImage),
       serviceType: product.category || undefined,
@@ -226,7 +228,10 @@ export function generateProductSchema(
     '@type': 'Product',
     '@id': `${productUrl}/#product`,
     name: product.name,
-    description: product.description || `${product.name} from ${tenant.name}`,
+    // [MARKDOWN] sama seperti di atas — jalur teks-polos.
+    description:
+      markdownToPlainText(product.description) ||
+      `${product.name} from ${tenant.name}`,
     url: productUrl,
     image: product.images?.[0] || getFullUrl(seoConfig.defaultOgImage),
     category: product.category || undefined,

@@ -14,9 +14,7 @@
 // Kalau keduanya berbeda, yang benar adalah server.
 //
 // [UI/UX — Agu 2026]
-//   • Ini satu-satunya layar kasir yang lebarnya dibatasi, dan batas itu kini
-//     datang dari KasirPageShell width="focused" — bukan `max-w-2xl` yang
-//     diketik ulang di empat tempat dalam berkas ini.
+//   • Lebar penuh, konsisten dengan semua tab kasir lainnya.
 //   • Di ≥lg isinya dua kolom: item di kiri, pembayaran di kanan yang menempel
 //     (sticky). Kasir tidak perlu menggulir bolak-balik antara daftar item dan
 //     kolom uang. Di bawah lg susunannya tetap satu kolom dengan ringkasan
@@ -29,8 +27,6 @@
 // ============================================================================
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
@@ -87,7 +83,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { formatPriceIDR } from '@/lib/shared/format';
+import { MahkotaKecil } from '@/components/dashboard/shared/notice-mahkota';
+import { useKasirLock } from '@/hooks/dashboard/use-kasir-lock';
 import { getErrorMessage } from '@/lib/api/client';
+import { Link, useRouter } from '@/i18n/navigation';
 import { hitungBarisGratis } from '@/lib/shared/kasir-promo';
 import {
   hitungTotal,
@@ -120,15 +119,19 @@ const METODE: Array<{
   icon: typeof Banknote;
   labelKey: string;
 }> = [
-  { id: 'TUNAI', icon: Banknote, labelKey: 'tunai' },
-  { id: 'TRANSFER', icon: Landmark, labelKey: 'transfer' },
-  { id: 'DEBIT', icon: CreditCard, labelKey: 'debit' },
-];
+    { id: 'TUNAI', icon: Banknote, labelKey: 'tunai' },
+    { id: 'TRANSFER', icon: Landmark, labelKey: 'transfer' },
+    { id: 'DEBIT', icon: CreditCard, labelKey: 'debit' },
+  ];
 
 export function KeranjangClient() {
   const t = useTranslations('dashboard.kasir.cart');
   const tMetode = useTranslations('dashboard.kasir.payment');
   const router = useRouter();
+
+  // Mahkota di tombol bayar. Keranjangnya tetap bisa diisi dan dihitung —
+  // yang ditahan cuma mencatat transaksinya.
+  const { terkunci, jaga } = useKasirLock();
 
   const lines = useKasirCartStore((s) => s.lines);
   const diskon = useKasirCartStore((s) => s.diskon);
@@ -193,9 +196,9 @@ export function KeranjangClient() {
         ...(bayarNanti
           ? { bayarNanti: true }
           : {
-              paymentMethod,
-              ...(paymentMethod === 'TUNAI' ? { uangDiterima: uangAngka } : {}),
-            }),
+            paymentMethod,
+            ...(paymentMethod === 'TUNAI' ? { uangDiterima: uangAngka } : {}),
+          }),
       },
       {
         onSuccess: (hasil) => {
@@ -258,7 +261,6 @@ export function KeranjangClient() {
       <KasirPageShell
         title={t('title')}
         showTabs={false}
-        width="focused"
         leading={tombolKembali}
       >
         <KasirEmptyState
@@ -280,7 +282,6 @@ export function KeranjangClient() {
       <KasirPageShell
         title={t('title')}
         showTabs={false}
-        width="focused"
         leading={tombolKembali}
       >
         <DiskonPicker
@@ -332,11 +333,16 @@ export function KeranjangClient() {
 
   const tombolBayar = (
     <div className="flex w-full flex-col gap-2">
+      {/* Tombol bayar TIDAK dimatikan untuk tenant FREE — ia tetap terlihat
+          dan tetap bisa ditekan, cuma dapat mahkota. Menekannya membuka modal
+          upgrade, bukan diam saja. Tombol mati tidak menjelaskan apa pun.
+          Yang menahan transaksinya ada di `useKasirMutation` (permintaannya
+          tidak pernah berangkat) dan di KasirPlanGuard server. */}
       <Button
-        onClick={handleBayar}
+        onClick={jaga(handleBayar)}
         disabled={!bisaBayar}
         size="lg"
-        className="h-12 w-full text-base font-semibold"
+        className="h-12 w-full gap-2 text-base font-semibold"
       >
         {isPending ? (
           <>
@@ -344,7 +350,10 @@ export function KeranjangClient() {
             {t('paying')}
           </>
         ) : (
-          t('pay', { nominal: formatPriceIDR(grandTotal) })
+          <>
+            {terkunci && <MahkotaKecil className="text-amber-300" />}
+            {t('pay', { nominal: formatPriceIDR(grandTotal) })}
+          </>
         )}
       </Button>
 
@@ -354,12 +363,16 @@ export function KeranjangClient() {
           menonjolnya akan memperlambat kasus yang paling sering. */}
       {adaJasa && (
         <Button
-          onClick={handleBayarNanti}
+          onClick={jaga(handleBayarNanti)}
           disabled={lines.length === 0 || isPending}
           variant="outline"
           className="h-11 w-full gap-2"
         >
-          <Clock className="h-4 w-4" aria-hidden />
+          {terkunci ? (
+            <MahkotaKecil />
+          ) : (
+            <Clock className="h-4 w-4" aria-hidden />
+          )}
           {t('payLater')}
         </Button>
       )}
@@ -372,7 +385,6 @@ export function KeranjangClient() {
       title={t('title')}
       subtitle={t('itemCount', { jumlah: totalItem })}
       showTabs={false}
-      width="focused"
       leading={tombolKembali}
       toolbar={jejak}
       actions={
@@ -405,7 +417,7 @@ export function KeranjangClient() {
                 <FieldLabel htmlFor="uang-diterima">
                   {t('cashReceived')}
                 </FieldLabel>
-                <InputGroup className="h-11">
+                <InputGroup>
                   <InputGroupAddon>Rp</InputGroupAddon>
                   <InputGroupInput
                     id="uang-diterima"
@@ -578,38 +590,34 @@ export function KeranjangClient() {
         {/* ZONA 3 — metode pembayaran. Di ponsel ia jatuh setelah diskon,
             urutan yang sama dengan sebelum layar dibagi dua kolom. */}
         <Card className="py-4 lg:col-start-2 lg:row-start-1">
-            <CardHeader className="px-4">
-              <CardTitle className="text-sm">{t('methodTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4">
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={(v) =>
-                  setPaymentMethod(v as KasirPaymentMethod)
-                }
-                aria-label={tMetode('label')}
-                className="grid-cols-3 gap-2"
-              >
-                {METODE.map((m) => (
-                  <FieldLabel key={m.id} htmlFor={`metode-${m.id}`}>
-                    <Card className="w-full items-center gap-1.5 py-3 text-center transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
-                      <CardContent className="flex flex-col items-center gap-1.5 px-2">
-                        <m.icon className="size-4" aria-hidden />
-                        <span className="text-sm font-medium">
-                          {tMetode(m.labelKey)}
-                        </span>
-                        <RadioGroupItem
-                          value={m.id}
-                          id={`metode-${m.id}`}
-                          className="sr-only"
-                        />
-                      </CardContent>
-                    </Card>
-                  </FieldLabel>
-                ))}
-              </RadioGroup>
-            </CardContent>
-          </Card>
+          <CardHeader className="px-4">
+            <CardTitle className="text-sm">{t('methodTitle')}</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(v) =>
+                setPaymentMethod(v as KasirPaymentMethod)
+              }
+              aria-label={tMetode('label')}
+              className="grid grid-cols-3 gap-2"
+            >
+              {METODE.map((m) => (
+                <label key={m.id} htmlFor={`metode-${m.id}`} className="cursor-pointer">
+                  <span className="flex h-11 w-full items-center justify-center gap-2 rounded-[var(--shape-control)] border bg-card px-3 text-sm font-medium transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
+                    <m.icon className="size-4 shrink-0" aria-hidden />
+                    {tMetode(m.labelKey)}
+                    <RadioGroupItem
+                      value={m.id}
+                      id={`metode-${m.id}`}
+                      className="sr-only"
+                    />
+                  </span>
+                </label>
+              ))}
+            </RadioGroup>
+          </CardContent>
+        </Card>
 
         {/* Ringkasan versi desktop — menempel di kolom kanan. Versi
             ponselnya adalah bar di bawah, di luar grid ini. */}

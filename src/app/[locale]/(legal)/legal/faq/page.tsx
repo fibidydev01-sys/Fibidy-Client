@@ -64,7 +64,7 @@ export default function FAQPage() {
                       value={`${group.category}-${index}`}
                       className="border-b border-border/60 last:border-b-0"
                     >
-                      <AccordionTrigger className="text-left hover:no-underline py-4 text-sm font-semibold hover:text-primary transition-colors duration-200">
+                      <AccordionTrigger className="text-left hover:no-underline py-4 text-sm font-semibold hover:text-link transition-colors duration-200">
                         {faq.question}
                       </AccordionTrigger>
                       <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
@@ -83,7 +83,7 @@ export default function FAQPage() {
           {t('stillQuestionPrefix')}{' '}
           <Link
             href="/legal/contact"
-            className="text-foreground font-semibold hover:text-primary transition-colors"
+            className="text-foreground font-semibold hover:text-link transition-colors"
           >
             {t('stillQuestionLinkText')}
           </Link>

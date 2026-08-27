@@ -44,7 +44,6 @@ import { StepReview } from './step-review';
 import { RegisterStepIndicator } from './register-step-indicator';
 import { RegisterNav } from './register-nav';
 import { ApiRequestError } from '@/lib/api/client';
-import type { RegisterIntent } from '@/types/auth';
 
 // ============================================================================
 // HELPERS
@@ -56,17 +55,7 @@ function isPhoneValid(whatsapp: string): boolean {
   return digits.length >= 6 && digits.length <= 15;
 }
 
-function getStepDefs(
-  intent: RegisterIntent | null,
-  t: ReturnType<typeof useTranslations>,
-) {
-  if (intent === 'BUYER') {
-    return [
-      { title: t('stepsMeta.whoAreYou.title'), desc: t('stepsMeta.whoAreYou.desc') },
-      { title: t('stepsMeta.yourAccount.title'), desc: t('stepsMeta.yourAccount.desc') },
-      { title: t('stepsMeta.review.title'), desc: t('stepsMeta.review.desc') },
-    ];
-  }
+function getStepDefs(t: ReturnType<typeof useTranslations>) {
   return [
     { title: t('stepsMeta.whoAreYou.title'), desc: t('stepsMeta.whoAreYou.desc') },
     { title: t('stepsMeta.businessType.title'), desc: t('stepsMeta.businessType.desc') },
@@ -76,12 +65,8 @@ function getStepDefs(
   ];
 }
 
-function shouldCenterContent(
-  currentStep: number,
-  intent: RegisterIntent | null,
-): boolean {
-  if (intent !== 'BUYER' && currentStep === 2) return false;
-  return true;
+function shouldCenterContent(currentStep: number): boolean {
+  return currentStep !== 2;
 }
 
 // ============================================================================
@@ -109,7 +94,6 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
   const wizard = useRegisterWizard();
   const {
     register,
-    registerBuyer,
     isLoading,
     error,
     errorCode,
@@ -150,9 +134,7 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
   // [SPRINT 5] Check email availability saat user ketik di Step 4
   useEffect(() => {
     const step = wizard.state.currentStep;
-    const currentIntent = wizard.state.intent;
-    const accountStep = currentIntent === 'BUYER' ? 2 : 4;
-    if (step === accountStep && debouncedEmail && debouncedEmail.includes('@')) {
+    if (step === 4 && debouncedEmail && debouncedEmail.includes('@')) {
       checkEmail(debouncedEmail);
     } else {
       resetEmail();
@@ -173,7 +155,7 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
       (error && error.toLowerCase().includes('email'))
     ) {
       // [SPRINT 5] Jump ke StepAccount + ValidationDialog + highlight email
-      wizard.goToStep(getAccountStep(wizard.state.intent));
+      wizard.goToStep(getAccountStep());
       setValidationItems([t('errors.emailTaken')]);
       setValidationOpen(true);
       setFieldErrors(new Set(['email']));
@@ -192,12 +174,12 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
   }, []);
 
   const intent = wizard.state.intent;
-  const STEPS = useMemo(() => getStepDefs(intent, t), [intent, t]);
+  const STEPS = useMemo(() => getStepDefs(t), [t]);
 
   const indicatorStep = wizard.state.currentStep - 1;
   const isWelcomeStep = wizard.state.currentStep === 0;
 
-  const centerContent = shouldCenterContent(wizard.state.currentStep, intent);
+  const centerContent = shouldCenterContent(wizard.state.currentStep);
 
   // ============================================================================
   // STEP VALIDATION — returns error keys + sets fieldErrors
@@ -214,33 +196,24 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
           if (!s.intent) errors.push(t('errors.intentRequired'));
           break;
         case 2:
-          if (intent === 'BUYER') {
-            if (!s.email || !isEmailValid(s.email)) errors.push(t('errors.emailInvalid'));
-            if (!s.password || !isPasswordStrong(s.password)) errors.push(t('errors.passwordWeak'));
-          } else {
-            if (!s.category?.trim()) errors.push(t('errors.categoryRequired'));
-          }
+          if (!s.category?.trim()) errors.push(t('errors.categoryRequired'));
           break;
         case 3:
-          if (intent === 'BUYER') {
-            if (!isAgreed) errors.push(t('errors.agreementRequired'));
-          } else {
-            if (!s.name || s.name.trim().length === 0) {
-              errors.push(t('errors.nameRequired'));
-            } else if (s.name.trim().length < 3) {
-              errors.push(t('errors.nameTooShort'));
-            }
-            if (!s.slug || s.slug.length === 0) {
-              errors.push(t('errors.slugRequired'));
-            } else if (s.slug.length < 3) {
-              errors.push(t('errors.slugTooShort'));
-            } else if (!validateSlugFormat(s.slug).valid) {
-              errors.push(t('errors.slugInvalidFormat'));
-            } else if (isChecking) {
-              errors.push(t('errors.slugChecking'));
-            } else if (isAvailable === false) {
-              errors.push(t('errors.slugTaken'));
-            }
+          if (!s.name || s.name.trim().length === 0) {
+            errors.push(t('errors.nameRequired'));
+          } else if (s.name.trim().length < 3) {
+            errors.push(t('errors.nameTooShort'));
+          }
+          if (!s.slug || s.slug.length === 0) {
+            errors.push(t('errors.slugRequired'));
+          } else if (s.slug.length < 3) {
+            errors.push(t('errors.slugTooShort'));
+          } else if (!validateSlugFormat(s.slug).valid) {
+            errors.push(t('errors.slugInvalidFormat'));
+          } else if (isChecking) {
+            errors.push(t('errors.slugChecking'));
+          } else if (isAvailable === false) {
+            errors.push(t('errors.slugTaken'));
           }
           break;
         case 4:
@@ -259,7 +232,7 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
       }
       return errors;
     };
-  }, [wizard.state, intent, isChecking, isAvailable, isAgreed, isEmailAvailable, isCheckingEmail, errorCode, t]);
+  }, [wizard.state, isChecking, isAvailable, isAgreed, isEmailAvailable, isCheckingEmail, errorCode, t]);
 
   // ============================================================================
   // COMPUTE FIELD ERRORS PER STEP — untuk highlight
@@ -273,25 +246,16 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
         if (!s.intent) fields.add('intent');
         break;
       case 2:
-        if (intent === 'BUYER') {
-          if (!s.email || !isEmailValid(s.email)) fields.add('email');
-          if (!s.password || !isPasswordStrong(s.password)) fields.add('password');
-        } else {
-          if (!s.category?.trim()) fields.add('category');
-        }
+        if (!s.category?.trim()) fields.add('category');
         break;
       case 3:
-        if (intent === 'BUYER') {
-          if (!isAgreed) fields.add('agreement');
-        } else {
-          if (!s.name || s.name.trim().length < 3) fields.add('name');
-          if (
-            !s.slug ||
-            s.slug.length < 3 ||
-            !validateSlugFormat(s.slug).valid ||
-            isAvailable === false
-          ) fields.add('slug');
-        }
+        if (!s.name || s.name.trim().length < 3) fields.add('name');
+        if (
+          !s.slug ||
+          s.slug.length < 3 ||
+          !validateSlugFormat(s.slug).valid ||
+          isAvailable === false
+        ) fields.add('slug');
         break;
       case 4:
         if (!s.email || !isEmailValid(s.email)) fields.add('email');
@@ -304,7 +268,7 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
         break;
     }
     return fields;
-  }, [wizard.state, intent, isAgreed, isAvailable, isEmailAvailable, errorCode]);
+  }, [wizard.state, isAgreed, isAvailable, isEmailAvailable, errorCode]);
 
   // ============================================================================
   // NAVIGATION HANDLERS
@@ -335,24 +299,17 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
       return;
     }
     try {
-      if (intent === 'BUYER') {
-        await registerBuyer({
-          email: wizard.state.email!,
-          password: wizard.state.password!,
-        });
-      } else {
-        await register({
-          intent: intent as 'SELLER' | 'EDU',
-          name: wizard.state.name!,
-          slug: wizard.state.slug!,
-          category: wizard.state.category!,
-          description: wizard.state.description || '',
-          email: wizard.state.email!,
-          password: wizard.state.password!,
-          whatsapp: wizard.state.whatsapp!,
-          agreementAccepted: true,
-        });
-      }
+      await register({
+        intent: intent as 'SELLER' | 'EDU',
+        name: wizard.state.name!,
+        slug: wizard.state.slug!,
+        category: wizard.state.category!,
+        description: wizard.state.description || '',
+        email: wizard.state.email!,
+        password: wizard.state.password!,
+        whatsapp: wizard.state.whatsapp!,
+        agreementAccepted: true,
+      });
     } catch {
       // Error handled in hook + via errorCode effect
     }
@@ -399,36 +356,6 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
           onClearFieldError={handleClearFieldError}
         />
       );
-    }
-
-    if (intent === 'BUYER') {
-      if (currentStep === 2) {
-        return (
-          <StepAccount
-            email={wizard.state.email || ''}
-            password={wizard.state.password || ''}
-            whatsapp=""
-            hiddenFields={['whatsapp']}
-            onUpdate={wizard.updateState}
-            fieldErrors={fieldErrors}
-            onClearFieldError={handleClearFieldError}
-          />
-        );
-      }
-      if (currentStep === 3) {
-        return (
-          <StepReview
-            data={wizard.state}
-            intent={intent}
-            onEdit={(step) => wizard.goToStep(step)}
-            isAgreed={isAgreed}
-            onAgreementChange={setIsAgreed}
-            cameFromBuilder={wizard.cameFromBuilder}
-            fieldErrors={fieldErrors}
-            onClearFieldError={handleClearFieldError}
-          />
-        );
-      }
     }
 
     if (currentStep === 2) {
@@ -481,7 +408,6 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
       return (
         <StepReview
           data={wizard.state}
-          intent={intent}
           onEdit={(step) => wizard.goToStep(step)}
           isAgreed={isAgreed}
           onAgreementChange={setIsAgreed}

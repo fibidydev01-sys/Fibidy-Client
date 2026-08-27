@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { seoConfig } from '@/lib/constants/shared/seo.config';
+import { markdownToPlainText } from './markdown';
 
 // ==========================================
 // METADATA GENERATORS
@@ -12,7 +13,7 @@ import { seoConfig } from '@/lib/constants/shared/seo.config';
 //   a pre-translated label via generateBreadcrumbs caller side if needed
 //
 // [IDR MIGRATION — May 2026]
-// createProductMetadata: currency default changed USD → IDR.
+// createProductMetadata: harga selalu diformat dalam Rupiah.
 // Intl.NumberFormat now always uses 'id-ID' locale + 0 decimal digits.
 // ==========================================
 
@@ -130,10 +131,8 @@ export function createProductMetadata({
     slug?: string | null;
     description?: string | null;
     price: number;
-    currency?: string | null;
     images?: string[];
     category?: string | null;
-    fileKey?: string | null;
   };
   tenant: {
     name: string;
@@ -142,17 +141,20 @@ export function createProductMetadata({
 }): Metadata {
   const title = `${product.name} — ${tenant.name} | Fibidy`;
 
-  // [IDR MIGRATION] All Stripe Connect transactions settle in IDR.
-  // Default to IDR — respect explicit product.currency if set.
-  const currency = product.currency ?? 'IDR';
+  // Platform ini hanya melayani Rupiah.
+  const currency = 'IDR';
   const priceFormatted = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
   }).format(product.price);
 
+  // [MARKDOWN] Dilucuti, bukan dirender. Deskripsi produk disimpan sebagai
+  // markdown; tanpa ini `**Kopi Susu**` bocor mentah-mentah ke hasil pencarian
+  // Google dan ke kartu pratinjau WhatsApp/Facebook.
   const description =
-    product.description || `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;
+    markdownToPlainText(product.description) ||
+    `Buy ${product.name} at ${tenant.name} for ${priceFormatted}.`;
 
   const productPath = product.slug ? `/p/${product.slug}` : `/product/${product.id}`;
   const canonicalUrl = getTenantUrl(tenant.slug, productPath);

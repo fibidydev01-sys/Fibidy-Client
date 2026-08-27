@@ -72,8 +72,8 @@ export function PapanClient() {
           {KOLOM_PAPAN.map((k) => (
             <div key={k} className="space-y-2">
               <Skeleton className="h-6 w-full" />
-              <Skeleton className="h-32 w-full rounded-xl" />
-              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-[var(--shape-panel)]" />
+              <Skeleton className="h-32 w-full rounded-[var(--shape-panel)]" />
             </div>
           ))}
         </div>
