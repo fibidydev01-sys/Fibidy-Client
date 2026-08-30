@@ -19,6 +19,14 @@ import { useTranslations } from 'next-intl';
 //
 // Also exports ProductGridCardSkeleton for loading states. Imported by
 // ./product-grid.tsx as part of <ProductsGridSkeleton />.
+//
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// ProductGridCardSkeleton sebelumnya menggambar 5 block terpisah (gambar +
+// kategori + 2 baris nama + harga) meniru struktur kartu asli persis.
+// Diubah jadi SATU block polos seukuran kartu. Skeleton yang meniru detail
+// menambah biaya perawatan — setiap kali tata letak kartu berubah, skeleton
+// harus ikut diubah supaya tidak "meleset" dari bentuk aslinya — tanpa
+// menambah kejelasan buat pengguna dibanding satu block generik.
 // ==========================================
 
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -130,19 +138,15 @@ export function ProductGridCard({ product, onClick }: ProductGridCardProps) {
 // SKELETON
 //
 // Imported by ./product-grid.tsx for <ProductsGridSkeleton count={n} />.
-// Mirrors the card shape so loading state doesn't shift layout.
+//
+// SATU block polos, tanpa border, radius mengikuti radius kartu asli
+// (rounded-xl). Lihat catatan simplifikasi di kepala file.
 // ==========================================
 
 export function ProductGridCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-      <Skeleton className="aspect-square w-full rounded-none" />
-      <div className="px-3 py-2.5 space-y-2">
-        <Skeleton className="h-3 w-1/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-1/3 mt-2" />
-      </div>
+    <div className="aspect-square w-full overflow-hidden rounded-xl bg-card">
+      <Skeleton className="h-full w-full rounded-xl" />
     </div>
   );
 }

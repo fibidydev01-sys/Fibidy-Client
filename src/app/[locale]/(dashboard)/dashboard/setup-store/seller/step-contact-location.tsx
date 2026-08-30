@@ -61,7 +61,7 @@ interface StepContactLocationProps {
 function MapPreview({ url }: { url: string }) {
   if (!url) return null;
   return (
-    <div className="border rounded-lg overflow-hidden shadow-sm">
+    <div className="border rounded-[var(--shape-panel)] overflow-hidden shadow-sm">
       <iframe
         src={url}
         width="100%"
@@ -121,7 +121,7 @@ function LocationPickerSection({
 
   return (
     <div className={cn(
-      'space-y-4 rounded-lg border p-4 transition-colors',
+      'space-y-4 rounded-[var(--shape-panel)] border p-4 transition-colors',
       hasMapError && 'border-destructive ring-2 ring-destructive/20',
     )}>
 
@@ -143,7 +143,7 @@ function LocationPickerSection({
           </span>
         </Button>
       ) : (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/20 px-4 py-3 flex items-center justify-between gap-2">
+        <div className="rounded-[var(--shape-panel)] border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/20 px-4 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
             <div className="min-w-0">
@@ -167,7 +167,7 @@ function LocationPickerSection({
       )}
 
       {error && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20 px-3 py-2 flex items-center gap-2">
+        <div className="rounded-[var(--shape-panel)] border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20 px-3 py-2 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-400">
             {error === 'permission_denied'
@@ -384,7 +384,7 @@ export function StepContactLocation({
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
             className={cn(
-            hasPhoneError && 'border-destructive focus-visible:ring-destructive',
+              hasPhoneError && 'border-destructive focus-visible:ring-destructive',
             )}
           />
           {hasPhoneError && (
@@ -414,7 +414,7 @@ export function StepContactLocation({
         <FormPanel wide title={t('whereWeAreHeading')}>
 
           {showPhysicalToggle && (
-            <div className="flex items-center justify-between border rounded-lg px-4 py-3">
+            <div className="flex items-center justify-between border rounded-[var(--shape-panel)] px-4 py-3">
               <div className="space-y-0.5 pr-3">
                 <p className="text-sm font-medium">{t('hasPhysicalLocationLabel')}</p>
                 <p className="text-xs text-muted-foreground">{t('hasPhysicalLocationHelper')}</p>
@@ -510,7 +510,7 @@ export function StepContactLocation({
       )}
 
       {isOnline && (
-        <div className={cn(PANEL_WIDE, "rounded-lg border bg-muted/40 px-4 py-3")}>
+        <div className={cn(PANEL_WIDE, "rounded-[var(--shape-panel)] border bg-muted/40 px-4 py-3")}>
           <p className="text-xs text-muted-foreground">{t('onlineNote')}</p>
         </div>
       )}

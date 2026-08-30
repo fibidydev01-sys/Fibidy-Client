@@ -4,6 +4,26 @@
 // REGISTER NAV
 // File: src/components/auth/register/register-nav.tsx
 //
+// [ROLLBACK HEADER MIGRATION — Aug 2026]
+// Dikembalikan ke pill floating BOTTOM (WizardNav), bukan header sticky
+// TOP (WizardHeader). Keputusan eksplisit: module auth (register.tsx +
+// register-nav.tsx) TIDAK ikut migrasi header yang diterapkan ke dashboard
+// (Setup Store, Product form, Settings) — auth tetap pakai pola nav
+// mengambang di bawah seperti semula.
+//
+// WizardNav sendiri sejak awal sudah generik untuk kasus ini — lihat
+// komentar di kepala wizard-nav.tsx: "Dipakai di: hero, contact, payment,
+// shipping, social, about, product form, register". Register memang
+// sudah termasuk daftar pemanggil resmi WizardNav sebelum migrasi apa pun
+// terjadi, jadi ini murni restore ke pemanggilan yang sudah didesain
+// untuknya, bukan menambal komponen dashboard ke tempat yang tidak
+// direncanakan untuknya.
+//
+// StepDots di-import lewat step-wizard.tsx (bukan langsung dari
+// step-indicator.tsx) — mengikuti jalur import ASLI WizardNav, supaya
+// file ini identik dengan bentuknya sebelum migrasi, bukan sekadar
+// "sama fungsinya lewat jalur lain".
+//
 // [STEP WELCOME — May 2026]
 // Tambah prop isWelcomeStep:
 //   - true  → kiri "← Kembali" ke backHref ("/"), kanan "Mulai →", dots hidden
@@ -46,6 +66,18 @@
 // untuk register.tsx (footer-nya sendiri sudah aman) dan menjaga
 // komponen ini tetap benar kalau dipakai ulang di kolom flex lain.
 // ============================================================================
+
+// ── BENTUK: PIL, MENGIKUTI DIALEK DASBOR ──────────────────────────────────
+//
+// Bilah ini dan kedua tombolnya `rounded-full`. Sempat dilepas ke 12px/8px
+// atas dasar expo.design.md ("pill geometry is reserved for badges only"),
+// lalu DIKEMBALIKAN: pemilik produk menolak bentuk kotak itu setelah
+// melihatnya di layar. Lihat catatan panjangnya di globals.css, blok
+// [data-surface="app"] — dialek dasbor memang pil, dan itu pilihan, bukan
+// kelalaian.
+//
+// Tinggi tombolnya TIDAK dikembalikan ke h-9: 40px adalah ukuran baku
+// Button sekarang, dan tidak ada yang mempermasalahkannya.
 
 import { ChevronLeft, ChevronRight, Save, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';

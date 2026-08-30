@@ -28,6 +28,11 @@
 //     tanpa jarak sama sekali, persis di titik yang paling sering dilihat
 //     kasir tiap membuka tab ini. `gap-4` dipilih supaya sama dengan jarak
 //     antar-blok yang sudah dipakai shell, bukan angka baru.
+//
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// KasirRowsSkeleton tidak lagi menerima prop `trailing` — barisnya sekarang
+// satu block polos, bukan meniru bentuk elemen kanan (stepper/amount).
+// Lihat catatan di kasir-state.tsx.
 // ============================================================================
 
 import { useMemo, useState } from 'react';
@@ -280,7 +285,7 @@ export function StokClient() {
 
         {/* Daftar produk */}
         {isLoading ? (
-          <KasirRowsSkeleton rows={6} trailing="amount" />
+          <KasirRowsSkeleton rows={6} />
         ) : produk.length === 0 ? (
           // Tersaring vs benar-benar kosong — dibedakan seperti di tab Jual.
           adaFilter ? (

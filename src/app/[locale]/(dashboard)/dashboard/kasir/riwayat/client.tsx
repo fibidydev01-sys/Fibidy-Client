@@ -20,6 +20,11 @@
 //     halaman berpindah lewat <Pagination>, bukan mengambil 200 baris sekaligus.
 //   • Data lama tidak pernah diganti skeleton saat pindah halaman atau mengetik
 //     (keepPreviousData di use-kasir), hanya diredupkan.
+//
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// KasirRowsSkeleton tidak lagi menerima prop `trailing` — barisnya sekarang
+// satu block polos, bukan meniru bentuk elemen kanan (stepper/amount).
+// Lihat catatan di kasir-state.tsx.
 // ============================================================================
 
 import { useMemo, useState } from 'react';
@@ -207,7 +212,7 @@ export function RiwayatClient() {
     cn(
       'font-semibold tabular-nums',
       (trx.status === 'VOID' || trx.status === 'REFUND') &&
-        'text-muted-foreground line-through',
+      'text-muted-foreground line-through',
       trx.status === 'BELUM_BAYAR' && 'text-amber-600 dark:text-amber-400',
     );
 
@@ -329,7 +334,7 @@ export function RiwayatClient() {
       toolbar={toolbar}
     >
       {isLoading ? (
-        <KasirRowsSkeleton rows={6} trailing="amount" />
+        <KasirRowsSkeleton rows={6} />
       ) : transaksis.length === 0 ? (
         // Tersaring vs benar-benar kosong — dibedakan seperti di tab Jual.
         adaFilter ? (
@@ -537,7 +542,7 @@ export function RiwayatClient() {
                     className={cn(
                       'gap-1 px-2.5',
                       halaman >= totalHalaman &&
-                        'pointer-events-none opacity-50',
+                      'pointer-events-none opacity-50',
                     )}
                     onClick={(e) => {
                       e.preventDefault();

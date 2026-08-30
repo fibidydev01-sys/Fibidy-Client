@@ -73,7 +73,7 @@ function HighlightFilledImage({
   onLoadFail,
 }: HighlightFilledImageProps) {
   return (
-    <div className="relative aspect-square w-full rounded-xl overflow-hidden border bg-muted group">
+    <div className="relative aspect-square w-full rounded-[var(--shape-panel)] overflow-hidden border bg-muted group">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
@@ -208,7 +208,7 @@ function HighlightImageUpload({
         Title dan desc punya wrapper sendiri di parent.
       */}
       <div className={cn(
-        'rounded-xl transition-all',
+        'rounded-[var(--shape-panel)] transition-all',
         hasImageError && 'ring-2 ring-destructive ring-offset-2',
       )}>
         {showFilled ? (
@@ -382,7 +382,7 @@ export function StepHighlights({
                     className={cn(
                       'pr-14',
                       hasTitleError &&
-                        'border-destructive focus-visible:ring-destructive',
+                      'border-destructive focus-visible:ring-destructive',
                     )}
                   />
                   <CharCounter
@@ -422,7 +422,7 @@ export function StepHighlights({
                     className={cn(
                       'resize-none pb-6',
                       hasDescError &&
-                        'border-destructive focus-visible:ring-destructive',
+                      'border-destructive focus-visible:ring-destructive',
                     )}
                   />
                   <CharCounter

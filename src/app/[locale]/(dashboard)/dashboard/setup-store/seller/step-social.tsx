@@ -106,7 +106,7 @@ export function StepSocial({
         <div
           className={cn(
             PANEL_FIELDS_2,
-            'rounded-lg transition-all',
+            'rounded-[var(--shape-panel)] transition-all',
             hasSocialError && 'ring-2 ring-destructive ring-offset-2',
           )}
           data-field-error={hasSocialError ? 'true' : undefined}

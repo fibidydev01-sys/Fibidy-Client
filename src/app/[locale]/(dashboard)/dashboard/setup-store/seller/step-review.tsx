@@ -98,11 +98,11 @@ export function StepReview({
       <ReviewCard label={t('visual')} step={1} onEdit={onEditStep}>
         <div className="flex items-center gap-3">
           {logo ? (
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden border shrink-0">
+            <div className="relative w-10 h-10 rounded-[var(--shape-panel)] overflow-hidden border shrink-0">
               <Image src={logo} alt="Logo" fill className="object-cover" sizes="40px" />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-lg bg-muted border shrink-0" />
+            <div className="w-10 h-10 rounded-[var(--shape-panel)] bg-muted border shrink-0" />
           )}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export function StepReview({
       </ReviewCard>
 
       {/* Launch note */}
-      <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/20 px-4 py-3">
+      <div className="rounded-[var(--shape-panel)] bg-emerald-500/5 border border-emerald-500/20 px-4 py-3">
         <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
           {t('launchNote')}
         </p>

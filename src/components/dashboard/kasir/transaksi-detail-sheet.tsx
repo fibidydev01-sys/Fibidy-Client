@@ -160,9 +160,9 @@ export function TransaksiDetailSheet({
             <ResponsiveSheetDescription>
               {trx
                 ? new Date(trx.createdAt).toLocaleString('id-ID', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })
                 : ''}
             </ResponsiveSheetDescription>
           </ResponsiveSheetHeader>
@@ -178,7 +178,7 @@ export function TransaksiDetailSheet({
                 {/* Alasan void/refund — jawaban pertama yang dicari orang
                     saat membuka transaksi yang tidak normal. */}
                 {trx.status !== 'COMPLETED' && trx.voidReason && (
-                  <div className="rounded-lg border bg-muted/40 px-3 py-2.5">
+                  <div className="rounded-[var(--shape-panel)] border bg-muted/40 px-3 py-2.5">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       {t('reasonLabel')}
                     </p>

@@ -4,6 +4,19 @@
 // PRODUCT FORM — v7 Validation Dialog + Field Highlight + Scroll Fix
 // File: src/components/dashboard/product/form/product.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (dulu floating pill footer, anak TERAKHIR di dalam <form>)
+// diganti WizardHeader — sekarang ANAK PERTAMA, sticky top-0. Step
+// indicator yang dulu cuma StepDots kecil nempel di dalam WizardNav
+// sekarang jadi StepIndicator penuh (lingkaran+tooltip di desktop,
+// teks "N/total" di mobile) — lihat wizard-header.tsx untuk detail
+// bentuknya. Logic handleNext/computeStepErrors/computeFieldErrorsForStep
+// TIDAK diubah — WizardHeader menerima callback yang sama persis.
+//
+// onBack sekarang wajib diisi eksplisit (WizardHeader mewajibkannya) —
+// diarahkan ke router.back(), sama seperti onClick lama pada tombol Back
+// yang dulu ada di dalam WizardNav (`onBack={() => router.back()}`).
+//
 // [PRODUCTS v7 — May 2026]
 // Tambah ValidationDialog (Lottie lonceng) + field highlight + scroll to first error.
 //
@@ -67,7 +80,7 @@ import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { useKasirConfig } from '@/hooks/dashboard/use-kasir';
 import { productSchema, type ProductFormData } from '@/lib/shared/validations';
 import { getMaxImages } from '@/lib/shared/product-utils';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
 import { StepDetails } from './step-details';
 import { StepDescription } from './step-description';
@@ -267,6 +280,11 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
     setCurrentStep((p) => p + 1);
   }, [currentStepKey, form, tValidation]);
 
+  const handlePrev = useCallback(() => {
+    setCurrentStep((p) => p - 1);
+    setFieldErrors(new Set());
+  }, []);
+
   // ── Save ──────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     const data = form.getValues();
@@ -338,6 +356,13 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
     }
   };
 
+  // [MIGRASI HEADER] onBack sekarang wajib diisi eksplisit (WizardHeader
+  // mewajibkannya) — sama persis dengan onClick lama pada tombol Back yang
+  // dulu ada di dalam WizardNav (`onBack={() => router.back()}`).
+  const handleBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
   const renderStep = () => {
     switch (currentStepKey) {
       case 'details':
@@ -398,25 +423,16 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
           onSubmit={(e) => e.preventDefault()}
           className={cn('h-full flex flex-col', PAGE_COLUMN)}
         >
-          {/* pb-24 (fixed-pill clearance) only matters below md; md:pb-6
-              takes over from md up where WizardNav is `sticky`/in-flow
-              and doesn't need an artificial reserve — see
-              wizard-nav.tsx's v6 note and contact.tsx's equivalent
-              comment for the full story. */}
-          <div className="flex flex-col pb-24 md:pb-6 min-h-[260px] lg:min-h-[300px] lg:flex-1">
-            {renderStep()}
-          </div>
-
-          <WizardNav
+          {/* [MIGRASI HEADER] WizardHeader sekarang ANAK PERTAMA, bukan lagi
+              anak terakhir. StepDots kecil yang dulu nempel di dalam
+              WizardNav sekarang jadi StepIndicator penuh (tooltip + label
+              N/total mobile) — lihat wizard-header.tsx. */}
+          <WizardHeader
             steps={steps}
             currentStep={currentStep}
-            onPrev={() => {
-              setCurrentStep((p) => p - 1);
-              setFieldErrors(new Set());
-            }}
+            onBack={handleBack}
+            onPrev={handlePrev}
             onNext={handleNext}
-            onBack={() => router.back()}
-            onSave={handleSave}
             isSaving={isSaving}
             lastStepIcon={Eye}
             lastStepLabel={
@@ -424,6 +440,14 @@ export function ProductForm({ product, categories = [] }: ProductFormProps) {
             }
             onLastStep={() => setShowPreview(true)}
           />
+
+          {/* [MIGRASI HEADER] `pb-24 md:pb-6` (clearance untuk pill BAWAH
+              yang lama) dihapus — tidak ada lagi elemen mengambang di
+              bawah yang perlu dihindari kontennya. `mt-6` menggantikan
+              jarak yang dulu didapat dari mb-8 di step indicator lama. */}
+          <div className="mt-6 flex flex-col min-h-[260px] lg:min-h-[300px] lg:flex-1">
+            {renderStep()}
+          </div>
         </form>
       </Form>
     </>

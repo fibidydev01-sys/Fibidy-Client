@@ -4,6 +4,14 @@
 // REGISTER FORM
 // File: src/components/auth/register/register.tsx
 //
+// [ROLLBACK HEADER MIGRATION — Aug 2026]
+// Dikembalikan ke bentuk sebelum migrasi WizardHeader: sticky header di
+// ATAS (RegisterStepIndicator + h2 title + p desc, kondisional
+// !isWelcomeStep) tetap tinggal di sini, dan RegisterNav kembali dipanggil
+// sebagai FOOTER (bawah), bukan lagi elemen pertama. Lihat catatan di
+// register-nav.tsx untuk alasan lengkap kenapa module auth tidak ikut
+// migrasi header yang diterapkan ke dashboard.
+//
 // [SPRINT 5 — FIELD HIGHLIGHT + VALIDATION DIALOG]
 // - Tambah fieldErrors: Set<string> state di orchestrator
 // - Setiap step menerima fieldErrors + onClearFieldError props
@@ -429,10 +437,10 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
         errorCode !== 'SLUG_TAKEN_AFTER_PREVIEW' &&
         !EMAIL_TAKEN_CODES.includes(errorCode ?? '') &&
         !(error.toLowerCase().includes('email')) && (
-        <Alert variant="destructive" className="mb-3 shrink-0">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+          <Alert variant="destructive" className="mb-3 shrink-0">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
       {/* STICKY HEADER */}
       <div className="sticky top-0 z-10 bg-background shrink-0">

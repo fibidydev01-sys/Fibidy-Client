@@ -434,7 +434,7 @@ export function LaporanClient() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-lg bg-muted/50 px-2 py-2">
+                <div className="rounded-[var(--shape-panel)] bg-muted/50 px-2 py-2">
                   <p className="text-[11px] text-muted-foreground">
                     {t('stokValue')}
                   </p>
@@ -442,7 +442,7 @@ export function LaporanClient() {
                     {formatPriceIDR(stok?.totalNilai ?? 0)}
                   </p>
                 </div>
-                <div className="rounded-lg bg-muted/50 px-2 py-2">
+                <div className="rounded-[var(--shape-panel)] bg-muted/50 px-2 py-2">
                   <p className="text-[11px] text-muted-foreground">
                     {t('stokLow')}
                   </p>
@@ -450,7 +450,7 @@ export function LaporanClient() {
                     {stok?.jumlahMenipis ?? 0}
                   </p>
                 </div>
-                <div className="rounded-lg bg-muted/50 px-2 py-2">
+                <div className="rounded-[var(--shape-panel)] bg-muted/50 px-2 py-2">
                   <p className="text-[11px] text-muted-foreground">
                     {t('stokOut')}
                   </p>

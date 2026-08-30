@@ -1,12 +1,12 @@
 'use client';
 
-// ==========================================
+// ============================================================================
 // PWA INSTALL PROMPT
-// File: src/components/shared/pwa-install-prompt.tsx
+// File: src/components/dashboard/shared/pwa-install-prompt.tsx
 //
-// Android → bottom banner with Install button
-// iOS     → modal with step-by-step instructions
-// ==========================================
+// [PILL UI — Aug 2026] Konsisten dengan dialek dashboard: rounded-full
+// di semua tombol dan elemen interaktif.
+// ============================================================================
 
 import { useEffect, useState } from 'react';
 import { X, Share, Plus, Download, Smartphone } from 'lucide-react';
@@ -14,9 +14,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/shared/utils';
 import { usePwaInstall } from '@/hooks/shared/use-pwa-install';
 
-// ==========================================
-// ANDROID INSTALL BANNER
-// ==========================================
+// ── ANDROID BANNER ────────────────────────────────────────────────────────────
 
 function AndroidBanner({
   onInstall,
@@ -29,9 +27,8 @@ function AndroidBanner({
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Small delay for smooth entry animation
-    const t = setTimeout(() => setVisible(true), 800);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setVisible(true), 800);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDismiss = () => {
@@ -52,15 +49,13 @@ function AndroidBanner({
         visible ? 'translate-y-0' : 'translate-y-full',
       )}
     >
-      {/* Safe area padding for mobile */}
       <div className="bg-background border-t shadow-2xl px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <div className="max-w-sm mx-auto">
 
           {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
-              {/* App icon */}
-              <div className="w-12 h-12 rounded-[var(--shape-panel)] bg-primary flex items-center justify-center shrink-0 shadow-md">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
                 <Smartphone className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
@@ -84,9 +79,7 @@ function AndroidBanner({
 
           {/* Benefits */}
           <div className="flex items-center gap-4 mb-4 px-1">
-            {[
-              t('benefits.quickAccess'),
-            ].map((benefit) => (
+            {[t('benefits.quickAccess')].map((benefit) => (
               <div key={benefit} className="flex items-center gap-1">
                 <div className="w-1 h-1 rounded-full bg-primary" />
                 <span className="text-[11px] text-muted-foreground">{benefit}</span>
@@ -99,14 +92,14 @@ function AndroidBanner({
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex-1 h-10 rounded-lg border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+              className="flex-1 h-10 rounded-full border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
             >
               {t('dismiss')}
             </button>
             <button
               type="button"
               onClick={handleInstall}
-              className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
+              className="flex-1 h-10 rounded-full bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
             >
               <Download className="h-4 w-4" />
               {t('install')}
@@ -119,17 +112,15 @@ function AndroidBanner({
   );
 }
 
-// ==========================================
-// iOS INSTALL MODAL
-// ==========================================
+// ── IOS MODAL ─────────────────────────────────────────────────────────────────
 
 function IosModal({ onDismiss }: { onDismiss: () => void }) {
   const t = useTranslations('dashboard.pwa.ios');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setVisible(true), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDismiss = () => {
@@ -186,14 +177,12 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-[var(--shape-panel)] bg-primary flex items-center justify-center shadow-md">
+              <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center shadow-md">
                 <Smartphone className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
                 <p className="text-base font-semibold text-foreground">{t('title')}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('subtitle')}
-                </p>
+                <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
               </div>
             </div>
             <button
@@ -212,7 +201,6 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
               const Icon = step.icon;
               return (
                 <div key={i} className="flex items-center gap-4">
-                  {/* Step number + connector */}
                   <div className="flex flex-col items-center shrink-0">
                     <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
                       <span className="text-xs font-bold text-primary">{i + 1}</span>
@@ -221,10 +209,8 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
                       <div className="w-px h-4 bg-border mt-1" />
                     )}
                   </div>
-
-                  {/* Content */}
                   <div className="flex items-center gap-3 pb-4">
-                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
                       <Icon className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
@@ -234,9 +220,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
                           &#34;{step.highlight}&#34;
                         </span>
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {step.sub}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{step.sub}</p>
                     </div>
                   </div>
                 </div>
@@ -244,11 +228,13 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
             })}
           </div>
 
-          {/* iOS Share icon hint */}
-          <div className="flex items-center gap-2 rounded-[var(--shape-panel)] bg-muted/50 border border-border/60 px-4 py-3 mb-4">
+          {/* Share hint */}
+          <div className="flex items-center gap-2 rounded-full bg-muted/50 border border-border/60 px-4 py-3 mb-4">
             <Share className="h-4 w-4 text-primary shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {t('shareHintPrefix')} <span className="font-semibold text-foreground">{t('shareHintBold')}</span> {t('shareHintSuffix')}
+              {t('shareHintPrefix')}{' '}
+              <span className="font-semibold text-foreground">{t('shareHintBold')}</span>{' '}
+              {t('shareHintSuffix')}
             </p>
           </div>
 
@@ -256,7 +242,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
           <button
             type="button"
             onClick={handleDismiss}
-            className="w-full h-11 rounded-[var(--shape-panel)] border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+            className="w-full h-11 rounded-full border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
             {t('close')}
           </button>
@@ -267,9 +253,7 @@ function IosModal({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
-// ==========================================
-// MAIN COMPONENT
-// ==========================================
+// ── MAIN ──────────────────────────────────────────────────────────────────────
 
 export function PwaInstallPrompt() {
   const {
@@ -281,19 +265,8 @@ export function PwaInstallPrompt() {
     dismiss,
   } = usePwaInstall();
 
-  // Don't render anything if:
-  // - already installed
-  // - user dismissed recently
-  // - not on a supported platform
   if (isInstalled || isDismissed) return null;
-
-  if (canInstallAndroid) {
-    return <AndroidBanner onInstall={promptInstall} onDismiss={dismiss} />;
-  }
-
-  if (isIosSafari) {
-    return <IosModal onDismiss={dismiss} />;
-  }
-
+  if (canInstallAndroid) return <AndroidBanner onInstall={promptInstall} onDismiss={dismiss} />;
+  if (isIosSafari) return <IosModal onDismiss={dismiss} />;
   return null;
 }

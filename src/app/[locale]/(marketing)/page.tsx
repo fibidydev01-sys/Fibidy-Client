@@ -36,19 +36,15 @@ function HeroSection() {
       id="hero"
       className="relative w-full bg-background flex flex-col items-center overflow-hidden pt-8 md:pt-16"
     >
-      {/* Cuci langit — satu-satunya dekorasi atmosferik di seluruh halaman.
-          Ia berhenti di sini: seksi lain berdiri di kanvas putih polos, dan
-          itu yang membuat kedalaman di hero berarti sesuatu. */}
       <div
         aria-hidden
         className="hero-sky-wash pointer-events-none absolute inset-x-0 top-0 h-[560px] md:h-[720px]"
       />
 
       <div className="relative flex flex-col items-center text-center pb-12 px-6 max-w-4xl mx-auto">
-        {/* Eyebrow */}
         <Badge
           variant="outline"
-          className="mb-6 text-xs font-medium text-muted-foreground px-4 py-1.5"
+          className="mb-6 text-xs font-medium text-muted-foreground px-4 py-1.5 rounded-full"
         >
           🚀 Toko Online untuk UMKM
         </Badge>
@@ -62,7 +58,7 @@ function HeroSection() {
           pesan yang super gampang.
         </p>
 
-        <Button size="lg" asChild className="min-w-[200px]">
+        <Button size="lg" className="rounded-full min-w-[200px]" asChild>
           <Link href="/register">
             Mulai Sekarang
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -74,7 +70,6 @@ function HeroSection() {
         </p>
       </div>
 
-      {/* iPhone mockup */}
       <div className="flex justify-center w-full px-6 pb-16">
         <div className="w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px]">
           <Iphone
@@ -124,7 +119,7 @@ function WhySection() {
         <div className="text-center mb-12">
           <Badge
             variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground"
+            className="mb-4 text-xs font-medium text-muted-foreground rounded-full"
           >
             Kenapa Harus Fibidy?
           </Badge>
@@ -136,7 +131,6 @@ function WhySection() {
           </p>
         </div>
 
-        {/* Problem → Agitate */}
         <div className="max-w-lg mx-auto mb-10">
           <ol className="flex flex-col gap-2 text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
             <li>
@@ -154,7 +148,6 @@ function WhySection() {
           </p>
         </div>
 
-        {/* Banner foto */}
         <div className="relative w-full rounded-2xl overflow-hidden mb-10 border border-border shadow-sm">
           <div className="relative" style={{ aspectRatio: "16/5" }}>
             <img
@@ -172,7 +165,7 @@ function WhySection() {
             return (
               <Card key={item.title} className="border border-border">
                 <CardContent className="flex flex-col gap-4 p-6">
-                  <div className="w-10 h-10 rounded-lg bg-surface-strong flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center flex-shrink-0">
                     <Icon className="w-5 h-5 text-ink" />
                   </div>
                   <div>
@@ -203,8 +196,7 @@ const setupSteps = [
     title: "Pilih template, data bisnis otomatis terisi",
     description:
       "Pilih template sesuai jenis bisnismu warung, salon, coffee shop, fashion. Data yang kamu isi saat daftar langsung otomatis terisi ke semua bagian: hero, about, produk, kontak. Langsung jadi.",
-    image:
-      "https://res.cloudinary.com/dxxds8jkx/image/upload/v1786105299/SCREENSHOT-1_at583x.png",
+    image: "https://res.cloudinary.com/dxxds8jkx/image/upload/v1786105299/SCREENSHOT-1_at583x.png",
     imageAlt: "Memilih template toko online",
     align: "right" as const,
   },
@@ -214,8 +206,7 @@ const setupSteps = [
     title: "Share link toko ke bio & semua channel",
     description:
       "nama-kamu.fibidy.com langsung bisa dipasang di bio TikTok, Instagram, YouTube. Pelanggan tap, langsung lihat produk dan info bisnismu. Simpel, rapi, profesional.",
-    image:
-      "https://res.cloudinary.com/dxxds8jkx/image/upload/v1786105300/SCREENSHOT-2_bvekri.png",
+    image: "https://res.cloudinary.com/dxxds8jkx/image/upload/v1786105300/SCREENSHOT-2_bvekri.png",
     imageAlt: "Share link di media sosial",
     align: "left" as const,
   },
@@ -243,11 +234,10 @@ function HowItWorksSection() {
   return (
     <section id="timeline" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Header center-aligned on both mobile and desktop */}
         <div className="mb-12 md:mb-16 text-center">
           <Badge
             variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground"
+            className="mb-4 text-xs font-medium text-muted-foreground rounded-full"
           >
             # Cara Kerjanya
           </Badge>
@@ -259,7 +249,6 @@ function HowItWorksSection() {
           </p>
         </div>
 
-        {/* Grup 1: Setup Toko Online */}
         <div className="mb-4 md:mb-2">
           <GroupLabel>Setup Toko Online</GroupLabel>
         </div>
@@ -278,15 +267,9 @@ function HowItWorksSection() {
                   <>
                     <div className="w-full md:w-1/2 flex justify-center md:justify-end pr-0 md:pr-16 py-6 md:py-8 order-1">
                       <div className="max-w-[260px] text-center md:text-right">
-                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">
-                          {step.eyebrow}
-                        </p>
-                        <h3 className="text-base font-semibold text-foreground mb-2">
-                          {step.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {step.description}
-                        </p>
+                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">{step.eyebrow}</p>
+                        <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
                       </div>
                     </div>
                     <div className="w-full md:w-1/2 flex justify-center md:justify-start pl-0 md:pl-16 py-6 md:py-8 order-2">
@@ -300,15 +283,9 @@ function HowItWorksSection() {
                     </div>
                     <div className="w-full md:w-1/2 flex justify-center md:justify-start pl-0 md:pl-16 py-6 md:py-8 order-1 md:order-2">
                       <div className="max-w-[260px] text-center md:text-left">
-                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">
-                          {step.eyebrow}
-                        </p>
-                        <h3 className="text-base font-semibold text-foreground mb-2">
-                          {step.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {step.description}
-                        </p>
+                        <p className="text-caption-uppercase caption-uppercase text-ink mb-1">{step.eyebrow}</p>
+                        <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
                       </div>
                     </div>
                   </>
@@ -319,7 +296,7 @@ function HowItWorksSection() {
         </div>
 
         <div className="flex justify-center mt-12">
-          <Button size="lg" asChild>
+          <Button size="lg" className="rounded-full" asChild>
             <Link href="/register">
               Mulai Sekarang
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -339,53 +316,20 @@ type CellType =
   | { type: "dash" }
   | { type: "text"; value: string; highlight?: boolean };
 
-const pricingFeatures: {
-  label: string;
-  free: CellType;
-  starter: CellType;
-}[] = [
-    {
-      label: "Produk di toko online",
-      free: { type: "text", value: "20 produk" },
-      starter: { type: "text", value: "50 produk", highlight: true },
-    },
-    {
-      label: "Foto per produk",
-      free: { type: "text", value: "2 foto" },
-      starter: { type: "text", value: "3 foto", highlight: true },
-    },
-    {
-      label: "Pilihan tampilan halaman",
-      free: { type: "text", value: "3 pilihan" },
-      starter: { type: "text", value: "12 pilihan", highlight: true },
-    },
-    {
-      label: "Kasir untuk catat penjualan",
-      free: { type: "dash" },
-      starter: { type: "check" },
-    },
-    {
-      label: "Data otomatis terisi",
-      free: { type: "check" },
-      starter: { type: "check" },
-    },
-    {
-      label: "Ganti tampilan bebas",
-      free: { type: "check" },
-      starter: { type: "check" },
-    },
-  ];
+const pricingFeatures: { label: string; free: CellType; starter: CellType }[] = [
+  { label: "Produk di toko online", free: { type: "text", value: "20 produk" }, starter: { type: "text", value: "50 produk", highlight: true } },
+  { label: "Foto per produk", free: { type: "text", value: "2 foto" }, starter: { type: "text", value: "3 foto", highlight: true } },
+  { label: "Pilihan tampilan halaman", free: { type: "text", value: "3 pilihan" }, starter: { type: "text", value: "12 pilihan", highlight: true } },
+  { label: "Kasir untuk catat penjualan", free: { type: "dash" }, starter: { type: "check" } },
+  { label: "Data otomatis terisi", free: { type: "check" }, starter: { type: "check" } },
+  { label: "Ganti tampilan bebas", free: { type: "check" }, starter: { type: "check" } },
+];
 
 function Cell({ cell }: { cell: CellType }) {
-  if (cell.type === "check")
-    return <Check className="w-4 h-4 text-foreground mx-auto" />;
-  if (cell.type === "dash")
-    return <Minus className="w-4 h-4 text-muted-foreground mx-auto" />;
+  if (cell.type === "check") return <Check className="w-4 h-4 text-foreground mx-auto" />;
+  if (cell.type === "dash") return <Minus className="w-4 h-4 text-muted-foreground mx-auto" />;
   return (
-    <span
-      className={`text-sm block text-center ${cell.highlight ? "text-primary" : "text-muted-foreground"
-        }`}
-    >
+    <span className={`text-sm block text-center ${cell.highlight ? "text-primary" : "text-muted-foreground"}`}>
       {cell.value}
     </span>
   );
@@ -396,10 +340,7 @@ function PricingSection() {
     <section id="pricing" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10 md:mb-12">
-          <Badge
-            variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground"
-          >
+          <Badge variant="outline" className="mb-4 text-xs font-medium text-muted-foreground rounded-full">
             # Harga
           </Badge>
           <h2 className="text-display-md sm:text-display-lg md:text-display-xl text-ink mb-4">
@@ -409,51 +350,38 @@ function PricingSection() {
             Toko online bisa langsung dipakai gratis.
           </p>
           <p className="text-sm text-ink mt-1">
-            Toko online lengkap mulai Rp 35.000 per bulan bayar sekali per
-            periode lewat QRIS, langsung aktif.
+            Toko online lengkap mulai Rp 35.000 per bulan bayar sekali per periode lewat QRIS, langsung aktif.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-border rounded-xl overflow-hidden mb-10">
-          {/* Free */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-border rounded-2xl overflow-hidden mb-10">
           <Card className="rounded-none border-0 border-b md:border-b-0 md:border-r border-border shadow-none">
             <CardContent className="p-6 sm:p-8 flex flex-col gap-5">
               <div className="text-center">
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  Free
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Toko online terbatas.
-                </p>
+                <p className="text-sm font-semibold text-foreground mb-1">Free</p>
+                <p className="text-xs text-muted-foreground">Toko online terbatas.</p>
               </div>
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">Rp 0</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Gratis selamanya
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Gratis selamanya</p>
               </div>
-              <Button variant="outline" className="w-full" asChild>
+              <Button variant="outline" className="w-full rounded-full" asChild>
                 <Link href="/register">Mulai Sekarang</Link>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Starter */}
           <Card className="rounded-none border-0 shadow-none">
             <CardContent className="p-6 sm:p-8 flex flex-col gap-5">
               <div className="text-center">
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  Starter
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Toko online lengkap plus Kasir buat catat penjualan.
-                </p>
+                <p className="text-sm font-semibold text-foreground mb-1">Starter</p>
+                <p className="text-xs text-muted-foreground">Toko online lengkap plus Kasir buat catat penjualan.</p>
               </div>
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">35rb</p>
                 <p className="text-xs text-ink mt-1">per bulan</p>
               </div>
-              <Button className="w-full" asChild>
+              <Button className="w-full rounded-full" asChild>
                 <Link href="/register">Mulai Starter</Link>
               </Button>
             </CardContent>
@@ -464,38 +392,23 @@ function PricingSection() {
           <div className="min-w-[360px]">
             <div className="grid grid-cols-3 pb-3">
               <div />
-              <div className="text-center text-sm font-semibold text-muted-foreground">
-                Free
-              </div>
-              <div className="text-center text-sm font-semibold text-foreground">
-                Starter
-              </div>
+              <div className="text-center text-sm font-semibold text-muted-foreground">Free</div>
+              <div className="text-center text-sm font-semibold text-foreground">Starter</div>
             </div>
             {pricingFeatures.map((f, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-3 py-4 border-t border-border items-center"
-              >
+              <div key={i} className="grid grid-cols-3 py-4 border-t border-border items-center">
                 <span className="text-sm text-foreground">{f.label}</span>
-                <div>
-                  <Cell cell={f.free} />
-                </div>
-                <div>
-                  <Cell cell={f.starter} />
-                </div>
+                <div><Cell cell={f.free} /></div>
+                <div><Cell cell={f.starter} /></div>
               </div>
             ))}
           </div>
         </ScrollArea>
 
-        {/* Business tidak punya kartunya sendiri di sini, tapi ia ADA — dan
-            tabel dua kolom di atas membuat Starter terbaca seperti puncak
-            tangga. Satu baris ini yang membuatnya jujur. */}
         <p className="text-xs text-muted-foreground text-center mt-6">
           Butuh lebih dari itu? Paket{" "}
-          <span className="text-foreground font-medium">Business</span> Rp
-          149.000 per bulan: produk tanpa batas, 5 foto per produk, dan semua
-          pilihan tampilan.
+          <span className="text-foreground font-medium">Business</span> Rp 149.000 per bulan:
+          produk tanpa batas, 5 foto per produk, dan semua pilihan tampilan.
         </p>
       </div>
     </section>
@@ -528,10 +441,7 @@ function FAQSection() {
   return (
     <section id="faq" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-2xl mx-auto">
-        <Badge
-          variant="outline"
-          className="mb-4 text-xs font-medium text-muted-foreground block w-fit mx-auto"
-        >
+        <Badge variant="outline" className="mb-4 text-xs font-medium text-muted-foreground block w-fit mx-auto rounded-full">
           # Tanya Jawab
         </Badge>
         <h2 className="text-display-lg md:text-display-xl text-ink text-center mb-10">
@@ -543,7 +453,7 @@ function FAQSection() {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="bg-card rounded-xl border-none px-5 overflow-hidden"
+                className="bg-card rounded-2xl border-none px-5 overflow-hidden"
               >
                 <AccordionTrigger className="text-sm font-semibold text-foreground py-4 hover:no-underline">
                   {faq.q}
@@ -564,24 +474,9 @@ function FAQSection() {
 // 6. CONTACT
 // ─────────────────────────────────────────────
 const contactInfo = [
-  {
-    icon: MessageCircle,
-    label: "WhatsApp",
-    value: "+62 858-1508-6235",
-    sub: "Balas dalam 1×24 jam kerja",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "admin@fibidy.com",
-    sub: "Untuk pertanyaan & kemitraan",
-  },
-  {
-    icon: MapPin,
-    label: "Lokasi",
-    value: "Madiun, Jawa Timur",
-    sub: "Indonesia",
-  },
+  { icon: MessageCircle, label: "WhatsApp", value: "+62 858-1508-6235", sub: "Balas dalam 1×24 jam kerja" },
+  { icon: Mail, label: "Email", value: "admin@fibidy.com", sub: "Untuk pertanyaan & kemitraan" },
+  { icon: MapPin, label: "Lokasi", value: "Madiun, Jawa Timur", sub: "Indonesia" },
 ];
 
 function ContactSection() {
@@ -589,10 +484,7 @@ function ContactSection() {
     <section id="contact" className="w-full bg-background py-16 md:py-section px-6">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <Badge
-            variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground"
-          >
+          <Badge variant="outline" className="mb-4 text-xs font-medium text-muted-foreground rounded-full">
             # Hubungi Kami
           </Badge>
           <h2 className="text-display-md md:text-display-lg text-ink mb-3">
@@ -609,19 +501,13 @@ function ContactSection() {
             return (
               <Card key={item.label} className="border border-border">
                 <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
-                  <div className="w-10 h-10 rounded-lg bg-surface-strong flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-surface-strong flex items-center justify-center">
                     <Icon className="w-5 h-5 text-ink" />
                   </div>
                   <div>
-                    <p className="text-caption-uppercase caption-uppercase text-muted-foreground mb-1">
-                      {item.label}
-                    </p>
-                    <p className="text-sm font-semibold text-foreground">
-                      {item.value}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {item.sub}
-                    </p>
+                    <p className="text-caption-uppercase caption-uppercase text-muted-foreground mb-1">{item.label}</p>
+                    <p className="text-sm font-semibold text-foreground">{item.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.sub}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -632,10 +518,7 @@ function ContactSection() {
         <Card className="border border-border overflow-hidden">
           <CardContent className="p-0 flex flex-col md:flex-row">
             <div className="w-full md:w-[45%] flex-shrink-0">
-              <div
-                className="relative w-full h-[240px] md:h-full"
-                style={{ minHeight: "300px" }}
-              >
+              <div className="relative w-full h-[240px] md:h-full" style={{ minHeight: "300px" }}>
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.814693682501!2d111.5965489!3d-7.5951371000000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e79b9ea675e654f%3A0x7e89a8b731df08ac!2sfibidy!5e0!3m2!1sid!2sid!4v1786104768540!5m2!1sid!2sid"
                   className="absolute inset-0 w-full h-full border-0"
@@ -648,24 +531,18 @@ function ContactSection() {
             </div>
             <div className="w-full md:w-[55%] p-6 sm:p-8 md:p-12 flex flex-col justify-center gap-6">
               <div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  Kirim Pesan
-                </h3>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Kirim Pesan</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Tim kami akan balas dalam 1×24 jam di hari kerja.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1.5">
-                  <Label htmlFor="name">
-                    Nama <span className="text-destructive">*</span>
-                  </Label>
+                  <Label htmlFor="name">Nama <span className="text-destructive">*</span></Label>
                   <Input id="name" placeholder="Nama kamu" />
                 </div>
                 <div className="flex-1 flex flex-col gap-1.5">
-                  <Label htmlFor="wa">
-                    WhatsApp <span className="text-destructive">*</span>
-                  </Label>
+                  <Label htmlFor="wa">WhatsApp <span className="text-destructive">*</span></Label>
                   <Input id="wa" type="tel" placeholder="+62 xxx-xxxx-xxxx" />
                 </div>
               </div>
@@ -674,17 +551,10 @@ function ContactSection() {
                 <Input id="bisnis" placeholder="Warung, salon, coffee shop, dll" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="message">
-                  Pesan <span className="text-destructive">*</span>
-                </Label>
-                <Textarea
-                  id="message"
-                  placeholder="Ada yang bisa kami bantu?"
-                  rows={4}
-                  className="resize-y"
-                />
+                <Label htmlFor="message">Pesan <span className="text-destructive">*</span></Label>
+                <Textarea id="message" placeholder="Ada yang bisa kami bantu?" rows={4} className="resize-y" />
               </div>
-              <Button className="w-full" size="lg">
+              <Button className="w-full rounded-full" size="lg">
                 Kirim Pesan
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -722,6 +592,7 @@ const legalLinks = [
   { label: "Privasi", href: "/legal/privacy" },
   { label: "Cookies", href: "/legal/cookies" },
 ];
+
 function FooterSection() {
   return (
     <footer className="w-full bg-background px-6 pt-10 pb-6">
@@ -735,9 +606,7 @@ function FooterSection() {
                 fill="var(--primary-foreground)"
               />
             </svg>
-            <span className="text-sm font-semibold text-foreground">
-              Fibidy
-            </span>
+            <span className="text-sm font-semibold text-foreground">Fibidy</span>
           </Link>
           <p className="text-xs text-muted-foreground max-w-xs">
             Platform Toko Online untuk UMKM Indonesia.
@@ -749,9 +618,7 @@ function FooterSection() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 pb-10">
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <p className="text-sm font-semibold text-foreground mb-4">
-                {category}
-              </p>
+              <p className="text-sm font-semibold text-foreground mb-4">{category}</p>
               <ul className="flex flex-col gap-2.5">
                 {links.map((link) => (
                   <li key={link.label}>

@@ -98,7 +98,7 @@ function ColorPicker({
     // dan `mx-auto` menaruhnya di tengah seperti sebelumnya.
     <div
       className={cn(
-        'mx-auto grid w-fit grid-cols-3 gap-2 rounded-lg p-2 transition-colors sm:grid-cols-6',
+        'mx-auto grid w-fit grid-cols-3 gap-2 rounded-[var(--shape-panel)] p-2 transition-colors sm:grid-cols-6',
         hasError && 'ring-2 ring-destructive ring-offset-2',
       )}
     >
@@ -313,7 +313,7 @@ export function StepVisual({
                 <div
                   data-field-error={hasLogoError ? 'true' : undefined}
                   className={cn(
-                    'rounded-xl transition-all',
+                    'rounded-[var(--shape-panel)] transition-all',
                     hasLogoError && 'ring-2 ring-destructive ring-offset-2',
                   )}
                 >
@@ -385,7 +385,7 @@ export function StepVisual({
                 <div
                   data-field-error={hasHeroBgError ? 'true' : undefined}
                   className={cn(
-                    'rounded-xl transition-all',
+                    'rounded-[var(--shape-panel)] transition-all',
                     hasHeroBgError && 'ring-2 ring-destructive ring-offset-2',
                   )}
                 >

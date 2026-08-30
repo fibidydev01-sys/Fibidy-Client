@@ -118,7 +118,7 @@ export function StoreHeader({ tenant }: StoreHeaderProps) {
                     <NavigationMenuLink asChild>
                       <Link
                         href={urls.home}
-                        className="relative flex h-full w-full overflow-hidden rounded-md no-underline outline-none focus:shadow-md"
+                        className="relative flex h-full w-full overflow-hidden rounded-[var(--shape-panel)] no-underline outline-none focus:shadow-md"
                       >
                         {tenant.logo ? (
                           <Image

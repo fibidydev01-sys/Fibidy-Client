@@ -13,6 +13,22 @@
 // geseran di setiap pemuatan; memakai KasirRowCard yang sama membuat pergantian
 // skeleton→data tidak menggeser apa pun.
 //
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// KasirRowsSkeleton sebelumnya menggambar tiap baris sebagai 2-3 block
+// terpisah (nama, subteks, trailing stepper/amount) yang meniru struktur
+// detail baris aslinya. Diubah jadi SATU block polos per baris — sama
+// spirit-nya dengan skeleton bawaan Expo: skeleton yang terlalu detail
+// menambah biaya perawatan (harus diperbarui tiap desain baris berubah)
+// tanpa menambah kejelasan buat pengguna. Baris kasir juga tampil dalam
+// dua bentuk berbeda (list vs grid via KatalogCard) — satu block generik
+// tetap valid buat keduanya, sedangkan skeleton yang meniru detail salah
+// satu bentuk akan terasa salah di bentuk yang lain.
+//
+// Prop `trailing` (dulu menentukan bentuk elemen kanan: stepper/amount)
+// DIHAPUS — sudah tidak relevan begitu barisnya jadi satu block. Tiga
+// pemanggil (kasir/client.tsx, kasir/riwayat/client.tsx, kasir/stok/client.tsx)
+// sudah disesuaikan.
+//
 // Teks tetap dikirim dari halaman lewat props: tiap layar punya kalimat error
 // dan kosongnya sendiri di berkas terjemahan, dan menyeragamkannya di sini
 // justru akan menghapus konteks yang berguna.
@@ -32,7 +48,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/shared/utils';
-import { KasirRowCard, KasirRowContent } from './kasir-row-card';
+import { KasirRowCard } from './kasir-row-card';
 
 // ── Error ───────────────────────────────────────────────────────────────────
 
@@ -129,15 +145,16 @@ export function KasirEmptySlot({ label }: { label: string }) {
 /**
  * Daftar baris dalam keadaan memuat. Memakai KasirRowCard yang sama dengan
  * baris sungguhan, jadi tinggi dan jaraknya identik.
+ *
+ * Tiap baris digambar sebagai SATU block polos setinggi baris aslinya
+ * (h-16), bukan dipecah meniru nama/subteks/trailing. Lihat catatan di
+ * kepala file untuk alasannya.
  */
 export function KasirRowsSkeleton({
   rows = 5,
-  trailing = 'stepper',
   className,
 }: {
   rows?: number;
-  /** Bentuk elemen di ujung kanan baris, mengikuti baris aslinya. */
-  trailing?: 'stepper' | 'amount' | 'none';
   /** Tata letaknya harus sama dengan daftar aslinya — daftar atau grid. */
   className?: string;
 }) {
@@ -145,14 +162,7 @@ export function KasirRowsSkeleton({
     <div className={cn('space-y-2', className)}>
       {Array.from({ length: rows }).map((_, i) => (
         <KasirRowCard key={i}>
-          <KasirRowContent>
-            <div className="min-w-0 flex-1 space-y-2">
-              <Skeleton className="h-4 w-2/5" />
-              <Skeleton className="h-3 w-1/4" />
-            </div>
-            {trailing === 'stepper' && <Skeleton className="h-9 w-9 rounded-[var(--shape-panel)]" />}
-            {trailing === 'amount' && <Skeleton className="h-5 w-20" />}
-          </KasirRowContent>
+          <Skeleton className="h-16 w-full rounded-[var(--shape-panel)]" />
         </KasirRowCard>
       ))}
     </div>

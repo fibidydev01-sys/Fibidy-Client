@@ -1,5 +1,15 @@
 "use client";
 
+// ============================================================================
+// MARKETING NAVBAR
+// File: src/components/marketing/navbar.tsx
+//
+// [PILL UI — Aug 2026] Konsisten dengan dialek dashboard:
+// - Tombol CTA rounded-full
+// - Nav item hover rounded-full
+// - Sheet footer buttons rounded-full
+// ============================================================================
+
 import * as React from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -21,7 +31,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Menu, CheckCircle, Clock, HelpCircle, MessageCircle, ChevronDown } from "lucide-react";
 
-// ── Dropdown items untuk "Kenapa Fibidy" ─────────────────────────
 const kenpaItems: {
   title: string;
   href: string;
@@ -31,15 +40,13 @@ const kenpaItems: {
     {
       title: "Tentang Fibidy",
       href: "#about",
-      description:
-        "Kenali lebih dalam apa itu Fibidy dan kenapa ribuan UMKM mempercayainya.",
+      description: "Kenali lebih dalam apa itu Fibidy dan kenapa ribuan UMKM mempercayainya.",
       icon: CheckCircle,
     },
     {
       title: "Cara Kerjanya",
       href: "#timeline",
-      description:
-        "Langkah simpel dari daftar hingga toko online kamu aktif dalam menit.",
+      description: "Langkah simpel dari daftar hingga toko online kamu aktif dalam menit.",
       icon: Clock,
     },
     {
@@ -56,7 +63,6 @@ const kenpaItems: {
     },
   ];
 
-// ── ListItem helper ───────────────────────────────────────────────
 function ListItem({
   title,
   children,
@@ -73,10 +79,10 @@ function ListItem({
       <NavigationMenuLink asChild>
         <a
           href={href}
-          className="flex select-none gap-3 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+          className="flex select-none gap-3 rounded-full p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
         >
           {Icon && (
-            <div className="w-8 h-8 rounded-md bg-surface-strong flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-full bg-surface-strong flex items-center justify-center flex-shrink-0 mt-0.5">
               <Icon className="w-4 h-4 text-ink" />
             </div>
           )}
@@ -92,14 +98,13 @@ function ListItem({
   );
 }
 
-// ── Mobile Accordion untuk Kenapa Fibidy ────────────────────────
 function MobileAccordion({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div>
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
+        className="flex items-center justify-between w-full rounded-full px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
       >
         <span>Kenapa Fibidy</span>
         <ChevronDown
@@ -108,22 +113,19 @@ function MobileAccordion({ children }: { children: React.ReactNode }) {
         />
       </button>
       {isOpen && (
-        <div className="mt-1 flex flex-col gap-0.5 pl-2">
-          {children}
-        </div>
+        <div className="mt-1 flex flex-col gap-0.5 pl-2">{children}</div>
       )}
     </div>
   );
 }
 
-// ── Navbar ────────────────────────────────────────────────────────
 export function Navbar() {
   const [open, setOpen] = React.useState(false);
 
   return (
     <div className="w-full px-4 pt-4 fixed top-0 left-0 z-50">
       <nav
-        className="max-w-6xl mx-auto border border-border rounded-2xl px-5 py-3 flex items-center justify-between shadow-sm"
+        className="max-w-6xl mx-auto border border-border rounded-full px-5 py-3 flex items-center justify-between shadow-sm"
         style={{
           background: "color-mix(in oklch, var(--card) 90%, transparent)",
           backdropFilter: "blur(8px)",
@@ -141,28 +143,22 @@ export function Navbar() {
           <span className="text-base font-bold text-foreground">Fibidy</span>
         </Link>
 
-        {/* Desktop — NavigationMenu */}
+        {/* Desktop nav */}
         <div className="hidden md:flex items-center">
           <NavigationMenu>
             <NavigationMenuList>
-
-              {/* Beranda */}
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
                   className={navigationMenuTriggerStyle()}
                   style={{ background: "transparent" }}
                 >
-                  <a
-                    href="#hero"
-                    className="text-nav-link font-semibold text-ink"
-                  >
+                  <a href="#hero" className="text-nav-link font-semibold text-ink">
                     Beranda
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* Kenapa Fibidy — dropdown */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent text-nav-link text-muted-foreground hover:text-ink data-[state=open]:text-ink">
                   Kenapa Fibidy
@@ -183,51 +179,44 @@ export function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Harga */}
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
                   className={navigationMenuTriggerStyle()}
                   style={{ background: "transparent" }}
                 >
-                  <a
-                    href="#pricing"
-                    className="text-nav-link text-muted-foreground hover:text-ink"
-                  >
+                  <a href="#pricing" className="text-nav-link text-muted-foreground hover:text-ink">
                     Harga
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
-        {/* Desktop right — CTA */}
+        {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="rounded-full" asChild>
             <Link href="/login">Masuk</Link>
           </Button>
-          <Button size="sm" asChild>
+          <Button size="sm" className="rounded-full" asChild>
             <Link href="/register">Mulai Sekarang</Link>
           </Button>
         </div>
 
-        {/* Mobile — Sheet */}
+        {/* Mobile sheet */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden rounded-full">
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-72 flex flex-col p-0">
-            {/* ── Content: Nav links ── */}
             <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
-              {/* Beranda — button style */}
               <SheetClose asChild>
                 <a
                   href="#hero"
-                  className="flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
+                  className="flex items-center rounded-full px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
                 >
                   Beranda
                 </a>
@@ -235,7 +224,6 @@ export function Navbar() {
 
               <div className="h-px bg-border my-1.5" />
 
-              {/* Kenapa Fibidy — Accordion */}
               <MobileAccordion>
                 {kenpaItems.map((item) => {
                   const Icon = item.icon;
@@ -243,7 +231,7 @@ export function Navbar() {
                     <SheetClose asChild key={item.title}>
                       <a
                         href={item.href}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80 transition-colors cursor-pointer"
+                        className="flex items-center gap-3 rounded-full px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80 transition-colors cursor-pointer"
                       >
                         <Icon className="w-4 h-4 text-ink flex-shrink-0" />
                         {item.title}
@@ -255,26 +243,24 @@ export function Navbar() {
 
               <div className="h-px bg-border my-1.5" />
 
-              {/* Harga — button style */}
               <SheetClose asChild>
                 <a
                   href="#pricing"
-                  className="flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
+                  className="flex items-center rounded-full px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer"
                 >
                   Harga
                 </a>
               </SheetClose>
             </nav>
 
-            {/* ── Footer: CTA buttons ── */}
             <SheetFooter className="px-5 py-4 border-t border-border flex-row gap-2">
               <SheetClose asChild>
-                <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Button variant="outline" size="sm" className="flex-1 rounded-full" asChild>
                   <Link href="/login">Masuk</Link>
                 </Button>
               </SheetClose>
               <SheetClose asChild>
-                <Button size="sm" className="flex-1" asChild>
+                <Button size="sm" className="flex-1 rounded-full" asChild>
                   <Link href="/register">Mulai Sekarang</Link>
                 </Button>
               </SheetClose>

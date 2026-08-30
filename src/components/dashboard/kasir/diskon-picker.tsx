@@ -94,7 +94,7 @@ export function DiskonPicker({
           <FieldLabel htmlFor="diskon-tanpa">
             <Card className="w-full flex-row items-center gap-3 py-3 transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
               <CardContent className="flex flex-1 items-center gap-3 px-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--shape-panel)] bg-muted text-muted-foreground">
                   <Percent className="h-4 w-4" aria-hidden />
                 </span>
                 <span className="flex-1 font-medium">{t('none')}</span>
@@ -112,7 +112,7 @@ export function DiskonPicker({
               <FieldLabel key={preset.id} htmlFor={`diskon-${preset.id}`}>
                 <Card className="w-full flex-row items-center gap-3 py-3 transition-colors has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5">
                   <CardContent className="flex flex-1 items-center gap-3 px-3">
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold tabular-nums text-primary">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--shape-panel)] bg-primary/10 text-sm font-bold tabular-nums text-primary">
                       {preset.persen}%
                     </span>
                     <span className="min-w-0 flex-1">

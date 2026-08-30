@@ -72,7 +72,7 @@ export function ProductRow({
           onDecrement={onDecrement}
         />
       ) : (
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-[var(--shape-panel)] bg-primary/10 text-primary">
           <Plus className="h-4 w-4" aria-hidden />
         </span>
       )}

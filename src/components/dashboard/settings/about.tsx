@@ -9,7 +9,7 @@ import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
 import { UpgradeModal } from '@/components/dashboard/shared/upgrade-modal';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { AboutFormData, FeatureItem } from '@/types/tenant';
 import { StepHighlights } from './form/about/step-highlights';
@@ -20,6 +20,12 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ABOUT SETTINGS SECTION
 // File: src/components/dashboard/settings/about.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (save-only mode) diganti WizardHeader, dipindah dari elemen
+// TERAKHIR jadi elemen PERTAMA. Upload guard (hasActiveUploads dari
+// StepHighlights) tidak diubah — masih dicek di dalam handleSave sebelum
+// WizardHeader.onSave benar-benar mengirim request.
+//
 // [BACKPORT — 2026-05-28]
 //   1. Upload guard via onUploadStateChange dari StepHighlights (SETTINGS-N2)
 //   2. ValidationDialog hard gate (SETTINGS-N1)
@@ -27,7 +33,7 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ============================================================================
 
 interface AboutSectionProps {
-  onBack?: () => void;
+  onBack: () => void;
 }
 
 export function AboutSection({ onBack }: AboutSectionProps) {
@@ -133,11 +139,12 @@ export function AboutSection({ onBack }: AboutSectionProps) {
         description={t('upgradePrompt.description')}
       />
 
-      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
-          takes over from md up where WizardNav is `sticky`/in-flow and
-          doesn't need an artificial reserve — see wizard-nav.tsx's v6
-          note and contact.tsx's equivalent comment for the full story. */}
-      <div className="flex-1 pb-20 md:pb-6">
+      {/* [MIGRASI HEADER] WizardHeader elemen PERTAMA, save-only mode. */}
+      <WizardHeader onBack={onBack} onSave={handleSave} isSaving={isSaving} />
+
+      {/* [MIGRASI HEADER] `pb-20 md:pb-6` (clearance pill bawah lama)
+          dihapus, diganti `mt-6`. */}
+      <div className="flex-1 mt-6">
         <StepHighlights
           formData={formData}
           updateFormData={updateFormData}
@@ -146,8 +153,6 @@ export function AboutSection({ onBack }: AboutSectionProps) {
           onUploadStateChange={handleUploadStateChange}
         />
       </div>
-
-      <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
 
       <ValidationDialog
         open={validationOpen}

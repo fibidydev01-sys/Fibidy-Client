@@ -8,7 +8,7 @@ import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { useAuthStore } from '@/stores/auth-store';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { SocialFormData, SocialLinks } from '@/types/tenant';
 import { StepSocialLinks } from './form/social/step-social-links';
@@ -18,6 +18,19 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ============================================================================
 // SOCIAL SETTINGS SECTION
 // File: src/components/dashboard/settings/social.tsx
+//
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (save-only mode: Back+Save, tanpa steps) diganti WizardHeader
+// dipanggil TANPA prop `steps` — otomatis jadi save-only mode juga di
+// WizardHeader (slot tengah tidak dirender, lihat wizard-header.tsx).
+// Dipindah dari elemen TERAKHIR jadi elemen PERTAMA di KEDUA cabang return
+// (skeleton loading & normal) — dua pemanggilan terpisah, konsisten
+// dengan struktur aslinya yang juga dua WizardNav terpisah per cabang.
+//
+// Split desktop/mobile TETAP dipertahankan dengan alasan sama seperti
+// contact.tsx — lihat catatan di sana. `max-w-sm mx-auto` yang sudah
+// dilepas di cabang mobile sebelumnya (SETTINGS "LEBAR KONSISTEN" note
+// asli) tidak disentuh oleh migrasi ini.
 //
 // [BACKPORT — 2026-05-28]
 //   1. ValidationDialog hard gate — min 1 social link (SETTINGS-N1)
@@ -42,7 +55,7 @@ const DEFAULT_SOCIAL_LINKS: SocialLinks = {
 };
 
 interface SocialSectionProps {
-  onBack?: () => void;
+  onBack: () => void;
 }
 
 export function SocialSection({ onBack }: SocialSectionProps) {
@@ -108,8 +121,15 @@ export function SocialSection({ onBack }: SocialSectionProps) {
   if (tenant === null) {
     return (
       <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
+        {/* [MIGRASI HEADER] WizardHeader tanpa steps = save-only mode.
+            isSaving tidak relevan di skeleton state — Save tetap dirender
+            tapi handler-nya belum berguna sampai tenant termuat, sama
+            seperti WizardNav lama di cabang ini yang juga onSave={handleSave}
+            padahal formData masih placeholder. */}
+        <WizardHeader onBack={onBack} onSave={handleSave} isSaving={isSaving} />
+
         <div className="hidden lg:flex lg:flex-col lg:h-full">
-          <div className="flex-1 pb-4 min-h-[280px]">
+          <div className="flex-1 mt-6 min-h-[280px]">
             <div className="space-y-7">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-[11px] w-24 rounded-full" />
@@ -131,7 +151,7 @@ export function SocialSection({ onBack }: SocialSectionProps) {
             </div>
           </div>
         </div>
-        <div className="lg:hidden flex flex-col pb-24 md:pb-6">
+        <div className="lg:hidden flex flex-col mt-6">
           {/* [LEBAR KONSISTEN] `max-w-sm mx-auto` dilepas: di tablet skeleton
               ini 384px sementara isi aslinya 672px, jadi kerangkanya
               melompat begitu data datang. Cabang loading dan cabang isi
@@ -146,34 +166,29 @@ export function SocialSection({ onBack }: SocialSectionProps) {
             ))}
           </div>
         </div>
-        <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
       </div>
     );
   }
 
   return (
     <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
-      {/* DESKTOP — always ≥lg, always within WizardNav's `sticky` range:
-          small breathing-room gap, no fixed-pill clearance needed. */}
+      {/* [MIGRASI HEADER] WizardHeader elemen PERTAMA, dipakai bersama oleh
+          kedua cabang desktop/mobile di bawahnya. */}
+      <WizardHeader onBack={onBack} onSave={handleSave} isSaving={isSaving} />
+
+      {/* DESKTOP — lihat catatan header berkas. */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
-        <div className="flex-1 pb-4 min-h-[280px]">
+        <div className="flex-1 mt-6 min-h-[280px]">
           <StepSocialLinks formData={formData} onSocialLinkChange={handleSocialLinkChange} isDesktop />
         </div>
       </div>
 
-      {/* MOBILE — shown 0-1023px, spans both WizardNav position modes.
-          pb-24 (fixed-pill clearance) only matters below md; md:pb-6
-          takes over from md up (sticky, in-flow — the old unconditional
-          pb-24 was 96px of dead space before the pill on tablet width,
-          slack long enough that the sticky-to-flow handoff at the very
-          end of a scroll visibly shifted). */}
-      <div className="lg:hidden flex flex-col pb-24 md:pb-6">
+      {/* MOBILE — shown 0-1023px. */}
+      <div className="lg:hidden flex flex-col mt-6">
         <div className="min-h-[260px]">
           <StepSocialLinks formData={formData} onSocialLinkChange={handleSocialLinkChange} />
         </div>
       </div>
-
-      <WizardNav onBack={onBack} onSave={handleSave} isSaving={isSaving} />
 
       <ValidationDialog
         open={validationOpen}

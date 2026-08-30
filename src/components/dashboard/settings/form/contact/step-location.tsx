@@ -80,9 +80,8 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
               placeholder={t('urlPlaceholder')}
               value={formData.contactMapUrl}
               onChange={(e) => handleMapUrlChange(e.target.value)}
-              className={`h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${
-                mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
-              }`}
+              className={`h-[var(--field-height)] text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
+                }`}
             />
             {mapUrlError ? (
               <p className="text-xs text-destructive font-medium">{mapUrlError}</p>
@@ -155,9 +154,8 @@ export function StepLocation({ formData, updateFormData, isDesktop = false }: St
           placeholder={t('urlPlaceholder')}
           value={formData.contactMapUrl}
           onChange={(e) => handleMapUrlChange(e.target.value)}
-          className={`h-11 text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${
-            mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
-          }`}
+          className={`h-[var(--field-height)] text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/50 ${mapUrlError ? 'border-destructive focus-visible:ring-destructive' : ''
+            }`}
         />
         {mapUrlError ? (
           <p className="text-xs text-destructive font-medium">{mapUrlError}</p>

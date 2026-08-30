@@ -4,6 +4,14 @@
 // PENGATURAN → KASIR (mode dagang + struk)
 // File: src/components/dashboard/settings/kasir-mode-dagang.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (save-only mode) diganti WizardHeader, HANYA di dalam
+// FormKasir — satu-satunya tempat yang di kode aslinya memang punya nav.
+// Cabang isLoading/!config di KasirModeDagangSection TIDAK disentuh:
+// keduanya tidak pernah punya WizardNav sama sekali (skeleton loading
+// dan pesan gagal-muat tidak butuh aksi Back/Save), jadi tidak ada yang
+// perlu dimigrasi di sana.
+//
 // Layar ini menutup dua lubang sekaligus.
 //
 // 1. MODE DAGANG. Kategori toko cuma MENEBAK sekali saat config kasir pertama
@@ -27,7 +35,7 @@ import { Boxes, ClipboardList, Package, Wrench } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { useKasirLock } from '@/hooks/dashboard/use-kasir-lock';
 import { toast } from 'sonner';
 import { cn } from '@/lib/shared/utils';
@@ -87,9 +95,12 @@ export function KasirModeDagangSection({ onBack }: { onBack: () => void }) {
   // KasirPlanGate di settings/client.tsx sebelum komponen ini dipasang;
   // cabang di bawah menangani kegagalan LAIN (jaringan, 500) yang dulu ikut
   // tersedot ke jalan buntu yang sama.
+  //
+  // [MIGRASI HEADER] Cabang isLoading dan !config TIDAK punya nav di kode
+  // aslinya — tidak ditambahkan WizardHeader di sini, konsisten dengan itu.
   if (isLoading) {
     return (
-      <div className={cn(PAGE_COLUMN, 'space-y-4 pb-20 md:pb-6')}>
+      <div className={cn(PAGE_COLUMN, 'space-y-4 mt-6')}>
         <Skeleton className="h-8 w-52" />
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-28 w-full" />
@@ -100,7 +111,7 @@ export function KasirModeDagangSection({ onBack }: { onBack: () => void }) {
 
   if (!config) {
     return (
-      <div className={cn(PAGE_COLUMN, 'space-y-3 pb-20 md:pb-6')}>
+      <div className={cn(PAGE_COLUMN, 'space-y-3 mt-6')}>
         <p className="text-sm text-muted-foreground">{t('gagalMuat')}</p>
         <Button variant="outline" size="sm" onClick={() => void refetch()}>
           {t('cobaLagi')}
@@ -157,7 +168,17 @@ function FormKasir({
 
   return (
     <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
-      <div className="flex-1 space-y-8 pb-20 md:pb-6">
+      {/* [MIGRASI HEADER] WizardHeader elemen PERTAMA, save-only mode. */}
+      <WizardHeader
+        onBack={onBack}
+        onSave={jaga(simpan)}
+        saveTerkunci={terkunci}
+        isSaving={isPending}
+        saveLabel={t('save')}
+        savingLabel={t('saving')}
+      />
+
+      <div className="flex-1 space-y-8 mt-6">
         {/* ── Mode dagang ────────────────────────────────────────────────── */}
         <section>
           <h2 className="text-lg font-semibold">{t('modeTitle')}</h2>
@@ -314,15 +335,6 @@ function FormKasir({
           </div>
         </section>
       </div>
-
-      <WizardNav
-        onBack={onBack}
-        onSave={jaga(simpan)}
-        saveTerkunci={terkunci}
-        isSaving={isPending}
-        saveLabel={t('save')}
-        savingLabel={t('saving')}
-      />
     </div>
   );
 }

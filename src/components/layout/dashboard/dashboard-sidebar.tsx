@@ -185,9 +185,9 @@ export function DashboardSidebar() {
         locked: !isSetupDone && !!e.requiresSetup,
         items: e.subKeysDinamis
           ? layarKasirUntuk(dagangType).map((layar) => ({
-              title: tKasir(layar.key),
-              href: layar.href,
-            }))
+            title: tKasir(layar.key),
+            href: layar.href,
+          }))
           : undefined,
       }));
 
@@ -210,7 +210,7 @@ export function DashboardSidebar() {
                 <Link href="/dashboard/products">
                   <div
                     aria-hidden
-                    className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-[13px] font-semibold text-sidebar-primary-foreground"
+                    className="flex aspect-square size-8 items-center justify-center rounded-[var(--shape-panel)] bg-sidebar-primary text-[13px] font-semibold text-sidebar-primary-foreground"
                   >
                     {namaToko.charAt(0).toUpperCase()}
                   </div>

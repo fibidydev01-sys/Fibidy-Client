@@ -171,21 +171,20 @@ export function KatalogCard({
 }
 
 // ── Skeleton ────────────────────────────────────────────────────────────────
-// Bentuknya menirukan kartu di atas supaya pergantian memuat → data tidak
-// menggeser satu piksel pun.
+//
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// Sebelumnya 4 block terpisah meniru struktur kartu (gambar + kategori +
+// nama + harga + footer). Diubah jadi SATU block polos. Kartu asli bisa
+// tampil di grid kasir sini ATAU di grid halaman produk dengan proporsi
+// yang tidak selalu identik — skeleton yang meniru detail salah satu
+// bentuk berisiko "meleset" begitu proporsi kartu berubah di desain
+// berikutnya. Satu block generik seukuran kartu tetap valid tanpa perlu
+// diperbarui setiap kali detail kartu berubah.
 
 export function KatalogCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-[var(--shape-panel)] border bg-card">
-      <Skeleton className="aspect-square w-full rounded-none" />
-      <div className="space-y-2 px-3 py-2.5">
-        <Skeleton className="h-3 w-1/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/5" />
-      </div>
-      <div className="border-t px-3 py-2">
-        <Skeleton className="h-5 w-full" />
-      </div>
+    <div className="aspect-square w-full overflow-hidden rounded-[var(--shape-panel)] bg-card">
+      <Skeleton className="h-full w-full rounded-[var(--shape-panel)]" />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
 import { THEME_COLORS } from '@/lib/constants/shared/theme-colors';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { HeroFormData } from '@/types/tenant';
 import { StepIdentity } from './form/hero/step-identity';
@@ -21,6 +21,19 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // HERO SETTINGS SECTION
 // File: src/components/dashboard/settings/hero.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (dulu floating pill footer, elemen TERAKHIR) diganti
+// WizardHeader — sekarang elemen PERTAMA, sticky top-0. Lihat
+// wizard-header.tsx untuk bentuk dan alasan lengkap.
+//
+// onBack diwajibkan (bukan optional) — dikonfirmasi terhadap
+// settings/client.tsx: SEMUA pemanggilan <HeroSection> di sana selalu
+// mengirim onBack={handleBack}, tidak ada jalur render yang melewatkannya.
+// Konsisten dengan language.tsx yang juga mewajibkan onBack. handleBack di
+// client.tsx menghapus query param ?section= dan push ulang ke pathname —
+// bukan router.back()/window.history.back() generik — jadi Back dari sini
+// selalu kembali ke LIST VIEW Settings, bukan ke halaman sebelum Settings.
+//
 // [BACKPORT — 2026-05-28]
 //   1. Upload guard via onUploadStateChange dari StepAppearance (SETTINGS-N2)
 //   2. ValidationDialog hard gate (SETTINGS-N1)
@@ -29,7 +42,7 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ============================================================================
 
 interface HeroSectionProps {
-  onBack?: () => void;
+  onBack: () => void;
 }
 
 export function HeroSection({ onBack }: HeroSectionProps) {
@@ -186,6 +199,9 @@ export function HeroSection({ onBack }: HeroSectionProps) {
     }
   };
 
+  const handlePrev = useCallback(() => setCurrentStep((p) => p - 1), []);
+  const handleNext = useCallback(() => setCurrentStep((p) => p + 1), []);
+
   if (!tenant || !formData) return null;
 
   const renderStep = () => {
@@ -217,23 +233,23 @@ export function HeroSection({ onBack }: HeroSectionProps) {
 
   return (
     <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
-      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
-          takes over from md up where WizardNav is `sticky`/in-flow and
-          doesn't need an artificial reserve — see wizard-nav.tsx's v6
-          note and contact.tsx's equivalent comment for the full story. */}
-      <div className="flex-1 min-h-[300px] pb-20 md:pb-6">
-        {renderStep()}
-      </div>
-
-      <WizardNav
+      {/* [MIGRASI HEADER] WizardHeader sekarang elemen PERTAMA. */}
+      <WizardHeader
         steps={STEPS}
         currentStep={currentStep}
         onBack={onBack}
-        onPrev={() => setCurrentStep((p) => p - 1)}
-        onNext={() => setCurrentStep((p) => p + 1)}
+        onPrev={handlePrev}
+        onNext={handleNext}
         onSave={handleSave}
         isSaving={isSaving}
       />
+
+      {/* [MIGRASI HEADER] `pb-20 md:pb-6` (clearance pill BAWAH lama)
+          dihapus — tidak ada lagi elemen mengambang di bawah. `mt-6`
+          menggantikan jarak yang dulu ada lewat mb-8 di step indicator lama. */}
+      <div className="flex-1 min-h-[300px] mt-6">
+        {renderStep()}
+      </div>
 
       <ValidationDialog
         open={validationOpen}

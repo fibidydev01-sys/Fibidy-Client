@@ -42,7 +42,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
   const url = useMemo(() => productUrl(storeSlug, product.id), [storeSlug, product.id]);
 
   return (
-    <div className="group overflow-hidden transition-shadow hover:shadow-md rounded-xl border border-border/50 bg-card h-full flex flex-col">
+    <div className="group overflow-hidden transition-shadow hover:shadow-md rounded-[var(--shape-panel)] border border-border/50 bg-card h-full flex flex-col">
       <Link href={url} className="flex flex-col flex-1">
 
         {/* Image */}
@@ -99,9 +99,9 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
               <span className="truncate">
                 {durasi
                   ? tInfo(
-                      durasi.satuan === 'hari' ? 'estimasiHari' : 'estimasiJam',
-                      { nilai: durasi.nilai },
-                    )
+                    durasi.satuan === 'hari' ? 'estimasiHari' : 'estimasiJam',
+                    { nilai: durasi.nilai },
+                  )
                   : product.durasiLabel}
               </span>
             </p>

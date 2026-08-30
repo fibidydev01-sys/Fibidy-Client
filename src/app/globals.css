@@ -303,28 +303,37 @@
 }
 
 /* ============================================================================
-   DIALEK SITUS — TANGGA expo.design.md (8 / 12 / 16)
+   DIALEK SITUS — MARKETING/LEGAL/STOREFRONT IKUT PIL DASHBOARD
    ============================================================================
-   Marketing, legal, dan storefront. Ketiganya permukaan PUBLIK yang memang
-   mengikuti spec Expo apa adanya:
+   [PILL UI — Aug 2026] Sebelumnya blok ini menandai tiga permukaan publik
+   ini KELUAR dari baku `:root` dan memasang tangga expo.design.md apa
+   adanya (field/button 8px, kartu 12px) — lihat riwayatnya di git blame
+   kalau nilai lama itu perlu ditelusuri lagi.
 
-     button/input  {rounded.md}  8px
-     kartu         {rounded.lg}  12px
+   Keputusan itu dibalik: marketing, legal, dan storefront sekarang
+   memakai NILAI YANG SAMA dengan baku `:root` (yang sudah pil sejak
+   catatan "PIL ADALAH BAKU" di atas). Field, tombol, dan panel di ketiga
+   permukaan publik ini sekarang pil juga, konsisten dengan dashboard.
 
-   Ini penyimpangan yang DITANDAI, bukan baku yang ditimpa — kebalikan dari
-   susunan sebelumnya, dan alasannya ada di catatan `:root` di atas: yang
-   ditandai harus yang jarang, karena penanda tidak pernah sampai ke portal.
+   Blok ini SENGAJA DIBIARKAN ADA, bukan dihapus, meski nilainya sekarang
+   sama dengan `:root` — supaya tiga permukaan ini tetap punya titik
+   tunggal kalau suatu saat perlu menyimpang lagi dari baku (persis alasan blok
+   `[data-surface="app"]` di bawah tetap menegaskan ulang nilainya sendiri
+   walau juga sama dengan `:root`: satu selector bernama = satu tempat
+   yang jelas untuk diubah, tanpa harus pergi ke `:root` yang dipakai
+   semua permukaan sekaligus).
 
-   `body:has()` ikut dipasang supaya dialog/sheet di storefront (checkout,
-   keranjang publik) juga memakai dialek yang sama dengan halamannya.
+   `body:has()` tetap dipasang supaya dialog/sheet di storefront (checkout,
+   keranjang publik) ikut pil bersama halamannya — sama seperti sebelumnya,
+   cuma nilainya sekarang pil, bukan kotak.
    ========================================================================= */
 
 [data-shape="site"],
 body:has([data-shape="site"]) {
-  --shape-field: var(--radius-md);
-  --shape-control: var(--radius-md);
-  --shape-panel: var(--radius-lg);
-  --field-pad-x: 1rem;
+  --shape-field: var(--radius-pill);
+  --shape-control: var(--radius-pill);
+  --shape-panel: var(--radius-xl);
+  --field-pad-x: 1.25rem;
 }
 
 [data-surface="app"] {
@@ -869,4 +878,3 @@ body:has([data-shape="site"]) {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
- 

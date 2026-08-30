@@ -62,7 +62,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <div className="space-y-4">
       {/* Main image */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-[var(--shape-panel)] bg-muted">
         {hasImages && currentImage ? (
           <>
             <OptimizedImage
@@ -130,7 +130,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               key={index}
               onClick={() => setSelectedIndex(index)}
               className={cn(
-                'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors',
+                'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[var(--shape-panel)] border-2 transition-colors',
                 selectedIndex === index
                   ? 'border-primary'
                   : 'border-transparent hover:border-muted-foreground/30'

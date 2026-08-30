@@ -255,9 +255,9 @@ export function StokKelolaSheet({
                       {selisih === 0
                         ? t('opnameNoDiff')
                         : t('opnamePreview', {
-                            selisih:
-                              selisih > 0 ? `+${selisih}` : `${selisih}`,
-                          })}
+                          selisih:
+                            selisih > 0 ? `+${selisih}` : `${selisih}`,
+                        })}
                     </FieldDescription>
                   )}
                 </Field>
@@ -306,7 +306,7 @@ export function StokKelolaSheet({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="rounded-lg border">
+          <div className="rounded-[var(--shape-panel)] border">
             <Table>
               <TableBody>
                 <TableRow>

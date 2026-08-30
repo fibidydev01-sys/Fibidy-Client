@@ -3,6 +3,12 @@
 // ==========================================
 // PASSWORD SECTION
 // File: src/components/dashboard/settings/password.tsx
+//
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (save-only mode) diganti WizardHeader, dipindah dari elemen
+// TERAKHIR jadi elemen PERTAMA. saveLabel/savingLabel di-override dengan
+// t('submitButton')/t('submittingButton') — sama persis seperti prop
+// aslinya di WizardNav lama, hanya nama komponennya yang berubah.
 // ==========================================
 
 import { useState } from 'react';
@@ -23,7 +29,7 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
 import { useTenant } from '@/hooks/dashboard/use-tenant';
@@ -37,7 +43,7 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ==========================================
 
 interface PasswordSectionProps {
-  onBack?: () => void;
+  onBack: () => void;
 }
 
 export function PasswordSection({ onBack }: PasswordSectionProps) {
@@ -103,7 +109,7 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
       });
 
       form.reset();
-      onBack?.();
+      onBack();
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
@@ -115,11 +121,18 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
 
   return (
     <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
-      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
-          takes over from md up where WizardNav is `sticky`/in-flow and
-          doesn't need an artificial reserve — see wizard-nav.tsx's v6
-          note and contact.tsx's equivalent comment for the full story. */}
-      <div className="flex-1 pb-20 md:pb-6 space-y-6">
+      {/* [MIGRASI HEADER] WizardHeader elemen PERTAMA, save-only mode. */}
+      <WizardHeader
+        onBack={onBack}
+        onSave={handleSave}
+        isSaving={isLoading}
+        saveLabel={t('submitButton')}
+        savingLabel={t('submittingButton')}
+      />
+
+      {/* [MIGRASI HEADER] `pb-20 md:pb-6` (clearance pill bawah lama)
+          dihapus, diganti `mt-6` (jarak dari header ke konten). */}
+      <div className="flex-1 mt-6 space-y-6">
         {/* Header */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -279,21 +292,13 @@ export function PasswordSection({ onBack }: PasswordSectionProps) {
             </div>
           )}
 
-          {/* Hidden submit — keeps Enter-to-submit working from the fields; the visible action lives in WizardNav below */}
+          {/* Hidden submit — keeps Enter-to-submit working from the fields; the visible action lives in WizardHeader above */}
           <button type="submit" className="sr-only" tabIndex={-1} disabled={isLoading}>
             {t('submitButton')}
           </button>
         </form>
         </Form>
       </div>
-
-      <WizardNav
-        onBack={onBack}
-        onSave={handleSave}
-        isSaving={isLoading}
-        saveLabel={t('submitButton')}
-        savingLabel={t('submittingButton')}
-      />
     </div>
   );
 }

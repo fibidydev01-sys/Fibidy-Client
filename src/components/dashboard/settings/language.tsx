@@ -4,6 +4,17 @@
 // LANGUAGE SECTION
 // File: src/components/dashboard/settings/language.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (save-only mode, hideSaveButton) diganti WizardHeader,
+// dipindah dari elemen TERAKHIR jadi elemen PERTAMA, sticky top-0.
+//
+// onBack di section ini WAJIB (bukan optional) — beda dari
+// HeroSection/ContactSection/SocialSection/AboutSection/PasswordSection
+// yang semua onBack?-nya optional dengan fallback lokal
+// (window.history.back()). Di sini tidak perlu fallback: parent
+// (settings/client.tsx) dipaksa TypeScript untuk selalu mengirim onBack,
+// jadi diteruskan langsung ke WizardHeader tanpa pembungkus tambahan.
+//
 // [LAYER 8 — 2026-04-19]
 // Settings section for language/locale picker.
 //
@@ -19,13 +30,12 @@
 // - Current selection is derived from `useLocale()`.
 //
 // Styling convention matches sibling section components (Hero, About,
-// Contact, Social, Password) — max-w-2xl shell + WizardNav sticky bottom
-// bar, back-only (no Save: selection applies instantly, nothing to save).
+// Contact, Social, Password) — back-only (no Save: selection applies
+// instantly, nothing to save).
 //
 // [UI/UX CONSISTENCY AUDIT]
-//   1. Back button moved off the top-inline position into the shared
-//      sticky-bottom WizardNav (hideSaveButton) — same "thumb reach"
-//      placement as every other settings section.
+//   1. Back button lives in the shared WizardHeader (hideSaveButton) —
+//      same placement convention as every other settings section.
 //   2. Fixed en->id switching one way only ("stuck on id"): switching TO
 //      the default locale (en) produces a bare/unprefixed URL under
 //      localePrefix:'as-needed'. If the NEXT_LOCALE cookie still said
@@ -49,7 +59,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { Check, Languages } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { cn } from '@/lib/shared/utils';
 import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
@@ -75,11 +85,12 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
 
   return (
     <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
-      {/* pb-20 (fixed-pill clearance) only matters below md; md:pb-6
-          takes over from md up where WizardNav is `sticky`/in-flow and
-          doesn't need an artificial reserve — see wizard-nav.tsx's v6
-          note and contact.tsx's equivalent comment for the full story. */}
-      <div className="flex-1 pb-20 md:pb-6 space-y-6">
+      {/* [MIGRASI HEADER] WizardHeader elemen PERTAMA, save-only mode. */}
+      <WizardHeader onBack={onBack} hideSaveButton />
+
+      {/* [MIGRASI HEADER] `pb-20 md:pb-6` (clearance pill bawah lama)
+          dihapus, diganti `mt-6` (jarak dari header ke konten). */}
+      <div className="flex-1 mt-6 space-y-6">
         {/* Header */}
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -92,7 +103,7 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
         </div>
 
         {/* Info alert */}
-        <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <div className="rounded-[var(--shape-panel)] border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
           {t('infoAlert')}
         </div>
 
@@ -145,8 +156,6 @@ export function LanguageSection({ onBack }: LanguageSectionProps) {
           })}
         </div>
       </div>
-
-      <WizardNav onBack={onBack} hideSaveButton />
     </div>
   );
 }

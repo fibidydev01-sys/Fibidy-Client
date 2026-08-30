@@ -4,6 +4,17 @@
 // PENGATURAN → PRESET DISKON
 // File: src/components/dashboard/settings/kasir-diskon-preset.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// Dua pemanggilan WizardNav yang sudah ada (satu di mode 'form', satu di
+// mode 'list') diganti WizardHeader, TETAP DUA PEMANGGILAN TERPISAH —
+// tidak digabung jadi satu tombol dinamis. Alasan: 'list' dan 'form' di
+// sini bukan posisi berurutan dalam satu alur linear (beda dari step 1→5
+// di wizard), melainkan dua MODE independen yang saling lompat. onBack
+// di mode form (`tutupForm`, balik ke list) dan onBack di mode list
+// (`onBack` dari parent, keluar section) adalah dua aksi berbeda yang
+// memang sudah benar dipisah di kode aslinya — menggabungnya jadi satu
+// tombol "pintar" hanya menambah cabang kondisional tanpa mengirit apa pun.
+//
 // Preset diskon adalah ATURAN, bukan transaksi. Kasir tidak membuat diskon
 // baru sambil melayani pelanggan — ia hanya MEMILIH dari daftar yang sudah
 // disiapkan pemilik toko. Karena itu layar pembuatannya tinggal di sini,
@@ -29,7 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { MahkotaKecil } from '@/components/dashboard/shared/notice-mahkota';
 import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
 import { GUIDE } from '@/lib/constants/dashboard/guide-links';
@@ -119,7 +130,19 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
   if (mode === 'form') {
     return (
       <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
-        <div className="flex-1 space-y-6 pb-20 md:pb-6">
+        {/* [MIGRASI HEADER] onBack di mode form = tutupForm (balik ke
+            list), BUKAN onBack dari parent. Ini pemanggilan terpisah dari
+            yang ada di cabang 'list' di bawah — lihat catatan header. */}
+        <WizardHeader
+          onBack={tutupForm}
+          onSave={jaga(simpan)}
+          saveTerkunci={terkunci}
+          isSaving={creating || updating}
+          saveLabel={t('save')}
+          savingLabel={t('saving')}
+        />
+
+        <div className="flex-1 space-y-6 mt-6">
           <div>
             <h2 className="flex items-center gap-2 text-xl font-semibold">
               <Percent className="h-5 w-5" aria-hidden />
@@ -189,15 +212,6 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         </div>
-
-        <WizardNav
-          onBack={tutupForm}
-          onSave={jaga(simpan)}
-          saveTerkunci={terkunci}
-          isSaving={creating || updating}
-          saveLabel={t('save')}
-          savingLabel={t('saving')}
-        />
       </div>
     );
   }
@@ -205,7 +219,12 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
   // ── Daftar ────────────────────────────────────────────────────────────
   return (
     <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
-      <div className="flex-1 space-y-6 pb-20 md:pb-6">
+      {/* [MIGRASI HEADER] onBack di mode list = onBack dari parent (keluar
+          section), hideSaveButton karena daftar tidak punya aksi simpan
+          sendiri — sama seperti WizardNav lama di cabang ini. */}
+      <WizardHeader onBack={onBack} hideSaveButton />
+
+      <div className="flex-1 space-y-6 mt-6">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
             <Percent className="h-5 w-5" aria-hidden />
@@ -279,7 +298,7 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
               </div>
             ))}
 
-            {/* Aksi utama halaman = bar melayang selebar kolom konten. */}
+            {/* Aksi utama halaman = tombol lebar penuh di bawah daftar. */}
             <Button onClick={jaga(() => bukaForm())} className="w-full gap-2">
               {terkunci ? (
                 <MahkotaKecil />
@@ -291,8 +310,6 @@ export function KasirDiskonPresetSection({ onBack }: { onBack: () => void }) {
           </div>
         )}
       </div>
-
-      <WizardNav onBack={onBack} hideSaveButton />
 
       <AlertDialog
         open={!!konfirmasiHapus}

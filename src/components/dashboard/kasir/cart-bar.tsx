@@ -59,7 +59,7 @@ export function CartBar({
         className="pointer-events-auto h-14 w-full justify-between gap-3 px-4 shadow-lg"
       >
         <Link href="/dashboard/kasir/keranjang">
-          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15">
+          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-[var(--shape-panel)] bg-primary-foreground/15">
             <ShoppingCart className="size-4" aria-hidden />
             <Badge
               variant="secondary"

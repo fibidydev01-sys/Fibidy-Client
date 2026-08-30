@@ -4,6 +4,31 @@
 // SELLER SETUP WIZARD — Orchestrator
 // File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/seller-setup-wizard.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// Step indicator (dulu di body, mb-8) DAN nav Prev/Next/Submit (dulu
+// floating pill footer, anak TERAKHIR flex column) digabung jadi satu
+// bar di HEADER — SetupWizardNav sekarang dipanggil sebagai anak
+// PERTAMA, sticky top-0, bukan lagi anak terakhir. Lihat wizard-header.tsx
+// untuk penjelasan bentuk 3-kolom (Back/Prev kiri — dots+tooltip tengah —
+// Next/Submit kanan) dan kenapa slot kiri tidak pernah kosong.
+//
+// KONSEKUENSI STRUKTURAL:
+//   - <SetupStepIndicator> yang dulu di body (dengan mb-8) DIHAPUS —
+//     step indicator sekarang cuma dirender sekali, di dalam header,
+//     bukan dua kali (dulu: sekali di body sebagai display, sekali
+//     implisit lewat StepDots di dalam nav footer — sekarang cuma
+//     satu sumber kebenaran visual).
+//   - Comment lama "[NEMPEL KE BAWAH] ... pill sebagai anak TERAKHIR
+//     selalu mendarat di dasarnya" SUDAH TIDAK BERLAKU — nav bukan lagi
+//     anak terakhir, jadi flex-1/min-h-0 pada wrapper step body tidak lagi
+//     berfungsi untuk "mendorong nav ke bawah". Konten step sekarang
+//     boleh setinggi apa pun secara alami (scroll biasa), karena tidak
+//     ada lagi elemen mengambang yang harus dihindari kontennya.
+//     NAV_PILL_CLEARANCE (dulu dipakai supaya konten terakhir tidak
+//     tenggelam di belakang pill BAWAH) juga tidak relevan lagi di sini
+//     — clearance yang dibutuhkan sekarang ada di ATAS (jarak dari
+//     header sticky ke konten pertama), bukan di bawah.
+//
 // [SETUP HIGHLIGHT — May 2026]
 // Listen CustomEvent 'setup:highlight' yang di-dispatch oleh
 // dashboard-sidebar.tsx dan mobile-navbar.tsx saat user mencoba navigate
@@ -36,12 +61,11 @@ import { StepHighlights } from './step-highlights';
 import { StepContactLocation } from './step-contact-location';
 import { StepSocial } from './step-social';
 import { SellerSetupDone } from './seller-setup-done';
-import { SetupStepIndicator } from '@/components/dashboard/setup-store/setup-step-indicator';
 import { SetupWizardNav } from '@/components/dashboard/setup-store/setup-wizard-nav';
 import { generateStoreLogo } from './logo-generator';
 import type { CompleteSetupInput, FeatureItem, SocialLinks } from '@/types/tenant';
 import { cn } from '@/lib/shared/utils';
-import { PAGE_COLUMN, NAV_PILL_CLEARANCE } from '@/components/dashboard/shared/page-column';
+import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ── Form State ────────────────────────────────────────────────────────────────
 
@@ -636,6 +660,19 @@ export function SellerSetupWizard() {
     }
   }, [checkUploadGuard, currentStep, form, completeSetup, t]);
 
+  // ── [MIGRASI HEADER] Back keluar wizard ────────────────────────────────
+  //
+  // SetupWizardNav/WizardHeader butuh onBack yang WAJIB (bukan optional) —
+  // itu yang menjamin slot kiri header selalu terisi dari Step 1 (lihat
+  // catatan di wizard-header.tsx). Wizard ini sebelumnya tidak punya
+  // konsep "keluar" sama sekali karena tombolnya dulu Prev-only dengan
+  // step 1 = invisible (tidak ada tempat untuk "keluar" ditekan).
+  // Sekarang wajib ada: mundur ke dashboard, konsisten dengan tombol
+  // Back di wizard lain (register.tsx pakai router.push('/')).
+  const handleBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
   if (isDone) {
     return <SellerSetupDone />;
   }
@@ -649,40 +686,35 @@ export function SellerSetupWizard() {
   ];
 
   return (
-    // [PRESISI] Dulu `pb-40 md:pb-8`. Yang 32px di desktop KURANG: pill
-    // SetupWizardNav tingginya 62px dan mengambang 16px dari tepi, jadi
-    // butuh 78px. Isian terakhir tenggelam di baliknya — dan karena
-    // pill-nya bg-background/90, ia terbaca sebagai teks berbayang, bukan
-    // sebagai batas. Angkanya sekarang dibaca dari satu konstanta yang juga
-    // dipakai halaman Pengaturan.
-    <div className={cn(PAGE_COLUMN, NAV_PILL_CLEARANCE, 'flex min-h-full flex-col')}>
-      <div className="mb-8">
-        <SetupStepIndicator
-          steps={STEPS}
-          currentStep={currentStep - 1}
-          onStepClick={(idx: number) => setCurrentStep(idx + 1)}
-        />
-      </div>
+    // [MIGRASI HEADER] Header (SetupWizardNav) sekarang ANAK PERTAMA,
+    // bukan lagi anak terakhir — lihat catatan besar di kepala file.
+    // `flex flex-col` dipertahankan (masih dipakai wrapper konten di
+    // bawah header), tapi `min-h-full` dan urutan "konten dulu baru nav"
+    // yang dulu memastikan nav "mendarat di dasar" sudah tidak relevan:
+    // nav sekarang sticky di ATAS, bukan mengambang di bawah yang harus
+    // didorong oleh flex-1 konten.
+    <div className={cn(PAGE_COLUMN, 'flex flex-col')}>
+      <SetupWizardNav
+        steps={STEPS}
+        currentStep={currentStep - 1}
+        totalSteps={5}
+        onStepClick={(idx: number) => setCurrentStep(idx + 1)}
+        onBack={handleBack}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onSubmit={handleSubmit}
+        isSaving={isLoading}
+      />
 
       {/*
-        [NEMPEL KE BAWAH] Dulu `min-h-[400px]`. Angka itu cadangan mati:
-        isi Langkah 2 cuma ~330px, jadi 400px menyisakan ~70px kosong yang
-        mendorong pill turun tanggung — tidak menempel isi, tidak menempel
-        layar, menggantung di antara keduanya.
-        Terukur di tangkapan pemilik produk: isi berakhir y=435, pill mulai
-        y=540. Selisih 105px, dan 81px-nya murni dari cadangan ini.
-
-        `flex-1` menggantikannya: kolom mengisi tinggi yang tersedia, dan
-        pill sebagai anak TERAKHIR selalu mendarat di dasarnya. Langkah
-        pendek maupun panjang menaruh tombol Selanjutnya di tempat yang
-        sama — itu yang membuatnya bisa dihafal tangan.
-
-        `min-h-0` WAJIB menyertai `flex-1` di sini: anak flex yang
-        overflow-nya visible punya `min-height:auto`, yang resolusinya
-        min-content — dan itu membatalkan batas atas dari induknya begitu
-        isinya lebih tinggi dari layar.
+        [MIGRASI HEADER] `mt-6` menggantikan `mb-8` yang dulu ada di
+        SetupStepIndicator (step indicator dulu di ATAS konten, sekarang
+        pindah ke dalam header di atas — jaraknya jadi di BAWAH header,
+        bukan lagi di atas indicator). Angka sama (24px / space-y ~6),
+        cuma posisi jarak yang berpindah dari "sebelum indicator" jadi
+        "sesudah header".
       */}
-      <div className="min-h-0 flex-1">
+      <div className="mt-6 flex-1">
         {currentStep === 1 && (
           <StepVisual
             logo={form.logo}
@@ -772,15 +804,6 @@ export function SellerSetupWizard() {
           />
         )}
       </div>
-
-      <SetupWizardNav
-        currentStep={currentStep - 1}
-        totalSteps={5}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        onSubmit={handleSubmit}
-        isSaving={isLoading}
-      />
 
       {/* Dialog validasi step — onAfterClose trigger scroll */}
       <ValidationDialog

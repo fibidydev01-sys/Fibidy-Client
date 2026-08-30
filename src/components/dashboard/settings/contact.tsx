@@ -7,7 +7,7 @@ import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { useAuthStore } from '@/stores/auth-store';
 import { tenantsApi } from '@/lib/api/tenants';
 import { getErrorMessage } from '@/lib/api/client';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
 import type { ContactFormData } from '@/types/tenant';
 import { StepContactInfo } from './form/contact/step-contact-info';
@@ -20,6 +20,36 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // CONTACT SETTINGS SECTION
 // File: src/components/dashboard/settings/contact.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// WizardNav (dulu floating pill footer) diganti WizardHeader — sekarang
+// elemen PERTAMA, sticky top-0, SERAGAM di semua breakpoint.
+//
+// KONSEKUENSI PADA SPLIT DESKTOP/MOBILE:
+// Pemisahan render `hidden lg:flex` (desktop) vs `lg:hidden` (mobile) di
+// bawah ini TIDAK DIHAPUS, meski alasan ASLINYA (WizardNav lama posisinya
+// beda perilaku per breakpoint — `fixed` di bawah md, `sticky` dari md+,
+// jadi butuh clearance padding berbeda) sudah tidak berlaku sama sekali
+// sekarang: WizardHeader sticky top-0 identik di semua ukuran layar.
+//
+// Split-nya tetap ada karena alasan LAIN yang independen dari posisi nav:
+// StepContactInfo/StepLocation/StepSectionHeading merender field dengan
+// id yang diberi akhiran `-d`/`-m` (lihat step-contact-info.tsx: "contact.tsx
+// merender langkah ini DUA KALI... Keduanya ada di DOM secara bersamaan").
+// Kedua cabang tetap live di DOM serentak (satu disembunyikan CSS, bukan
+// unmount), jadi id-nya tetap wajib unik. Menyatukan jadi satu render
+// butuh audit terpisah pada 3 step component itu (menghapus prop
+// isDesktop dan seluruh logic sfx di dalamnya) — di luar scope migrasi
+// header ini, supaya perubahan struktural besar (hapus duplikasi id) tidak
+// tercampur dengan perubahan posisi (pindah nav ke atas) dalam satu diff.
+//
+// YANG DISEDERHANAKAN: clearance padding. Dulu desktop dan mobile punya
+// angka pb-* berbeda (desktop: pb-4 kecil karena WizardNav lama selalu
+// sticky di rentang itu; mobile: pb-24 besar lalu md:pb-6 karena WizardNav
+// lama fixed di bawah md). Sekarang keduanya sama-sama butuh jarak ATAS
+// (dari header sticky ke konten), bukan lagi jarak BAWAH — jadi kedua
+// cabang memakai `mt-6` yang sama, tidak ada lagi perbedaan per breakpoint
+// untuk alasan posisi nav.
+//
 // [BACKPORT — 2026-05-28]
 //   1. ValidationDialog hard gate (SETTINGS-N1)
 //   2. setTenant() setelah save (SETTINGS-N6)
@@ -27,7 +57,7 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 // ============================================================================
 
 interface ContactSectionProps {
-  onBack?: () => void;
+  onBack: () => void;
 }
 
 export function ContactSection({ onBack }: ContactSectionProps) {
@@ -120,51 +150,47 @@ export function ContactSection({ onBack }: ContactSectionProps) {
     }
   };
 
+  const handlePrev = useCallback(() => setCurrentStep((p) => p - 1), []);
+  const handleNext = useCallback(() => setCurrentStep((p) => p + 1), []);
+
   if (!tenant || !formData) return null;
 
   const stepProps = { formData: formData!, updateFormData };
 
   return (
     <div className={cn('h-full flex flex-col', PAGE_COLUMN)}>
-      {/* DESKTOP — always ≥lg (1024px), always inside WizardNav's `sticky`
-          range (md+): no fixed-position pill to reserve clearance for, so
-          just a small breathing-room gap instead of the mobile block's
-          big reserve. */}
+      {/* [MIGRASI HEADER] WizardHeader sekarang elemen PERTAMA, sebelum
+          kedua cabang desktop/mobile — satu header, dipakai bersama. */}
+      <WizardHeader
+        steps={STEPS}
+        currentStep={currentStep}
+        onBack={onBack}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onSave={handleSave}
+        isSaving={isSaving}
+      />
+
+      {/* DESKTOP — lihat catatan header berkas soal kenapa split ini tetap
+          ada meski alasan clearance-nya sudah tidak berlaku. `mt-6` sama
+          dengan cabang mobile — tidak ada lagi perbedaan clearance per
+          breakpoint karena WizardHeader seragam di semua ukuran. */}
       <div className="hidden lg:flex lg:flex-col lg:h-full">
-        <div className="flex-1 min-h-[340px] pb-4">
+        <div className="flex-1 min-h-[340px] mt-6">
           {currentStep === 0 && <StepContactInfo {...stepProps} isDesktop />}
           {currentStep === 1 && <StepLocation {...stepProps} isDesktop />}
           {currentStep === 2 && <StepSectionHeading {...stepProps} isDesktop />}
         </div>
       </div>
 
-      {/* MOBILE — shown 0-1023px, spanning BOTH WizardNav position modes:
-          pb-24 (big reserve) only applies below md, where the pill is
-          `fixed`/out-of-flow and needs real clearance from scrolled
-          content; md:pb-6 takes over from md up, where the pill is
-          `sticky`/in-flow (tablet width already renders this "mobile"
-          field layout below lg, but the pill itself is already sticky
-          there) and an artificial 96px reserve was just dead space
-          before the pill, not to mention the slack was long enough for
-          the sticky-to-normal-flow handoff at the very end of a scroll
-          to visibly shift/flick. */}
-      <div className="lg:hidden flex flex-col pb-24 md:pb-6">
+      {/* MOBILE — shown 0-1023px. `mt-6` sama dengan cabang desktop. */}
+      <div className="lg:hidden flex flex-col mt-6">
         <div className="min-h-[300px]">
           {currentStep === 0 && <StepContactInfo {...stepProps} />}
           {currentStep === 1 && <StepLocation {...stepProps} />}
           {currentStep === 2 && <StepSectionHeading {...stepProps} />}
         </div>
       </div>
-
-      <WizardNav
-        steps={STEPS}
-        currentStep={currentStep}
-        onBack={onBack}
-        onPrev={() => setCurrentStep((p) => p - 1)}
-        onNext={() => setCurrentStep((p) => p + 1)}
-        onSave={handleSave}
-        isSaving={isSaving}
-      />
 
       <ValidationDialog
         open={validationOpen}

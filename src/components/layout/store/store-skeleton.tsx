@@ -2,6 +2,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // ==========================================
 // STORE LOADING SKELETONS
+// File: src/components/layout/store/store-skeleton.tsx
+//
+// [SKELETON SIMPLIFIKASI — Agu 2026]
+// ProductCardSkeleton sebelumnya menggambar 4 block terpisah (gambar +
+// kategori + 2 baris nama + harga) meniru struktur ProductCard asli persis.
+// Diubah jadi SATU block polos seukuran kartu — konsisten dengan
+// penyederhanaan yang sama di ProductGridCardSkeleton (dashboard) dan
+// KatalogCardSkeleton (kasir). StoreHeaderSkeleton dan ProductDetailSkeleton
+// TIDAK diubah — keduanya bukan skeleton kartu produk, jadi di luar
+// perubahan ini.
 // ==========================================
 
 export function StoreHeaderSkeleton() {
@@ -16,8 +26,8 @@ export function StoreHeaderSkeleton() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Skeleton className="h-10 w-10 rounded-md" />
-          <Skeleton className="h-10 w-10 rounded-md" />
+          <Skeleton className="h-10 w-10 rounded-[var(--shape-control)]" />
+          <Skeleton className="h-10 w-10 rounded-[var(--shape-control)]" />
         </div>
       </div>
     </header>
@@ -26,14 +36,8 @@ export function StoreHeaderSkeleton() {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="rounded-lg border bg-card overflow-hidden">
-      <Skeleton className="aspect-square w-full" />
-      <div className="p-4">
-        <Skeleton className="h-3 w-16 mb-2" />
-        <Skeleton className="h-4 w-full mb-1" />
-        <Skeleton className="h-4 w-3/4 mb-3" />
-        <Skeleton className="h-5 w-24" />
-      </div>
+    <div className="aspect-square w-full overflow-hidden rounded-[var(--shape-panel)] bg-card">
+      <Skeleton className="h-full w-full rounded-[var(--shape-panel)]" />
     </div>
   );
 }
@@ -57,10 +61,10 @@ export function ProductDetailSkeleton() {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Gallery */}
         <div className="space-y-4">
-          <Skeleton className="aspect-square w-full rounded-xl" />
+          <Skeleton className="aspect-square w-full rounded-[var(--shape-panel)]" />
           <div className="flex gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 w-20 rounded-lg" />
+              <Skeleton key={i} className="h-20 w-20 rounded-[var(--shape-panel)]" />
             ))}
           </div>
         </div>

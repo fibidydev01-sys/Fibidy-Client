@@ -95,7 +95,7 @@ export function StrukDialog({
           dari benda fisik, dan hasil bagikannya juga putih-hitam. Kalau
           pratinjau gelap tapi gambarnya terang, kasir akan mengira salah.
         */}
-        <ScrollArea className="max-h-[45vh] rounded-lg border bg-white">
+        <ScrollArea className="max-h-[45vh] rounded-[var(--shape-panel)] border bg-white">
           <pre className="whitespace-pre px-3 py-3 font-mono text-[11px] leading-[1.45] text-black">
             {teks}
           </pre>

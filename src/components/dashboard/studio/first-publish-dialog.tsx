@@ -53,7 +53,7 @@ export function FirstPublishDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={() => { }}>
       <DialogContent
         className="sm:max-w-md [&>button:last-child]:hidden"
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -79,7 +79,7 @@ export function FirstPublishDialog({
               </p>
 
               {/* Empati explore block */}
-              <div className="rounded-lg bg-muted/50 border px-4 py-3 text-left">
+              <div className="rounded-[var(--shape-panel)] bg-muted/50 border px-4 py-3 text-left">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   💡 {t('exploreHint')}
                 </p>

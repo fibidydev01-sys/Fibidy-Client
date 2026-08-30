@@ -185,7 +185,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
   // Centralized here so future polish (shadow, hover, bg tweak) lands
   // in one place instead of three.
   const cardClass =
-    'border border-border rounded-2xl p-6 md:p-8 bg-card';
+    'border border-border rounded-[var(--shape-panel)] p-6 md:p-8 bg-card';
 
   // Shared eyebrow class — small all-caps mono label above each card's content.
   const eyebrowClass =
@@ -202,7 +202,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
             <p className={eyebrowClass}>{t('brandTitle')}</p>
             <div className="flex items-center gap-3">
               {tenant.logo ? (
-                <div className="relative w-12 h-12 overflow-hidden border border-border rounded-xl shrink-0 bg-background">
+                <div className="relative w-12 h-12 overflow-hidden border border-border rounded-[var(--shape-panel)] shrink-0 bg-background">
                   <Image
                     src={tenant.logo}
                     alt={tenant.name}
@@ -212,7 +212,7 @@ export function StoreFooter({ tenant }: StoreFooterProps) {
                   />
                 </div>
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-[var(--shape-panel)] bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-lg font-bold text-primary">
                     {tenant.name.charAt(0)}
                   </span>

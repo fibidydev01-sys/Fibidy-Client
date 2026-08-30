@@ -4,6 +4,11 @@
 // PENGATURAN → PROGRAM PROMO
 // File: src/components/dashboard/settings/kasir-promo.tsx
 //
+// [MIGRASI HEADER — Aug 2026]
+// Dua pemanggilan WizardNav (mode 'form' dan mode 'list') diganti
+// WizardHeader, TETAP DUA PEMANGGILAN TERPISAH — alasan sama persis
+// dengan kasir-diskon-preset.tsx, lihat catatan di sana.
+//
 // Promo BOGO / Buy2Get1 per produk. Sama seperti preset diskon, ini ATURAN
 // yang dibuat sesekali oleh pemilik toko, bukan sesuatu yang disentuh kasir
 // tiap transaksi — jadi rumahnya di Pengaturan.
@@ -39,7 +44,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { WizardNav } from '@/components/dashboard/shared/wizard-nav';
+import { WizardHeader } from '@/components/dashboard/shared/wizard-header';
 import { MahkotaKecil } from '@/components/dashboard/shared/notice-mahkota';
 import { EmptyPanel } from '@/components/dashboard/shared/empty-panel';
 import { GUIDE } from '@/lib/constants/dashboard/guide-links';
@@ -135,7 +140,17 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
   if (mode === 'form') {
     return (
       <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
-        <div className="flex-1 space-y-6 pb-20 md:pb-6">
+        {/* [MIGRASI HEADER] onBack di mode form = balik ke list. */}
+        <WizardHeader
+          onBack={() => setMode('list')}
+          onSave={jaga(simpan)}
+          saveTerkunci={terkunci}
+          isSaving={creating}
+          saveLabel={t('save')}
+          savingLabel={t('saving')}
+        />
+
+        <div className="flex-1 space-y-6 mt-6">
           <div>
             <h2 className="flex items-center gap-2 text-xl font-semibold">
               <Gift className="h-5 w-5" aria-hidden />
@@ -266,15 +281,6 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         </div>
-
-        <WizardNav
-          onBack={() => setMode('list')}
-          onSave={jaga(simpan)}
-          saveTerkunci={terkunci}
-          isSaving={creating}
-          saveLabel={t('save')}
-          savingLabel={t('saving')}
-        />
       </div>
     );
   }
@@ -282,7 +288,10 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
   // ── Daftar ────────────────────────────────────────────────────────────
   return (
     <div className={cn('flex h-full flex-col', PAGE_COLUMN)}>
-      <div className="flex-1 space-y-6 pb-20 md:pb-6">
+      {/* [MIGRASI HEADER] onBack di mode list = onBack dari parent. */}
+      <WizardHeader onBack={onBack} hideSaveButton />
+
+      <div className="flex-1 space-y-6 mt-6">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
             <Gift className="h-5 w-5" aria-hidden />
@@ -383,8 +392,6 @@ export function KasirPromoSection({ onBack }: { onBack: () => void }) {
           </div>
         )}
       </div>
-
-      <WizardNav onBack={onBack} hideSaveButton />
 
       <AlertDialog
         open={!!konfirmasiHapus}

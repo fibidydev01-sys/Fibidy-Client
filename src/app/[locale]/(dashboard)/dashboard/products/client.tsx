@@ -4,24 +4,20 @@
 // PRODUCTS CLIENT
 // File: src/app/[locale]/(dashboard)/dashboard/products/client.tsx
 //
-// [PRODUCTS ONBOARDING v3 — May 2026]
-// Flow untuk first-time seller (products kosong):
+// [SKELETON KONSISTEN — Agu 2026]
+// Loading state sebelumnya: PageHeader (real) + ProductsGridSkeleton (kartu
+// kecil tanpa toolbar). Masalahnya: toolbar (pencarian, urutkan, kategori,
+// toggle tampilan) tidak muncul saat loading, padahal di Kasir toolbar-nya
+// tetap real dan hanya grid/list-nya yang skeleton.
 //
-//   Load selesai → WelcomeProductDialog muncul LANGSUNG (no delay)
-//     Background: BERSIH (dot pattern, no grid/empty-state)
-//     Locked — hanya bisa dismiss via tombol
-//     "Ayo Tambah Produk" → /dashboard/products/new
-//     "Nanti" → dismiss (session only, muncul lagi next visit selama masih kosong)
+// Sekarang loading state Products konsisten dengan Kasir:
+//   • Header real  (judul + tombol Tambah Produk)
+//   • Toolbar real (pencarian, urutkan, kategori, grid/list toggle)
+//   • Grid skeleton (view='grid') → 10 kartu skeleton
+//   • List skeleton (view='list') → 6 baris skeleton
 //
-// Returning user (products >= 1):
-//   Normal — grid tampil langsung, dialog tidak pernah muncul lagi.
-//
-// Dismiss logic: products.length >= 1 = natural dismiss selamanya.
-// Tidak perlu dismissedFirstProductDialog flag — produk itu sendiri yang jadi gate.
-//
-// [RACE CONDITION FIX — May 2026]
-// Hapus setTimeout 600ms + hapus privateTenant dependency.
-// productsLoading saja sudah cukup sebagai gate.
+// view dibaca dari localStorage SEBELUM data produk datang, sama seperti
+// kasir yang sudah bisa menampilkan toolbar lengkap sejak detik pertama.
 // ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
@@ -64,6 +60,7 @@ import {
   ProductsGrid,
   ProductsGridSkeleton,
 } from '@/components/dashboard/product/product-grid';
+import { KasirRowsSkeleton } from '@/components/dashboard/kasir/kasir-state';
 import { Link, useRouter } from '@/i18n/navigation';
 
 // ── WelcomeProductDialog ──────────────────────────────────────────────────────
@@ -87,7 +84,6 @@ function WelcomeProductDialog({
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          {/* Icon */}
           <div className="flex justify-center mb-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
               <ShoppingBag className="h-7 w-7 text-primary" />
@@ -100,7 +96,6 @@ function WelcomeProductDialog({
 
           <DialogDescription asChild>
             <div className="space-y-3 pt-1">
-              {/* Steps */}
               <div className="space-y-2">
                 {(['step1', 'step2', 'step3'] as const).map((key, i) => (
                   <div key={key} className="flex items-start gap-2.5">
@@ -114,7 +109,6 @@ function WelcomeProductDialog({
                 ))}
               </div>
 
-              {/* Hint */}
               <div className="rounded-lg bg-muted/50 border px-3 py-2.5">
                 <p className="text-xs text-muted-foreground leading-relaxed flex items-start gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
@@ -126,13 +120,10 @@ function WelcomeProductDialog({
         </DialogHeader>
 
         <DialogFooter className="mt-2 flex-col gap-2 sm:flex-col">
-          {/* Primary: langsung ke form tambah produk */}
           <Button onClick={onStart} className="w-full gap-2">
             <Plus className="h-4 w-4" />
             {t('cta')}
           </Button>
-
-          {/* Secondary: nanti — dialog muncul lagi next visit selama kosong */}
           <Button
             variant="ghost"
             onClick={onLater}
@@ -161,33 +152,20 @@ export function DashboardClient() {
     isFetching: isRefetching,
   } = useProductsFlat();
 
-  // `productsData ?? []` menghasilkan array BARU tiap render selama datanya
-  // belum datang, dan tiga useMemo di bawah membacanya sebagai dependensi —
-  // jadi ketiganya menghitung ulang tiap render tanpa ada yang berubah.
-  // Sudah begitu sejak dulu; baru terlihat saat saringan kategori menambah
-  // pemakai ketiga. Satu useMemo di sini memperbaiki ketiganya.
   const products = useMemo(() => productsData ?? [], [productsData]);
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
 
-  // ── Pencarian, pengurutan, tampilan ──────────────────────────────────────
-  //
-  // Penyaringan dikerjakan DI SINI, bukan di CollectionToolbar. Bilah itu
-  // melapor apa yang dipilih; halaman yang tahu arti "harga terendah" untuk
-  // koleksinya sendiri. Begitu bilahnya ikut menyaring, ia berhenti bisa
-  // dipakai daftar kasir yang bentuk datanya berbeda.
   const tc = useTranslations('dashboard.products.collection');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('newest');
   const [kategori, setKategori] = useState<string | null>(null);
+
+  // view dibaca dari localStorage sejak awal — tersedia bahkan saat loading,
+  // sama seperti kasir yang sudah tahu grid/list sebelum data datang.
   const [view, setView] = useCollectionView('fibidy:view:products');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
-
-  // Ruang untuk bilah aksi massal yang mengambang. Lihat catatan pada
-  // `onSelectionCountChange` di product-grid.tsx: bilahnya `fixed`, jadi ia
-  // tidak memakan ruang sendiri, dan tanpa ini ia menutupi pager begitu
-  // halaman digulir habis.
   const [jumlahTerpilih, setJumlahTerpilih] = useState(0);
 
   const sortOptions = useMemo(
@@ -202,9 +180,6 @@ export function DashboardClient() {
     [tc],
   );
 
-  // Kategori diturunkan dari produk yang ada, bukan dari endpoint terpisah:
-  // satu request lebih sedikit, dan saringan tidak pernah menawarkan kategori
-  // yang produknya sudah tidak dijual. Aturan yang sama dipakai kasir.
   const categories = useMemo(
     () =>
       [
@@ -222,15 +197,13 @@ export function DashboardClient() {
 
     const hasil = q
       ? products.filter(
-          (p) =>
-            cocokKategori(p) &&
-            (p.name.toLowerCase().includes(q) ||
-              (p.category ?? '').toLowerCase().includes(q)),
-        )
+        (p) =>
+          cocokKategori(p) &&
+          (p.name.toLowerCase().includes(q) ||
+            (p.category ?? '').toLowerCase().includes(q)),
+      )
       : products.filter(cocokKategori);
 
-    // `localeCompare` dengan 'id' supaya urutan nama menghormati abjad
-    // Indonesia, bukan urutan byte.
     switch (sort) {
       case 'oldest':
         return hasil.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -247,11 +220,6 @@ export function DashboardClient() {
     }
   }, [products, query, sort, kategori]);
 
-  // ── Halaman ──────────────────────────────────────────────────────────────
-  //
-  // Dipotong SETELAH disaring dan diurutkan, bukan sebelumnya — kalau tidak,
-  // pencarian cuma akan menelusuri 20 produk yang kebetulan ada di halaman
-  // yang sedang dibuka.
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / perPage));
   const halamanAman = Math.min(page, totalPages);
   const pagedProducts = visibleProducts.slice(
@@ -259,9 +227,6 @@ export function DashboardClient() {
     halamanAman * perPage,
   );
 
-  // Mengubah kata kunci, urutan, atau jumlah baris membuat halaman ke-7 tidak
-  // lagi berarti apa-apa. Direset lewat KEY, bukan efek: `useEffect` di sini
-  // berarti satu render menampilkan halaman kosong sebelum resetnya masuk.
   const resetKey = `${query}|${sort}|${kategori ?? ''}|${perPage}`;
   const [lastResetKey, setLastResetKey] = useState(resetKey);
   if (resetKey !== lastResetKey) {
@@ -269,33 +234,13 @@ export function DashboardClient() {
     setPage(1);
   }
 
-  // ── Dialog trigger ────────────────────────────────────────────────────────
-  //
-  // Gate tunggal: products.length
-  //   0 produk → dialog muncul setiap visit (agresif)
-  //   1+ produk → tidak pernah muncul lagi (natural dismiss)
-  //
-  // No setTimeout, no dismissedFirstProductDialog, no privateTenant fetch.
-
   useEffect(() => {
-    // Gate 1: initial loading
     if (productsLoading) return;
-
-    // Gate 2: refetching (misal balik dari /products/new setelah tambah produk)
-    // Tanpa ini: products = [] sebentar saat stale → dialog flash muncul
     if (isRefetching) return;
-
-    // Gate 3: error
     if (productsError) return;
-
-    // Gate 4: sudah ada produk
     if (products.length > 0) return;
-
-    // Benar-benar kosong dan tidak sedang fetch → tampilkan dialog
     setWelcomeOpen(true);
   }, [productsLoading, isRefetching, productsError, products.length]);
-
-  // ── Handlers ─────────────────────────────────────────────────────────────
 
   const handleStart = () => {
     setWelcomeOpen(false);
@@ -305,9 +250,6 @@ export function DashboardClient() {
   const handleLater = () => {
     setWelcomeOpen(false);
   };
-
-  // ── Background bersih saat onboarding welcome ─────────────────────────────
-  // Sama seperti Studio — user fokus ke dialog, tidak ada distraksi di belakang
 
   const isOnboardingPhase = welcomeOpen;
 
@@ -326,12 +268,48 @@ export function DashboardClient() {
   );
 
   // ── Loading ───────────────────────────────────────────────────────────────
+  //
+  // [KONSISTEN DENGAN KASIR]
+  // Header real + Toolbar real (disabled) + skeleton konten.
+  //
+  // Toolbar dirender dengan props kosong/disabled saat loading:
+  //   - pencarian: value='' + onChange=noop → input kosong, tidak interaktif
+  //   - kategori: categories=[] → dropdown kategori tidak muncul (belum ada data)
+  //   - sort: value='newest' + onChange=noop → nilai baku, tidak interaktif
+  //   - view toggle: TETAP BERFUNGSI — penjual bisa pilih grid/list
+  //     sebelum data datang, dan skeleton langsung menyesuaikan.
 
   if (productsLoading) {
     return (
       <div className="space-y-6">
         <PageHeader />
-        <ProductsGridSkeleton />
+
+        <CollectionToolbar
+          searchLabel={tc('searchLabel')}
+          searchPlaceholder={tc('searchPlaceholder')}
+          clearSearchLabel={tc('clearSearch')}
+          query=""
+          onQueryChange={() => { }}
+          sortLabel={tc('sortLabel')}
+          sortOptions={sortOptions}
+          sort="newest"
+          onSortChange={() => { }}
+          categoryLabel={tc('categoryLabel')}
+          categoryAllLabel={tc('categoryAll')}
+          categories={[]}
+          category={null}
+          onCategoryChange={() => { }}
+          view={view}
+          onViewChange={setView}
+          gridLabel={tc('viewGrid')}
+          listLabel={tc('viewList')}
+        />
+
+        {view === 'grid' ? (
+          <ProductsGridSkeleton count={10} />
+        ) : (
+          <KasirRowsSkeleton rows={6} />
+        )}
       </div>
     );
   }
@@ -355,7 +333,9 @@ export function DashboardClient() {
               disabled={isRefetching}
               className="gap-2"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`}
+              />
               {isRefetching ? tError('retrying') : tError('retry')}
             </Button>
           </AlertDescription>
@@ -368,11 +348,6 @@ export function DashboardClient() {
 
   return (
     <>
-      {/*
-        Background bersih saat onboarding welcome dialog.
-        User fokus ke dialog — tidak ada distraksi grid/empty-state di belakang.
-        Returning user (products >= 1) → konten normal langsung.
-      */}
       {isOnboardingPhase ? (
         <div className="relative min-h-[60vh]">
           <div
@@ -389,9 +364,6 @@ export function DashboardClient() {
 
           {products.length === 0 ? (
             <div className="py-8">
-              {/* Acuan polanya sekarang ikut komponen yang sama dengan layar
-                  lain. Dulu halaman ini yang jadi contoh tapi ditulis manual,
-                  jadi begitu layar lain menirunya, tiruannya yang menyimpang. */}
               <EmptyPanel
                 icon={<Package />}
                 title={t('empty')}
@@ -404,8 +376,6 @@ export function DashboardClient() {
                 learnLabel={t('emptyGuideLink')}
                 learnHref={GUIDE.produk}
                 helpLabel={t('emptyReopenDialog')}
-                // Satu-satunya layar yang punya dialog terpandu sungguhan.
-                // Yang lain mengarah ke pusat bantuan lewat bawaan EmptyPanel.
                 onHelp={() => setWelcomeOpen(true)}
               />
             </div>
@@ -433,18 +403,6 @@ export function DashboardClient() {
               />
 
               {visibleProducts.length === 0 ? (
-                /* Kosong karena PENCARIAN, bukan karena belum punya produk.
-                   Dua keadaan yang berbeda, jadi dua bentuk yang berbeda:
-
-                   EmptyPanel adalah pola "layar kosong" milik repo ini, dan
-                   kontraknya mewajibkan tautan panduan + tautan bantuan. Itu
-                   benar untuk penjual yang belum punya produk sama sekali,
-                   dan salah untuk penjual yang produknya ada tapi kata
-                   kuncinya tidak cocok — ia tidak butuh artikel "cara
-                   menambah produk", ia butuh mengosongkan kotak pencarian.
-
-                   Jadi keadaan ini memakai primitif Empty yang lebih ringan,
-                   dengan satu aksi yang benar-benar menyelesaikannya. */
                 <Empty>
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -453,9 +411,6 @@ export function DashboardClient() {
                     <EmptyTitle>{tc('noMatch')}</EmptyTitle>
                     <EmptyDescription>{tc('noMatchHint')}</EmptyDescription>
                   </EmptyHeader>
-                  {/* Mengosongkan KEDUANYA. Tombol yang cuma menghapus kata
-                      kunci sementara saringan kategori masih menyala akan
-                      meninggalkan penjual di layar kosong yang sama. */}
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -488,7 +443,6 @@ export function DashboardClient() {
         </div>
       )}
 
-      {/* Dialog muncul setiap visit selama products kosong */}
       <WelcomeProductDialog
         open={welcomeOpen}
         onStart={handleStart}
