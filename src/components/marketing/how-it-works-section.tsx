@@ -66,7 +66,8 @@ export function HowItWorksSection() {
   // di BannerSection), pause saat hover panel (stopOnMouseEnter), dan
   // pause sesaat saat user klik tab manual lalu resume lagi setelah
   // jeda berikutnya (stopOnInteraction: false).
-  const resumeTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
+  // FIX: React 19 mengharuskan useRef diberi initial value eksplisit (undefined).
+  const resumeTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
 
   React.useEffect(() => {
     if (isPaused) return;
