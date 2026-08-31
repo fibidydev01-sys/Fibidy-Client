@@ -1,16 +1,13 @@
 import React, { type ElementType, type CSSProperties } from "react"
 import { cn } from "@/lib/shared/utils"
 
-export interface ShimmerButtonProps {
+export interface ShimmerButtonProps extends React.ComponentPropsWithoutRef<"button"> {
   shimmerColor?: string
   shimmerSize?: string
   borderRadius?: string
   shimmerDuration?: string
   background?: string
-  className?: string
-  children?: React.ReactNode
   as?: ElementType
-  [key: string]: unknown
 }
 
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
