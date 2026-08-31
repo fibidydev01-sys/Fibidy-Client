@@ -8,6 +8,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -529,53 +530,54 @@ function MapLayersControl({
           <LayersIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="z-1000"
-        container={map.getContainer()}>
-        {showTileLayersDropdown && (
-          <>
-            <DropdownMenuLabel>{tileLayersLabel}</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={selectedTileLayer}
-              onValueChange={setSelectedTileLayer}>
-              {tileLayers.map((tileLayer) => (
-                <DropdownMenuRadioItem
-                  key={tileLayer.name}
-                  value={tileLayer.name}>
-                  {tileLayer.name}
-                </DropdownMenuRadioItem>
+      <DropdownMenuPortal container={map.getContainer()}>
+        <DropdownMenuContent
+          align="end"
+          className="z-1000">
+          {showTileLayersDropdown && (
+            <>
+              <DropdownMenuLabel>{tileLayersLabel}</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={selectedTileLayer}
+                onValueChange={setSelectedTileLayer}>
+                {tileLayers.map((tileLayer) => (
+                  <DropdownMenuRadioItem
+                    key={tileLayer.name}
+                    value={tileLayer.name}>
+                    {tileLayer.name}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </>
+          )}
+          {showTileLayersDropdown && showLayerGroupsDropdown && (
+            <DropdownMenuSeparator />
+          )}
+          {showLayerGroupsDropdown && (
+            <>
+              <DropdownMenuLabel>
+                {layerGroupsLabel}
+              </DropdownMenuLabel>
+              {layerGroups.map((layerGroup) => (
+                <DropdownMenuCheckboxItem
+                  key={layerGroup.name}
+                  checked={activeLayerGroups.includes(
+                    layerGroup.name
+                  )}
+                  disabled={layerGroup.disabled}
+                  onCheckedChange={(checked) =>
+                    handleLayerGroupToggle(
+                      layerGroup.name,
+                      checked
+                    )
+                  }>
+                  {layerGroup.name}
+                </DropdownMenuCheckboxItem>
               ))}
-            </DropdownMenuRadioGroup>
-          </>
-        )}
-        {showTileLayersDropdown && showLayerGroupsDropdown && (
-          <DropdownMenuSeparator />
-        )}
-        {showLayerGroupsDropdown && (
-          <>
-            <DropdownMenuLabel>
-              {layerGroupsLabel}
-            </DropdownMenuLabel>
-            {layerGroups.map((layerGroup) => (
-              <DropdownMenuCheckboxItem
-                key={layerGroup.name}
-                checked={activeLayerGroups.includes(
-                  layerGroup.name
-                )}
-                disabled={layerGroup.disabled}
-                onCheckedChange={(checked) =>
-                  handleLayerGroupToggle(
-                    layerGroup.name,
-                    checked
-                  )
-                }>
-                {layerGroup.name}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </>
-        )}
-      </DropdownMenuContent>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenuPortal>
     </DropdownMenu>
   )
 }
