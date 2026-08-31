@@ -1,13 +1,16 @@
 import React, { type ElementType, type CSSProperties } from "react"
 import { cn } from "@/lib/shared/utils"
 
-export interface ShimmerButtonProps extends React.ComponentPropsWithoutRef<"button"> {
+export interface ShimmerButtonProps {
   shimmerColor?: string
   shimmerSize?: string
   borderRadius?: string
   shimmerDuration?: string
   background?: string
+  className?: string
+  children?: React.ReactNode
   as?: ElementType
+  [key: string]: unknown
 }
 
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
@@ -42,26 +45,17 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         className={cn(
           "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
-          className
+          className as string
         )}
         ref={ref}
         {...props}
       >
-        {/* spark container */}
-        <div
-          className={cn(
-            "-z-30 blur-[2px]",
-            "@container-[size] absolute inset-0 overflow-visible"
-          )}
-        >
-          {/* spark */}
+        <div className={cn("-z-30 blur-[2px]", "@container-[size] absolute inset-0 overflow-visible")}>
           <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
-            {/* spark before */}
             <div className="animate-spin-around absolute -inset-full w-auto [translate:0_0] rotate-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
           </div>
         </div>
         {children}
-        {/* Highlight */}
         <div
           className={cn(
             "absolute inset-0 size-full",
@@ -71,12 +65,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
             "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]"
           )}
         />
-        {/* backdrop */}
-        <div
-          className={cn(
-            "absolute inset-(--cut) -z-20 [border-radius:var(--radius)] [background:var(--bg)]"
-          )}
-        />
+        <div className={cn("absolute inset-(--cut) -z-20 [border-radius:var(--radius)] [background:var(--bg)]")} />
       </Comp>
     )
   }
