@@ -9,20 +9,6 @@ export interface ShimmerButtonProps {
   background?: string
   className?: string
   children?: React.ReactNode
-  /**
-   * [DESIGN.md AUDIT — Agu 2026] `as`, bukan `asChild`+Slot.
-   *
-   * ShimmerButton merender 3 div dekorasi (spark/highlight/backdrop) sebagai
-   * SIBLING dari {children} di dalam elemen akarnya. Radix Slot hanya bisa
-   * menyatukan props ke SATU child — dipasang di sini, Slot akan meng-clone
-   * children (mis. <Link>) dan menaruh ketiga div dekorasi itu SEBAGAI ANAK
-   * dari Link hasil clone, bukan lagi sibling-nya. Animasi shimmer akan rusak
-   * atau hilang.
-   *
-   * `as` cukup mengganti tag akar (default "button") tanpa menyentuh struktur
-   * children — aman untuk komponen ber-sibling seperti ini. Dipakai sebagai
-   * `<ShimmerButton as={Link} href="/register">`, bukan `asChild`.
-   */
   as?: ElementType
   [key: string]: unknown
 }
@@ -30,9 +16,6 @@ export interface ShimmerButtonProps {
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
-      // Token Expo, bukan hex hardcoded — --primary (hitam) & --primary-foreground
-      // (putih) supaya CTA ini otomatis benar kalau nada primary pernah digeser,
-      // dan otomatis ikut inversi dark mode (--primary jadi putih di .dark).
       shimmerColor = "var(--primary-foreground)",
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
@@ -40,11 +23,13 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
       background = "var(--primary)",
       className,
       children,
-      as: Comp = "button",
+      as: AsProp = "button",
       ...props
     },
     ref
   ) => {
+    const Comp = AsProp as React.ElementType
+
     return (
       <Comp
         style={
@@ -84,11 +69,8 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           className={cn(
             "absolute inset-0 size-full",
             "rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
-            // transition
             "transform-gpu transition-all duration-300 ease-in-out",
-            // on hover
             "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
-            // on click
             "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]"
           )}
         />
