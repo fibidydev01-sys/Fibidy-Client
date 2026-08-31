@@ -8,6 +8,15 @@
 // - Tombol CTA rounded-full
 // - Nav item hover rounded-full
 // - Sheet footer buttons rounded-full
+//
+// [Z-INDEX FIX — Aug 2026] Sebelumnya z-50: kalah tumpuk lawan kontrol peta
+// Leaflet (map.tsx) yang pakai z-1000/z-1001 (MapZoomControl,
+// MapFullscreenControl, MapLocateControl, MapLayersControl, MapSearchControl)
+// — akibatnya tombol +/- zoom di peta bagian ContactSection nembus di atas
+// navbar meski navbar fixed di top & lebih dulu di DOM. Dinaikkan ke
+// z-[1100], di atas z-1001 (nilai tertinggi yang dipakai kontrol peta),
+// supaya navbar konsisten selalu jadi lapisan paling atas di seluruh
+// halaman tanpa perlu sentuh z-index internal map.tsx.
 // ============================================================================
 
 import * as React from "react";
@@ -123,7 +132,7 @@ export function Navbar() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="w-full px-4 pt-4 fixed top-0 left-0 z-50">
+    <div className="w-full px-4 pt-4 fixed top-0 left-0 z-[1100]">
       <nav
         className="max-w-6xl mx-auto border border-border rounded-full px-5 py-3 flex items-center justify-between shadow-sm"
         style={{
