@@ -1,0 +1,69 @@
+==============================================================================
+ LOGO / BRANDING AUDIT REPORT
+ Generated: 2026-09-01 11:06:21
+ Root: /d/PRODUK-LPPM-FINAL/UMKM-MULTI-TENANT/railway/client
+==============================================================================
+
+------------------------------------------------------------------------------
+1. FILE DENGAN SVG viewBox "0 0 28 28" (pola persis SVG logo di navbar.tsx)
+------------------------------------------------------------------------------
+src/components/marketing/footer-section.tsx
+src/components/marketing/navbar.tsx
+
+------------------------------------------------------------------------------
+2. FILE DENGAN TEKS LITERAL "Fibidy" DI JSX (.tsx)
+------------------------------------------------------------------------------
+src/app/opengraph-image.tsx
+src/app/twitter-image.tsx
+src/app/[locale]/layout.tsx
+
+------------------------------------------------------------------------------
+3. FILE/FOLDER DENGAN NAMA MENGANDUNG "logo" (case-insensitive)
+------------------------------------------------------------------------------
+src/app/[locale]/(dashboard)/dashboard/setup-store/seller/logo-generator.ts
+src/components/layout/auth/auth-logo.tsx
+
+------------------------------------------------------------------------------
+4. FILE .tsx YANG MENYEBUT KATA "logo" DI ISINYA (folder layout + marketing + store)
+------------------------------------------------------------------------------
+src/components/layout/auth/auth-layout.tsx
+src/components/layout/auth/auth-logo.tsx
+src/components/layout/dashboard/dashboard-sidebar.tsx
+src/components/layout/dashboard/nav-user.tsx
+src/components/layout/store/store-footer.tsx
+src/components/layout/store/store-header.tsx
+src/components/marketing/navbar.tsx
+src/components/marketing/why-section.tsx
+src/components/store/product/product-actions.tsx
+src/components/store/shared/local-business-schema.tsx
+
+------------------------------------------------------------------------------
+5. FILE .tsx YANG PUNYA TAG <svg AWAL (kandidat logo/icon custom lainnya,
+   di luar pola 28x28 pada poin 1 — biar gak ketinggalan varian ukuran lain)
+------------------------------------------------------------------------------
+src/components/layout/store/store-footer.tsx
+src/components/marketing/footer-section.tsx
+src/components/marketing/navbar.tsx
+
+------------------------------------------------------------------------------
+6. REFERENSI KE FOLDER public/icons/ (apple-touch-icon, dll) DI DALAM KODE
+------------------------------------------------------------------------------
+(tidak ada hasil)
+
+------------------------------------------------------------------------------
+7. KANDIDAT PALING RELEVAN — file layout inti yang KEMUNGKINAN BESAR muncul
+   di banyak halaman (navbar, footer, sidebar, topbar, auth logo, store header/footer)
+   Dicek satu per satu apakah file-nya memang ada.
+------------------------------------------------------------------------------
+[ADA]    src/components/marketing/navbar.tsx
+[ADA]    src/components/marketing/footer-section.tsx
+[ADA]    src/components/layout/auth/auth-logo.tsx
+[ADA]    src/components/layout/dashboard/dashboard-sidebar.tsx
+[ADA]    src/components/layout/dashboard/dashboard-topbar.tsx
+[ADA]    src/components/layout/dashboard/mobile-navbar.tsx
+[ADA]    src/components/layout/store/store-header.tsx
+[ADA]    src/components/layout/store/store-footer.tsx
+
+==============================================================================
+ SELESAI. Total baris laporan di atas.
+==============================================================================

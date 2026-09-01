@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Separator } from "@/components/ui/separator";
 
@@ -30,14 +31,29 @@ export function FooterSection() {
     <footer className="w-full bg-background px-6 pt-10 pb-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8">
+          {/*
+            [LOGO — Sep 2026] Dulu:
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="8" fill="var(--primary)" />
+                <path d="M8 9C8 8.44772..." fill="var(--primary-foreground)" />
+              </svg>
+            Selain diganti ke file logo asli (sama seperti navbar.tsx), ini
+            juga membenarkan bug kecil yang sudah ada dari sebelumnya:
+            width/height di-set 24 tapi viewBox tetap "0 0 28 28" — SVG-nya
+            jadi digambar dengan koordinat internal 28x28 lalu dipaksa muat
+            ke kotak 24x24, sedikit menyusutkan proporsi rect+path dibanding
+            versi navbar yang 28x28 penuh. <Image> di bawah pakai
+            width={24} height={24} langsung tanpa viewBox terpisah, jadi
+            tidak ada lagi mismatch semacam itu.
+          */}
           <Link href="/" className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-              <rect width="28" height="28" rx="8" fill="var(--primary)" />
-              <path
-                d="M8 9C8 8.44772 8.44772 8 9 8H18C18.5523 8 19 8.44772 19 9C19 9.55228 18.5523 10 18 10H10V13H16C16.5523 13 17 13.4477 17 14C17 14.5523 16.5523 15 16 15H10V19C10 19.5523 9.55228 20 9 20C8.44772 20 8 19.5523 8 19V9Z"
-                fill="var(--primary-foreground)"
-              />
-            </svg>
+            <Image
+              src="/apple-touch-icon.png"
+              alt="Fibidy"
+              width={24}
+              height={24}
+              className="rounded-full object-cover"
+            />
             <span className="text-sm font-semibold text-foreground">Fibidy</span>
           </Link>
           <p className="text-xs text-muted-foreground max-w-xs">

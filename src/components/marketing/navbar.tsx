@@ -17,9 +17,18 @@
 // z-[1100], di atas z-1001 (nilai tertinggi yang dipakai kontrol peta),
 // supaya navbar konsisten selalu jadi lapisan paling atas di seluruh
 // halaman tanpa perlu sentuh z-index internal map.tsx.
+//
+// [LOGO — Sep 2026] SVG inline (kotak rounded + huruf "F" digambar manual
+// lewat <path>) dicabut, diganti <Image> dari /apple-touch-icon.png — file
+// yang sama persis sudah dipakai di auth-logo.tsx dan opengraph-image.tsx,
+// jadi logo brand sekarang konsisten satu sumber di ketiga tempat itu.
+// SVG lama TIDAK dihapus dari codebase, cuma tidak lagi dipanggil di sini —
+// lihat komentar di atas elemen <Image> untuk detail bentuknya kalau perlu
+// dikembalikan.
 // ============================================================================
 
 import * as React from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -140,15 +149,24 @@ export function Navbar() {
           backdropFilter: "blur(8px)",
         }}
       >
-        {/* Logo */}
+        {/* Logo
+            [LOGO — Sep 2026] Dulu:
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="8" fill="var(--primary)" />
+                <path d="M8 9C8 8.44772..." fill="var(--primary-foreground)" />
+              </svg>
+            (kotak rounded warna --primary berisi huruf "F" digambar manual
+            lewat path). Sekarang pakai file logo asli, path yang sama
+            dengan auth-logo.tsx & opengraph-image.tsx. */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect width="28" height="28" rx="8" fill="var(--primary)" />
-            <path
-              d="M8 9C8 8.44772 8.44772 8 9 8H18C18.5523 8 19 8.44772 19 9C19 9.55228 18.5523 10 18 10H10V13H16C16.5523 13 17 13.4477 17 14C17 14.5523 16.5523 15 16 15H10V19C10 19.5523 9.55228 20 9 20C8.44772 20 8 19.5523 8 19V9Z"
-              fill="var(--primary-foreground)"
-            />
-          </svg>
+          <Image
+            src="/apple-touch-icon.png"
+            alt="Fibidy"
+            width={28}
+            height={28}
+            className="rounded-full object-cover"
+            priority
+          />
           <span className="text-base font-bold text-foreground">Fibidy</span>
         </Link>
 
