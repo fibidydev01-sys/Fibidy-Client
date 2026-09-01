@@ -69,7 +69,7 @@ export function PricingSection() {
             <CardContent className="p-6 sm:p-8 flex flex-col gap-5">
               <div className="text-center">
                 <p className="text-sm font-semibold text-foreground mb-1">Starter</p>
-                <p className="text-xs text-muted-foreground">Toko online lengkap plus Kasir buat catat penjualan.</p>
+                <p className="text-xs text-muted-foreground">Toko online lengkap Kasir buat catat penjualan.</p>
               </div>
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">35rb</p>
