@@ -83,7 +83,7 @@ export function HeroSection() {
         <div className="w-full max-w-4xl">
           <Safari
             url="fibidy.com/dashboard"
-            imageSrc="/home/dashboard.png"
+            imageSrc="/home/DASHBOARD.png"
             className="w-full h-auto"
           />
         </div>
