@@ -18,6 +18,25 @@
 //   ✅ Smooth progress fade (via UploadingOverlay di image-slot.tsx)
 //
 // [RENAME — May 2026] item.icon → item.image
+//
+// [BUGFIX — 2026-09-01: 300ms upload-guard race]
+// onUploadStateChange ke parent (AboutSection) dulu murni mengikuti
+// isUploading dari useCloudinaryUpload. isUploading sengaja didelay 300ms
+// setelah upload sukses (untuk smooth progress fade — lihat komentar di
+// use-cloudinary-upload.ts), jadi ikut mendelay laporan "upload selesai"
+// ke parent selama 300ms yang sama — padahal fotonya sendiri sudah tampil
+// duluan lewat onSuccess. Dalam jendela 300ms itu, hasActiveUploads di
+// AboutSection masih true walau upload sudah kelar secara visual, sehingga
+// user yang klik Save di momen itu kena modal "upload masih berjalan"
+// padahal fotonya sudah ke-upload.
+//
+// Fix: laporkan status "selesai" ke parent dari onUploadSettled (dipanggil
+// hook segera setelah sukses/gagal, TANPA delay 300ms), bukan dari efek
+// yang mengikuti isUploading. isUploading tetap dipakai apa adanya untuk
+// kontrol visual di dalam slot ini (spinner/overlay) — dua hal itu sengaja
+// dipisah: animasi lokal boleh telat, tapi sinyal ke parent tidak boleh.
+// Slot yang lagi upload tetap melapor "active" begitu isUploading jadi
+// true (tidak berubah); yang berubah cuma kapan slot melapor "selesai".
 // ============================================================================
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -52,13 +71,13 @@ import {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const TOTAL_SLOTS = 7;
-const FREE_SLOTS  = 4;
+const FREE_SLOTS = 4;
 
 // Batasnya tidak lagi ditulis di sini. Dua angka yang sama juga hidup di
 // wizard setup, dan begitu salah satunya diubah tanpa yang lain, penjual
 // melihat "15" di satu layar dan "100" di layar yang menulis medan yang sama.
 const MAX_TITLE = TENANT_LIMITS.aboutFeatureTitle.max;
-const MAX_DESC  = TENANT_LIMITS.aboutFeatureDescription.max;
+const MAX_DESC = TENANT_LIMITS.aboutFeatureDescription.max;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface StepHighlightsProps {
@@ -180,16 +199,16 @@ function HighlightImageUpload({
   const handleUploadError = useCallback(
     (retry: () => void) => (error: CloudinaryUploadError) => {
       const descKey =
-        error.code === 'FILE_TOO_LARGE'    ? 'fileTooLarge'   :
-        error.code === 'INVALID_FILE_TYPE' ? 'invalidFileType':
-        error.code === 'NETWORK_ERROR'     ? 'networkError'   :
-        error.code === 'CONFIG_MISSING'    ? 'configMissing'  : 'generic';
+        error.code === 'FILE_TOO_LARGE' ? 'fileTooLarge' :
+          error.code === 'INVALID_FILE_TYPE' ? 'invalidFileType' :
+            error.code === 'NETWORK_ERROR' ? 'networkError' :
+              error.code === 'CONFIG_MISSING' ? 'configMissing' : 'generic';
       toast.error(tToast('logoFailed'), {
         description: tToast(descKey),
         action:
           error.code === 'NETWORK_ERROR' ||
-          error.code === 'CLOUDINARY_REJECTED' ||
-          error.code === 'UNKNOWN'
+            error.code === 'CLOUDINARY_REJECTED' ||
+            error.code === 'UNKNOWN'
             ? { label: tToast('retryAction'), onClick: retry }
             : undefined,
       });
@@ -208,9 +227,22 @@ function HighlightImageUpload({
     onFileSelected: (file) => {
       openCrop(file, CROP_ASPECT.SQUARE);
     },
+    // [BUGFIX 300ms] Laporkan "slot ini sudah tidak upload" ke parent segera
+    // — tanpa menunggu delay 300ms yang isUploading pakai untuk animasi.
+    // Ini yang dibaca AboutSection.hasActiveUploads sebelum Save, jadi tidak
+    // boleh ketinggalan dari kenyataan (foto sudah tampil via onSuccess).
+    onUploadSettled: () => {
+      onUploadStateChange?.(slotId, false);
+    },
   });
 
-  // Report upload state ke parent
+  // Report upload state ke parent. Untuk slot AKTIF (mulai upload),
+  // isUploading -> true tetap sumber kebenarannya — tidak ada delay di
+  // sisi itu, hook langsung set true begitu upload mulai. Untuk slot
+  // SELESAI, onUploadSettled di atas sudah melapor lebih dulu; efek ini
+  // tetap ada sebagai fallback yang konsisten (mengirim false lagi saat
+  // isUploading akhirnya menyusul tidak masalah, parent hanya peduli hasil
+  // akhirnya false).
   useEffect(() => {
     onUploadStateChange?.(slotId, isUploading);
   }, [isUploading, slotId, onUploadStateChange]);
@@ -368,6 +400,11 @@ export function StepHighlights({
       const cur = itemsRef.current;
       const newItem: FeatureItem = { image: url, title: '', description: '' };
       updateFormData('aboutFeatures', [...cur, newItem]);
+    },
+    // [BUGFIX 300ms] Sama seperti slot terisi: laporkan selesai segera,
+    // tanpa menunggu delay 300ms isUploadingNew.
+    onUploadSettled: () => {
+      onUploadStateChange?.('highlights-new', false);
     },
   });
 

@@ -80,7 +80,8 @@
       "businessBadge": "Business",
       "validation": {
         "titleRequired": "Highlight #{index}: Judul wajib diisi",
-        "descriptionRequired": "Highlight #{index}: Deskripsi wajib diisi"
+        "descriptionRequired": "Highlight #{index}: Deskripsi wajib diisi",
+        "uploadInProgress": "Masih ada gambar yang sedang diunggah. Tunggu sampai selesai sebelum menyimpan."
       },
       "panelTitle": "Highlight",
       "reorderLabel": "Ubah urutan Highlight",

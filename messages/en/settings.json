@@ -80,7 +80,8 @@
       "businessBadge": "Business",
       "validation": {
         "titleRequired": "Highlight #{index}: Title is required",
-        "descriptionRequired": "Highlight #{index}: Description is required"
+        "descriptionRequired": "Highlight #{index}: Description is required",
+        "uploadInProgress": "An image is still uploading. Wait for it to finish before saving."
       },
       "panelTitle": "Highlight",
       "reorderLabel": "Reorder Highlight",

@@ -23,6 +23,24 @@
 // [SPRINT 1 carry-forward]
 // onFileSelected callback untuk crop flow.
 // onError callback dengan typed CloudinaryUploadError.
+//
+// [BUGFIX — 2026-09-01: 300ms upload-guard race]
+// isUploading sengaja didelay 300ms setelah onSuccess (lihat komentar di
+// uploadBlob di bawah) supaya progress bar sempat fade halus ke 100% alih-
+// alih hilang tiba-tiba. Konsumen yang memakai isUploading sebagai sinyal
+// "boleh save sekarang?" (mis. upload guard di Settings > About) mewarisi
+// delay itu juga — dalam 300ms itu, foto sudah tampil di layar (onSuccess
+// sudah jalan) tapi isUploading masih true, sehingga guard salah membaca
+// upload sebagai "masih berjalan".
+//
+// Fix: tambah callback onUploadSettled — dipanggil BERSAMAAN dengan
+// onSuccess/onError, tanpa delay 300ms. Ini sinyal terpisah dari
+// isUploading: isUploading tetap didelay apa adanya untuk animasi visual
+// di dalam slot itu sendiri, sementara onUploadSettled dipakai konsumen
+// yang butuh tahu "request-nya sudah kelar" secepat mungkin (mis. upload
+// guard sebelum Save). Opsional — pemakai existing (LogoGenerator,
+// step-media.tsx) yang tidak menyediakan callback ini tidak berubah
+// perilakunya sama sekali.
 // ============================================================================
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -36,18 +54,27 @@ export interface CloudinaryUploadOptions {
   onError?: (error: CloudinaryUploadError) => void;
   onProgress?: (progress: number) => void;
   onFileSelected?: (file: File) => void;
+  /**
+   * [BUGFIX 300ms] Dipanggil segera setelah upload selesai (sukses ATAU
+   * gagal), sebelum delay 300ms yang menunda isUploading -> false. Pakai
+   * ini — bukan efek yang mengikuti isUploading — untuk sinyal "aman buat
+   * lanjut" yang tidak boleh ketinggalan dari kenyataan visual (mis. upload
+   * guard sebelum submit form). isUploading tetap ada untuk kontrol
+   * animasi/overlay dan sengaja tidak diubah.
+   */
+  onUploadSettled?: () => void;
 }
 
 export interface CloudinaryUploadError {
   message: string;
   cause?: unknown;
   code:
-    | 'CONFIG_MISSING'
-    | 'NETWORK_ERROR'
-    | 'CLOUDINARY_REJECTED'
-    | 'FILE_TOO_LARGE'
-    | 'INVALID_FILE_TYPE'
-    | 'UNKNOWN';
+  | 'CONFIG_MISSING'
+  | 'NETWORK_ERROR'
+  | 'CLOUDINARY_REJECTED'
+  | 'FILE_TOO_LARGE'
+  | 'INVALID_FILE_TYPE'
+  | 'UNKNOWN';
 }
 
 export interface UseCloudinaryUploadReturn {
@@ -208,6 +235,11 @@ export function useCloudinaryUpload(
     setProgress(0);
     abortControllerRef.current = null;
     optionsRef.current.onError?.(error);
+    // [BUGFIX 300ms] Gagal juga "settled" — tidak ada lagi request in-flight.
+    // Dipanggil di sini (bukan lewat setTimeout) karena handleError sendiri
+    // tidak pernah didelay; hanya jalur sukses di uploadBlob yang punya
+    // delay 300ms untuk animasi.
+    optionsRef.current.onUploadSettled?.();
   }, []);
 
   // ── uploadBlob — used after crop confirms ────────────────────────────────
@@ -240,6 +272,11 @@ export function useCloudinaryUpload(
           controller.signal,
         );
         optionsRef.current.onSuccess?.(url);
+        // [BUGFIX 300ms] Sinyal "settled" SEKARANG, sebelum delay 300ms di
+        // bawah. onSuccess sudah membuat foto tampil (lewat onImageChange);
+        // konsumen yang butuh tahu upload sudah kelar (mis. upload guard)
+        // tidak boleh menunggu delay animasi yang tidak relevan buat mereka.
+        optionsRef.current.onUploadSettled?.();
         setProgress(100);
         setTimeout(() => {
           setIsUploading(false);
@@ -252,6 +289,8 @@ export function useCloudinaryUpload(
           setIsUploading(false);
           setProgress(0);
           abortControllerRef.current = null;
+          // [BUGFIX 300ms] Abort juga mengakhiri request in-flight ini.
+          optionsRef.current.onUploadSettled?.();
           return;
         }
         handleError({
@@ -331,6 +370,9 @@ export function useCloudinaryUpload(
             );
             optionsRef.current.onSuccess?.(url);
           }
+          // [BUGFIX 300ms] Sama seperti uploadBlob: sinyal "settled" segera
+          // setelah loop upload selesai, sebelum delay 300ms di bawah.
+          optionsRef.current.onUploadSettled?.();
           setProgress(100);
           setTimeout(() => {
             setIsUploading(false);
@@ -342,6 +384,7 @@ export function useCloudinaryUpload(
             setIsUploading(false);
             setProgress(0);
             abortControllerRef.current = null;
+            optionsRef.current.onUploadSettled?.();
             return;
           }
           handleError({
