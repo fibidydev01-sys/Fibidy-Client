@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { MousePointerClick, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Safari } from "@/components/ui/safari";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type SetupStep = {
@@ -11,8 +11,7 @@ type SetupStep = {
   eyebrow: string;
   title: string;
   description: string;
-  image: string;
-  imageAlt: string;
+  icon: React.ElementType;
 };
 
 const setupSteps: SetupStep[] = [
@@ -23,8 +22,7 @@ const setupSteps: SetupStep[] = [
     title: "Pilih template & halaman otomatis terisi",
     description:
       "Pilih template sesuai jenis bisnismu warung, salon, coffee shop, fashion. Data yang kamu isi saat daftar langsung otomatis terisi ke semua bagian: hero, about, produk, kontak. Langsung jadi.",
-    image: "/how-it-works/1.jpg",
-    imageAlt: "Memilih template toko online",
+    icon: MousePointerClick,
   },
   {
     id: "share",
@@ -33,27 +31,35 @@ const setupSteps: SetupStep[] = [
     title: "Share link toko ke bio & semua channel",
     description:
       "nama-kamu.fibidy.com langsung bisa dipasang di bio TikTok, Instagram, YouTube. Pelanggan tap, langsung lihat produk dan info bisnismu. Simpel, rapi, profesional.",
-    image: "/how-it-works/2.jpg",
-    imageAlt: "Share link di media sosial",
+    icon: Link2,
   },
 ];
 
-// Panel besar di tengah: Safari browser-mock full-width, teks (title +
-// description) overlay di bagian bawah gambar di atas gradient gelap,
-// menggantikan layout split kiri-kanan sebelumnya.
+// Panel besar di tengah: card dengan icon besar + nomor step di kiri,
+// judul + deskripsi di kanan. Menggantikan Safari browser-mock + gambar
+// screenshot sebelumnya (image: "/how-it-works/1.jpg", "/how-it-works/2.jpg")
+// — gak butuh asset gambar sama sekali, lebih ringan, dan konsisten sama
+// pola icon-card yang udah dipakai di why-section.tsx.
 function StepShowcase({ step }: { step: SetupStep }) {
+  const Icon = step.icon;
   return (
-    <div className="relative left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-6xl overflow-hidden rounded-2xl">
-      <Safari url="fibidy.com" imageSrc={step.image} className="w-full h-auto" />
-      <div className="absolute inset-x-0 bottom-0 rounded-b-2xl bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-32 pb-8 px-8 md:px-14">
-        <h3 className="text-xl md:text-3xl font-semibold text-white mb-2 max-w-xl">
-          {step.title}
-        </h3>
-        <p className="text-sm md:text-base text-white/80 leading-relaxed max-w-xl text-justify">
-          {step.description}
-        </p>
+    <div className="relative left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface-strong">
+      <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 px-8 py-12 md:px-14 md:py-16">
+        <div className="flex-shrink-0 flex items-center justify-center w-28 h-28 md:w-36 md:h-36 rounded-full bg-background border border-border">
+          <Icon className="w-12 h-12 md:w-16 md:h-16 text-ink" strokeWidth={1.5} />
+        </div>
+        <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          <span className="text-xs font-medium text-muted-foreground mb-2">
+            Langkah {step.number}
+          </span>
+          <h3 className="text-xl md:text-3xl font-semibold text-ink mb-3 max-w-xl">
+            {step.title}
+          </h3>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl text-justify">
+            {step.description}
+          </p>
+        </div>
       </div>
-      <span className="sr-only">{step.imageAlt}</span>
     </div>
   );
 }

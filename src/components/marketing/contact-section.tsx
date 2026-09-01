@@ -7,15 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Mail, MessageCircle, MapPin } from "lucide-react";
-import {
-  Map,
-  MapTileLayer,
-  MapMarker,
-  MapPopup,
-  MapZoomControl,
-  MapFullscreenControl,
-  MapLocateControl,
-} from "@/components/ui/map";
 
 const contactInfo = [
   { icon: MessageCircle, label: "WhatsApp", value: "+62 858-1508-6235", sub: "Balas dalam 1×24 jam kerja" },
@@ -23,55 +14,23 @@ const contactInfo = [
   { icon: MapPin, label: "Lokasi", value: "Madiun, Jawa Timur", sub: "Indonesia" },
 ];
 
-// [DESIGN.md AUDIT — Agu 2026] Koordinat diambil dari pb= embed Google Maps
-// yang sebelumnya dipakai (!2d111.5965489!3d-7.5951371...). Lat/lng Leaflet
-// urutannya [lat, lng] — kebalikan dari pb= Google yang [lng, lat] — jadi
-// nilainya ditukar posisi di sini, bukan disalin apa adanya.
-const FIBIDY_LOCATION: [number, number] = [-7.5951371, 111.5965489];
-
-// [DESIGN.md AUDIT — Agu 2026] Pin marker Fibidy.
-// Default MapMarker Leaflet biasanya biru — di sini dipaksa `text-primary`
-// supaya konsisten dengan "single black voltage" Expo: satu-satunya warna
-// aksi/penanda di seluruh sistem adalah --primary, tidak ada warna kedua.
-function FibidyPin() {
-  return <MapPin className="size-6 fill-primary text-primary" strokeWidth={1.5} />;
-}
-
-function FibidyLocationMap() {
-  return (
-    <Map
-      center={FIBIDY_LOCATION}
-      zoom={15}
-      className="rounded-none min-h-[240px] md:min-h-full"
-    >
-      {/*
-        [DESIGN.md AUDIT — Agu 2026] Basemap: dulu OpenStreetMap standar
-        (tile.openstreetmap.org, oranye-hijau) di-hardcode lewat url/
-        attribution eksplisit di sini. Override eksplisit dihapus supaya
-        komponen ini otomatis ikut default terkini dari MapTileLayer
-        (map.tsx) — sekarang Alidade Smooth (Stadia Maps, minimalis, sedikit
-        titik minat) — bukan duplikat URL yang gampang basi tiap kali
-        basemap-nya diganti. Lihat komentar lebih lengkap di JSX utama
-        ContactSection untuk riwayat perubahannya.
-
-        CATATAN kalau situs ini nanti deploy ke domain publik: basemap
-        Stadia Maps butuh domain didaftarkan gratis di dashboard mereka
-        (docs.stadiamaps.com/authentication) — akses tanpa-key ini cuma
-        berlaku untuk localhost/127.0.0.1.
-      */}
-      <MapTileLayer />
-      <MapMarker position={FIBIDY_LOCATION} icon={<FibidyPin />} popupAnchor={[0, -12]}>
-        <MapPopup>
-          <p className="text-sm font-semibold text-foreground mb-0.5">Fibidy</p>
-          <p className="text-xs text-muted-foreground">Madiun, Jawa Timur, Indonesia</p>
-        </MapPopup>
-      </MapMarker>
-      <MapZoomControl position="top-1 left-1" />
-      <MapFullscreenControl position="top-1 right-1" />
-      <MapLocateControl position="right-1 bottom-1" />
-    </Map>
-  );
-}
+// [REVERT — Sep 2026] Balik ke iframe Google Maps embed biasa, gantiin
+// komponen Map interaktif (Leaflet/Stadia Maps) dari @shadcn-map/map yang
+// dipakai sebelumnya — dianggap overkill untuk peta formalitas kontak doang
+// (gak butuh zoom/fullscreen/locate control custom, gak butuh basemap
+// alternatif, gak butuh daftar domain ke Stadia Maps sebelum deploy).
+//
+// Koordinat sumbernya sama persis dengan FIBIDY_LOCATION versi Leaflet
+// sebelumnya: [-7.5951371, 111.5965489] (lat, lng). Format embed yang
+// dipakai di sini adalah `q=<lat>,<lng>&output=embed` — cara paling
+// sederhana untuk pin satu titik tanpa perlu API key maupun Place ID.
+// (Beda dengan pola pb=... versi sangat lama yang disebut di komentar
+// audit sebelumnya — pb= itu string terenkode dari Google Maps "Share >
+// Embed a map" dan butuh di-generate ulang manual dari UI Google Maps
+// kalau mau eksak sama; q= di bawah ini fungsinya setara dan lebih mudah
+// dirawat karena parameternya terbaca jelas.)
+const FIBIDY_MAPS_EMBED_SRC =
+  "https://www.google.com/maps?q=-7.5951371,111.5965489&z=15&output=embed";
 
 export function ContactSection() {
   return (
@@ -111,46 +70,16 @@ export function ContactSection() {
 
         <Card className="border border-border overflow-hidden">
           <CardContent className="p-0 flex flex-col md:flex-row">
-            {/*
-              [DESIGN.md AUDIT — Agu 2026] Sebelumnya: <iframe> Google Maps
-              embed (pb=...). Diganti ke Map interaktif (Leaflet) dari
-              @shadcn-map/map — zoom + fullscreen + locate control, marker
-              custom warna --primary. Basemap sempat CARTO (default lama
-              MapTileLayer), tapi CARTO mewajibkan API key setelah trial
-              14 hari (lihat watermark "API KEY REQUIRED", dikonfirmasi
-              masih berlaku per Agu 2026 — carto.com/basemaps/apikey).
-              Sempat coba OpenFreeMap + MapLibre (vector, gratis penuh
-              tanpa key) tapi kejebak bug dev-mode Next.js: HMR berulang
-              bikin module MapLibre yang besar kena stale-chunk error,
-              ketumpuk sama bug hydration mismatch tak-terkait dari
-              PwaInstallPrompt — keputusan: hindari MapLibre/vector tiles
-              sama sekali, tetap di raster.
-
-              Lalu sempat pakai Stamen Toner (Stadia Maps) untuk gaya
-              hitam-putih literal, tapi terlalu padat/kontras tinggi untuk
-              kebutuhan di sini — style itu memang didesain sebagai
-              backdrop ramai untuk overlay data berwarna, bukan tampilan
-              bersih. Label jalan menumpuk dan gang kecil tergambar setebal
-              jalan utama di area urban padat.
-
-              Basemap sekarang: Alidade Smooth (Stadia Maps) — skema warna
-              lembut/muted dengan sengaja lebih sedikit titik minat, supaya
-              marker yang jadi fokus, bukan basemap-nya. Ini cuma peta
-              formalitas kontak, jadi prioritasnya "clean" bukan presisi
-              gaya hitam-putih. Tetap raster PNG, tetap tidak butuh API key
-              untuk localhost/127.0.0.1 (docs.stadiamaps.com/authentication),
-              free tier non-commercial sampai 200.000 tile/bulan. Diset
-              sebagai default baru di MapTileLayer (map.tsx), bukan
-              di-override di sini, supaya satu sumber kebenaran untuk
-              basemap di seluruh app.
-
-              min-h-[300px] lama dipertahankan sebagai floor tinggi lewat
-              wrapper ini (Map sendiri sudah min-h-96 = 384px, lebih tinggi
-              dari 300px lama, jadi floor 300px otomatis terlampaui).
-            */}
             <div className="w-full md:w-[45%] flex-shrink-0">
               <div className="relative w-full h-[240px] md:h-full" style={{ minHeight: "300px" }}>
-                <FibidyLocationMap />
+                <iframe
+                  src={FIBIDY_MAPS_EMBED_SRC}
+                  className="absolute inset-0 w-full h-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Lokasi Fibidy — Madiun, Jawa Timur"
+                  aria-label="Peta lokasi Fibidy di Madiun, Jawa Timur"
+                />
               </div>
             </div>
             <div className="w-full md:w-[55%] p-6 sm:p-8 md:p-12 flex flex-col justify-center gap-6">

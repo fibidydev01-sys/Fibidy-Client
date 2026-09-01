@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
-import { Iphone } from "@/components/ui/iphone";
+import { Safari } from "@/components/ui/safari";
 import { ArrowRight, Rocket } from "lucide-react";
 
 export function HeroSection() {
@@ -62,11 +62,29 @@ export function HeroSection() {
         </ShimmerButton>
       </div>
 
+      {/*
+        [REVISI — Sep 2026] Sebelumnya: <Iphone videoSrc={cloudinary mp4}/>
+        — mockup HP muter video demo produk. Diganti ke <Safari> browser-mock
+        (komponen yang sama dipakai di how-it-works-section.tsx sebelum
+        section itu sendiri direvisi ke card icon) berisi screenshot statis
+        DASHBOARD.png, bukan video.
+
+        Asset: taruh file dashboard dari
+        d:\PRODUK-LPPM-FINAL\UMKM-MULTI-TENANT\railway\client\public\home\DASHBOARD.png
+        ke public/home/dashboard.png di project Next.js ini — path di bawah
+        (/home/dashboard.png) resolve ke situ. File ini TIDAK ikut ke-generate
+        otomatis, harus disalin manual.
+
+        Lebar wrapper dinaikkan dari mockup HP (max ~400px) ke lebar browser
+        penuh (max-w-4xl) karena Safari didesain sebagai frame lebar landscape,
+        beda proporsi dari Iphone yang portrait/sempit.
+      */}
       <div className="flex justify-center w-full px-6 pb-16">
-        <div className="w-[260px] sm:w-[300px] md:w-[360px] lg:w-[400px]">
-          <Iphone
-            className="size-full"
-            videoSrc="https://res.cloudinary.com/dxxds8jkx/video/upload/q_auto,f_auto/v1786103969/fibidy_psbtto.mp4"
+        <div className="w-full max-w-4xl">
+          <Safari
+            url="fibidy.com/dashboard"
+            imageSrc="/home/dashboard.png"
+            className="w-full h-auto"
           />
         </div>
       </div>
