@@ -5,7 +5,6 @@ import { HowItWorksSection } from "@/components/marketing/how-it-works-section";
 import { PricingSection } from "@/components/marketing/pricing-section";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { ContactSection } from "@/components/marketing/contact-section";
-import { FooterSection } from "@/components/marketing/footer-section";
 
 export default function MarketingPage() {
   return (
@@ -17,7 +16,6 @@ export default function MarketingPage() {
       <PricingSection />
       <FAQSection />
       <ContactSection />
-      <FooterSection />
     </>
   );
 }
