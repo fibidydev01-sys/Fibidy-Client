@@ -176,11 +176,11 @@ export default function RoadmapPage() {
           </h1>
           <p className="text-sm md:text-base text-muted-foreground leading-relaxed text-justify">
             Aplikasi Smart Business yang mengintegrasikan Website Builder, Kasir Offline,
-            Manajemen Stok, dan Laporan Penjualan— dirancang khusus untuk 64 juta UMKM
+            Manajemen Stok, dan Laporan Penjualan dirancang khusus untuk 64 juta UMKM
             Indonesia yang membutuhkan solusi digital terjangkau dan mudah digunakan.
             Fibidy menggabungkan: pendaftaran 5 langkah dengan autofill cerdas, katalog
             produk interaktif, sistem Point of Sale offline, manajemen inventaris
-            real-time, papan kerja untuk jasa, dan analitik penjualan harian—semuanya
+            real-time, papan kerja untuk jasa, dan analitik penjualan harian semuanya
             terintegrasi dengan WhatsApp untuk komunikasi personal yang dipercaya UMKM.
           </p>
         </div>
