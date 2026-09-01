@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
@@ -109,10 +110,10 @@ const roadmapPhases: RoadmapPhase[] = [
 type YearTab = { year: string; disabled: boolean; title: string; subtitle: string; tooltip?: string };
 
 const yearTabs: YearTab[] = [
-  { year: "2026", disabled: false, title: "🚀 Program PKM K Aktif", subtitle: "Validasi Fibidy dengan 3-5 UMKM dari sektor retail, kuliner, dan jasa" },
-  { year: "2027", disabled: true, title: "⚡ Sesuatu yang Besar Datang", subtitle: "Ekspansi ke 15+ sektor UMKM & AI-powered recommendations masif", tooltip: "Sesuatu yang Besar Datang" },
-  { year: "2028", disabled: true, title: "✨ Ini Akan Jadi yang Terbaik", subtitle: "Ekosistem startup UMKM digital terbesar se-Asia Tenggara", tooltip: "Akan Jadi yang Terbaik" },
-  { year: "...", disabled: true, title: "🚀 Beyond 2028", subtitle: "Masa depan ekosistem UMKM digital Indonesia", tooltip: "Masih ada kejutan lagi" },
+  { year: "2026", disabled: false, title: "Program PKM K Aktif", subtitle: "Validasi Fibidy dengan 3-5 UMKM dari sektor retail, kuliner, dan jasa" },
+  { year: "2027", disabled: true, title: "Sesuatu yang Besar Datang", subtitle: "Ekspansi ke 15+ sektor UMKM & AI-powered recommendations masif", tooltip: "Sesuatu yang Besar Datang" },
+  { year: "2028", disabled: true, title: "Ini Akan Jadi yang Terbaik", subtitle: "Ekosistem startup UMKM digital terbesar se-Asia Tenggara", tooltip: "Akan Jadi yang Terbaik" },
+  { year: "...", disabled: true, title: "Beyond 2028", subtitle: "Masa depan ekosistem UMKM digital Indonesia", tooltip: "Masih ada kejutan lagi" },
 ];
 
 const logos = [
@@ -226,7 +227,13 @@ export default function RoadmapPage() {
               (tab) =>
                 activeYear === tab.year && (
                   <div key={`subtitle-${tab.year}`} className="text-center">
-                    <p className="text-xs font-semibold text-foreground mb-1">{tab.title}</p>
+                    {tab.year === "2026" ? (
+                      <AnimatedShinyText className="text-xs font-semibold mb-1 inline-block">
+                        {tab.title}
+                      </AnimatedShinyText>
+                    ) : (
+                      <p className="text-xs font-semibold text-foreground mb-1">{tab.title}</p>
+                    )}
                     <p className="text-xs text-muted-foreground">{tab.subtitle}</p>
                   </div>
                 )

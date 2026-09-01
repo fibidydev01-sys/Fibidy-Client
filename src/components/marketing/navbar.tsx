@@ -5,38 +5,73 @@
 // File: src/components/marketing/navbar.tsx
 //
 // [PILL UI — Aug 2026] rounded-full konsisten di seluruh navbar.
+// [Z-INDEX FIX — Aug 2026] z-[1100]. (Catatan lama soal "di atas Leaflet
+//   z-1001" sudah tidak relevan — contact-section.tsx sudah di-revert dari
+//   Leaflet/Stadia Maps ke iframe Google Maps embed biasa, lihat komentar
+//   [REVERT — Sep 2026] di file itu. Angka z-[1100] dipertahankan sebagai
+//   baseline navbar, bukan lagi relatif ke Leaflet.)
+// [LOGO — Sep 2026] <Image> dari /apple-touch-icon.png.
+// [ROADMAP ICON — Sep 2026] Ship icon + ping dot kuning.
 //
-// [Z-INDEX FIX — Aug 2026] z-[1100] — di atas Leaflet z-1001.
+// [Z-INDEX FIX — Sep 2026] DropdownMenuContent & SheetContent
+//   DropdownMenu dan Sheet dari shadcn di-render lewat React Portal ke
+//   document.body, KELUAR dari <nav className="z-[1100]">. z-index parent
+//   tidak otomatis berlaku untuk portal, jadi keduanya perlu z-index
+//   eksplisit sendiri via className:
+//     - DropdownMenuContent (language switcher): z-[1200] — di atas navbar.
+//     - SheetContent (menu hamburger mobile): z-[1300] — paling atas, sesuai
+//       urutan hierarki: Sheet > Dropdown > Navbar.
+//   CATATAN: SheetOverlay (backdrop gelap Sheet) TIDAK ikut naik — dia
+//   hardcoded z-50 di sheet.tsx dan dipanggil di sana tanpa menerima props/
+//   className dari luar (<SheetOverlay /> tanpa argumen), jadi className
+//   yang dikirim dari sini hanya menjangkau SheetPrimitive.Content (panelnya),
+//   bukan overlay-nya. Ini keputusan sadar, bukan terlewat — lihat riwayat
+//   diskusi kalau perlu diubah nanti: perbaikan sebenarnya ada di sheet.tsx,
+//   bukan di file ini, karena z-index overlay tidak reachable dari sini.
 //
-// [LOGO — Sep 2026] <Image> dari /apple-touch-icon.png, konsisten dengan
-// auth-logo.tsx dan opengraph-image.tsx.
+// [LANGUAGE SWITCHER — Sep 2026]
+// Fix tiga bug sekaligus:
 //
-// [ROADMAP ICON — Sep 2026] Ship icon + ping dot kuning. Desktop: tooltip.
-// Mobile: baris menu biasa.
+// BUG 1 — router.replace("/", { locale })
+//   Selalu redirect ke root, bukan ke halaman/section yang sedang dikunjungi.
+//   Fix: pakai usePathname() dari @/i18n/navigation (sudah strip locale prefix),
+//   lalu router.replace(pathname, { locale }). Pattern identik language.tsx
+//   di settings dashboard.
 //
-// [SEARCH + THEME + X — Sep 2026]
-// Icon bar desktop (kiri ke kanan):
-//   Search → | (Separator) → ThemeToggle → Ship → X
+// BUG 2 — Hash anchor hilang setelah switch
+//   Marketing page pakai hash untuk section navigation (#hero, #about, #pricing,
+//   #faq, #contact, dll). router.replace tidak preserve window.location.hash.
+//   Fix: capture hash SEBELUM navigate, append ke pathname target.
+//   Contoh: user di fibidy.com/#pricing → switch ke ID → /id#pricing ✓
 //
-// Search: membuka Command palette (cmdk) via CommandDialog dari command.tsx.
-//   Isi: navigasi halaman (Beranda, Harga, Roadmap, Login, Register).
-//   Shortcut keyboard: ⌘K / Ctrl+K.
+// BUG 3 — NEXT_LOCALE cookie tidak di-set
+//   Tanpa cookie, middleware next-intl bisa re-detect locale lama dari
+//   Accept-Language header dan redirect balik — terutama saat switch KE
+//   default locale (en) karena localePrefix: 'as-needed' menghasilkan URL
+//   tanpa prefix (fibidy.com/ bukan fibidy.com/en/) yang ambigu bagi middleware.
+//   Fix: set cookie NEXT_LOCALE sebelum navigate, persis seperti language.tsx.
 //
-// ThemeToggle: Sun/Moon dari next-themes useTheme(). Tooltip "Ganti tema".
+// [THEME TOGGLE FIX — Sep 2026]
+//   ThemeToggleButton sebagai komponen terpisah render <span> kosong saat
+//   !mounted — span kosong gagal di-forward-ref oleh TooltipTrigger asChild,
+//   tooltip tidak pernah muncul. Fix: inline button langsung di dalam Tooltip.
+//   mounted guard hanya mengontrol icon, bukan eksistensi button-nya.
 //
-// X (Twitter/X): link ke https://x.com/ dengan tooltip "Ikuti kami di X".
-//   Icon: SVG inline karena lucide-react tidak punya ikon X brand.
-//
-// Separator: <Separator orientation="vertical"> antara Search dan ThemeToggle,
-//   tinggi h-5, sejajar tengah.
-//
-// Mobile sheet: Search row (buka command palette), ThemeToggle row, Roadmap
-//   row, X row — semua konsisten dengan desktop.
+// [LANGUAGE SWITCHER — VISUAL REV — Sep 2026]
+//   Ganti label teks "EN"/"ID" jadi bendera SVG inline (GBFlagIcon /
+//   IDFlagIcon), pattern sama seperti XIcon di file ini — bukan emoji,
+//   supaya render konsisten di semua OS/browser dan bisa di-style CSS.
+//   Desktop: trigger tetap icon Languages polos (konsisten dengan icon
+//   lain di navbar), klik membuka DropdownMenu shadcn berisi 2 opsi
+//   berbendera + checkmark pada locale aktif. useLocaleSwitcher() sebagai
+//   sumber logic TIDAK diubah sama sekali — murni perubahan presentasi.
+//   Mobile: row tetap 2 pill EN/ID berdampingan, isi pill diganti bendera.
 // ============================================================================
 
 import * as React from "react";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +97,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -69,7 +110,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Separator } from "@/components/ui/separator";
 import {
   Menu,
   CheckCircle,
@@ -86,7 +126,13 @@ import {
   LogIn,
   UserPlus,
   Map,
+  Languages,
+  Check,
 } from "lucide-react";
+
+// ── Konstanta cookie — identik dengan language.tsx di settings ───────────
+// Satu sumber kebenaran untuk max-age: 1 tahun, sama dengan next-intl default.
+const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 // ── SVG X (Twitter/X brand) ──────────────────────────────────────────────
 function XIcon({ className }: { className?: string }) {
@@ -98,6 +144,49 @@ function XIcon({ className }: { className?: string }) {
       className={className}
     >
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
+
+// ── SVG Flag Icons — bendera bulat, bukan emoji ───────────────────────────
+// Kenapa SVG bukan emoji: rendering emoji bendera tidak konsisten lintas
+// OS/browser (kadang jadi kotak di Windows/Linux tanpa emoji font lengkap),
+// dan tidak bisa di-style via CSS. SVG inline dipotong bulat lewat <clipPath>
+// supaya pas dengan estetika rounded-full di seluruh navbar ini.
+//
+// Union Jack disederhanakan (bukan versi presisi resmi) — cukup akurat untuk
+// icon 16-20px, konsisten dengan gaya XIcon di atas.
+function GBFlagIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <defs>
+        <clipPath id="gb-flag-circle">
+          <circle cx="12" cy="12" r="12" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#gb-flag-circle)">
+        <rect width="24" height="24" fill="#00247d" />
+        <path d="M0 0 L24 24 M24 0 L0 24" stroke="#fff" strokeWidth="4.4" />
+        <path d="M0 0 L24 24 M24 0 L0 24" stroke="#cf142b" strokeWidth="1.6" />
+        <path d="M12 0 V24 M0 12 H24" stroke="#fff" strokeWidth="7.2" />
+        <path d="M12 0 V24 M0 12 H24" stroke="#cf142b" strokeWidth="4.2" />
+      </g>
+    </svg>
+  );
+}
+
+function IDFlagIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <defs>
+        <clipPath id="id-flag-circle">
+          <circle cx="12" cy="12" r="12" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#id-flag-circle)">
+        <rect width="24" height="12" fill="#dc0000" />
+        <rect y="12" width="24" height="12" fill="#fff" />
+      </g>
     </svg>
   );
 }
@@ -142,7 +231,6 @@ const commandItems: {
   label: string;
   href: string;
   icon: React.ElementType;
-  external?: boolean;
 }[] = [
     { label: "Beranda", href: "#hero", icon: Home },
     { label: "Harga", href: "#pricing", icon: Tag },
@@ -221,39 +309,150 @@ function MobileAccordion({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ── Theme toggle button ───────────────────────────────────────────────────
-function ThemeToggleButton({ className }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+// ── Language Switcher hook — logika switch locale ─────────────────────────
+//
+// TIDAK DIUBAH pada revisi visual ini. Dipisah sebagai hook supaya bisa
+// dipakai oleh LanguageSwitcher (desktop dropdown) dan MobileLanguageRow
+// (mobile) tanpa duplikasi logic.
+//
+// PATTERN (identik language.tsx di settings):
+//   1. Set cookie NEXT_LOCALE sebelum navigate — mencegah middleware
+//      re-detect locale lama dari Accept-Language, terutama saat switch
+//      ke default locale (en) yang menghasilkan URL tanpa prefix.
+//   2. Capture window.location.hash sebelum navigate — hash tidak
+//      disertakan di pathname dari usePathname(), tapi harus dipertahankan
+//      supaya user tetap di section yang sama setelah switch.
+//   3. router.replace(pathname + hash, { locale }) — ganti locale tanpa
+//      keluar dari halaman/section saat ini.
+function useLocaleSwitcher() {
+  const params = useParams();
+  const router = useRouter();
+  // usePathname dari @/i18n/navigation: mengembalikan path TANPA locale prefix.
+  // Contoh: /id/dashboard → /dashboard, /id#pricing → /#pricing (hash tidak
+  // termasuk), fibidy.com/ → /
+  const pathname = usePathname();
+  const locale = (params?.locale as string) ?? "en";
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const switchLocale = React.useCallback(
+    (nextLocale: string) => {
+      if (nextLocale === locale) return;
 
-  if (!mounted) {
-    // Placeholder saat SSR supaya tidak layout shift
-    return (
-      <span
-        className={`flex h-9 w-9 items-center justify-center rounded-full ${className ?? ""}`}
-      />
-    );
-  }
+      // Step 1: Set cookie — sama dengan language.tsx di settings.
+      // Mencegah middleware re-detect locale lama dari Accept-Language.
+      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
 
-  const isDark = resolvedTheme === "dark";
+      // Step 2: Capture hash saat ini (termasuk '#').
+      // window.location.hash → '#hero', '#pricing', '' (kalau tidak ada hash).
+      // Hash tidak ada di pathname dari usePathname(), tapi perlu dipertahankan.
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+
+      // Step 3: Navigate ke pathname + hash yang sama, dengan locale baru.
+      // next-intl handle prefix routing: 'en' → tanpa prefix, 'id' → /id/...
+      router.replace(pathname + hash, { locale: nextLocale });
+    },
+    [locale, pathname, router]
+  );
+
+  return { locale, switchLocale };
+}
+
+// ── Data locale — dipakai bareng oleh desktop dropdown & mobile row ──────
+const LOCALES: {
+  code: "en" | "id";
+  label: string;
+  flag: React.ElementType;
+}[] = [
+    { code: "en", label: "English", flag: GBFlagIcon },
+    { code: "id", label: "Indonesia", flag: IDFlagIcon },
+  ];
+
+// ── Desktop Language Switcher ─────────────────────────────────────────────
+// Trigger: icon Languages polos di pill bulat — konsisten dengan icon-icon
+// lain di navbar (Search, Theme, Roadmap), tanpa label teks.
+// Klik → DropdownMenu shadcn (klik-toggle, bukan hover), berisi 2 opsi
+// berbendera SVG + label, dengan checkmark pada locale yang sedang aktif.
+function LanguageSwitcher() {
+  const { locale, switchLocale } = useLocaleSwitcher();
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [tooltipOpen, setTooltipOpen] = React.useState(false);
 
   return (
-    <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-ink transition-colors ${className ?? ""
-        }`}
-      aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
-    >
-      {isDark ? (
-        <Sun className="h-4 w-4" />
-      ) : (
-        <Moon className="h-4 w-4" />
-      )}
-    </button>
+    <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      {/* Tooltip dikontrol manual (open + onOpenChange) supaya bisa dipaksa
+          tertutup begitu dropdown terbuka. Tanpa ini, Tooltip dan DropdownMenu
+          sama-sama mendengarkan pointerdown/focus di trigger yang sama →
+          tooltip bisa nyangkut kebuka berbarengan dengan dropdown-nya. */}
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              onPointerDown={() => setTooltipOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-ink transition-colors data-[state=open]:bg-accent data-[state=open]:text-ink"
+              aria-label="Ganti bahasa"
+            >
+              <Languages className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Ganti bahasa</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <DropdownMenuContent align="end" className="z-[1200] min-w-[180px] rounded-2xl p-1.5">
+        {LOCALES.map(({ code, label, flag: Flag }) => {
+          const isActive = locale === code;
+          return (
+            <DropdownMenuItem
+              key={code}
+              onClick={() => switchLocale(code)}
+              className="flex items-center gap-2.5 rounded-full px-2.5 py-2 cursor-pointer"
+            >
+              <Flag className="h-5 w-5 flex-shrink-0 rounded-full" />
+              <span className="text-sm flex-1">{label}</span>
+              {isActive && (
+                <Check className="h-4 w-4 flex-shrink-0 text-ink" aria-label="Bahasa aktif" />
+              )}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// ── Mobile Language Row ───────────────────────────────────────────────────
+// Dua pill berdampingan, masing-masing berisi bendera SVG + kode locale.
+// Pill aktif solid supaya state saat ini langsung terbaca tanpa perlu
+// membaca label teks.
+function MobileLanguageRow() {
+  const { locale, switchLocale } = useLocaleSwitcher();
+
+  return (
+    <div className="flex items-center gap-2 rounded-full px-3 py-1.5">
+      <Languages className="w-4 h-4 text-ink flex-shrink-0" />
+      <span className="text-sm font-medium text-foreground mr-1">Bahasa</span>
+      <div className="flex gap-1 ml-auto">
+        {LOCALES.map(({ code, flag: Flag }) => {
+          const isActive = locale === code;
+          return (
+            <button
+              key={code}
+              onClick={() => switchLocale(code)}
+              aria-pressed={isActive}
+              aria-label={code === "en" ? "English" : "Indonesia"}
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${isActive
+                ? "bg-foreground text-background"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-ink"
+                }`}
+            >
+              <Flag className="h-3.5 w-3.5 flex-shrink-0 rounded-full" />
+              {code.toUpperCase()}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -297,7 +496,6 @@ export function Navbar() {
                   key={item.label}
                   onSelect={() => {
                     setCommandOpen(false);
-                    // Untuk anchor (#), scroll ke section; untuk path, navigasi
                     if (item.href.startsWith("#")) {
                       const el = document.querySelector(item.href);
                       el?.scrollIntoView({ behavior: "smooth" });
@@ -403,25 +601,48 @@ export function Navbar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>
-                    Cari
-                  </p>
+                  <p>Cari</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* Separator */}
-              <Separator
-                orientation="vertical"
-                className="mx-1 h-5 bg-border"
+              {/* Separator — bukan <Separator> dari shadcn, sengaja.
+                  Elemen dasar Separator selalu bawa class default "bg-border"
+                  sebelum di-merge dengan className custom — string "bg-border"
+                  match selector global [class*="border"] di globals.css, yang
+                  nge-apply @apply border-border ke elemen manapun yang class-nya
+                  mengandung substring "border". Untuk menghindari efek samping
+                  dari selector semacam itu (dan supaya warnanya tidak bisa
+                  ke-override oleh CSS global apa pun), garis ini pakai <div>
+                  polos dengan style inline — specificity inline style tidak
+                  bisa dikalahkan oleh selector class manapun. */}
+              <div
+                aria-hidden="true"
+                className="mx-1 h-5 w-px flex-shrink-0"
+                style={{ backgroundColor: "var(--muted-foreground)", opacity: 0.35 }}
               />
 
-              {/* Theme Toggle */}
+              {/* Theme Toggle — FIX: inline button, bukan komponen terpisah.
+                  Komponen terpisah render <span> kosong saat !mounted →
+                  TooltipTrigger asChild gagal forward ref → tooltip tidak muncul.
+                  Inline button selalu ada di DOM, ref selalu sampai ke Tooltip. */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ThemeToggleButton />
+                  <button
+                    onClick={() => setTheme(isDark ? "light" : "dark")}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-ink transition-colors"
+                    aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+                  >
+                    {mounted && isDark ? (
+                      <Sun className="h-4 w-4" />
+                    ) : (
+                      <Moon className="h-4 w-4" />
+                    )}
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isDark ? "Mode terang" : "Mode gelap"}</p>
+                  <p suppressHydrationWarning>
+                    {mounted ? (isDark ? "Mode terang" : "Mode gelap") : "Ganti tema"}
+                  </p>
                 </TooltipContent>
               </Tooltip>
 
@@ -441,6 +662,9 @@ export function Navbar() {
                   <p>Lihat roadmap</p>
                 </TooltipContent>
               </Tooltip>
+
+              {/* Language Switcher — dropdown, Tooltip sudah di dalam komponen */}
+              <LanguageSwitcher />
 
               {/* X (Twitter) */}
               <Tooltip>
@@ -479,7 +703,7 @@ export function Navbar() {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 flex flex-col p-0">
+            <SheetContent side="right" className="z-[1300] w-72 flex flex-col p-0">
               <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
                 <SheetClose asChild>
                   <a
@@ -553,9 +777,7 @@ export function Navbar() {
 
                 {/* Theme toggle — mobile */}
                 <button
-                  onClick={() => {
-                    setTheme(isDark ? "light" : "dark");
-                  }}
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
                   className="flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium text-foreground hover:bg-accent active:bg-accent/80 transition-colors cursor-pointer w-full text-left"
                 >
                   {mounted && isDark ? (
@@ -563,8 +785,13 @@ export function Navbar() {
                   ) : (
                     <Moon className="w-4 h-4 text-ink flex-shrink-0" />
                   )}
-                  {mounted && isDark ? "Mode Terang" : "Mode Gelap"}
+                  <span suppressHydrationWarning>
+                    {mounted ? (isDark ? "Mode Terang" : "Mode Gelap") : "Ganti Tema"}
+                  </span>
                 </button>
+
+                {/* Language — mobile */}
+                <MobileLanguageRow />
 
                 {/* X — mobile */}
                 <a
