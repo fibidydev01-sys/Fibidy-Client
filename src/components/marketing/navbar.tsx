@@ -66,6 +66,18 @@
 //   berbendera + checkmark pada locale aktif. useLocaleSwitcher() sebagai
 //   sumber logic TIDAK diubah sama sekali — murni perubahan presentasi.
 //   Mobile: row tetap 2 pill EN/ID berdampingan, isi pill diganti bendera.
+//
+// [LEARN ENTRY POINT — Sep 2026]
+//   Halaman /learn (panduan fitur & modul produk) sebelumnya tidak
+//   terhubung dari navbar mana pun — hanya bisa diakses lewat URL langsung.
+//   Ditambahkan sebagai item ke-5 di kenpaItems (dropdown "Kenapa Fibidy")
+//   karena isinya memang penjelasan fitur, konsisten dengan 4 item lain
+//   di dropdown yang sama. Juga ditambahkan ke commandItems supaya bisa
+//   dicari lewat ⌘K. Route /learn adalah halaman nyata (bukan hash anchor),
+//   jadi href-nya "/learn" tanpa "#" — ListItem & CommandItem sudah
+//   menangani kedua jenis href ini (lihat handler onSelect di CommandDialog
+//   dan <a href> biasa di ListItem/MobileAccordion untuk hash, generic
+//   href untuk route asli).
 // ============================================================================
 
 import * as React from "react";
@@ -128,6 +140,7 @@ import {
   Map,
   Languages,
   Check,
+  BookOpen,
 } from "lucide-react";
 
 // ── Konstanta cookie — identik dengan language.tsx di settings ───────────
@@ -213,6 +226,13 @@ const kenpaItems: {
       icon: Clock,
     },
     {
+      title: "Panduan Fitur",
+      href: "/learn",
+      description:
+        "Pelajari tiap fitur Fibidy secara mendalam, dari kasir sampai laporan.",
+      icon: BookOpen,
+    },
+    {
       title: "FAQ",
       href: "#faq",
       description: "Pertanyaan yang sering ditanyakan seputar Fibidy.",
@@ -234,6 +254,7 @@ const commandItems: {
 }[] = [
     { label: "Beranda", href: "#hero", icon: Home },
     { label: "Harga", href: "#pricing", icon: Tag },
+    { label: "Panduan Fitur", href: "/learn", icon: BookOpen },
     { label: "Roadmap", href: "/roadmap", icon: Map },
     { label: "Masuk", href: "/login", icon: LogIn },
     { label: "Daftar Sekarang", href: "/register", icon: UserPlus },

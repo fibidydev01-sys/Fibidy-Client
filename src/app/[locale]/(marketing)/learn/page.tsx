@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Rocket, Package, ShoppingCart, KanbanSquare, Boxes, LineChart,
   Palette, Settings2, ArrowRight, CheckCircle2, AlertTriangle,
@@ -903,21 +903,36 @@ export default function LearnPage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-lg font-semibold text-ink mb-6 text-center">Bacaan Lanjutan</h2>
           <div className="space-y-3">
-            {furtherReadings.map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                target={item.external ? "_blank" : undefined}
-                rel={item.external ? "noopener noreferrer" : undefined}
-                className="group flex items-center justify-between gap-4 rounded-lg border border-border p-4 hover:border-foreground/20 hover:shadow-sm transition-all duration-200"
-              >
-                <div>
-                  <h3 className="text-sm font-semibold text-ink mb-0.5">{item.title}</h3>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                </div>
-                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.75} />
-              </Link>
-            ))}
+            {furtherReadings.map((item) => {
+              const content = (
+                <>
+                  <div>
+                    <h3 className="text-sm font-semibold text-ink mb-0.5">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.75} />
+                </>
+              );
+              const className = "group flex items-center justify-between gap-4 rounded-lg border border-border p-4 hover:border-foreground/20 hover:shadow-sm transition-all duration-200";
+
+              // Link dari @/i18n/navigation membungkus locale-prefixing next-intl,
+              // yang tidak sesuai untuk absolute external URL — dipisah ke <a> polos.
+              return item.external ? (
+                <a
+                  key={item.title}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                >
+                  {content}
+                </a>
+              ) : (
+                <Link key={item.title} href={item.href} className={className}>
+                  {content}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
