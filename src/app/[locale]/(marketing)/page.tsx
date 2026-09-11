@@ -9,7 +9,6 @@ import { ContactSection } from "@/components/marketing/contact-section";
 export default function MarketingPage() {
   return (
     <>
-      <BannerSection />
       <HeroSection />
       <WhySection />
       <HowItWorksSection />
