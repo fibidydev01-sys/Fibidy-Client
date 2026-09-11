@@ -101,4 +101,4 @@ function Block24ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
     </section>
   );
 }
-export function Block24(props: Block24Props) { return (<><Block24HeroSection {...props} /><Block24ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }
+export function Template24(props: Block24Props) { return (<><Block24HeroSection {...props} /><Block24ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }

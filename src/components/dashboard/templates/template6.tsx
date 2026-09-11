@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block6.tsx
+// FILE: src/components/dashboard/templates/template6.tsx
 //
 // STYLE: Shopify / Overland — "Sticky Split"
 // - Hero: Split 50/50 — left image sticky, right text scrolls
@@ -376,7 +376,7 @@ function Block6ContactSection({
   );
 }
 
-export function Block6(props: Block6Props) {
+export function Template6(props: Block6Props) {
   return (
     <>
       <Block6HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block10.tsx
+// FILE: src/components/dashboard/templates/template10.tsx
 //
 // STYLE: Spotify Wrapped / Framer — "Parallax Story"
 // - Hero: Full-viewport immersive, bold contrast color blocks,
@@ -409,7 +409,7 @@ function Block10ContactSection({
   );
 }
 
-export function Block10(props: Block10Props) {
+export function Template10(props: Block10Props) {
   return (
     <>
       <Block10HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block12.tsx
+// FILE: src/components/dashboard/templates/template12.tsx
 //
 // STYLE: Showit / Sutéra — "Broken Grid Overlap"
 // - Hero: Asymmetric — large image RIGHT side, text LEFT overlaps INTO image.
@@ -310,7 +310,7 @@ function Block12ContactSection({
   );
 }
 
-export function Block12(props: Block12Props) {
+export function Template12(props: Block12Props) {
   return (
     <>
       <Block12HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

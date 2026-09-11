@@ -102,4 +102,4 @@ function Block20ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
     </section>
   );
 }
-export function Block20(props: Block20Props) { return (<><Block20HeroSection {...props} /><Block20ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }
+export function Template20(props: Block20Props) { return (<><Block20HeroSection {...props} /><Block20ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }

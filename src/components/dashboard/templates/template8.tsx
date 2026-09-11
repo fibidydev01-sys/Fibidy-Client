@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block8.tsx
+// FILE: src/components/dashboard/templates/template8.tsx
 //
 // STYLE: NYT Longform / Linear Feature Pages — "Editorial Chess"
 // - Hero: Centered, oversized display headline, subtle warm off-white bg,
@@ -347,7 +347,7 @@ function Block8ContactSection({
   );
 }
 
-export function Block8(props: Block8Props) {
+export function Template8(props: Block8Props) {
   return (
     <>
       <Block8HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

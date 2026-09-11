@@ -15,7 +15,7 @@
 //   <StoreFooter/>
 //
 // REMOVED in this phase:
-//   - Standalone fallback block ("Hero inactive") — now handled by parent
+//   - Standalone fallback template ("Hero inactive") — now handled by parent
 //     via `onEnableHero` modal flow. Preview ALWAYS attempts to render the
 //     real template even when hero is disabled (template handles its own
 //     visibility internally), so the seller sees what's actually deployed.
@@ -35,7 +35,7 @@
 import { EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { TenantHero } from '@/components/dashboard/blocks/block';
+import { TenantHero } from '@/components/dashboard/templates/template';
 import { StoreHeader } from '@/components/layout/store/store-header';
 import { StoreFooter } from '@/components/layout/store/store-footer';
 import { generateThemeCSS } from '@/lib/shared/colors';

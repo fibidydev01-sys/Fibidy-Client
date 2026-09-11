@@ -30,7 +30,7 @@
 //   saved → idle        : SAVED_LINGER_MS elapses
 //   idle → unsaved      : user edits again
 //
-// NOT CLICKABLE — pure indicator. Publish lives in the BlockDrawer toolbar.
+// NOT CLICKABLE — pure indicator. Publish lives in the TemplateDrawer toolbar.
 // ============================================================================
 
 import { useEffect, useState, useRef } from 'react';

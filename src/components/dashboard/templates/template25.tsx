@@ -98,4 +98,4 @@ function Block25ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
     </section>
   );
 }
-export function Block25(props: Block25Props) { return (<><Block25HeroSection {...props} /><Block25ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }
+export function Template25(props: Block25Props) { return (<><Block25HeroSection {...props} /><Block25ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }

@@ -1,21 +1,22 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block.tsx
-// PURPOSE: Block dispatcher — lazy-loads block{N}.tsx based on landingConfig
+// FILE: src/components/dashboard/templates/template.tsx
+// PURPOSE: Template dispatcher — lazy-loads template{N}.tsx based on
+//          landingConfig.hero.template
 //
-// [BLOCK MIGRATION — 2026-05-13]
-//   - Renamed lazy-import target from `./hero{N}` to `./block{N}`
-//   - Added value normalizer to extract block number from EITHER:
-//       "block1" (new format)        → "1" → loads ./block1
-//       "hero1"  (legacy format)     → "1" → loads ./block1
-//       undefined / invalid          → "1" → loads ./block1 (fallback)
+// [TEMPLATE MIGRATION — 2026-09-11]
+//   - Folder `blocks/` → `templates/`; files `block{N}.tsx` → `template{N}.tsx`
+//   - Exported components `Block{N}` → `Template{N}`
+//   - Hero field consumed: `hero.template` (was `hero.block`)
+//   - Identifier normalisation no longer needs the legacy `hero{n}` form —
+//     the AJV regex '^template[1-9][0-9]*$' guarantees canonical input.
 //
 // [FIELD ORGANIZATION — 2026-05-13]
-//   Block is a full landing page template with 3 sections:
+//   Template is a full landing page template with 3 sections:
 //   Hero → Contact → Pre-footer CTA.
 //
-//   BlockComponentProps exposes ALL editable fields (no dead field):
+//   TemplateComponentProps exposes ALL editable fields (no dead field):
 //     Hero:       name, category, description, logo, heroTitle, heroSubtitle,
 //                 heroCtaText, heroBackgroundImage, aboutFeatures[]
 //     Contact:    contactTitle, contactSubtitle, whatsapp, phone, email,
@@ -23,8 +24,8 @@
 //     Pre-footer: re-uses whatsapp + storeName, copy from
 //                 t('store.footer.directContact.*') keys
 //
-//   contactShowForm is NOW wired (previously dead in block, only used in
-//   /contact sub-page reference). When toggle ON, block contact section
+//   contactShowForm is NOW wired (previously dead in template, only used in
+//   /contact sub-page reference). When toggle ON, template contact section
 //   renders the form.
 //
 //   ctaLink journey is fixed BY DESIGN — landing → Products listing is the
@@ -48,7 +49,7 @@ interface TenantHeroProps {
   tenant: Tenant | PublicTenant;
 }
 
-export interface BlockComponentProps {
+export interface TemplateComponentProps {
   // ─── Hero (CTA PRODUK → /products) ─────────────────────────
   title: string;
   subtitle?: string;
@@ -69,34 +70,35 @@ export interface BlockComponentProps {
   address?: string;
   contactMapUrl?: string;
   contactShowMap?: boolean;
-  contactShowForm?: boolean;     // NOW wired — drives form rendering in block
+  contactShowForm?: boolean;     // NOW wired — drives form rendering in template
 
   // ─── Pre-footer CTA ────────────────────────────────────────
   // reuses whatsapp + storeName above, no new field
 
-  // ─── Legacy (kept for backward-compat with old block1/2/3 destructures)
+  // ─── Legacy (kept for backward-compat with old template1/2/3 destructures)
   description?: string;
   category?: string;
   showCta?: boolean;
 }
 
 /**
- * Extract block number from a block ID string.
- * Accepts both new ("block1") and legacy ("hero1") formats.
+ * Extract template number from a canonical template ID.
+ * Single form: "template1" → "1" → loads ./template1
+ * Invalid / undefined falls back to "1".
  */
-function normalizeBlockNumber(block: string | undefined): string {
-  if (!block) return '1';
-  const match = block.match(/\d+$/);
+function normalizeTemplateNumber(template: string | undefined): string {
+  if (!template) return '1';
+  const match = template.match(/\d+$/);
   return match ? match[0] : '1';
 }
 
 export function TenantHero({ config, tenant }: TenantHeroProps) {
   const tSettings = useTranslations('settings.hero');
-  const block = config?.block;
+  const template = config?.template;
   const heroConfig = config;
   const heroConfigSettings = heroConfig?.config;
 
-  const commonProps: BlockComponentProps = {
+  const commonProps: TemplateComponentProps = {
     // ─── Hero ────────────────────────────────────────────────
     title:
       tenant.heroTitle ||
@@ -131,34 +133,34 @@ export function TenantHero({ config, tenant }: TenantHeroProps) {
     contactShowMap: tenant.contactShowMap ?? false,
     contactShowForm: tenant.contactShowForm ?? false,
 
-    // ─── Legacy fields (kept for old block1/2/3 still using them) ─
+    // ─── Legacy fields (kept for old template1/2/3 still using them) ─
     description: tenant.description || undefined,
     category: tenant.category || undefined,
     showCta: true,
   };
 
-  const blockNumber = normalizeBlockNumber(block);
+  const templateNumber = normalizeTemplateNumber(template);
 
-  const BlockComponent = lazy(() =>
-    import(`./block${blockNumber}`)
+  const TemplateComponent = lazy(() =>
+    import(`./template${templateNumber}`)
       .then((mod) => ({
-        default: mod[`Block${blockNumber}`] as ComponentType<BlockComponentProps>,
+        default: mod[`Template${templateNumber}`] as ComponentType<TemplateComponentProps>,
       }))
       .catch(() =>
-        import('./block1').then((mod) => ({
-          default: mod.Block1 as ComponentType<BlockComponentProps>,
+        import('./template1').then((mod) => ({
+          default: mod.Template1 as ComponentType<TemplateComponentProps>,
         })),
       ),
   );
 
   return (
-    <Suspense fallback={<BlockSkeleton />}>
-      <BlockComponent {...commonProps} />
+    <Suspense fallback={<TemplateSkeleton />}>
+      <TemplateComponent {...commonProps} />
     </Suspense>
   );
 }
 
-function BlockSkeleton() {
+function TemplateSkeleton() {
   const t = useTranslations('common.state');
   return (
     <div className="h-screen w-full animate-pulse bg-muted flex items-center justify-center">

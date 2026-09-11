@@ -107,4 +107,4 @@ function Block21ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
     </section>
   );
 }
-export function Block21(props: Block21Props) { return (<><Block21HeroSection {...props} /><Block21ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }
+export function Template21(props: Block21Props) { return (<><Block21HeroSection {...props} /><Block21ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }

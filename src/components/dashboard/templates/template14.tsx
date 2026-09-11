@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block14.tsx
+// FILE: src/components/dashboard/templates/template14.tsx
 //
 // STYLE: Linear Changelog / Product Hunt — "Scroll Reveal Stack"
 // - Hero: Clean, left-aligned, generous padding, storeName as giant
@@ -296,7 +296,7 @@ function Block14ContactSection({
   );
 }
 
-export function Block14(props: Block14Props) {
+export function Template14(props: Block14Props) {
   return (
     <>
       <Block14HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

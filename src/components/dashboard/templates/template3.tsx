@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block3.tsx
+// FILE: src/components/dashboard/templates/template3.tsx
 //
 // STYLE: Supabase / Stripe — "Dark Full-bleed + Scrolling Belt"
 // - Hero: Dark background, left-aligned headline, full-bleed bg image/overlay
@@ -519,7 +519,7 @@ function Block3ContactSection({
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
-export function Block3(props: Block3Props) {
+export function Template3(props: Block3Props) {
   return (
     <>
       <Block3HeroSection

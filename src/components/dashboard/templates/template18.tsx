@@ -90,4 +90,4 @@ function Block18ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
     </section>
   );
 }
-export function Block18(props: Block18Props) { return (<><Block18HeroSection {...props} /><Block18ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }
+export function Template18(props: Block18Props) { return (<><Block18HeroSection {...props} /><Block18ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>); }

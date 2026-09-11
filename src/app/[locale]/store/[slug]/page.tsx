@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { tenantsApi } from '@/lib/api/tenants';
-import { TenantHero } from '@/components/dashboard/blocks/block';
+import { TenantHero } from '@/components/dashboard/templates/template';
 import { BreadcrumbSchema } from '@/components/store/shared/breadcrumb-schema';
 import { generateTenantBreadcrumbs } from '@/lib/shared/seo';
 import type { PublicTenant } from '@/types/tenant';

@@ -12,7 +12,7 @@
 //   - Icon PartyPopper emerald
 //   - Title: "Toko kamu sudah live! 🎉"
 //   - Description: URL live + empati
-//   - Hint box: "Mau tampilan berbeda? Bisa ganti block kapan saja"
+//   - Hint box: "Mau tampilan berbeda? Bisa ganti template kapan saja"
 //   - CTA Primary: "Tambah Produk Pertama" → /dashboard/products
 //   - CTA Secondary: "Lihat Toko Saya" → /store/{slug} (new tab)
 // ============================================================================
@@ -78,7 +78,7 @@ export function FirstPublishDialog({
                 {t('description', { slug: storeSlug })}
               </p>
 
-              {/* Empati explore block */}
+              {/* Empati explore template */}
               <div className="rounded-[var(--shape-panel)] bg-muted/50 border px-4 py-3 text-left">
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   💡 {t('exploreHint')}

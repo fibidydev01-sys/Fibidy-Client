@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block7.tsx
+// FILE: src/components/dashboard/templates/template7.tsx
 //
 // STYLE: Behance / Editorial Fashion — "Horizontal Film"
 // - Hero: Ultra-wide, full-bleed, centered pill eyebrow, massive headline,
@@ -424,7 +424,7 @@ function Block7ContactSection({
   );
 }
 
-export function Block7(props: Block7Props) {
+export function Template7(props: Block7Props) {
   return (
     <>
       <Block7HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

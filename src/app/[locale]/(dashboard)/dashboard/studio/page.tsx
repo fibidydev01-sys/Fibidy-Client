@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { Sparkles, Zap } from 'lucide-react';
 import { LivePreview } from '@/components/dashboard/studio/live-preview';
 import { LandingErrorBoundary } from '@/components/dashboard/studio/landing-error-boundary';
-import { BlockDrawer } from '@/components/dashboard/studio/block-drawer';
+import { TemplateDrawer } from '@/components/dashboard/studio/template-drawer';
 import { BuilderLoadingSteps } from '@/components/dashboard/studio/builder-loading-steps';
 import { SaveStatusPill } from '@/components/dashboard/studio/save-status-pill';
 import { FirstPublishDialog } from '@/components/dashboard/studio/first-publish-dialog';
@@ -23,7 +23,7 @@ import { useTenant } from '@/hooks/dashboard/use-tenant';
 import { usePrivateTenant } from '@/hooks/dashboard/use-tenant';
 import { useLandingConfig } from '@/hooks/dashboard/use-landing-config';
 import { useSubscriptionPlan } from '@/hooks/dashboard/use-subscription-plan';
-import { hasProBlocks } from '@/components/dashboard/studio/block-options';
+import { hasProTemplates } from '@/components/dashboard/studio/template-options';
 import { useBuilderStore } from '@/hooks/dashboard/use-builder-store';
 import {
   AlertDialog,
@@ -104,7 +104,7 @@ export default function LandingBuilderPage() {
 
   const { tenant, refresh } = useTenant();
   const { data: privateTenant, isLoading: isPrivateTenantLoading, refetch: refetchPrivateTenant } = usePrivateTenant();
-  const { blockVariantLimit, isBusiness } = useSubscriptionPlan();
+  const { templateVariantLimit, isBusiness } = useSubscriptionPlan();
 
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -132,9 +132,9 @@ export default function LandingBuilderPage() {
 
   const normalizedConfig = useMemo(() => normalizeLandingConfig(landingConfig), [landingConfig]);
 
-  // Blok yang dipilih sekarang di luar jatah paket. Ini cuma untuk lencana
-  // mahkota — jujur menyebut bloknya berbayar, tanpa menahan tombol apa pun.
-  const configHasProBlocks = !isBusiness && normalizedConfig !== null && hasProBlocks(normalizedConfig, blockVariantLimit);
+  // Template yang dipilih sekarang di luar jatah paket. Ini cuma untuk lencana
+  // mahkota — jujur menyebut templatenya berbayar, tanpa menahan tombol apa pun.
+  const configHasProTemplates = !isBusiness && normalizedConfig !== null && hasProTemplates(normalizedConfig, templateVariantLimit);
   const heroEnabled = landingConfig?.hero?.enabled === true;
   const hasPublishedOnce = privateTenant?.hasPublishedOnce === true;
 
@@ -181,20 +181,20 @@ export default function LandingBuilderPage() {
     if (!landingConfig) return;
     const overrideConfig: TenantLandingConfig = {
       ...landingConfig,
-      hero: { ...landingConfig.hero, enabled: true, block: landingConfig.hero?.block ?? 'block1' },
+      hero: { ...landingConfig.hero, enabled: true, template: landingConfig.hero?.template ?? 'template1' },
     };
     setOnboardingPhase('drawer');
     setDrawerAutoOpen(true);
     await publishWithOverride(overrideConfig);
   }, [landingConfig, publishWithOverride]);
 
-  // Dulu di sini ada gembok kedua: kalau configHasProBlocks, tombol terbit
+  // Dulu di sini ada gembok kedua: kalau configHasProTemplates, tombol terbit
   // membuka modal upgrade dan permintaannya TIDAK PERNAH dikirim. Akibatnya
   // penjual yang paketnya turun tidak bisa memperbaiki satu salah ketik pun
   // di landing-nya — diblokir sebelum permintaannya sempat lahir.
   //
   // Sekarang permintaannya selalu dikirim. Server (tenants.service.ts) yang
-  // memutuskan, dan server memberi grandfathering: blok lama yang sudah
+  // memutuskan, dan server memberi grandfathering: template lama yang sudah
   // tersimpan tetap diterima. Kalau server benar-benar menolak,
   // onPlanRejected di atas yang membuka modal upgrade.
   const handlePublish = useCallback(async () => {
@@ -202,9 +202,9 @@ export default function LandingBuilderPage() {
     await publishToServer();
   }, [heroEnabled, publishToServer]);
 
-  const handleBlockSelect = useCallback((block: string) => {
+  const handleTemplateSelect = useCallback((template: string) => {
     if (!landingConfig) return;
-    setLandingConfig({ ...landingConfig, hero: { ...landingConfig.hero, block } } as TenantLandingConfig);
+    setLandingConfig({ ...landingConfig, hero: { ...landingConfig.hero, template } } as TenantLandingConfig);
   }, [landingConfig, setLandingConfig]);
 
   const handlePublishAndLeave = useCallback(async () => {
@@ -272,15 +272,15 @@ export default function LandingBuilderPage() {
       </div>
 
       {(onboardingPhase === 'idle' || onboardingPhase === 'drawer' || onboardingPhase === 'done') && (
-        <BlockDrawer
+        <TemplateDrawer
           section="hero"
-          currentBlock={landingConfig?.hero?.block}
-          onBlockSelect={handleBlockSelect}
-          blockVariantLimit={blockVariantLimit}
+          currentTemplate={landingConfig?.hero?.template}
+          onTemplateSelect={handleTemplateSelect}
+          templateVariantLimit={templateVariantLimit}
           storeSlug={tenant.slug}
           hasUnsavedChanges={hasUnsavedChanges}
           isSaving={isSaving}
-          configHasProBlocks={configHasProBlocks}
+          configHasProTemplates={configHasProTemplates}
           heroEnabled={heroEnabled}
           hasPublishedOnce={hasPublishedOnce}
           onPublish={handlePublish}

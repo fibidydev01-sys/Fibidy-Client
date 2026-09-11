@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block17.tsx
+// FILE: src/components/dashboard/templates/template17.tsx
 // STYLE: Awwwards Portfolio — "Hover Reveal"
 // Hero: Full-width, image covers right 55%, text left bold
 // Features: Uniform grid — each card small on idle, hover → image fills
@@ -117,6 +117,6 @@ function Block17ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
   );
 }
 
-export function Block17(props: Block17Props) {
+export function Template17(props: Block17Props) {
   return (<><Block17HeroSection {...props} /><Block17ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>);
 }

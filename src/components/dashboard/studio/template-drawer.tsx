@@ -1,8 +1,8 @@
 'use client';
 
 // ============================================================================
-// BLOCK DRAWER — Studio Flow v3
-// File: src/components/dashboard/studio/block-drawer.tsx
+// TEMPLATE DRAWER — Studio Flow v3
+// File: src/components/dashboard/studio/template-drawer.tsx
 //
 // [STUDIO FLOW v3 — May 2026]
 // Props baru:
@@ -14,7 +14,7 @@
 //
 // Flow saat autoOpen + autoPublish = true:
 //   1. Drawer/Sheet open
-//   2. block1 di-pulse + badge "Mulai di sini" muncul 2.5s
+//   2. template1 di-pulse + badge "Mulai di sini" muncul 2.5s
 //   3. 600ms delay (user sempat lihat) → publishChanges() dipanggil otomatis
 //   4. Setelah publish → parent useLandingConfig.onSaveSuccess → FirstPublishDialog
 //
@@ -40,11 +40,11 @@
 // [Z-INDEX FIX — Aug 2026]
 // SEBELUMNYA: SheetContent & collapsed-strip pakai z-40. StoreHeader
 // (src/components/layout/store/store-header.tsx) pakai `sticky top-0 z-50`.
-// Karena BlockDrawer dan LivePreview (yang me-render StoreHeader di
+// Karena TemplateDrawer dan LivePreview (yang me-render StoreHeader di
 // dalamnya) adalah SIBLING langsung di studio/page.tsx, keduanya berbagi
 // stacking context yang sama — dan z-50 header MENANG di atas z-40 drawer.
 // Akibatnya header selalu tampil di depan, menutupi baris teratas drawer
-// (termasuk Block 1) setiap kali drawer dibuka.
+// (termasuk Template 1) setiap kali drawer dibuka.
 //
 // SEKARANG: drawer & strip dinaikkan ke z-[51] — sengaja di atas header,
 // bukan sekadar menyamai. Selama drawer terbuka, drawer memang dimaksudkan
@@ -88,22 +88,22 @@ import {
   Save,
   Sparkles,
 } from 'lucide-react';
-import type { BlockOption } from './block-options';
-import { BLOCK_OPTIONS_MAP, isProBlock } from './block-options';
+import type { TemplateOption } from './template-options';
+import { TEMPLATE_OPTIONS_MAP, isProTemplate } from './template-options';
 import type { PublishResult } from '@/hooks/dashboard/use-landing-config';
 import { storeAbsoluteUrl } from '@/lib/public/store-url';
 
 type SectionType = 'hero';
 
-interface BlockDrawerProps {
+interface TemplateDrawerProps {
   section: SectionType;
-  currentBlock?: string;
-  onBlockSelect: (block: string) => void;
-  blockVariantLimit?: number;
+  currentTemplate?: string;
+  onTemplateSelect: (template: string) => void;
+  templateVariantLimit?: number;
   storeSlug: string;
   hasUnsavedChanges: boolean;
   isSaving: boolean;
-  configHasProBlocks: boolean;
+  configHasProTemplates: boolean;
   heroEnabled: boolean;
   hasPublishedOnce: boolean;
   onPublish: () => void;
@@ -143,7 +143,7 @@ function useIsMobile(): boolean {
   return isMobile;
 }
 
-export function BlockDrawer(props: BlockDrawerProps) {
+export function TemplateDrawer(props: TemplateDrawerProps) {
   const isMobile = useIsMobile();
   return isMobile ? <MobileDrawer {...props} /> : <DesktopSheet {...props} />;
 }
@@ -156,7 +156,7 @@ interface ToolbarProps {
   storeSlug: string;
   hasUnsavedChanges: boolean;
   isSaving: boolean;
-  configHasProBlocks: boolean;
+  configHasProTemplates: boolean;
   heroEnabled: boolean;
   hasPublishedOnce: boolean;
   onPublish: () => void;
@@ -166,7 +166,7 @@ function DrawerToolbar({
   storeSlug,
   hasUnsavedChanges,
   isSaving,
-  configHasProBlocks,
+  configHasProTemplates,
   heroEnabled,
   hasPublishedOnce,
   onPublish,
@@ -193,7 +193,7 @@ function DrawerToolbar({
       disabled={isPublishDisabled}
       className="gap-1.5 h-9 text-xs flex-1"
     >
-      {configHasProBlocks && <Crown className="h-3 w-3 text-amber-300" />}
+      {configHasProTemplates && <Crown className="h-3 w-3 text-amber-300" />}
       <Save className="h-3.5 w-3.5" />
       {isSaving ? t('publishing') : t('publish')}
     </Button>
@@ -239,23 +239,23 @@ function DrawerToolbar({
 function useAutoFlow({
   autoOpen,
   autoPublish,
-  blocks,
+  templates,
   onAutoOpenConsumed,
   onAutoPublishConsumed,
   publishChanges,
   onPublishDone,
   setOpen,
-  setPulsingBlock,
+  setPulsingTemplate,
 }: {
   autoOpen: boolean;
   autoPublish: boolean;
-  blocks: BlockOption[];
+  templates: TemplateOption[];
   onAutoOpenConsumed?: () => void;
   onAutoPublishConsumed?: () => void;
   publishChanges?: () => Promise<PublishResult>;
   onPublishDone?: () => void;
   setOpen: (v: boolean) => void;
-  setPulsingBlock: (v: string | null) => void;
+  setPulsingTemplate: (v: string | null) => void;
 }) {
   const publishRef = useRef(publishChanges);
   publishRef.current = publishChanges;
@@ -267,12 +267,12 @@ function useAutoFlow({
     setOpen(true);
     onAutoOpenConsumed?.();
 
-    // 2. Pulse block1 setelah drawer terbuka
+    // 2. Pulse template1 setelah drawer terbuka
     const pulseTimer = setTimeout(() => {
-      const firstBlock = blocks[0];
-      if (firstBlock) {
-        setPulsingBlock(firstBlock.value);
-        setTimeout(() => setPulsingBlock(null), PULSE_DURATION_MS);
+      const firstTemplate = templates[0];
+      if (firstTemplate) {
+        setPulsingTemplate(firstTemplate.value);
+        setTimeout(() => setPulsingTemplate(null), PULSE_DURATION_MS);
       }
     }, 400);
 
@@ -305,13 +305,13 @@ function useAutoFlow({
 
 function MobileDrawer({
   section,
-  currentBlock,
-  onBlockSelect,
-  blockVariantLimit = 3,
+  currentTemplate,
+  onTemplateSelect,
+  templateVariantLimit = 3,
   storeSlug,
   hasUnsavedChanges,
   isSaving,
-  configHasProBlocks,
+  configHasProTemplates,
   heroEnabled,
   hasPublishedOnce,
   onPublish,
@@ -321,22 +321,22 @@ function MobileDrawer({
   onAutoPublishConsumed,
   publishChanges,
   onPublishDone,
-}: BlockDrawerProps) {
+}: TemplateDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(false);
-  const [pulsingBlock, setPulsingBlock] = useState<string | null>(null);
-  const blocks = BLOCK_OPTIONS_MAP[section] || [];
+  const [pulsingTemplate, setPulsingTemplate] = useState<string | null>(null);
+  const templates = TEMPLATE_OPTIONS_MAP[section] || [];
 
   useAutoFlow({
     autoOpen,
     autoPublish,
-    blocks,
+    templates,
     onAutoOpenConsumed,
     onAutoPublishConsumed,
     publishChanges,
     onPublishDone,
     setOpen,
-    setPulsingBlock,
+    setPulsingTemplate,
   });
 
   return (
@@ -365,7 +365,7 @@ function MobileDrawer({
       <Drawer open={open} onOpenChange={setOpen} modal={true}>
         <DrawerContent className="z-[60] flex flex-col max-h-[85vh]">
           <VisuallyHidden.Root>
-            <DrawerTitle>{t('selectBlock', { section })}</DrawerTitle>
+            <DrawerTitle>{t('selectTemplate', { section })}</DrawerTitle>
           </VisuallyHidden.Root>
 
           <div
@@ -377,14 +377,14 @@ function MobileDrawer({
           </div>
 
           <div className="overflow-y-auto flex-1">
-            {blocks.map((block) => (
-              <BlockListItem
-                key={block.value}
-                block={block}
-                isSelected={currentBlock === block.value}
-                onSelect={onBlockSelect}
-                blockVariantLimit={blockVariantLimit}
-                isPulsing={pulsingBlock === block.value}
+            {templates.map((template) => (
+              <TemplateListItem
+                key={template.value}
+                template={template}
+                isSelected={currentTemplate === template.value}
+                onSelect={onTemplateSelect}
+                templateVariantLimit={templateVariantLimit}
+                isPulsing={pulsingTemplate === template.value}
               />
             ))}
           </div>
@@ -393,7 +393,7 @@ function MobileDrawer({
             storeSlug={storeSlug}
             hasUnsavedChanges={hasUnsavedChanges}
             isSaving={isSaving}
-            configHasProBlocks={configHasProBlocks}
+            configHasProTemplates={configHasProTemplates}
             heroEnabled={heroEnabled}
             hasPublishedOnce={hasPublishedOnce}
             onPublish={onPublish}
@@ -410,13 +410,13 @@ function MobileDrawer({
 
 function DesktopSheet({
   section,
-  currentBlock,
-  onBlockSelect,
-  blockVariantLimit = 3,
+  currentTemplate,
+  onTemplateSelect,
+  templateVariantLimit = 3,
   storeSlug,
   hasUnsavedChanges,
   isSaving,
-  configHasProBlocks,
+  configHasProTemplates,
   heroEnabled,
   hasPublishedOnce,
   onPublish,
@@ -426,23 +426,23 @@ function DesktopSheet({
   onAutoPublishConsumed,
   publishChanges,
   onPublishDone,
-}: BlockDrawerProps) {
+}: TemplateDrawerProps) {
   const t = useTranslations('studio.drawer');
   const [open, setOpen] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
-  const [pulsingBlock, setPulsingBlock] = useState<string | null>(null);
-  const blocks = BLOCK_OPTIONS_MAP[section] || [];
+  const [pulsingTemplate, setPulsingTemplate] = useState<string | null>(null);
+  const templates = TEMPLATE_OPTIONS_MAP[section] || [];
 
   useAutoFlow({
     autoOpen,
     autoPublish,
-    blocks,
+    templates,
     onAutoOpenConsumed,
     onAutoPublishConsumed,
     publishChanges,
     onPublishDone,
     setOpen,
-    setPulsingBlock,
+    setPulsingTemplate,
   });
 
   const handleCollapse = useCallback(() => {
@@ -511,14 +511,14 @@ function DesktopSheet({
           </div>
 
           <div className="overflow-y-auto flex-1">
-            {blocks.map((block) => (
-              <BlockListItem
-                key={block.value}
-                block={block}
-                isSelected={currentBlock === block.value}
-                onSelect={onBlockSelect}
-                blockVariantLimit={blockVariantLimit}
-                isPulsing={pulsingBlock === block.value}
+            {templates.map((template) => (
+              <TemplateListItem
+                key={template.value}
+                template={template}
+                isSelected={currentTemplate === template.value}
+                onSelect={onTemplateSelect}
+                templateVariantLimit={templateVariantLimit}
+                isPulsing={pulsingTemplate === template.value}
               />
             ))}
           </div>
@@ -527,7 +527,7 @@ function DesktopSheet({
             storeSlug={storeSlug}
             hasUnsavedChanges={hasUnsavedChanges}
             isSaving={isSaving}
-            configHasProBlocks={configHasProBlocks}
+            configHasProTemplates={configHasProTemplates}
             heroEnabled={heroEnabled}
             hasPublishedOnce={hasPublishedOnce}
             onPublish={onPublish}
@@ -539,30 +539,30 @@ function DesktopSheet({
 }
 
 // ============================================================================
-// BLOCK LIST ITEM
+// TEMPLATE LIST ITEM
 // ============================================================================
 
-interface BlockListItemProps {
-  block: BlockOption;
+interface TemplateListItemProps {
+  template: TemplateOption;
   isSelected: boolean;
-  onSelect: (blockValue: string) => void;
-  blockVariantLimit?: number;
+  onSelect: (templateValue: string) => void;
+  templateVariantLimit?: number;
   isPulsing?: boolean;
 }
 
-const BlockListItem = memo(function BlockListItem({
-  block,
+const TemplateListItem = memo(function TemplateListItem({
+  template,
   isSelected,
   onSelect,
-  blockVariantLimit = 3,
+  templateVariantLimit = 3,
   isPulsing = false,
-}: BlockListItemProps) {
+}: TemplateListItemProps) {
   const t = useTranslations('studio.drawer');
-  const isPro = isProBlock(block.value, blockVariantLimit);
+  const isPro = isProTemplate(template.value, templateVariantLimit);
 
   const handleClick = useCallback(() => {
-    onSelect(block.value);
-  }, [block.value, onSelect]);
+    onSelect(template.value);
+  }, [template.value, onSelect]);
 
   return (
     <button
@@ -577,7 +577,7 @@ const BlockListItem = memo(function BlockListItem({
     >
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-sm font-medium text-left truncate">
-          {block.label}
+          {template.label}
         </span>
         {isPulsing && (
           <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shrink-0 animate-bounce">

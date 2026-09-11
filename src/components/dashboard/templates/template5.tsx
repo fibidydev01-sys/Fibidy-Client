@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block5.tsx
+// FILE: src/components/dashboard/templates/template5.tsx
 //
 // STYLE: Apple / Glossier — "Cinematic Scroll"
 // - Hero: Full-viewport, image fills entire screen, text bottom-left overlay
@@ -355,7 +355,7 @@ function Block5ContactSection({
   );
 }
 
-export function Block5(props: Block5Props) {
+export function Template5(props: Block5Props) {
   return (
     <>
       <Block5HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

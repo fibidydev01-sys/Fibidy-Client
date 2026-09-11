@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block9.tsx
+// FILE: src/components/dashboard/templates/template9.tsx
 //
 // STYLE: Vogue / Dribbble Portfolio — "Masonry Editorial"
 // - Hero: Stacked typographic — eyebrow + giant headline stacked,
@@ -351,7 +351,7 @@ function Block9ContactSection({
   );
 }
 
-export function Block9(props: Block9Props) {
+export function Template9(props: Block9Props) {
   return (
     <>
       <Block9HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

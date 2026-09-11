@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block2.tsx
+// FILE: src/components/dashboard/templates/template2.tsx
 //
 // STYLE: Linear / Notion / Vercel — "Centered Hero + Bento Grid"
 // - Hero: Centered composition, subtle dot-grid background, eyebrow pill,
@@ -536,7 +536,7 @@ function Block2ContactSection({
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
-export function Block2(props: Block2Props) {
+export function Template2(props: Block2Props) {
   return (
     <>
       <Block2HeroSection

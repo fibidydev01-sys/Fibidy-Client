@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block11.tsx
+// FILE: src/components/dashboard/templates/template11.tsx
 //
 // STYLE: Squarespace / Glossier 2026 — "Kinetic Type"
 // - Hero: TYPOGRAPHY ONLY — zero images above fold. Oversized headline
@@ -317,7 +317,7 @@ function Block11ContactSection({
   );
 }
 
-export function Block11(props: Block11Props) {
+export function Template11(props: Block11Props) {
   return (
     <>
       <Block11HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

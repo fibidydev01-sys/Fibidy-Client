@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block13.tsx
+// FILE: src/components/dashboard/templates/template13.tsx
 //
 // STYLE: Arc Browser / Raycast — "Fullscreen Tabs"
 // - Hero: Strong centered, dark glass-morphism pill eyebrow, gradient mesh bg
@@ -339,7 +339,7 @@ function Block13ContactSection({
   );
 }
 
-export function Block13(props: Block13Props) {
+export function Template13(props: Block13Props) {
   return (
     <>
       <Block13HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />

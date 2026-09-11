@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block16.tsx
+// FILE: src/components/dashboard/templates/template16.tsx
 // STYLE: Elementor / Webflow — "Accordion Expand"
 // Hero: Bold centered, subtle grid texture bg
 // Features: Accordion rows — each row shows title + number when collapsed,
@@ -148,6 +148,6 @@ function Block16ContactSection({ contactTitle, contactSubtitle, whatsapp, phone,
   );
 }
 
-export function Block16(props: Block16Props) {
+export function Template16(props: Block16Props) {
   return (<><Block16HeroSection {...props} /><Block16ContactSection contactTitle={props.contactTitle} contactSubtitle={props.contactSubtitle} whatsapp={props.whatsapp} phone={props.phone} email={props.email} address={props.address} contactMapUrl={props.contactMapUrl} contactShowMap={props.contactShowMap} contactShowForm={props.contactShowForm} storeName={props.storeName} /></>);
 }

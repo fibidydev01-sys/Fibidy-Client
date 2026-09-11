@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block4.tsx
+// FILE: src/components/dashboard/templates/template4.tsx
 //
 // STYLE: Framer / Linear — "Editorial Minimal + Icon Grid"
 // - Hero: Typography-first, extreme whitespace, large serif-weight headline,
@@ -476,7 +476,7 @@ function Block4ContactSection({
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
-export function Block4(props: Block4Props) {
+export function Template4(props: Block4Props) {
   return (
     <>
       <Block4HeroSection

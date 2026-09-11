@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block1.tsx
+// FILE: src/components/dashboard/templates/template1.tsx
 //
 // [RENAME — May 2026]
 // feature.icon → feature.image (FeatureItem.icon removed)
@@ -543,7 +543,7 @@ function Block1ContactSection({
   );
 }
 
-export function Block1(props: Block1Props) {
+export function Template1(props: Block1Props) {
   return (
     <>
       <Block1HeroSection

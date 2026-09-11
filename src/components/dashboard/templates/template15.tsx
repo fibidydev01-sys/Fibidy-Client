@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================================
-// FILE: src/components/dashboard/blocks/block15.tsx
+// FILE: src/components/dashboard/templates/template15.tsx
 //
 // STYLE: Nike / Loewe / Zara — "Lookbook"
 // - Hero: Magazine cover — full-viewport, centered storeName as masthead,
@@ -386,7 +386,7 @@ function Block15ContactSection({
   );
 }
 
-export function Block15(props: Block15Props) {
+export function Template15(props: Block15Props) {
   return (
     <>
       <Block15HeroSection title={props.title} subtitle={props.subtitle} description={props.description} category={props.category} eyebrow={props.eyebrow} ctaText={props.ctaText} ctaLink={props.ctaLink} showCta={props.showCta} backgroundImage={props.backgroundImage} logo={props.logo} storeName={props.storeName} features={props.features} />
