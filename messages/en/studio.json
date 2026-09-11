@@ -16,9 +16,9 @@
       "open": "Choose Layout",
       "close": "Close",
       "proBadge": "Pro",
-      "selectBlock": "Select {section} block",
-      "openTooltip": "Open block selector",
-      "closeTooltip": "Close block selector",
+      "selectTemplate": "Select {section} template",
+      "openTooltip": "Open template selector",
+      "closeTooltip": "Close template selector",
       "startHere": "Start here"
     },
     "preview": {
@@ -53,8 +53,8 @@
       "description": "Failed to load the Landing Builder. Please try again.",
       "retry": "Try Again"
     },
-    "blockOptions": {
-      "hero": "Block {index}"
+    "templateOptions": {
+      "hero": "Template {index}"
     },
     "fullPreview": {
       "ariaTitle": "Full Page Preview: {name}",
@@ -68,7 +68,7 @@
     },
     "onboardingDialog": {
       "title": "Choose your store layout",
-      "step1": "Pick the block combination you like",
+      "step1": "Pick the template you like",
       "step2": "Click Publish",
       "step3": "Your store goes live! 🚀",
       "cta": "Let's Go"
@@ -76,7 +76,7 @@
     "firstPublishDialog": {
       "title": "Your store is now live! 🎉",
       "description": "Your storefront is live at {slug}.fibidy.com. Time to add your first products so customers can start shopping.",
-      "exploreHint": "Want a different look? You can switch block styles anytime from Studio changes go live instantly.",
+      "exploreHint": "Want a different look? You can switch template styles anytime. Studio changes go live instantly.",
       "ctaPreview": "View My Store",
       "ctaContinue": "Add Your First Product"
     },
@@ -86,8 +86,8 @@
       "offline": "You're offline. Reconnect to publish your changes."
     },
     "upgradeModal": {
-      "title": "Upgrade to publish Pro blocks",
-      "description": "You're using a Pro hero design (block 4+). Upgrade to Business plan to publish."
+      "title": "Upgrade to publish Pro templates",
+      "description": "You're using a Pro hero design (template 4+). Upgrade to Business plan to publish."
     },
     "enableHeroModal": {
       "title": "Enable Hero Section",

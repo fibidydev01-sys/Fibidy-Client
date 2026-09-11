@@ -16,9 +16,9 @@
       "open": "Pilih Tampilan",
       "close": "Tutup",
       "proBadge": "Pro",
-      "selectBlock": "Pilih block {section}",
-      "openTooltip": "Buka pemilih block",
-      "closeTooltip": "Tutup pemilih block",
+      "selectTemplate": "Pilih template {section}",
+      "openTooltip": "Buka pemilih template",
+      "closeTooltip": "Tutup pemilih template",
       "startHere": "Mulai di sini"
     },
     "preview": {
@@ -53,8 +53,8 @@
       "description": "Gagal memuat Landing Builder. Silakan coba lagi.",
       "retry": "Coba Lagi"
     },
-    "blockOptions": {
-      "hero": "Block {index}"
+    "templateOptions": {
+      "hero": "Template {index}"
     },
     "fullPreview": {
       "ariaTitle": "Preview Halaman Penuh: {name}",
@@ -76,7 +76,7 @@
     "firstPublishDialog": {
       "title": "Toko kamu sudah live! 🎉",
       "description": "Storefront kamu sekarang bisa diakses di {slug}.fibidy.com. Saatnya tambah produk pertama supaya pelanggan bisa belanja.",
-      "exploreHint": "Mau tampilan berbeda? Kamu bisa ganti block kapan saja dari Studio perubahan langsung tampil.",
+      "exploreHint": "Mau tampilan berbeda? Kamu bisa ganti template kapan saja. Perubahan di Studio langsung tampil.",
       "ctaPreview": "Lihat Toko Saya",
       "ctaContinue": "Tambah Produk Pertama"
     },
@@ -86,8 +86,8 @@
       "offline": "Kamu offline. Sambungkan ulang untuk publish perubahan."
     },
     "upgradeModal": {
-      "title": "Upgrade untuk publikasikan block Pro",
-      "description": "Kamu memakai desain hero Pro (block 4+). Upgrade ke paket Business untuk mempublikasikan."
+      "title": "Upgrade untuk publikasikan template Pro",
+      "description": "Kamu memakai desain hero Pro (template 4+). Upgrade ke paket Business untuk mempublikasikan."
     },
     "enableHeroModal": {
       "title": "Aktifkan Hero Section",
