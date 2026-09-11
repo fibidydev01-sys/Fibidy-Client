@@ -27,8 +27,8 @@ interface SubscriptionPlanInfo {
   isPaid: boolean;
   /** Max images per product based on tier */
   maxImagesPerProduct: number;
-  /** Max block variants for landing page */
-  blockVariantLimit: number;
+  /** Max template variants for landing page */
+  templateVariantLimit: number;
   /** Business unlock gate: seller already qualified? */
   businessQualified: boolean;
   /** Sales tracking for Business qualification progress */
@@ -85,7 +85,7 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
       masaTenggangHari: 3,
       limits: {
         maxProducts: 20,
-        componentBlockVariants: 3,
+        componentTemplateVariants: 3,
         maxImagesPerProduct: 2,
       },
       usage: { products: 0 },
@@ -96,7 +96,9 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
   });
 
   const tier: SubscriptionTier = data?.tier ?? 'FREE';
-  const blockVariantLimit = normalizeLimit(data?.limits.componentBlockVariants);
+  const templateVariantLimit = normalizeLimit(
+    data?.limits.componentTemplateVariants,
+  );
   const maxImagesPerProduct = data?.limits.maxImagesPerProduct ?? 2;
 
   return {
@@ -107,7 +109,7 @@ export function useSubscriptionPlan(): SubscriptionPlanInfo {
     isBusiness: tier === 'BUSINESS',
     isPaid: tier === 'STARTER' || tier === 'BUSINESS',
     maxImagesPerProduct,
-    blockVariantLimit,
+    templateVariantLimit,
     businessQualified: data?.businessQualified ?? false,
     salesTrack: data?.salesTrack ?? { totalAmount: 0, totalCount: 0 },
     isActive: data?.isActive ?? false,

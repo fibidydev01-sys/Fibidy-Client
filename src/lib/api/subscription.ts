@@ -30,7 +30,7 @@ export type TripayPaymentStatus =
 
 interface PlanLimits {
   maxProducts: number;
-  componentBlockVariants: number;
+  componentTemplateVariants: number;
   maxImagesPerProduct: number;
 }
 

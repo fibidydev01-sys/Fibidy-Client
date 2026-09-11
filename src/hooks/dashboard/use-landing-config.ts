@@ -21,7 +21,7 @@
 //   pada React state update cycle.
 //
 //   Flow baru:
-//     handleEnableAndPublish → publishWithOverride({ ...config, hero: { enabled: true, block: 'block1' } })
+//     handleEnableAndPublish → publishWithOverride({ ...config, hero: { enabled: true, template: 'template1' } })
 //     → BE menerima config dengan hero.enabled=true
 //     → onSaveSuccess dipanggil
 //     → setConfig + setSavedConfig diupdate
@@ -118,7 +118,7 @@ function mergeLandingConfig(
       enabled: tenant.hero?.enabled ?? dHero.enabled,
       title: tenant.hero?.title ?? dHero.title,
       subtitle: tenant.hero?.subtitle ?? dHero.subtitle,
-      block: tenant.hero?.block,
+      template: tenant.hero?.template,
       config: { ...dHero.config, ...(tenant.hero?.config ?? {}) },
     },
   };
