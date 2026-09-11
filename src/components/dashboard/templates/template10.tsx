@@ -12,7 +12,7 @@
 //             Alternating panel position and accent color
 // - Contact: Dark footer-style with accent pill + grid
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

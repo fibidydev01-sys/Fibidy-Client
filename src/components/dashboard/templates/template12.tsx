@@ -12,7 +12,7 @@
 //             Alternate sides. Bold numbers as decoration.
 // - Contact: Organic, off-grid — title at an angle hint, staggered columns
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

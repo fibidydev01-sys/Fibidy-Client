@@ -12,7 +12,7 @@
 //             Alternates L/R every item like magazine spread
 // - Contact: Newspaper column style — 3 col grid, tight type
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

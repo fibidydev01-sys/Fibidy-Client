@@ -10,7 +10,7 @@
 //             features[].image + .title + .description → pill/card in belt
 // - Contact: Dark card grid, 2-col, bold section header
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useEffect, useRef, useState } from 'react';

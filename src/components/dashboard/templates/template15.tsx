@@ -12,7 +12,7 @@
 //             Pure editorial, maximum image real estate.
 // - Contact: Minimal footer-style — single row, wide, elegant
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

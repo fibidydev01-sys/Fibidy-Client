@@ -178,10 +178,10 @@ const trackKustomisasi: Track = {
       icon: Palette,
       title: "Studio / Landing Builder",
       summary:
-        "Pilih tampilan hero dari 25 variasi block dan lihat pratinjaunya secara langsung sebelum dipublikasikan.",
+        "Pilih tampilan hero dari 25 variasi template dan lihat pratinjaunya secara langsung sebelum dipublikasikan.",
       path: "/dashboard/studio",
       steps: [
-        { label: "Buka drawer block", description: "25 varian tersedia — block1–3 gratis, hingga block12 di Starter, semua block di Business." },
+        { label: "Buka drawer template", description: "25 varian tersedia — template1–3 gratis, hingga template12 di Starter, semua template di Business." },
         { label: "Pratinjau tampilan", description: "Perubahan langsung terlihat di layar sebelum kamu memutuskan menyimpannya." },
         { label: "Publikasikan", description: "Klik \"Publish\" agar perubahan benar-benar live — tidak tersimpan otomatis." },
       ],

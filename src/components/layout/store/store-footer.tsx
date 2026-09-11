@@ -9,7 +9,7 @@
 //   NEW layout: Brand + Nav + Social + Copyright
 //
 //   Direct Contact card was REMOVED — its functionality merged into the
-//   pre-footer CTA section inside block1/2/3 (uses the same translation
+//   pre-footer CTA section inside template1/2/3 (uses the same translation
 //   keys: store.footer.directContact.*). No duplication anymore.
 //
 // [CARD TREATMENT — 2026-05-13b]

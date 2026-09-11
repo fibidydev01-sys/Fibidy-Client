@@ -1,5 +1,5 @@
 'use client';
-// FILE: block25.tsx — "Brutalist Raw"
+// FILE: template25.tsx — "Brutalist Raw"
 // Reference: Balenciaga, The Outline, brutalist web design 2026
 // Hero: White background, massive black headline, zero decoration,
 //       raw thick borders, ultra-high contrast, grid of bold rules

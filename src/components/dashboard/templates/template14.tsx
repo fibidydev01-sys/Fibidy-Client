@@ -14,7 +14,7 @@
 //             Image is always large and dominant — never small.
 // - Contact: Sidebar style — contact left, form/map right
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

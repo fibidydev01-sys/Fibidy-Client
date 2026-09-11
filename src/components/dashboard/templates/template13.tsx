@@ -11,7 +11,7 @@
 //             Image fills 100% of the panel — large and dominant.
 // - Contact: Glass card style, warm dark, 2-col
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

@@ -10,7 +10,7 @@
 //             features[].image, .title, .description → card content
 // - Contact: Chess alternating layout (left/right) + map + form
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react';

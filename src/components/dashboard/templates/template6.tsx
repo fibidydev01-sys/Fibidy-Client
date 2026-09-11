@@ -10,7 +10,7 @@
 //             scrolls past. Large, dominant, immersive.
 // - Contact: Clean light, 2-col layout, generous spacing
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

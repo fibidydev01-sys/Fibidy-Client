@@ -10,7 +10,7 @@
 //             .title + .description → compact feature card
 // - Contact: Ultra-clean monospaced rows, no border decoration, full width
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

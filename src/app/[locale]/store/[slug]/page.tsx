@@ -9,8 +9,8 @@ import type { PublicTenant } from '@/types/tenant';
 // STORE LANDING PAGE
 // File: src/app/[locale]/store/[slug]/page.tsx
 //
-// [LANDING TEMPLATE — 2026-05-13 PHASE 3]
-// Slimmed to minimal orchestrator. Block template (block1/2/3) now renders
+// [TEMPLATE — 2026-05-13 PHASE 3]
+// Slimmed to minimal orchestrator. Template (template1/2/3) now renders
 // the ENTIRE landing page: Hero → Contact → Pre-footer CTA.
 //
 // REMOVED in this phase:

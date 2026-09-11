@@ -13,7 +13,7 @@
 //             Description sits below the image in a clean strip.
 // - Contact: Clean light, borderless, generous whitespace, 2-col
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState, useEffect, useRef } from 'react';

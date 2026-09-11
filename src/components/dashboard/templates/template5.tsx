@@ -10,7 +10,7 @@
 //             Scroll through each like a cinematic sequence
 // - Contact: Dark minimal, large headline, clean rows
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

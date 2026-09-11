@@ -11,7 +11,7 @@
 //             Feels like scrolling through a film strip or lookbook.
 // - Contact: Warm editorial — large serif-weight heading, 2-col grid
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useRef, useState, useCallback, useEffect } from 'react';

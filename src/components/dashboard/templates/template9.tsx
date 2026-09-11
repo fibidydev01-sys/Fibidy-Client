@@ -11,7 +11,7 @@
 //             All images fill their container fully, no small thumbnails
 // - Contact: Warm split — left bold pull quote, right clean form
 //
-// Props: identical to BlockComponentProps (block.tsx)
+// Props: identical to TemplateComponentProps (template.tsx)
 // ============================================================================
 
 import { useState } from 'react';

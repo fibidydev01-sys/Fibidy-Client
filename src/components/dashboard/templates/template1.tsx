@@ -420,11 +420,11 @@ function Block1ContactSection({
                 {t('sectionEyebrow')}
               </p>
               <div className="space-y-1.5">
-                <Label htmlFor="block1-name" className="text-xs font-medium">
+                <Label htmlFor="template1-name" className="text-xs font-medium">
                   {tForm('nameLabel')}
                 </Label>
                 <Input
-                  id="block1-name"
+                  id="template1-name"
                   placeholder={tForm('namePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -432,11 +432,11 @@ function Block1ContactSection({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="block1-email" className="text-xs font-medium">
+                <Label htmlFor="template1-email" className="text-xs font-medium">
                   {tForm('emailLabel')}
                 </Label>
                 <Input
-                  id="block1-email"
+                  id="template1-email"
                   type="email"
                   placeholder={tForm('emailPlaceholder')}
                   value={formData.email}
@@ -445,11 +445,11 @@ function Block1ContactSection({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="block1-message" className="text-xs font-medium">
+                <Label htmlFor="template1-message" className="text-xs font-medium">
                   {tForm('messageLabel')}
                 </Label>
                 <Textarea
-                  id="block1-message"
+                  id="template1-message"
                   placeholder={tForm('messagePlaceholder')}
                   rows={4}
                   value={formData.message}
