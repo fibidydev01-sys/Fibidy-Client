@@ -2,10 +2,14 @@
 // CONTACT SECTION — "Ada pertanyaan? Kami siap bantu."
 // File: src/components/marketing/contact-section.tsx
 //
-// [SHADOW + SEJAJAR + PILL SHIMMER — Sep 2026]
-// - Section wrapper max-w-6xl (1152px) — sejajar navbar pill + section lain
-// - 3 contact card + form card: rounded-xl + shadow bento
-// - Badge pill pakai AnimatedShinyText (konsisten dengan hero + section lain)
+// [MAP + FORM = 2 CARD TERPISAH — Sep 2026]
+// SEBELUMNYA: 1 card wrapper dengan 2 bagian (map kiri + form kanan)
+// → map cuma bisa rounded-l-xl (kiri doang)
+//
+// SEKARANG: 2 card terpisah dengan gap:
+//   - Card 1: MAP (rounded-xl semua sudut)
+//   - Card 2: FORM (rounded-xl semua sudut)
+// Layout: grid 2 kolom di desktop, stack di mobile
 // ============================================================================
 
 "use client";
@@ -24,30 +28,17 @@ const contactInfo = [
   { icon: MapPin, label: "Lokasi", value: "Madiun, Jawa Timur", sub: "Indonesia" },
 ];
 
-// [REVERT — Sep 2026] Balik ke iframe Google Maps embed biasa, gantiin
-// komponen Map interaktif (Leaflet/Stadia Maps) dari @shadcn-map/map yang
-// dipakai sebelumnya — dianggap overkill untuk peta formalitas kontak doang
-// (gak butuh zoom/fullscreen/locate control custom, gak butuh basemap
-// alternatif, gak butuh daftar domain ke Stadia Maps sebelum deploy).
-//
-// Koordinat sumbernya sama persis dengan FIBIDY_LOCATION versi Leaflet
-// sebelumnya: [-7.5951371, 111.5965489] (lat, lng). Format embed yang
-// dipakai di sini adalah `q=<lat>,<lng>&output=embed` — cara paling
-// sederhana untuk pin satu titik tanpa perlu API key maupun Place ID.
 const FIBIDY_MAPS_EMBED_SRC =
   "https://www.google.com/maps?q=-7.5951371,111.5965489&z=15&output=embed";
 
-// ── Shadow signature — sama dengan bento card ──────────────────────────────
 const CARD_SHADOW =
   "shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.05),0_12px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_-20px_80px_-20px_#ffffff1f_inset]";
 
 export function ContactSection() {
   return (
     <section id="contact" className="w-full bg-background py-16 md:py-section px-6">
-      {/* Section wrapper max-w-6xl — sejajar navbar pill + section lain */}
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
-          {/* Badge pill — konsisten dengan hero + section lain */}
           <div className="inline-flex items-center justify-center rounded-full border border-hairline-strong px-4 py-1.5 bg-neutral-100 dark:bg-neutral-900 transition-colors duration-500 ease-out hover:bg-neutral-200 dark:hover:bg-neutral-800 mb-4">
             <AnimatedShinyText className="text-sm font-medium">
               # Hubungi Kami
@@ -62,7 +53,7 @@ export function ContactSection() {
           </p>
         </div>
 
-        {/* 3 Contact card — rounded-xl + shadow bento */}
+        {/* 3 Contact card */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           {contactInfo.map((item) => {
             const Icon = item.icon;
@@ -76,9 +67,15 @@ export function ContactSection() {
                     <Icon className="w-5 h-5 text-ink" />
                   </div>
                   <div>
-                    <p className="text-caption-uppercase caption-uppercase text-muted-foreground mb-1">{item.label}</p>
-                    <p className="text-sm font-semibold text-foreground">{item.value}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.sub}</p>
+                    <p className="text-caption-uppercase caption-uppercase text-muted-foreground mb-1">
+                      {item.label}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {item.value}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {item.sub}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -86,55 +83,86 @@ export function ContactSection() {
           })}
         </div>
 
-        {/* Form card dengan map — rounded-xl + shadow bento */}
-        <Card className={`rounded-xl border border-border bg-background overflow-hidden ${CARD_SHADOW}`}>
-          <CardContent className="p-0 flex flex-col md:flex-row">
-            <div className="w-full md:w-[45%] flex-shrink-0">
-              <div className="relative w-full h-[240px] md:h-full" style={{ minHeight: "300px" }}>
-                <iframe
-                  src={FIBIDY_MAPS_EMBED_SRC}
-                  className="absolute inset-0 w-full h-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Lokasi Fibidy — Madiun, Jawa Timur"
-                  aria-label="Peta lokasi Fibidy di Madiun, Jawa Timur"
-                />
-              </div>
+        {/* ══════════════════════════════════════════════════════════════
+            MAP + FORM = 2 CARD TERPISAH
+            Grid 2 kolom di desktop (map 45% + form 55%), stack di mobile.
+            Masing-masing card rounded-xl SEMUA SUDUT.
+        ══════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-[45%_1fr] gap-4">
+
+          {/* ── CARD 1: MAP — rounded-xl SEMUA SUDUT ── */}
+          <Card
+            className={`rounded-xl border border-border bg-background overflow-hidden ${CARD_SHADOW} p-0`}
+          >
+            <div
+              className="relative w-full h-[280px] md:h-full"
+              style={{ minHeight: "320px" }}
+            >
+              <iframe
+                src={FIBIDY_MAPS_EMBED_SRC}
+                className="absolute inset-0 w-full h-full border-0 rounded-xl"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Lokasi Fibidy — Madiun, Jawa Timur"
+                aria-label="Peta lokasi Fibidy di Madiun, Jawa Timur"
+              />
             </div>
-            <div className="w-full md:w-[55%] p-6 sm:p-8 md:p-12 flex flex-col justify-center gap-6">
+          </Card>
+
+          {/* ── CARD 2: FORM — rounded-xl SEMUA SUDUT ── */}
+          <Card
+            className={`rounded-xl border border-border bg-background ${CARD_SHADOW}`}
+          >
+            <CardContent className="p-6 sm:p-8 md:p-10 flex flex-col justify-center gap-6">
               <div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">Kirim Pesan</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-2">
+                  Kirim Pesan
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Tim kami akan balas dalam 1×24 jam di hari kerja.
                 </p>
               </div>
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1.5">
-                  <Label htmlFor="name">Nama <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="name">
+                    Nama <span className="text-destructive">*</span>
+                  </Label>
                   <Input id="name" placeholder="Nama kamu" />
                 </div>
                 <div className="flex-1 flex flex-col gap-1.5">
-                  <Label htmlFor="wa">WhatsApp <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="wa">
+                    WhatsApp <span className="text-destructive">*</span>
+                  </Label>
                   <Input id="wa" type="tel" placeholder="+62 xxx-xxxx-xxxx" />
                 </div>
               </div>
+
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="bisnis">Jenis Bisnis</Label>
                 <Input id="bisnis" placeholder="Warung, salon, coffee shop, dll" />
               </div>
+
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="message">Pesan <span className="text-destructive">*</span></Label>
-                <Textarea id="message" placeholder="Ada yang bisa kami bantu?" rows={4} className="resize-y" />
+                <Label htmlFor="message">
+                  Pesan <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  id="message"
+                  placeholder="Ada yang bisa kami bantu?"
+                  rows={4}
+                  className="resize-y"
+                />
               </div>
+
               <Button className="w-full rounded-full" size="lg">
                 Kirim Pesan
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Link ke Pusat Bantuan di docs */}
         <p className="text-xs text-muted-foreground text-center mt-6">
           Butuh bantuan cepat? Kunjungi{" "}
           <a

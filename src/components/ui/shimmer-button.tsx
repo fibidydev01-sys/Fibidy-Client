@@ -1,6 +1,23 @@
 import React, { type ElementType, type CSSProperties } from "react"
 import { cn } from "@/lib/shared/utils"
 
+// ============================================================================
+// SHIMMER BUTTON
+// File: src/components/ui/shimmer-button.tsx
+//
+// [DARK MODE FIX — Sep 2026]
+// Base class sebelumnya pakai `text-white` hardcoded. Di dark mode,
+// --primary = #ffffff (putih), --primary-foreground = #171717 (hitam).
+// Teks putih di atas background putih = INVISIBLE.
+//
+// Fix: ganti `text-white` → `text-primary-foreground`. Sekarang:
+//   - Light mode: bg #000 (hitam), teks --primary-foreground = #fff (putih) ✅
+//   - Dark mode:  bg #fff (putih), teks --primary-foreground = #171717 (hitam) ✅
+//
+// Konsisten dengan globals.css lo — token theme yang sama dipakai
+// background button + foreground text-nya.
+// ============================================================================
+
 export interface ShimmerButtonProps {
   shimmerColor?: string
   shimmerSize?: string
@@ -43,7 +60,8 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           } as CSSProperties
         }
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)]",
+          // FIX: text-white → text-primary-foreground
+          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3 whitespace-nowrap text-primary-foreground [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className as string
         )}

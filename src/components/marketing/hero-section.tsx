@@ -2,7 +2,18 @@ import { Link } from "@/i18n/navigation";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { Safari } from "@/components/ui/safari";
-import { ArrowRight, Rocket } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+// ============================================================================
+// HERO SECTION — "Solusi Manajemen Toko Online Terpadu untuk UMKM Indonesia"
+// File: src/components/marketing/hero-section.tsx
+//
+// [PILL SHIMMER + DARK MODE FIX — Sep 2026]
+// 1. Badge pill: hapus Rocket icon + hr divider, sisakan AnimatedShinyText
+// 2. Header wrapper max-w-4xl → max-w-6xl (sejajar Safari di bawah)
+// 3. ShimmerButton pakai text-primary-foreground (fix dark mode — teks
+//    hitam di atas bg putih, kelihatan)
+// ============================================================================
 
 export function HeroSection() {
   return (
@@ -15,25 +26,16 @@ export function HeroSection() {
         className="hero-sky-wash pointer-events-none absolute inset-x-0 top-0 h-[560px] md:h-[720px]"
       />
 
-      <div className="relative flex flex-col items-center text-center pb-12 px-6 max-w-4xl mx-auto">
-        {/*
-          [DESIGN.md AUDIT — Agu 2026] Badge pill "Toko Online untuk UMKM".
-          Sebelumnya: border gradient beranimasi #ffaa40/#9c40ff (bukan token
-          Expo apa pun) + AnimatedGradientText. Sekarang: border solid pakai
-          --border, isi teks pakai AnimatedShinyText (shimmer monokrom di atas
-          teks, bukan gradient warna). Wadah pill (bg-neutral-100/900,
-          border-black/5 dark:border-white/5) BELUM disentuh — itu neutral
-          Tailwind mentah, bukan token Expo, tapi di luar scope perbaikan ini.
-        */}
-        <div className="group relative mb-6 flex items-center justify-center rounded-full border border-hairline-strong px-4 py-1.5 bg-neutral-100 dark:bg-neutral-900 transition-colors duration-500 ease-out hover:bg-neutral-200 dark:hover:bg-neutral-800">
-          <Rocket className="size-4 text-muted-foreground" />
-          <hr className="mx-2 h-4 w-px shrink-0 bg-hairline-strong" />
+      {/* Header wrapper max-w-6xl (sejajar Safari di bawah) */}
+      <div className="relative flex flex-col items-center text-center pb-12 px-6 max-w-6xl mx-auto">
+        {/* Badge pill — konsisten dengan section lain, tanpa Rocket + tanpa divider */}
+        <div className="inline-flex items-center justify-center mb-6 rounded-full border border-hairline-strong px-4 py-1.5 bg-neutral-100 dark:bg-neutral-900 transition-colors duration-500 ease-out hover:bg-neutral-200 dark:hover:bg-neutral-800">
           <AnimatedShinyText className="text-sm font-medium">
             Toko Online untuk UMKM
           </AnimatedShinyText>
         </div>
 
-        <h1 className="text-display-lg sm:text-display-xl md:text-display-mega text-ink mb-6">
+        <h1 className="text-display-lg sm:text-display-xl md:text-display-mega text-ink mb-6 max-w-3xl mx-auto">
           Solusi Manajemen Toko Online Terpadu untuk UMKM Indonesia
         </h1>
 
@@ -42,30 +44,17 @@ export function HeroSection() {
           pesan yang super gampang.
         </p>
 
-        {/*
-          [DESIGN.md AUDIT — Agu 2026] CTA utama hero.
-          Sebelumnya: RainbowButton (gradient multi-warna) — melawan langsung
-          filosofi inti Expo: "single brand voltage adalah hitam murni, tanpa
-          warna merek jenuh". Sekarang: ShimmerButton dengan background &
-          shimmerColor diisi eksplisit dari --primary / --primary-foreground
-          (lihat shimmer-button.tsx) — animasinya jalan, tapi warnanya token,
-          bukan hex baru.
-
-          `as={Link}` dipakai, BUKAN `asChild` — ShimmerButton punya 3 div
-          dekorasi sebagai sibling dari children, dan Slot/asChild akan
-          merusak struktur itu (lihat komentar `as` di shimmer-button.tsx).
-          `as` cuma mengganti tag akar jadi <Link>, aman untuk struktur ini.
-        */}
-        <ShimmerButton as={Link} href="/register" className="min-w-[200px] gap-2">
+        {/* CTA utama — ShimmerButton dengan text-primary-foreground (fix dark mode) */}
+        <ShimmerButton
+          as={Link}
+          href="/register"
+          className="text-primary-foreground min-w-[200px] gap-2"
+        >
           Mulai Sekarang
           <ArrowRight className="ml-2 h-4 w-4" />
         </ShimmerButton>
 
-        {/*
-          [Sep 2026] Link sekunder "Pelajari lebih lanjut" ke docs.
-          Ditaruh SETELAH CTA utama, dengan gaya teks kecil muted supaya
-          tidak bersaing visual dengan CTA. External link → buka tab baru.
-        */}
+        {/* Link sekunder "Pelajari lebih lanjut" ke docs */}
         <a
           href="https://docs.fibidy.com/getting-started/introduction"
           target="_blank"
@@ -77,31 +66,7 @@ export function HeroSection() {
         </a>
       </div>
 
-      {/*
-        [REVISI — Sep 2026] Sebelumnya: <Iphone videoSrc={cloudinary mp4}/>
-        — mockup HP muter video demo produk. Diganti ke <Safari> browser-mock
-        (komponen yang sama dipakai di how-it-works-section.tsx sebelum
-        section itu sendiri direvisi ke card icon) berisi screenshot statis
-        DASHBOARD.png, bukan video.
-
-        Asset: taruh file dashboard dari
-        d:\PRODUK-LPPM-FINAL\UMKM-MULTI-TENANT\railway\client\public\home\DASHBOARD.png
-        ke public/home/dashboard.png di project Next.js ini — path di bawah
-        (/home/dashboard.png) resolve ke situ. File ini TIDAK ikut ke-generate
-        otomatis, harus disalin manual.
-
-        [LEBAR SEJAJAR — Sep 2026]
-        Wrapper Safari diubah dari max-w-4xl (896px) → max-w-6xl (1152px).
-        Alasan: supaya Safari browser mock SEJAJAR dengan card-card di section
-        lain (What Is, Who Is It For, Features, dll) yang semua pakai
-        max-w-6xl dan sejajar dengan navbar pill. Sebelumnya Safari lebih
-        sempit 256px dari card section lain — keliatan "mengambang" tidak
-        proporsional.
-
-        Lebar wrapper dinaikkan dari mockup HP (max ~400px) ke lebar browser
-        penuh karena Safari didesain sebagai frame lebar landscape, beda
-        proporsi dari Iphone yang portrait/sempit.
-      */}
+      {/* Safari browser mock — max-w-6xl (sejajar header) */}
       <div className="flex justify-center w-full px-6 pb-16">
         <div className="w-full max-w-6xl">
           <Safari

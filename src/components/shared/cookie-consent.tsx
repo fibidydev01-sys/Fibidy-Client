@@ -1,37 +1,30 @@
 "use client";
 
 // ============================================================================
-// COOKIE CONSENT — Banner persetujuan cookie
+// COOKIE CONSENT — Modal persetujuan cookie
 // File: src/components/shared/cookie-consent.tsx
 //
-// [MVP — KISS — Sep 2026]
-// Simpel: 1 tombol "Terima", link ke /legal/cookies, cookie 1 tahun.
+// [MODAL CENTER — STYLE PWA IOS — Sep 2026]
+// Tiru style IosModal di pwa-install-prompt.tsx:
+//   - Backdrop gelap + backdrop-blur-sm
+//   - Card modal di tengah (fixed inset-0 flex items-center justify-center)
+//   - rounded-2xl + shadow-2xl
+//   - Scale-in animation (zoom-in-95 + fade-in)
+//   - Delay 600ms sebelum muncul
+//
 // Muncul di SEMUA halaman (di-render di [locale]/layout.tsx).
-//
-// Behavior:
-//   - Cek cookie 'fibidy-cookie-consent' saat mount.
-//   - Kalau ada → tidak render apa-apa.
-//   - Kalau belum → render card di bottom-right dengan slide-in animation.
-//   - Klik "Terima" → set cookie (1 tahun) + slide-out animation + unmount.
-//
-// Style: konsisten dengan design system pill — rounded-2xl + border +
-// shadow bento. Icon Cookie dari lucide.
+// z-[1000] — di bawah navbar (z-[1100]) tapi backdrop nutup semua.
 // ============================================================================
 
 import * as React from "react";
-import { Cookie, X } from "lucide-react";
+import { Cookie } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/shared/utils";
 
 // ── Konstanta ──────────────────────────────────────────────────────────────
 const COOKIE_NAME = "fibidy-cookie-consent";
 const COOKIE_VALUE = "accepted";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 tahun
-
-// ── Shadow signature — konsisten bento card ────────────────────────────────
-const CARD_SHADOW =
-  "shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.05),0_12px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_-20px_80px_-20px_#ffffff1f_inset]";
 
 // ── Helper: cek apakah consent cookie sudah ada ────────────────────────────
 function hasConsentCookie(): boolean {
@@ -47,18 +40,14 @@ function setConsentCookie() {
 }
 
 export function CookieConsent() {
-  // mounted guard — supaya tidak render di server (cookie cuma ada di client)
+  // mounted guard — supaya tidak render di server
   const [mounted, setMounted] = React.useState(false);
-  // visible = banner sedang ditampilkan
+  // visible = modal sedang ditampilkan (opacity 100, scale 100)
   const [visible, setVisible] = React.useState(false);
-  // animating out — untuk handle slide-down sebelum unmount
-  const [animatingOut, setAnimatingOut] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
-    // Cek cookie setelah mount
     if (!hasConsentCookie()) {
-      // Delay sedikit supaya tidak "pop" di first paint
       const t = setTimeout(() => setVisible(true), 600);
       return () => clearTimeout(t);
     }
@@ -66,93 +55,104 @@ export function CookieConsent() {
 
   const handleAccept = () => {
     setConsentCookie();
-    setAnimatingOut(true);
-    // Tunggu animasi slide-down selesai, baru unmount
-    setTimeout(() => {
-      setVisible(false);
-      setAnimatingOut(false);
-    }, 300);
-  };
-
-  const handleDismiss = () => {
-    // X button = sama seperti terima (KISS: tidak ada partial consent)
-    handleAccept();
+    setVisible(false);
   };
 
   // Belum mounted → tidak render (hindari hydration mismatch)
   if (!mounted) return null;
-  // Sudah di-dismiss / belum waktunya muncul → tidak render
-  if (!visible) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-live="polite"
-      aria-label="Persetujuan cookie"
-      className={cn(
-        // Posisi: fixed bottom-right
-        "fixed bottom-4 right-4 z-[1400] max-w-sm w-[calc(100vw-2rem)] sm:w-[380px]",
-        // Card style — rounded-2xl + border + shadow bento
-        "rounded-2xl border border-border bg-background p-5",
-        CARD_SHADOW,
-        // Animasi slide-in dari bawah
-        "transition-all duration-300 ease-out",
-        animatingOut
-          ? "translate-y-4 opacity-0"
-          : "translate-y-0 opacity-100 animate-in fade-in-0 slide-in-from-bottom-4"
-      )}
-    >
-      {/* Close button (X) di pojok kanan atas */}
-      <button
-        type="button"
-        onClick={handleDismiss}
-        className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-ink transition-colors"
-        aria-label="Tutup"
+    <>
+      {/* Backdrop — full screen, gelap + blur */}
+      <div
+        onClick={handleAccept}
+        className={cn(
+          "fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm",
+          "transition-opacity duration-300",
+          visible ? "opacity-100" : "opacity-0 pointer-events-none",
+        )}
+        aria-hidden="true"
+      />
+
+      {/* Wrapper modal — center */}
+      <div
+        className={cn(
+          "fixed inset-0 z-[1001] flex items-center justify-center p-4",
+          "transition-opacity duration-300",
+          visible ? "opacity-100" : "opacity-0 pointer-events-none",
+        )}
       >
-        <X className="h-3.5 w-3.5" />
-      </button>
+        {/* Card modal */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cookie-consent-title"
+          aria-describedby="cookie-consent-desc"
+          className={cn(
+            // Card style — rounded-2xl + border + shadow-2xl
+            "relative w-full max-w-md rounded-2xl border border-border bg-background",
+            "shadow-2xl",
+            "p-6 md:p-8",
+            // Scale-in animation
+            "transition-all duration-300 ease-out",
+            visible ? "scale-100" : "scale-95",
+          )}
+        >
+          {/* Icon bulat primary — konsisten PWA iOS */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
+              <Cookie className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h2
+                id="cookie-consent-title"
+                className="text-base font-semibold text-foreground leading-tight"
+              >
+                Kami pakai cookie
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Persetujuan singkat sebelum lanjut
+              </p>
+            </div>
+          </div>
 
-      {/* Icon bulat + header */}
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-muted flex-shrink-0">
-          <Cookie className="w-4 h-4 text-ink" strokeWidth={1.75} />
+          {/* Body text */}
+          <p
+            id="cookie-consent-desc"
+            className="text-sm text-muted-foreground leading-relaxed mb-6 text-justify"
+          >
+            Fibidy pakai cookie untuk mengingat preferensi, menjaga sesi login,
+            dan meningkatkan pengalamanmu saat menjelajah toko online. Dengan
+            klik <strong className="text-ink font-semibold">Terima</strong>,
+            kamu setuju dengan{" "}
+            <Link
+              href="/legal/cookies"
+              className="text-link hover:underline font-medium"
+            >
+              Kebijakan Cookie
+            </Link>{" "}
+            kami. Kamu bisa berubah pikiran kapan saja dengan hapus cookie di
+            browser.
+          </p>
+
+          {/* Actions — 2 tombol rounded-full, konsisten PWA */}
+          <div className="flex gap-2">
+            <Link
+              href="/legal/cookies"
+              className="flex-1 h-10 rounded-full border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors flex items-center justify-center"
+            >
+              Pelajari
+            </Link>
+            <button
+              type="button"
+              onClick={handleAccept}
+              className="flex-1 h-10 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
+            >
+              Terima
+            </button>
+          </div>
         </div>
-        <p className="text-sm font-semibold text-ink">
-          Kami pakai cookie
-        </p>
       </div>
-
-      {/* Body */}
-      <p className="text-xs text-muted-foreground leading-relaxed mb-4 text-justify">
-        Fibidy pakai cookie untuk mengingat preferensi dan meningkatkan pengalamanmu.
-        Dengan klik <strong className="text-ink">Terima</strong>, kamu setuju dengan{" "}
-        <Link
-          href="/legal/cookies"
-          className="text-link hover:underline font-medium"
-        >
-          Kebijakan Cookie
-        </Link>{" "}
-        kami.
-      </p>
-
-      {/* Action buttons */}
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={handleAccept}
-          size="sm"
-          className="flex-1 rounded-full"
-        >
-          Terima
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="flex-1 rounded-full"
-        >
-          <Link href="/legal/cookies">Pelajari</Link>
-        </Button>
-      </div>
-    </div>
+    </>
   );
 }
