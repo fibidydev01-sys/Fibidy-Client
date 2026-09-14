@@ -76,11 +76,11 @@
         "zoomButton": "Zoom"
       },
       "info": {
-        "priceContactSeller": "Harga: Hubungi penjual",
         "discountBadge": "-{percent}%",
         "jasaBadge": "Layanan",
         "estimasiJam": "Estimasi {nilai} jam",
-        "estimasiHari": "Estimasi {nilai} hari"
+        "estimasiHari": "Estimasi {nilai} hari",
+        "priceContactOwner": "Harga: Hubungi pemilik"
       },
       "notFound": {
         "title": "Produk Tidak Ditemukan",
@@ -118,28 +118,10 @@
       "collectionBadge": "Koleksi"
     },
     "checkout": {
-      "contactSeller": "Hubungi Penjual",
-      "contactSellerDialog": {
-        "title": "Hubungi Penjual",
-        "subtitlePrefix": "Tanyakan ke {name} tentang",
-        "nameLabel": "Nama (opsional)",
-        "namePlaceholder": "Nama kamu",
-        "questionLabel": "Pertanyaan (opsional)",
-        "questionPlaceholder": "Pertanyaan apa pun tentang produk ini...",
-        "cancel": "Batal",
-        "send": "Kirim via WhatsApp"
-      },
-      "contactSellerWhatsappTemplate": "Halo {name},\n\nSaya tertarik dengan produk kamu:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nTerima kasih! 🙏",
-      "contactSellerWhatsappLabels": {
-        "price": "Harga",
-        "name": "Nama",
-        "question": "Pertanyaan"
-      },
       "orderWhatsapp": "Pesan via WhatsApp",
       "simulateOrder": "Simulasi Pesanan",
       "orderDialog": {
         "titleGeneric": "Pesan via WhatsApp",
-        "titleAskSeller": "Tanya Penjual via WhatsApp",
         "subtitleOrder": "Lengkapi detail pesanan untuk dikirim ke {name}",
         "subtitleAsk": "Tanyakan ke {name} tentang \"{product}\"",
         "nameLabel": "Nama (opsional)",
@@ -149,12 +131,30 @@
         "notesPlaceholder": "Catatan tambahan...",
         "notesPlaceholderAsk": "Tulis pertanyaan kamu di sini...",
         "cancel": "Batal",
-        "send": "Kirim via WhatsApp"
+        "send": "Kirim via WhatsApp",
+        "titleAskOwner": "Tanya Pemilik via WhatsApp"
       },
       "orderWhatsappTemplate": "Halo {name},\n\nSaya ingin pesan:\n\n*{product}*\n{namePart}{notesPart}\n\nMohon konfirmasi ketersediaan.\nTerima kasih! 🙏",
       "orderWhatsappLabels": {
         "name": "Nama",
         "notes": "Catatan"
+      },
+      "contactOwner": "Hubungi Pemilik",
+      "contactOwnerDialog": {
+        "title": "Hubungi Pemilik",
+        "subtitlePrefix": "Tanyakan ke {name} tentang",
+        "nameLabel": "Nama (opsional)",
+        "namePlaceholder": "Nama kamu",
+        "questionLabel": "Pertanyaan (opsional)",
+        "questionPlaceholder": "Pertanyaan apa pun tentang produk ini...",
+        "cancel": "Batal",
+        "send": "Kirim via WhatsApp"
+      },
+      "contactOwnerWhatsappTemplate": "Halo {name},\n\nSaya tertarik dengan produk kamu:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nTerima kasih! 🙏",
+      "contactOwnerWhatsappLabels": {
+        "price": "Harga",
+        "name": "Nama",
+        "question": "Pertanyaan"
       }
     },
     "productList": {

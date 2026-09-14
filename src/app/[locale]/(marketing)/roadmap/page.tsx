@@ -1,29 +1,37 @@
 "use client";
 
+// ============================================================================
+// ROADMAP PAGE — Program LPPM PKM K UT
+// File: src/app/[locale]/(marketing)/roadmap/page.tsx
+//
+// [SEJAJAR max-w-6xl — Sep 2026]
+// Semua section pakai wrapper max-w-6xl (1152px) — sejajar dengan navbar
+// pill + hero Safari + marketing homepage.
+//
+// Untuk readability, konten di dalam tetap dibatasi:
+//   - Hero paragraf: max-w-3xl (768px) — nyaman dibaca
+//   - Timeline entries: max-w-3xl — fokus per entry
+//   - Logos: 2 logo cukup di 1152px
+//
+// [PILL SHIMMER]
+// Badge pakai AnimatedShinyText. Import Badge + Separator dihapus.
+//
+// [FLICKERING GRID]
+// Warna #0d74ce (--text-link biru Expo). maxOpacity 0.05. Fade atas-bawah.
+// ============================================================================
+
 import * as React from "react";
 import Image from "next/image";
 import {
   Lightbulb, Rocket, TrendingUp, Zap, Users, Award,
   BookOpen, Target, Briefcase, Globe,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import { cn } from "@/lib/shared/utils";
-
-// ============================================================================
-// ROADMAP PAGE — Program LPPM PKM K UT
-// File: src/app/[locale]/(marketing)/roadmap/page.tsx
-//
-// [FLICKERING GRID — Sep 2026]
-// Hanya di section About (bagian atas). Warna #0d74ce (--text-link biru Expo).
-// canvas ctx.fillStyle tidak bisa resolve CSS variable, jadi hardcode hex.
-// maxOpacity 0.05 — subtle. Gradient fade pakai var(--background), ikut tema.
-// ============================================================================
 
 type RoadmapEntry = { icon: React.ElementType; title: string; description: string };
 type RoadmapPhase = { id: string; label: string; name: string; entries: RoadmapEntry[] };
@@ -121,8 +129,6 @@ const logos = [
   { name: "UT", src: "/logo-lppm-ut/logo-ut.png", alt: "Universitas Terbuka" },
 ];
 
-
-
 export default function RoadmapPage() {
   const [activeYear, setActiveYear] = React.useState("2026");
 
@@ -133,10 +139,10 @@ export default function RoadmapPage() {
   return (
     <>
       {/* ══════════════════════════════════════════════════════════════════
-          1. ABOUT — FlickeringGrid di section ini saja
+          1. ABOUT — wrapper max-w-6xl, konten max-w-3xl di dalam
       ══════════════════════════════════════════════════════════════════ */}
       <section className="relative w-full bg-background overflow-hidden pt-16 pb-8 md:pt-24 md:pb-12 px-6">
-        {/* FlickeringGrid — warna dari CSS variable yang sudah di-resolve */}
+        {/* FlickeringGrid */}
         <FlickeringGrid
           className="absolute inset-0 z-0"
           squareSize={4}
@@ -146,7 +152,7 @@ export default function RoadmapPage() {
           flickerChance={0.1}
         />
 
-        {/* Gradient fade bawah — var(--background) ikut tema */}
+        {/* Gradient fade bawah */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-32 z-10"
@@ -164,25 +170,29 @@ export default function RoadmapPage() {
           }}
         />
 
-        <div className="relative z-20 max-w-2xl mx-auto text-center">
-          <Badge
-            variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground rounded-full"
-          >
-            # Program Akademik LPPM PKM K UT
-          </Badge>
-          <h1 className="text-display-lg md:text-display-xl text-ink mb-4 tracking-tight">
-            Fibidy: Platform Bisnis Cerdas untuk UMKM
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground leading-relaxed text-justify">
-            Aplikasi Smart Business yang mengintegrasikan Website Builder, Kasir Offline,
-            Manajemen Stok, dan Laporan Penjualan dirancang khusus untuk 64 juta UMKM
-            Indonesia yang membutuhkan solusi digital terjangkau dan mudah digunakan.
-            Fibidy menggabungkan: pendaftaran 5 langkah dengan autofill cerdas, katalog
-            produk interaktif, sistem Point of Sale offline, manajemen inventaris
-            real-time, papan kerja untuk jasa, dan analitik penjualan harian semuanya
-            terintegrasi dengan WhatsApp untuk komunikasi personal yang dipercaya UMKM.
-          </p>
+        <div className="relative z-20 max-w-6xl mx-auto">
+          {/* Konten hero dibatasi max-w-3xl, di-center */}
+          <div className="max-w-3xl mx-auto text-center">
+            {/* Badge pill — konsisten dengan hero + section lain */}
+            <div className="inline-flex items-center justify-center rounded-full border border-hairline-strong px-4 py-1.5 bg-neutral-100 dark:bg-neutral-900 transition-colors duration-500 ease-out hover:bg-neutral-200 dark:hover:bg-neutral-800 mb-4">
+              <AnimatedShinyText className="text-sm font-medium">
+                # Program Akademik LPPM PKM K UT
+              </AnimatedShinyText>
+            </div>
+
+            <h1 className="text-display-lg md:text-display-xl text-ink mb-4 tracking-tight">
+              Fibidy: Platform Bisnis Cerdas untuk UMKM
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed text-justify">
+              Aplikasi Smart Business yang mengintegrasikan Website Builder, Kasir Offline,
+              Manajemen Stok, dan Laporan Penjualan dirancang khusus untuk 64 juta UMKM
+              Indonesia yang membutuhkan solusi digital terjangkau dan mudah digunakan.
+              Fibidy menggabungkan: pendaftaran 5 langkah dengan autofill cerdas, katalog
+              produk interaktif, sistem Point of Sale offline, manajemen inventaris
+              real-time, papan kerja untuk jasa, dan analitik penjualan harian semuanya
+              terintegrasi dengan WhatsApp untuk komunikasi personal yang dipercaya UMKM.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -243,47 +253,54 @@ export default function RoadmapPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          3. TIMELINE
+          3. TIMELINE — wrapper max-w-6xl, konten di dalam max-w-3xl
       ══════════════════════════════════════════════════════════════════ */}
       {activeYear === "2026" && (
         <section className="w-full bg-background py-8 md:py-16 px-6">
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Separator orientation="vertical" className="absolute top-1 left-[15px] bg-border" />
-              {roadmapPhases.map((phase) => (
-                <div key={phase.id}>
-                  <div className="relative flex gap-4 pb-4">
-                    <div className="w-8 flex-shrink-0" aria-hidden="true" />
-                    <p className="text-xs font-medium text-muted-foreground pt-1">
-                      {phase.label} · {phase.name}
-                    </p>
+          <div className="max-w-6xl mx-auto">
+            {/* Timeline konten dibatasi max-w-3xl, di-center */}
+            <div className="max-w-3xl mx-auto">
+              <div className="relative">
+                {/* Garis timeline vertical */}
+                <div
+                  aria-hidden
+                  className="absolute top-1 bottom-0 left-[15px] w-px bg-border"
+                />
+                {roadmapPhases.map((phase) => (
+                  <div key={phase.id}>
+                    <div className="relative flex gap-4 pb-4">
+                      <div className="w-8 flex-shrink-0" aria-hidden="true" />
+                      <p className="text-xs font-medium text-muted-foreground pt-1">
+                        {phase.label} · {phase.name}
+                      </p>
+                    </div>
+                    {phase.entries.map((entry) => {
+                      const Icon = entry.icon;
+                      return (
+                        <div key={entry.title} className="relative flex gap-4 pb-10">
+                          <div className="relative z-10 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-background border border-border">
+                            <Icon className="w-4 h-4 text-ink" strokeWidth={1.75} />
+                          </div>
+                          <div className="pt-0.5">
+                            <h3 className="text-base font-semibold text-ink mb-1.5">{entry.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed text-justify">{entry.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {phase.entries.map((entry) => {
-                    const Icon = entry.icon;
-                    return (
-                      <div key={entry.title} className="relative flex gap-4 pb-10">
-                        <div className="relative z-10 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-background border border-border">
-                          <Icon className="w-4 h-4 text-ink" strokeWidth={1.75} />
-                        </div>
-                        <div className="pt-0.5">
-                          <h3 className="text-base font-semibold text-ink mb-1.5">{entry.title}</h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed text-justify">{entry.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          4. LOGOS
+          4. LOGOS — wrapper max-w-6xl
       ══════════════════════════════════════════════════════════════════ */}
       <section className="w-full bg-background py-8 pb-16 md:pb-24 px-6">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold text-muted-foreground text-center mb-6">
             Fibidy: Didukung oleh Program LPPM PKM K Universitas Terbuka
           </p>

@@ -122,7 +122,7 @@ export function ProductCard({ product, storeSlug }: ProductCardProps) {
 
           {isCustomPrice && (
             <p className="mt-1.5 text-xs text-muted-foreground italic">
-              {tCommon('contactSeller')}
+              {tCommon('contactOwner')}
             </p>
           )}
         </div>

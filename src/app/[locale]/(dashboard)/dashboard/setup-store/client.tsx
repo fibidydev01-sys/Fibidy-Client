@@ -12,7 +12,7 @@
 
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
-import { SellerSetupWizard } from './seller/seller-setup-wizard';
+import { OwnerSetupWizard } from './owner/owner-setup-wizard';
 import { useRouter } from '@/i18n/navigation';
 
 export function SetupStoreClient() {
@@ -32,5 +32,5 @@ export function SetupStoreClient() {
 
   if (!tenant || isSetupComplete) return null;
 
-  return <SellerSetupWizard />;
+  return <OwnerSetupWizard />;
 }

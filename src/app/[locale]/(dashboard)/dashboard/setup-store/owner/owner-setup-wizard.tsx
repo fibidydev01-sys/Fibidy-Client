@@ -1,8 +1,8 @@
 'use client';
 
 // ============================================================================
-// SELLER SETUP WIZARD — Orchestrator
-// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/seller-setup-wizard.tsx
+// OWNER SETUP WIZARD — Orchestrator
+// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/owner/owner-setup-wizard.tsx
 //
 // [MIGRASI HEADER — Aug 2026]
 // Step indicator (dulu di body, mb-8) DAN nav Prev/Next/Submit (dulu
@@ -51,7 +51,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCompleteSetup } from '@/hooks/dashboard/use-setup-store';
-import { useSellerSetupAutofill } from './use-seller-setup-autofill';
+import { useOwnerSetupAutofill } from './use-owner-setup-autofill';
 import { useAsyncStateTracker } from '@/lib/shared/use-async-state-tracker';
 import { getCategoryConfig } from '@/lib/constants/shared/categories';
 import { ValidationDialog } from '@/components/ui/validation-dialog';
@@ -60,7 +60,7 @@ import { StepStory } from './step-story';
 import { StepHighlights } from './step-highlights';
 import { StepContactLocation } from './step-contact-location';
 import { StepSocial } from './step-social';
-import { SellerSetupDone } from './seller-setup-done';
+import { OwnerSetupDone } from './owner-setup-done';
 import { SetupWizardNav } from '@/components/dashboard/setup-store/setup-wizard-nav';
 import { generateStoreLogo } from './logo-generator';
 import type { CompleteSetupInput, FeatureItem, SocialLinks } from '@/types/tenant';
@@ -69,7 +69,7 @@ import { PAGE_COLUMN } from '@/components/dashboard/shared/page-column';
 
 // ── Form State ────────────────────────────────────────────────────────────────
 
-interface SellerWizardFormState {
+interface OwnerWizardFormState {
   logo: string;
   primaryColor: string;
   heroBackgroundImage: string;
@@ -103,13 +103,13 @@ interface AutofillSnapshot {
 // ── Wizard Reducer ────────────────────────────────────────────────────────────
 
 interface WizardState {
-  form: SellerWizardFormState;
+  form: OwnerWizardFormState;
   autofilledFields: Set<string>;
 }
 
 type WizardAction =
-  | { type: 'SET_FIELD'; key: keyof SellerWizardFormState; value: SellerWizardFormState[keyof SellerWizardFormState] }
-  | { type: 'APPLY_AUTOFILL'; patch: Partial<SellerWizardFormState>; fields: Set<string> }
+  | { type: 'SET_FIELD'; key: keyof OwnerWizardFormState; value: OwnerWizardFormState[keyof OwnerWizardFormState] }
+  | { type: 'APPLY_AUTOFILL'; patch: Partial<OwnerWizardFormState>; fields: Set<string> }
   | { type: 'CLEAR_AUTOFILL_FIELD'; field: string };
 
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
@@ -152,7 +152,7 @@ type TFn = (key: string, params?: Record<string, string | number | Date>) => str
 
 function getStepErrors(
   step: number,
-  form: SellerWizardFormState,
+  form: OwnerWizardFormState,
   t: TFn,
 ): string[] {
   const errors: string[] = [];
@@ -205,7 +205,7 @@ function getStepErrors(
 
 function computeFieldErrorsForStep(
   step: number,
-  form: SellerWizardFormState,
+  form: OwnerWizardFormState,
 ): Set<string> {
   const fields = new Set<string>();
 
@@ -253,7 +253,7 @@ function computeFieldErrorsForStep(
 
 // ── Initial form state ────────────────────────────────────────────────────────
 
-function makeInitialForm(defaultHasPhysicalLocation: boolean): SellerWizardFormState {
+function makeInitialForm(defaultHasPhysicalLocation: boolean): OwnerWizardFormState {
   return {
     logo: '',
     primaryColor: '#8B4513',
@@ -296,8 +296,8 @@ function scrollToFirstFieldError(): void {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function SellerSetupWizard() {
-  const t = useTranslations('dashboard.setupStore.seller');
+export function OwnerSetupWizard() {
+  const t = useTranslations('dashboard.setupStore.owner');
   const tenant = useAuthStore((s) => s.tenant);
   const { completeSetup, isLoading, isDone } = useCompleteSetup();
 
@@ -393,14 +393,14 @@ export function SellerSetupWizard() {
 
   // ── Autofill ────────────────────────────────────────────────────────────
 
-  const autofill = useSellerSetupAutofill(tenant?.category ?? '', tenant?.name ?? '');
+  const autofill = useOwnerSetupAutofill(tenant?.category ?? '', tenant?.name ?? '');
   const autofillSnapshotRef = useRef<AutofillSnapshot | null>(null);
 
   useEffect(() => {
     if (!tenant?.category) return;
 
     let dilepas = false;
-    const patch: Partial<SellerWizardFormState> = {};
+    const patch: Partial<OwnerWizardFormState> = {};
     const fields = new Set<string>();
 
     if (!form.primaryColor || form.primaryColor === '#8B4513') {
@@ -523,9 +523,9 @@ export function SellerSetupWizard() {
 
   // ── Update helpers ────────────────────────────────────────────────────────
 
-  const update = useCallback(<K extends keyof SellerWizardFormState>(
+  const update = useCallback(<K extends keyof OwnerWizardFormState>(
     key: K,
-    value: SellerWizardFormState[K],
+    value: OwnerWizardFormState[K],
   ) => {
     dispatch({ type: 'SET_FIELD', key, value });
   }, []);
@@ -674,7 +674,7 @@ export function SellerSetupWizard() {
   }, []);
 
   if (isDone) {
-    return <SellerSetupDone />;
+    return <OwnerSetupDone />;
   }
 
   const STEPS = [

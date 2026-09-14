@@ -150,7 +150,7 @@ export function useRegisterWizard() {
         slug,
         name,
         category,
-        intent: 'SELLER',
+        intent: 'OWNER',
         currentStep: STEP_ACCOUNT_SELLER,
       };
     }
@@ -159,7 +159,7 @@ export function useRegisterWizard() {
       ...base,
       slug,
       name,
-      intent: 'SELLER',
+      intent: 'OWNER',
       currentStep: STEP_CATEGORY,
     };
   });

@@ -248,7 +248,7 @@
       "daysLeftShort": "(sisa {days}h)"
     },
     "productType": {
-      "contactSeller": "Hubungi penjual"
+      "contactOwner": "Hubungi pemilik"
     },
     "price": {
       "discountBadge": "-{percent}%",

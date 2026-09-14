@@ -17,12 +17,12 @@
         },
         "onboard": {
           "title": "Tidak tersedia di Mode Pelajar",
-          "description": "Akun kamu adalah simulasi pembelajaran. Verifikasi identitas tidak diperlukan kamu bisa praktik alur seller lengkap tanpa itu.",
+          "description": "Akun kamu adalah simulasi pembelajaran. Verifikasi identitas tidak diperlukan kamu bisa praktik alur owner lengkap tanpa itu.",
           "featureName": "Verifikasi identitas"
         },
         "generic": {
           "title": "Tidak tersedia di Mode Pelajar",
-          "description": "Fitur ini bagian dari pengalaman seller aktif. Akun simulasi kamu tidak termasuk fitur ini.",
+          "description": "Fitur ini bagian dari pengalaman owner aktif. Akun simulasi kamu tidak termasuk fitur ini.",
           "featureName": "Fitur ini"
         },
         "featureBlocked": "Dibatasi: {feature}",
@@ -346,7 +346,7 @@
       "comingSoonBadge": "Segera Hadir",
       "comingSoon": {
         "sectionLabel": "Segera Hadir",
-        "sectionHint": "Lagi dipoles biar pas untuk seller Indonesia segera ya.",
+        "sectionHint": "Lagi dipoles biar pas untuk pemilik toko Indonesia segera ya.",
         "fullPlanLabel": "Segera Hadir",
         "fullPlanHint": "Kami lagi finalisasi paket ini."
       },
@@ -530,7 +530,7 @@
         "whatsappRequired": "Nomor WhatsApp wajib diisi",
         "agreementRequired": "Silakan setujui Syarat Layanan untuk melanjutkan"
       },
-      "seller": {
+      "owner": {
         "title": "Bangun Toko Kamu",
         "subtitle": "Hampir selesai isi detailnya biar toko kamu siap tampil",
         "autofillBadge": "Terisi otomatis — ketuk isiannya untuk mengubah",
@@ -626,22 +626,39 @@
           "hasPhysicalLocationLabel": "Apakah punya lokasi fisik?",
           "hasPhysicalLocationHelper": "Matikan jika hanya melayani online atau dengan janji temu.",
           "mapLabel": "Lokasi peta",
-          "mapRequired": "Mohon atur lokasi gunakan tombol atau tempel URL peta",
-          "geoUseMyLocation": "📍 Gunakan lokasi saya saat ini",
-          "geoLocating": "Mengambil lokasi...",
-          "geoSuccess": "Lokasi tersimpan",
-          "geoErrorPermission": "Izin lokasi ditolak. Aktifkan di pengaturan browser atau tempel URL peta di bawah.",
-          "geoErrorUnavailable": "Tidak bisa mengambil lokasi. Coba lagi atau tempel URL peta di bawah.",
-          "geoShowManual": "Tempel URL embed manual",
-          "geoHideManual": "Sembunyikan URL manual",
-          "geoQuickstartNote": "Kami akan buatkan peta embed dari koordinat ini. Anda bisa upgrade ke Google Business Profile nanti di Settings.",
+          "mapRequired": "Mohon atur lokasi lewat generator peta atau tempel URL peta",
           "onlineNote": "Bisnis Anda online-only tidak perlu alamat fisik. Pelanggan menghubungi via form kontak dan media sosial.",
           "mapUrlLabel": "URL Embed Google Maps",
           "mapUrlPlaceholder": "Tempel URL embed Google Maps atau kode iframe di sini",
           "mapUrlHelper": "Tempel URL embed dari Google Maps. Kami ekstrak otomatis.",
           "mapPreviewLabel": "Preview Peta",
-          "mapPreviewEmpty": "Tempel URL embed Google Maps di atas untuk preview",
-          "mapUrlInvalidHint": "Tempel URL embed lengkap yang dimulai dengan https://www.google.com/maps/embed"
+          "mapPreviewEmpty": "Klik \"Buat Peta Sekarang\" untuk membuat peta, atau tempel URL di bawah.",
+          "mapUrlInvalidHint": "Tempel URL embed lengkap yang dimulai dengan https://www.google.com/maps/embed",
+          "mapBuilder": {
+            "triggerEmptyTitle": "Buat Peta Sekarang",
+            "triggerEmptyHint": "Klik untuk membuka generator peta. Pilih lokasi, style, dan zoom langsung jadi!",
+            "triggerEditHint": "Klik untuk ubah peta",
+            "modalTitle": "Buat Peta Google Maps",
+            "modalSubtitle": "Atur lokasi, style, dan zoom langsung jadi!",
+            "close": "Tutup",
+            "step1Label": "Lokasi",
+            "step1Placeholder": "cth: Monas Jakarta, atau alamat lengkap",
+            "step1Helper": "Ketik nama tempat atau alamat lengkap. Bisa juga koordinat (cth: -6.175, 106.827)",
+            "step2Label": "Map Style",
+            "step2Roadmap": "Standard View (Peta Jalan)",
+            "step2Satellite": "Satellite View (Satelit)",
+            "step3Label": "Zoom Level",
+            "zoomWorld": "Dunia",
+            "zoomStreet": "Jalan",
+            "zoomBuilding": "Gedung",
+            "previewTitle": "Preview",
+            "previewLive": "Live preview",
+            "previewWaiting": "Menunggu input...",
+            "previewEmpty": "Masukkan lokasi dulu",
+            "footerHint": "Klik \"Gunakan Peta Ini\" URL otomatis terisi di form.",
+            "cancel": "Batal",
+            "apply": "Gunakan Peta Ini"
+          }
         },
         "social": {
           "intro": "Tambah minimal satu link sosial agar pengunjung bisa mengikuti toko kamu.",
@@ -689,7 +706,7 @@
           "phoneRequired": "Nomor telepon wajib diisi",
           "addressMin": "Alamat terlalu pendek (min 10 karakter)",
           "mapUrlInvalid": "Mohon tempel URL embed Google Maps yang valid",
-          "mapRequired": "Mohon atur lokasi gunakan tombol atau tempel URL peta",
+          "mapRequired": "Mohon atur lokasi lewat generator peta atau tempel URL peta",
           "contactTitleMin": "Judul section terlalu pendek (min 3 karakter)",
           "contactSubtitleMin": "Subjudul section terlalu pendek (min 5 karakter)",
           "atLeastOneSocial": "Tambah minimal satu link sosial untuk melanjutkan",

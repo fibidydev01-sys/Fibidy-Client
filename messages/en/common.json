@@ -248,7 +248,7 @@
       "daysLeftShort": "({days}d left)"
     },
     "productType": {
-      "contactSeller": "Contact seller"
+      "contactOwner": "Contact owner"
     },
     "price": {
       "discountBadge": "-{percent}%",

@@ -308,7 +308,7 @@ export function RegisterForm({ onImageChange }: RegisterFormProps) {
     }
     try {
       await register({
-        intent: intent as 'SELLER' | 'EDU',
+        intent: intent as 'OWNER' | 'EDU',
         name: wizard.state.name!,
         slug: wizard.state.slug!,
         category: wizard.state.category!,

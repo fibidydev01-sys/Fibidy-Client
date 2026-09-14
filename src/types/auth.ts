@@ -8,7 +8,7 @@
 //
 // RegisterInput: +intent field (SELLER | EDU)
 
-export type RegisterIntent = 'SELLER' | 'EDU';
+export type RegisterIntent = 'OWNER' | 'EDU';
 
 export interface LoginInput {
   email: string;
@@ -20,7 +20,7 @@ export interface LoginInput {
  * intent: 'SELLER' | 'EDU' — determines isEduMode on BE
  */
 export interface RegisterInput {
-  intent: 'SELLER' | 'EDU';
+  intent: 'OWNER' | 'EDU';
   slug: string;
   name: string;
   category: string;

@@ -48,7 +48,7 @@ export function StepSocial({
   fieldErrors = new Set(),
   onClearFieldError,
 }: StepSocialProps) {
-  const t = useTranslations('dashboard.setupStore.seller.social');
+  const t = useTranslations('dashboard.setupStore.owner.social');
 
   const hasSocialError = fieldErrors.has('socialLinks');
 

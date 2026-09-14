@@ -10,7 +10,7 @@
 //   - Apple / MS PWA meta tags
 //   - OrganizationSchema (JSON-LD)
 //   - Providers (QueryClient + Theme)
-//   - Toaster + PwaInstallPrompt
+//   - Toaster + PwaInstallPrompt + CookieConsent
 //
 // i18n integration:
 //   - params: Promise<{ locale }> (Next 16 async params)
@@ -47,6 +47,13 @@
 // di bawah, termasuk temuan bahwa Geist tidak pernah benar-benar tampil.
 // Riwayat lengkapnya ada di git; menyimpannya di sini cuma membuat
 // berkas ini menjelaskan kode yang sudah tidak ada.
+//
+// [COOKIE CONSENT — Sep 2026]
+// <CookieConsent /> di-render di sini (root layout untuk SEMUA halaman
+// di bawah [locale]: marketing, legal, dashboard, auth, store).
+// Satu tempat render, otomatis muncul di semua halaman.
+// Banner fixed bottom-right, cek cookie 'fibidy-cookie-consent' saat
+// mount. Kalau sudah ada → tidak render. Kalau belum → tampil + slide-in.
 // ==========================================
 
 import type { Metadata, Viewport } from 'next';
@@ -56,6 +63,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { Providers } from '@/lib/providers/root-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { CookieConsent } from '@/components/shared/cookie-consent';
 import { seoConfig } from '@/lib/constants/shared/seo.config';
 import { getFullUrl } from '@/lib/shared/seo';
 import { OrganizationSchema } from '@/components/store/shared/organization-schema';
@@ -332,6 +340,8 @@ export default async function LocaleLayout({
             {children}
             <Toaster position="top-center" richColors />
             <PwaInstallPrompt />
+            {/* Cookie consent banner — fixed bottom-right, muncul di semua halaman */}
+            <CookieConsent />
           </Providers>
         </NextIntlClientProvider>
       </body>

@@ -149,7 +149,7 @@ export function StepVisual({
   fieldErrors = new Set(),
   onClearFieldError,
 }: StepVisualProps) {
-  const t = useTranslations('dashboard.setupStore.seller.visual');
+  const t = useTranslations('dashboard.setupStore.owner.visual');
   const tToast = useTranslations('toast.upload');
 
   const hasLogoError = fieldErrors.has('logo');

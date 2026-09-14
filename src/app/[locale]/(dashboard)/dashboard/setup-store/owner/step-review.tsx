@@ -82,7 +82,7 @@ export function StepReview({
   socialLinks,
   onEditStep,
 }: StepReviewProps) {
-  const t = useTranslations('dashboard.setupStore.seller.review');
+  const t = useTranslations('dashboard.setupStore.owner.review');
 
   const filledSocialLinks = Object.entries(socialLinks).filter(
     ([, v]) => typeof v === 'string' && v.trim().length > 0,

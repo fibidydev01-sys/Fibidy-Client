@@ -1,51 +1,168 @@
+// ============================================================================
+// FOOTER SECTION — MARKETING
+// File: src/components/marketing/footer-section.tsx
+//
+// [ROMBAK — Sep 2026]
+// Dari 4 kolom → 5 kolom. Alasan:
+//   1. Link lama mayoritas hash (#contact, #about) sudah tidak valid setelah
+//      migrasi ke docs.fibidy.com
+//   2. Kolom "Pengaturan" perlu ditambah karena fitur settings sekarang
+//      punya 5 sub-halaman (hero, kontak, sosial, diskon, mode dagang)
+//   3. Struktur kolom disamakan dengan mega menu navbar supaya konsisten:
+//        Navbar: Produk, Solusi, Panduan, Harga, Roadmap
+//        Footer: Produk, Panduan, Pengaturan, Dukungan, Legal
+//      → "Produk" & "Panduan" nama sama persis dengan navbar
+//
+// Aturan link:
+//   • External (docs.fibidy.com) → <a> polos + target="_blank"
+//   • Internal marketing (/learn, /roadmap) → <Link> dari @/i18n/navigation
+//   • Internal legal (/legal/*) → <Link> dari @/i18n/navigation
+//   • Hash (#contact) → <a> polos (sama halaman, tidak perlu target)
+//
+// Type FooterLink punya flag `external` dan `hash` supaya rendering
+// otomatis pilih tag yang tepat tanpa if-else bersarang.
+//
+// [TODO] 5 URL settings/* belum diverifikasi ada di docs:
+//   - /settings/hero
+//   - /settings/contact
+//   - /settings/social
+//   - /settings/discounts
+//   - /settings/trading-mode
+// Grep "TODO" di file ini untuk lihat semuanya.
+// ============================================================================
+
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Separator } from "@/components/ui/separator";
 
-const footerLinks = {
-  Produk: [
-    { label: "Fitur", href: "#about" },
-    { label: "Cara Kerjanya", href: "#timeline" },
-    { label: "Harga", href: "#pricing" },
-    { label: "Tanya Jawab", href: "#faq" },
-  ],
-  Perusahaan: [
-    { label: "Tentang Kami", href: "#about" },
-    { label: "Hubungi Kami", href: "#contact" },
-  ],
-  Dukungan: [
-    { label: "Pusat Bantuan", href: "/legal/faq" },
-    { label: "Hubungi Kami", href: "#contact" },
-  ],
-} as const;
+// ── Docs base URL — samain dengan navbar-data.ts ─────────────────────────
+const DOCS = "https://docs.fibidy.com";
 
-const legalLinks = [
-  { label: "Tentang Kami", href: "/legal/about" },
-  { label: "Syarat Layanan", href: "/legal/terms" },
-  { label: "Privasi", href: "/legal/privacy" },
-  { label: "Cookies", href: "/legal/cookies" },
+// ── Tipe link footer ──────────────────────────────────────────────────────
+type FooterLink = {
+  label: string;
+  href: string;
+  /** External link → buka tab baru. */
+  external?: boolean;
+  /** Hash anchor (#contact) → <a> polos tanpa target. */
+  hash?: boolean;
+};
+
+type FooterColumn = {
+  title: string;
+  links: FooterLink[];
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5 KOLOM FOOTER
+// ════════════════════════════════════════════════════════════════════════════
+
+const footerColumns: FooterColumn[] = [
+  {
+    title: "Produk",
+    links: [
+      { label: "Fitur", href: `${DOCS}/features/overview`, external: true },
+      { label: "Cara Kerjanya", href: `${DOCS}/getting-started/quick-start`, external: true },
+      { label: "Harga", href: `${DOCS}/subscription/pricing`, external: true },
+      { label: "Tanya Jawab", href: `${DOCS}/troubleshooting/common-issues`, external: true },
+      { label: "Studio", href: `${DOCS}/studio/overview`, external: true },
+    ],
+  },
+  {
+    title: "Panduan",
+    links: [
+      { label: "Memulai Cepat", href: `${DOCS}/getting-started/quick-start`, external: true },
+      { label: "Setup Toko", href: `${DOCS}/features/store-setup`, external: true },
+      { label: "Panduan Fitur", href: "/learn" },
+      { label: "Roadmap", href: "/roadmap" },
+    ],
+  },
+  {
+    title: "Pengaturan",
+    links: [
+      // TODO: verify URL — settings/hero belum confirm ada
+      { label: "Hero & Branding", href: `${DOCS}/settings/hero`, external: true },
+      // TODO: verify URL — settings/contact belum confirm ada
+      { label: "Kontak", href: `${DOCS}/settings/contact`, external: true },
+      // TODO: verify URL — settings/social belum confirm ada
+      { label: "Sosial Media", href: `${DOCS}/settings/social`, external: true },
+      // TODO: verify URL — settings/discounts belum confirm ada
+      { label: "Diskon & Promo", href: `${DOCS}/settings/discounts`, external: true },
+      // TODO: verify URL — settings/trading-mode belum confirm ada
+      { label: "Mode Dagang", href: `${DOCS}/settings/trading-mode`, external: true },
+    ],
+  },
+  {
+    title: "Dukungan",
+    links: [
+      { label: "Pusat Bantuan", href: `${DOCS}/troubleshooting/common-issues`, external: true },
+      // TODO: verify URL — troubleshooting/offline belum confirm ada
+      { label: "Mode Offline", href: `${DOCS}/troubleshooting/offline`, external: true },
+      // TODO: verify URL — settings/account belum confirm ada
+      { label: "Akun & Keamanan", href: `${DOCS}/settings/account`, external: true },
+      { label: "Hubungi Kami", href: "#contact", hash: true },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Tentang Kami", href: "/legal/about" },
+      { label: "Syarat Layanan", href: "/legal/terms" },
+      { label: "Privasi", href: "/legal/privacy" },
+      { label: "Cookies", href: "/legal/cookies" },
+    ],
+  },
 ];
+
+// ════════════════════════════════════════════════════════════════════════════
+// SUB-COMPONENT: satu item link — pilih tag otomatis
+// ════════════════════════════════════════════════════════════════════════════
+
+function FooterLinkItem({ link }: { link: FooterLink }) {
+  const sharedClasses =
+    "text-sm text-muted-foreground hover:text-foreground transition-colors";
+
+  // Hash anchor → <a> polos, tidak buka tab baru (navigasi di halaman yang sama)
+  if (link.hash) {
+    return (
+      <a href={link.href} className={sharedClasses}>
+        {link.label}
+      </a>
+    );
+  }
+
+  // External → <a target="_blank">
+  if (link.external) {
+    return (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={sharedClasses}
+      >
+        {link.label}
+      </a>
+    );
+  }
+
+  // Internal → <Link> dari @/i18n/navigation (locale-aware)
+  return (
+    <Link href={link.href} className={sharedClasses}>
+      {link.label}
+    </Link>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAIN FOOTER
+// ════════════════════════════════════════════════════════════════════════════
 
 export function FooterSection() {
   return (
     <footer className="w-full bg-background px-6 pt-10 pb-6">
       <div className="max-w-6xl mx-auto">
+        {/* ── Logo + tagline ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8">
-          {/*
-            [LOGO — Sep 2026] Dulu:
-              <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-                <rect width="28" height="28" rx="8" fill="var(--primary)" />
-                <path d="M8 9C8 8.44772..." fill="var(--primary-foreground)" />
-              </svg>
-            Selain diganti ke file logo asli (sama seperti navbar.tsx), ini
-            juga membenarkan bug kecil yang sudah ada dari sebelumnya:
-            width/height di-set 24 tapi viewBox tetap "0 0 28 28" — SVG-nya
-            jadi digambar dengan koordinat internal 28x28 lalu dipaksa muat
-            ke kotak 24x24, sedikit menyusutkan proporsi rect+path dibanding
-            versi navbar yang 28x28 penuh. <Image> di bawah pakai
-            width={24} height={24} langsung tanpa viewBox terpisah, jadi
-            tidak ada lagi mismatch semacam itu.
-          */}
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/apple-touch-icon.png"
@@ -63,43 +180,28 @@ export function FooterSection() {
 
         <Separator className="mb-8" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 pb-10">
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <p className="text-sm font-semibold text-foreground mb-4">{category}</p>
+        {/* ── 5 kolom link ── */}
+        {/* Responsive grid: 2 → 3 → 5 kolom */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-10 pb-10">
+          {footerColumns.map((column) => (
+            <div key={column.title}>
+              <p className="text-sm font-semibold text-foreground mb-4">
+                {column.title}
+              </p>
               <ul className="flex flex-col gap-2.5">
-                {links.map((link) => (
+                {column.links.map((link) => (
                   <li key={link.label}>
-                    <Link
-                      href={link.href as string}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                    <FooterLinkItem link={link} />
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-          <div>
-            <p className="text-sm font-semibold text-foreground mb-4">Legal</p>
-            <ul className="flex flex-col gap-2.5">
-              {legalLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         <Separator className="mb-6" />
 
+        {/* ── Copyright ── */}
         <p className="text-xs text-muted-foreground">
           © {new Date().getFullYear()} Fibidy. Hak cipta dilindungi.
         </p>

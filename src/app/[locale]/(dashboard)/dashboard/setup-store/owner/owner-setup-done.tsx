@@ -1,8 +1,8 @@
 'use client';
 
 // ============================================================================
-// SELLER SETUP DONE
-// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/seller-setup-done.tsx
+// OWNER SETUP DONE
+// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/owner/owner-setup-done.tsx
 //
 // [TYPECHECK FIX — May 2026]
 // Hapus prop icon dan iconTone — sudah tidak ada di MandatoryDialog
@@ -15,8 +15,8 @@ import { MandatoryDialog } from '@/components/ui/mandatory-dialog';
 import { storeAbsoluteUrl } from '@/lib/public/store-url';
 import { useRouter } from '@/i18n/navigation';
 
-export function SellerSetupDone() {
-  const t = useTranslations('dashboard.setupStore.seller.done.goToStudioDialog');
+export function OwnerSetupDone() {
+  const t = useTranslations('dashboard.setupStore.owner.done.goToStudioDialog');
   const router = useRouter();
   const tenant = useAuthStore((s) => s.tenant);
 

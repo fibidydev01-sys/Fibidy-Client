@@ -60,6 +60,21 @@ export function HeroSection() {
           Mulai Sekarang
           <ArrowRight className="ml-2 h-4 w-4" />
         </ShimmerButton>
+
+        {/*
+          [Sep 2026] Link sekunder "Pelajari lebih lanjut" ke docs.
+          Ditaruh SETELAH CTA utama, dengan gaya teks kecil muted supaya
+          tidak bersaing visual dengan CTA. External link → buka tab baru.
+        */}
+        <a
+          href="https://docs.fibidy.com/getting-started/introduction"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-ink transition-colors"
+        >
+          Pelajari lebih lanjut
+          <ArrowRight className="h-3 w-3" />
+        </a>
       </div>
 
       {/*
@@ -75,12 +90,20 @@ export function HeroSection() {
         (/home/dashboard.png) resolve ke situ. File ini TIDAK ikut ke-generate
         otomatis, harus disalin manual.
 
+        [LEBAR SEJAJAR — Sep 2026]
+        Wrapper Safari diubah dari max-w-4xl (896px) → max-w-6xl (1152px).
+        Alasan: supaya Safari browser mock SEJAJAR dengan card-card di section
+        lain (What Is, Who Is It For, Features, dll) yang semua pakai
+        max-w-6xl dan sejajar dengan navbar pill. Sebelumnya Safari lebih
+        sempit 256px dari card section lain — keliatan "mengambang" tidak
+        proporsional.
+
         Lebar wrapper dinaikkan dari mockup HP (max ~400px) ke lebar browser
-        penuh (max-w-4xl) karena Safari didesain sebagai frame lebar landscape,
-        beda proporsi dari Iphone yang portrait/sempit.
+        penuh karena Safari didesain sebagai frame lebar landscape, beda
+        proporsi dari Iphone yang portrait/sempit.
       */}
       <div className="flex justify-center w-full px-6 pb-16">
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-6xl">
           <Safari
             url="fibidy.com/dashboard"
             imageSrc="/home/DASHBOARD.png"

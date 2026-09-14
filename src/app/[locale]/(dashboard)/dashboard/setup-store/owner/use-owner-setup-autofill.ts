@@ -1,14 +1,14 @@
 // ============================================================================
-// USE SELLER SETUP AUTOFILL — Phase B
-// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/seller/use-seller-setup-autofill.ts
+// USE OWNER SETUP AUTOFILL — Phase B
+// File: client/src/app/[locale]/(dashboard)/dashboard/setup-store/owner/use-owner-setup-autofill.ts
 //
 // [SETUP-GATE Phase B — May 2026]
-// Returns autofill values for the seller setup wizard based on tenant category.
+// Returns autofill values for the owner setup wizard based on tenant category.
 //
 // Key behaviours:
 //   - Memoized — only recalculates when category or storeName changes
 //   - Interpolates {{storeName}} in all string fields
-//   - Deep-clones aboutFeatures so seller edits do NOT mutate the template constant
+//   - Deep-clones aboutFeatures so owner edits do NOT mutate the template constant
 //   - Falls back to __default__ for unknown / custom categories
 // ============================================================================
 
@@ -35,17 +35,17 @@ export interface AutofillResult {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 /**
- * Returns smart-default values for the seller setup wizard.
+ * Returns smart-default values for the owner setup wizard.
  *
  * @param category  - tenant.category key (e.g. 'CAFE', 'BARBERSHOP')
  * @param storeName - tenant.name used to interpolate {{storeName}} placeholders
  *
  * @example
- *   const autofill = useSellerSetupAutofill('CAFE', 'Kopi Senja');
+ *   const autofill = useOwnerSetupAutofill('CAFE', 'Kopi Senja');
  *   // autofill.heroTitle === 'Welcome to Kopi Senja'
  *   // autofill.primaryColor === '#8B4513'
  */
-export function useSellerSetupAutofill(
+export function useOwnerSetupAutofill(
   category: string,
   storeName: string,
 ): AutofillResult {
@@ -63,7 +63,7 @@ export function useSellerSetupAutofill(
       heroCtaText: i(template.heroCtaText),
       contactTitle: i(template.contactTitle),
       contactSubtitle: i(template.contactSubtitle),
-      // Deep clone — seller edits must NOT mutate CATEGORY_AUTOFILL constant
+      // Deep clone — owner edits must NOT mutate CATEGORY_AUTOFILL constant
       aboutFeatures: template.aboutFeatures.map((f) => ({ ...f })),
     };
   }, [category, storeName]);

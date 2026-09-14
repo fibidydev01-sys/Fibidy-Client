@@ -70,7 +70,7 @@ interface AutofillBadgeProps {
 }
 
 export function AutofillBadge({ visible }: AutofillBadgeProps) {
-  const t = useTranslations('dashboard.setupStore.seller');
+  const t = useTranslations('dashboard.setupStore.owner');
 
   if (!visible) return null;
 

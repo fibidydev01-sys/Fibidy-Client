@@ -65,7 +65,7 @@ export function StepStory({
   isAutofilled,
   fieldErrors = new Set(),
 }: StepStoryProps) {
-  const t = useTranslations('dashboard.setupStore.seller.story');
+  const t = useTranslations('dashboard.setupStore.owner.story');
 
   // Angkanya datang dari FIELD_LIMITS — cermin DTO umkm-server. Sebelumnya
   // ditulis di sini, dan salinan kedua yang menulis medan yang SAMA hidup di

@@ -76,11 +76,11 @@
         "zoomButton": "Zoom"
       },
       "info": {
-        "priceContactSeller": "Price: Contact seller",
         "discountBadge": "-{percent}%",
         "jasaBadge": "Service",
         "estimasiJam": "Approx. {nilai, plural, one {# hour} other {# hours}}",
-        "estimasiHari": "Approx. {nilai, plural, one {# day} other {# days}}"
+        "estimasiHari": "Approx. {nilai, plural, one {# day} other {# days}}",
+        "priceContactOwner": "Price: Contact owner"
       },
       "notFound": {
         "title": "Product Not Found",
@@ -118,28 +118,10 @@
       "collectionBadge": "Collection"
     },
     "checkout": {
-      "contactSeller": "Contact Seller",
-      "contactSellerDialog": {
-        "title": "Contact Seller",
-        "subtitlePrefix": "Ask {name} about",
-        "nameLabel": "Name (optional)",
-        "namePlaceholder": "Your name",
-        "questionLabel": "Question (optional)",
-        "questionPlaceholder": "Any questions about this product...",
-        "cancel": "Cancel",
-        "send": "Send via WhatsApp"
-      },
-      "contactSellerWhatsappTemplate": "Hi {name},\n\nI'm interested in your product:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nThank you! 🙏",
-      "contactSellerWhatsappLabels": {
-        "price": "Price",
-        "name": "Name",
-        "question": "Question"
-      },
       "orderWhatsapp": "Order via WhatsApp",
       "simulateOrder": "Simulate Order",
       "orderDialog": {
         "titleGeneric": "Order via WhatsApp",
-        "titleAskSeller": "Ask Seller via WhatsApp",
         "subtitleOrder": "Complete your order details to send to {name}",
         "subtitleAsk": "Ask {name} about \"{product}\"",
         "nameLabel": "Name (optional)",
@@ -149,12 +131,30 @@
         "notesPlaceholder": "Any additional notes...",
         "notesPlaceholderAsk": "Write your question here...",
         "cancel": "Cancel",
-        "send": "Send via WhatsApp"
+        "send": "Send via WhatsApp",
+        "titleAskOwner": "Ask Owner via WhatsApp"
       },
       "orderWhatsappTemplate": "Hi {name},\n\nI'd like to order:\n\n*{product}*\n{namePart}{notesPart}\n\nPlease confirm availability.\nThank you! 🙏",
       "orderWhatsappLabels": {
         "name": "Name",
         "notes": "Notes"
+      },
+      "contactOwner": "Contact Owner",
+      "contactOwnerDialog": {
+        "title": "Contact Owner",
+        "subtitlePrefix": "Ask {name} about",
+        "nameLabel": "Name (optional)",
+        "namePlaceholder": "Your name",
+        "questionLabel": "Question (optional)",
+        "questionPlaceholder": "Any questions about this product...",
+        "cancel": "Cancel",
+        "send": "Send via WhatsApp"
+      },
+      "contactOwnerWhatsappTemplate": "Hi {name},\n\nI'm interested in your product:\n\n*{product}*{pricePart}\n{namePart}{questionPart}\n\nThank you! 🙏",
+      "contactOwnerWhatsappLabels": {
+        "price": "Price",
+        "name": "Name",
+        "question": "Question"
       }
     },
     "productList": {

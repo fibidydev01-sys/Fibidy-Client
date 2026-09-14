@@ -6,7 +6,7 @@
 //
 // v3: added customLabel prop
 //   - Default: "Order via WhatsApp" (Custom/Service)
-//   - Custom: "Ask Seller via WhatsApp" (Digital — pre-sales)
+//   - Custom: "Ask Owner via WhatsApp" (Digital — pre-sales)
 //
 // [i18n FIX — 2026-04-19]
 // Previously the WhatsApp template parts (`Name:`, `Notes:`) were
@@ -53,7 +53,7 @@ interface WhatsAppOrderButtonProps {
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   children?: ReactNode;
-  // v3: custom label for "Ask Seller" mode (Digital product)
+  // v3: custom label for "Ask Owner" mode (Digital product)
   customLabel?: string;
 }
 
@@ -75,16 +75,16 @@ export function WhatsAppOrderButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mode detection
-  const isAskSeller = !!customLabel;
+  const isAskOwner = !!customLabel;
 
-  // Resolved labels — custom mode (askSeller) vs default (order)
+  // Resolved labels — custom mode (askOwner) vs default (order)
   const buttonLabel = customLabel ?? t('orderWhatsapp');
-  const dialogTitle = isAskSeller ? tDialog('titleAskSeller') : tDialog('titleGeneric');
-  const dialogSubtitle = isAskSeller
+  const dialogTitle = isAskOwner ? tDialog('titleAskOwner') : tDialog('titleGeneric');
+  const dialogSubtitle = isAskOwner
     ? tDialog('subtitleAsk', { name: tenant.name, product: product.name })
     : tDialog('subtitleOrder', { name: tenant.name });
-  const notesLabel = isAskSeller ? tDialog('notesLabelAsk') : tDialog('notesLabel');
-  const notesPlaceholder = isAskSeller ? tDialog('notesPlaceholderAsk') : tDialog('notesPlaceholder');
+  const notesLabel = isAskOwner ? tDialog('notesLabelAsk') : tDialog('notesLabel');
+  const notesPlaceholder = isAskOwner ? tDialog('notesPlaceholderAsk') : tDialog('notesPlaceholder');
 
   const handleOrder = async () => {
     setIsSubmitting(true);

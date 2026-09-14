@@ -1,12 +1,12 @@
 'use client';
 
 // ==========================================
-// CONTACT SELLER BUTTON — v3
-// File: src/components/store/checkout/contact-seller-button.tsx
+// CONTACT OWNER BUTTON — v3
+// File: src/components/store/checkout/contact-owner-button.tsx
 //
 // Repurposed from WhatsAppOrderButton.
 // Purpose: pre-sales contact channel via WhatsApp.
-// Pembeli bisa bertanya ke penjual sebelum memesan lewat WhatsApp.
+// Pembeli bisa bertanya ke pemilik sebelum memesan lewat WhatsApp.
 //
 // Used in:
 //   - Discover detail page (alongside Buy button)
@@ -23,21 +23,21 @@
 //   const questionPart = question ? `\nQuestion: ${question}` : '';
 //
 // Those labels would never translate even after adding a new locale —
-// the outer `contactSellerWhatsappTemplate` key was translatable, but the
+// the outer `contactOwnerWhatsappTemplate` key was translatable, but the
 // inner field labels leaked through as English.
 //
 // Fix: read the labels from a dedicated namespace
-// `store.checkout.contactSellerWhatsappLabels.{price,name,question}` and
+// `store.checkout.contactOwnerWhatsappLabels.{price,name,question}` and
 // interpolate them into the `{pricePart}/{namePart}/{questionPart}` slots.
 //
 // Also use `formatPriceIDR()` from `lib/shared/format.ts` for the price
 // part so formatting konsisten dengan sisa aplikasi (bukan `$X.XX` ad-hoc).
 //
-// REQUIRED JSON additIONS (messages/en/checkout.json):
+// REQUIRED JSON ADDITIONS (messages/en/checkout.json):
 //
 //   "checkout": {
 //     ...
-//     "contactSellerWhatsappLabels": {
+//     "contactOwnerWhatsappLabels": {
 //       "price": "Price",
 //       "name": "Name",
 //       "question": "Question"
@@ -61,10 +61,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/shared/utils';
 import { generateWhatsAppLink, formatPriceIDR } from '@/lib/shared/format';
 
-interface ContactSellerButtonProps {
+interface ContactOwnerButtonProps {
   productName: string;
-  sellerName: string;
-  sellerWhatsapp: string;
+  ownerName: string;
+  ownerWhatsapp: string;
   price?: number;
   className?: string;
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
@@ -72,19 +72,19 @@ interface ContactSellerButtonProps {
   children?: ReactNode;
 }
 
-export function ContactSellerButton({
+export function ContactOwnerButton({
   productName,
-  sellerName,
-  sellerWhatsapp,
+  ownerName,
+  ownerWhatsapp,
   price,
   className,
   variant = 'outline',
   size = 'default',
   children,
-}: ContactSellerButtonProps) {
+}: ContactOwnerButtonProps) {
   const t = useTranslations('store.checkout');
-  const tLabels = useTranslations('store.checkout.contactSellerWhatsappLabels');
-  const tDialog = useTranslations('store.checkout.contactSellerDialog');
+  const tLabels = useTranslations('store.checkout.contactOwnerWhatsappLabels');
+  const tDialog = useTranslations('store.checkout.contactOwnerDialog');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [question, setQuestion] = useState('');
@@ -94,7 +94,7 @@ export function ContactSellerButton({
     setIsSubmitting(true);
 
     // Build template parts with translated labels.
-    // `store.checkout.contactSellerWhatsappTemplate` uses slots
+    // `store.checkout.contactOwnerWhatsappTemplate` uses slots
     // `{pricePart}`, `{namePart}`, `{questionPart}` so the outer
     // structure stays under translator control.
     const pricePart = price
@@ -103,15 +103,15 @@ export function ContactSellerButton({
     const namePart = name ? `\n${tLabels('name')}: ${name}` : '';
     const questionPart = question ? `\n${tLabels('question')}: ${question}` : '';
 
-    const message = t('contactSellerWhatsappTemplate', {
-      name: sellerName,
+    const message = t('contactOwnerWhatsappTemplate', {
+      name: ownerName,
       product: productName,
       pricePart,
       namePart,
       questionPart,
     });
 
-    const link = generateWhatsAppLink(sellerWhatsapp, message);
+    const link = generateWhatsAppLink(ownerWhatsapp, message);
     window.open(link, '_blank');
 
     setName('');
@@ -120,8 +120,8 @@ export function ContactSellerButton({
     setIsSubmitting(false);
   };
 
-  // If the seller has no WhatsApp, don't render
-  if (!sellerWhatsapp) return null;
+  // If the owner has no WhatsApp, don't render
+  if (!ownerWhatsapp) return null;
 
   return (
     <Drawer.Root open={open} onOpenChange={setOpen}>
@@ -130,7 +130,7 @@ export function ContactSellerButton({
           {children || (
             <>
               <MessageCircle className="mr-2 h-4 w-4" />
-              {t('contactSeller')}
+              {t('contactOwner')}
             </>
           )}
         </Button>
@@ -145,16 +145,16 @@ export function ContactSellerButton({
             'outline-none',
             'flex flex-col',
           )}
-          aria-describedby="contact-seller-drawer-description"
+          aria-describedby="contact-owner-drawer-description"
         >
           <Drawer.Title asChild>
             <VisuallyHidden.Root>
-              {tDialog('title')} — {sellerName}
+              {tDialog('title')} — {ownerName}
             </VisuallyHidden.Root>
           </Drawer.Title>
           <Drawer.Description asChild>
-            <VisuallyHidden.Root id="contact-seller-drawer-description">
-              {tDialog('subtitlePrefix', { name: sellerName })} {productName}
+            <VisuallyHidden.Root id="contact-owner-drawer-description">
+              {tDialog('subtitlePrefix', { name: ownerName })} {productName}
             </VisuallyHidden.Root>
           </Drawer.Description>
 
@@ -168,7 +168,7 @@ export function ContactSellerButton({
             <div className="max-w-2xl mx-auto w-full">
               <h3 className="font-semibold text-lg">{tDialog('title')}</h3>
               <p className="text-sm text-muted-foreground">
-                {tDialog('subtitlePrefix', { name: sellerName })} {productName}
+                {tDialog('subtitlePrefix', { name: ownerName })} {productName}
               </p>
             </div>
           </div>

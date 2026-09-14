@@ -85,7 +85,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {isCustomPrice && (
         <p className="text-lg text-muted-foreground italic">
-          {t('priceContactSeller')}
+          {t('priceContactOwner')}
         </p>
       )}
 

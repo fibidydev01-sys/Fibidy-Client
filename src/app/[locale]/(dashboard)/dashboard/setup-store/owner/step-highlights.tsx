@@ -254,7 +254,7 @@ export function StepHighlights({
   fieldErrors = new Set(),
   onClearFieldError,
 }: StepHighlightsProps) {
-  const t = useTranslations('dashboard.setupStore.seller.highlights');
+  const t = useTranslations('dashboard.setupStore.owner.highlights');
 
   const features: FeatureItem[] = [
     items[0] ?? { ...EMPTY_FEATURE },

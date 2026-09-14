@@ -26,16 +26,16 @@ interface StepIntentProps {
 interface IntentOption {
   intent: RegisterIntent;
   icon: React.ElementType;
-  labelKey: 'seller' | 'edu';
+  labelKey: 'owner' | 'edu';
   iconColor: string;
   iconBg: string;
 }
 
 const INTENT_OPTIONS: IntentOption[] = [
   {
-    intent: 'SELLER',
+    intent: 'OWNER',
     icon: Store,
-    labelKey: 'seller',
+    labelKey: 'owner',
     iconColor: 'text-emerald-600 dark:text-emerald-400',
     iconBg: 'bg-emerald-100 dark:bg-emerald-950/40',
   },

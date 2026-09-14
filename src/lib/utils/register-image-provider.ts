@@ -25,8 +25,8 @@ import { CATEGORY_AUTOFILL } from '@/lib/constants/shared/category-autofill';
 // ── Intent images ────────────────────────────────────────────────────────────
 
 const INTENT_IMAGES: Record<RegisterIntent, string> = {
-  SELLER: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80&auto=format&fit=crop',
-  // Entrepreneur at counter — seller/storefront energy
+  OWNER: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80&auto=format&fit=crop',
+  // Entrepreneur at counter — owner/storefront energy
   EDU: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=80&auto=format&fit=crop',
   // Graduation caps in the air — student/edu energy
 };

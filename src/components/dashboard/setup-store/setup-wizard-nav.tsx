@@ -52,7 +52,7 @@ export function SetupWizardNav({
   onSubmit,
   isSaving = false,
 }: SetupWizardNavProps) {
-  const t = useTranslations('dashboard.setupStore.seller');
+  const t = useTranslations('dashboard.setupStore.owner');
 
   return (
     <WizardHeader

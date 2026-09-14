@@ -17,12 +17,12 @@
         },
         "onboard": {
           "title": "Not available in Student Mode",
-          "description": "Your account is a learning simulation. Identity verification isn't required you can practice the full seller flow without it.",
+          "description": "Your account is a learning simulation. Identity verification isn't required you can practice the full owner flow without it.",
           "featureName": "Identity verification"
         },
         "generic": {
           "title": "Not available in Student Mode",
-          "description": "This feature is part of the live seller experience. Your simulation account doesn't include it.",
+          "description": "This feature is part of the live owner experience. Your simulation account doesn't include it.",
           "featureName": "This feature"
         },
         "featureBlocked": "Blocked: {feature}",
@@ -346,7 +346,7 @@
       "comingSoonBadge": "Coming Soon",
       "comingSoon": {
         "sectionLabel": "Coming Soon",
-        "sectionHint": "We're polishing this for Indonesian sellers available soon.",
+        "sectionHint": "We're polishing this for Indonesian store owners available soon.",
         "fullPlanLabel": "Coming Soon",
         "fullPlanHint": "We're putting the final touches on this plan."
       },
@@ -530,7 +530,7 @@
         "whatsappRequired": "WhatsApp number is required",
         "agreementRequired": "Please agree to the Terms of Service to continue"
       },
-      "seller": {
+      "owner": {
         "title": "Build Your Store",
         "subtitle": "Almost there fill in the details to make your store presentable",
         "autofillBadge": "Autofilled — tap the field to edit",
@@ -626,22 +626,39 @@
           "hasPhysicalLocationLabel": "Do you have a physical location?",
           "hasPhysicalLocationHelper": "Turn off if you only serve online or by appointment.",
           "mapLabel": "Map location",
-          "mapRequired": "Please set your location use the button or paste a map URL",
-          "geoUseMyLocation": "📍 Use my current location",
-          "geoLocating": "Getting your location...",
-          "geoSuccess": "Location captured",
-          "geoErrorPermission": "Location permission denied. Allow access in browser settings or paste a map URL below.",
-          "geoErrorUnavailable": "Couldn't get location. Try again or paste a map URL below.",
-          "geoShowManual": "Paste embed URL manually",
-          "geoHideManual": "Hide manual URL",
-          "geoQuickstartNote": "We'll generate an embed map from these coordinates. You can upgrade to a Google Business Profile later in Settings.",
+          "mapRequired": "Please set your location via the map builder or paste a map URL",
           "onlineNote": "Your business is online-only no physical address needed. Customers reach you via the contact form and your social links.",
           "mapUrlLabel": "Google Maps Embed URL",
           "mapUrlPlaceholder": "Paste Google Maps embed URL or iframe code here",
           "mapUrlHelper": "Paste the embed URL from Google Maps. We extract it automatically.",
           "mapPreviewLabel": "Map Preview",
-          "mapPreviewEmpty": "Paste a Google Maps embed URL above to preview",
-          "mapUrlInvalidHint": "Paste the full embed URL starting with https://www.google.com/maps/embed"
+          "mapPreviewEmpty": "Click \"Build a Map Now\" to create a map, or paste a URL below.",
+          "mapUrlInvalidHint": "Paste the full embed URL starting with https://www.google.com/maps/embed",
+          "mapBuilder": {
+            "triggerEmptyTitle": "Build a Map Now",
+            "triggerEmptyHint": "Click to open the map builder. Pick a location, style, and zoom done instantly!",
+            "triggerEditHint": "Click to change the map",
+            "modalTitle": "Build a Google Map",
+            "modalSubtitle": "Set location, style, and zoom done instantly!",
+            "close": "Close",
+            "step1Label": "Location",
+            "step1Placeholder": "e.g. Monas Jakarta, or a full address",
+            "step1Helper": "Type a place name or full address. Coordinates work too (e.g. -6.175, 106.827)",
+            "step2Label": "Map Style",
+            "step2Roadmap": "Standard View (Roadmap)",
+            "step2Satellite": "Satellite View",
+            "step3Label": "Zoom Level",
+            "zoomWorld": "World",
+            "zoomStreet": "Street",
+            "zoomBuilding": "Building",
+            "previewTitle": "Preview",
+            "previewLive": "Live preview",
+            "previewWaiting": "Waiting for input...",
+            "previewEmpty": "Enter a location first",
+            "footerHint": "Click \"Use This Map\" the URL is filled in automatically.",
+            "cancel": "Cancel",
+            "apply": "Use This Map"
+          }
         },
         "social": {
           "intro": "Add at least one social link so visitors can follow your store.",
@@ -689,7 +706,7 @@
           "phoneRequired": "Phone number is required",
           "addressMin": "Address is too short (min 10 characters)",
           "mapUrlInvalid": "Please paste a valid Google Maps embed URL",
-          "mapRequired": "Please set your location use the button or paste a map URL",
+          "mapRequired": "Please set your location via the map builder or paste a map URL",
           "contactTitleMin": "Section title is too short (min 3 characters)",
           "contactSubtitleMin": "Section subtitle is too short (min 5 characters)",
           "atLeastOneSocial": "Add at least one social link to continue",
@@ -1169,7 +1186,7 @@
         "pekerjaanTitle": "Pending work",
         "pekerjaanTerlambat": "{jumlah} past estimate",
         "pekerjaanOnTrack": "Everything is still on estimate",
-        "basisKas": "Revenue is counted on the PAYMENT date, not the order date. An order taken on Monday and paid on Wednesday lands in Wednesday’s revenue.",
+        "basisKas": "Revenue is counted on the PAYMENT date, not the order date. An order taken on Monday and paid on Wednesday lands in Wednesday's revenue.",
         "topBarang": "Goods",
         "topLayanan": "Services",
         "omzetLabel": "Revenue",

@@ -1,8 +1,18 @@
+// ============================================================================
+// HOW IT WORKS SECTION — "Bikin toko online, dalam waktu 5 menit"
+// File: src/components/marketing/how-it-works-section.tsx
+//
+// [SHADOW + SEJAJAR + PILL SHIMMER — Sep 2026]
+// - StepShowcase card: rounded-2xl + shadow bento
+// - Container max-w-6xl (sejajar navbar pill + hero Safari)
+// - Badge pill pakai AnimatedShinyText (konsisten dengan hero + section lain)
+// ============================================================================
+
 "use client";
 
 import * as React from "react";
-import { MousePointerClick, Link2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { MousePointerClick, Link2, TrendingUp } from "lucide-react";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type SetupStep = {
@@ -33,7 +43,20 @@ const setupSteps: SetupStep[] = [
       "nama-kamu.fibidy.com langsung bisa dipasang di bio TikTok, Instagram, YouTube. Pelanggan tap, langsung lihat produk dan info bisnismu. Simpel, rapi, profesional.",
     icon: Link2,
   },
+  {
+    id: "kelola",
+    number: "03",
+    eyebrow: "Kelola",
+    title: "Kelola pesanan & pantau omzet harian",
+    description:
+      "Setiap pesanan masuk tercatat rapi — dari keranjang, pembayaran, sampai struk digital. Pantau omzet dan produk terlaris lewat laporan otomatis. Semua dalam satu dashboard.",
+    icon: TrendingUp,
+  },
 ];
+
+// ── Shadow signature — sama dengan bento card ──────────────────────────────
+const CARD_SHADOW =
+  "shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_2px_4px_rgba(0,0,0,0.05),0_12px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_-20px_80px_-20px_#ffffff1f_inset]";
 
 // Panel besar di tengah: card dengan icon besar + nomor step di kiri,
 // judul + deskripsi di kanan. Menggantikan Safari browser-mock + gambar
@@ -43,7 +66,7 @@ const setupSteps: SetupStep[] = [
 function StepShowcase({ step }: { step: SetupStep }) {
   const Icon = step.icon;
   return (
-    <div className="relative left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface-strong">
+    <div className={`relative left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface-strong ${CARD_SHADOW}`}>
       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 px-8 py-12 md:px-14 md:py-16">
         <div className="flex-shrink-0 flex items-center justify-center w-28 h-28 md:w-36 md:h-36 rounded-full bg-background border border-border">
           <Icon className="w-12 h-12 md:w-16 md:h-16 text-ink" strokeWidth={1.5} />
@@ -105,14 +128,15 @@ export function HowItWorksSection() {
       id="timeline"
       className="w-full bg-background py-16 md:py-section px-6"
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="mb-12 md:mb-16 text-center">
-          <Badge
-            variant="outline"
-            className="mb-4 text-xs font-medium text-muted-foreground rounded-full"
-          >
-            # Cara Kerjanya
-          </Badge>
+          {/* Badge pill — konsisten dengan hero + section lain */}
+          <div className="inline-flex items-center justify-center rounded-full border border-hairline-strong px-4 py-1.5 bg-neutral-100 dark:bg-neutral-900 transition-colors duration-500 ease-out hover:bg-neutral-200 dark:hover:bg-neutral-800 mb-4">
+            <AnimatedShinyText className="text-sm font-medium">
+              # Cara Kerjanya
+            </AnimatedShinyText>
+          </div>
+
           <h2 className="text-display-md md:text-display-lg text-ink mb-3">
             Bikin toko online, dalam waktu 5 menit.
           </h2>
