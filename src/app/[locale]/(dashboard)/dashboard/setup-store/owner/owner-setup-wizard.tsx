@@ -42,6 +42,13 @@
 // User tetap di step yang sama — tidak reset ke step 1.
 // Tidak ada dialog baru — field langsung highlight.
 //
+// [MAP URL BUILDER — Sept 2026]
+// StepContactLocation tidak lagi pakai lat/lng picker (Leaflet/Stadia).
+// Sekarang pakai Map Generator Modal yang menghasilkan URL Google Maps
+// Embed → disimpan ke contactMapUrl. Prop locationLat/locationLng/
+// onLocationCoordsChange DIHAPUS dari wizard ini karena step component
+// sudah tidak menerimanya.
+//
 // [SPRINT 5 — SCROLL FIX carry-forward]
 // [SPRINT 1 — G1 FIX carry-forward]
 // [SPRINT 1 — G2 FIX carry-forward]
@@ -83,8 +90,6 @@ interface OwnerWizardFormState {
   hasPhysicalLocation: boolean;
   address: string;
   contactMapUrl: string;
-  locationLat?: number;
-  locationLng?: number;
   socialLinks: SocialLinks;
 }
 
@@ -183,10 +188,8 @@ function getStepErrors(
       if (form.contactSubtitle.trim().length < 5) errors.push(t('contact.contactSubtitleRequired'));
       if (form.hasPhysicalLocation) {
         if (form.address.trim().length < 10) errors.push(t('contact.addressRequired'));
-        const hasMap =
-          form.contactMapUrl.trim().length > 0 ||
-          (form.locationLat !== undefined && form.locationLng !== undefined);
-        if (!hasMap) errors.push(t('contact.mapRequired'));
+        // Map dianggap ada kalau contactMapUrl terisi (URL Google Maps Embed)
+        if (!form.contactMapUrl.trim()) errors.push(t('contact.mapRequired'));
       }
       break;
     case 5: {
@@ -233,10 +236,7 @@ function computeFieldErrorsForStep(
       if (form.contactSubtitle.trim().length < 5) fields.add('contactSubtitle');
       if (form.hasPhysicalLocation) {
         if (form.address.trim().length < 10) fields.add('address');
-        const hasMap =
-          form.contactMapUrl.trim().length > 0 ||
-          (form.locationLat !== undefined && form.locationLng !== undefined);
-        if (!hasMap) fields.add('map');
+        if (!form.contactMapUrl.trim()) fields.add('map');
       }
       break;
     case 5: {
@@ -268,8 +268,6 @@ function makeInitialForm(defaultHasPhysicalLocation: boolean): OwnerWizardFormSt
     hasPhysicalLocation: defaultHasPhysicalLocation,
     address: '',
     contactMapUrl: '',
-    locationLat: undefined,
-    locationLng: undefined,
     socialLinks: {},
   };
 }
@@ -647,8 +645,6 @@ export function OwnerSetupWizard() {
       ...(form.hasPhysicalLocation && {
         address: form.address.trim(),
         ...(form.contactMapUrl.trim() && { contactMapUrl: form.contactMapUrl.trim() }),
-        ...(form.locationLat !== undefined && { locationLat: form.locationLat }),
-        ...(form.locationLng !== undefined && { locationLng: form.locationLng }),
       }),
       socialLinks: form.socialLinks,
     };
@@ -762,8 +758,6 @@ export function OwnerSetupWizard() {
             contactMapUrl={form.contactMapUrl}
             whatsappReadonly={tenant?.whatsapp}
             hasPhysicalLocation={form.hasPhysicalLocation}
-            locationLat={form.locationLat}
-            locationLng={form.locationLng}
             locationType={locationType}
             onContactTitleChange={handleContactTitleChange}
             onContactSubtitleChange={handleContactSubtitleChange}
@@ -780,13 +774,6 @@ export function OwnerSetupWizard() {
               handleClearFieldError('map');
             }}
             onHasPhysicalLocationChange={(v: boolean) => update('hasPhysicalLocation', v)}
-            onLocationCoordsChange={(lat: number | undefined, lng: number | undefined) => {
-              update('locationLat', lat);
-              update('locationLng', lng);
-              if (lat !== undefined && lng !== undefined) {
-                handleClearFieldError('map');
-              }
-            }}
             isAutofilled={isAutofilled}
             fieldErrors={fieldErrors}
             onClearFieldError={handleClearFieldError}
